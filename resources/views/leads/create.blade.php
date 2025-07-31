@@ -10,7 +10,7 @@
             <span class="pull-right">
               <div class="btn-group">
                 @if(auth()->user()->can(['customer_access']))
-                <a href="{{ url('leads') }}" class="btn btn-just-icon btn-theme" title="Leads"><i class="material-icons">next_plan</i></a>
+                <a href="{{ url('leads') }}" class="btn btn-just-icon btn-theme" title="Leads"><i class="material-icons">arrow_circle_left</i></a>
                 @endif
               </div>
             </span>
@@ -29,7 +29,8 @@
             </span>
           </div>
           @endif
-          <form method="POST" action="{{ route('leads.store') }}" id="frmLeadsCreate" enctype="multipart/form-data" class="w-100">
+          <form method="POST" action="{{ isset($lead) ? route('leads.update', $lead->id) : route('leads.store') }}" id="frmLeadsCreate" enctype="multipart/form-data" class="w-100">
+            @method(isset($lead) ? 'PUT' : 'POST')
             @csrf
 
             <div class="modal-content lead-modal">
@@ -49,7 +50,7 @@
                     <select name="status" id="status" class="custom-select" required>
                       <option value="" disabled selected>Lead Type</option>
                       @foreach($status as $opt)
-                      <option value="{{ $opt->id }}" {{ old('status')==$opt->id ? 'selected' : '' }}>{{ $opt->display_name }}</option>
+                      <option value="{{ $opt->id }}" {{ old('status', isset($lead) ? $lead->status : 0)==$opt->id ? 'selected' : '' }}>{{ $opt->display_name }}</option>
                       @endforeach
                     </select>
                     @error('status') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
@@ -57,7 +58,7 @@
 
                   {{-- Firm Name --}}
                   <div class="form-group col-6 mb-2">
-                    <input type="text" name="company_name" id="company_name" value="{{ old('company_name') }}"
+                    <input type="text" name="company_name" id="company_name" value="{{ old('company_name', isset($lead) ? $lead->company_name : '') }}"
                       class="form-control form-control-lg" placeholder="Firm Name" required>
                     @error('company_name') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
@@ -65,14 +66,14 @@
                 <div class="form-row">
                   {{-- Customer Name --}}
                   <div class="form-group col-6 mb-2">
-                    <input type="text" name="contact_name" id="contact_name" value="{{ old('contact_name') }}"
+                    <input type="text" name="contact_name" id="contact_name" value="{{ old('contact_name', isset($lead) ? $lead->contacts?->first()->name : '') }}"
                       class="form-control form-control-lg" placeholder="Customer Name" required>
                     @error('contact_name') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
 
                   {{-- Mobile --}}
                   <div class="form-group col-6 mb-2">
-                    <input type="tel" name="phone_number" id="phone_number" value="{{ old('phone_number') }}"
+                    <input type="tel" name="phone_number" id="phone_number" value="{{ old('phone_number', isset($lead) ? $lead->contacts?->first()->phone_number : '') }}"
                       class="form-control form-control-lg" placeholder="Mobile Number" maxlength="15" required>
                     @error('phone_number') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
@@ -80,14 +81,14 @@
                 <div class="form-row">
                   {{-- Email --}}
                   <div class="form-group col-6 mb-2">
-                    <input type="email" name="email" id="email" value="{{ old('email') }}"
+                    <input type="email" name="email" id="email" value="{{ old('email', isset($lead) ? $lead->contacts?->first()->email : '') }}"
                       class="form-control form-control-lg" placeholder="Email Id">
                     @error('email') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
 
                   {{-- Address --}}
                   <div class="form-group col-6 mb-2">
-                    <input type="text" name="address" id="address" value="{{ old('address') }}"
+                    <input type="text" name="address" id="address" value="{{ old('address', isset($lead) ? $lead->address?->address1 : '') }}"
                       class="form-control form-control-lg" placeholder="Address">
                     @error('address') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
@@ -100,7 +101,7 @@
                       <option value="">Select {!! trans('panel.global.pincode') !!}</option>
                       @if(@isset($pincodes ))
                       @foreach($pincodes as $pincode)
-                      <option value="{!! $pincode['id'] !!}" @if(isset($address) && $address->pincode_id==$pincode['id']) selected @endif >{!! $pincode['pincode'] !!}</option>
+                      <option value="{!! $pincode['id'] !!}" @if(isset($lead) && $lead->address->pincode_id==$pincode['id']) selected @endif >{!! $pincode['pincode'] !!}</option>
                       @endforeach
                       @endif
                     </select>
@@ -143,7 +144,7 @@
                 {{-- Other / Lead Source --}}
                 <div class="form-row">
                   <div class="form-group col-6 mb-2">
-                    <input type="text" name="other" id="other" value="{{ old('other') }}"
+                    <input type="text" name="other" id="other" value="{{ old('other', isset($lead) && isset($lead->others) ? (count(json_decode($lead->others, true)) > 0 ? array_values(json_decode($lead->others, true))[0] : '') : '') }}"
                       class="form-control form-control-lg" placeholder="Other">
                     @error('other') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
@@ -151,7 +152,7 @@
                     <select name="lead_source" id="lead_source" class="custom-select" required>
                       <option value="" disabled selected>Lead Source</option>
                       @foreach($lead_sources as $src)
-                      <option value="{{ $src }}" {{ old('lead_source')==$src ? 'selected' : '' }}>{{ $src }}</option>
+                      <option value="{{ $src }}" {{ old('lead_source', isset($lead) ? $lead->lead_source : '')==$src ? 'selected' : '' }}>{{ $src }}</option>
                       @endforeach
                     </select>
                     @error('lead_source') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
@@ -161,14 +162,14 @@
                 {{-- Assigned To --}}
                 <div class="form-row">
                   <div class="form-group col-6 mb-2">
-                    <input type="text" name="company_url" id="company_url" value="{{ old('company_url') }}" class="form-control form-control-lg" placeholder="Website">
+                    <input type="text" name="company_url" id="company_url" value="{{ old('company_url', isset($lead) ? $lead->company_url : '') }}" class="form-control form-control-lg" placeholder="Website">
                     @error('company_url') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
                   <div class="form-group col-6 mb-2">
                     <select name="assign_to" id="assign_to" class="custom-select" required>
                       <option value="" disabled selected>Assigned To</option>
                       @foreach($users as $user)
-                      <option value="{{ $user->id }}" {{ old('assign_to')==$user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                      <option value="{{ $user->id }}" {{ old('assign_to', isset($lead) ? $lead->assign_to : '')==$user->id ? 'selected' : '' }}>{{ $user->name }}</option>
                       @endforeach
                     </select>
                     @error('assign_to') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
@@ -177,14 +178,14 @@
 
                 {{-- Note --}}
                 <div class="form-group mb-2">
-                  <textarea name="note" id="note" rows="3" class="form-control" placeholder="Note">{{ old('note') }}</textarea>
+                  <textarea name="note" id="note note_text" rows="3" class="form-control rounded border ckeditor-init" placeholder="Note">{{ old('note', isset($lead) ? $lead->notes->first()?->note : '') }}</textarea>
                   @error('note') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                 </div>
               </div>
 
               {{-- Footer --}}
               <div class="modal-footer border-0">
-                <button type="submit" class="btn btn-info btn-block lead-submit">SUBMIT</button>
+                <button type="submit" class="btn btn-info btn-block lead-submit">{{ isset($lead) ? 'Update' : 'Create' }}</button>
               </div>
             </div>
           </form>
@@ -194,5 +195,26 @@
   </div>
   </div>
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
+  <script type="text/javascript" src="{{ url('/').'/'.asset('vendor/ckeditor/js/ckeditor.js') }}"></script>
+  <script>
+    document.querySelectorAll('.ckeditor-init').forEach(function(item) {
+      var editor = CKEDITOR.replace(item, {
+        customConfig: 'config.js',
+        toolbar: 'Basic',
+        height: '15em'
+      });
+
+      editor.on('change', function() {
+        this.updateElement();
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var pincodeSelect = document.getElementById('pincode_id');
+      if (pincodeSelect && pincodeSelect.value) {
+        getAddressData();
+      }
+    });
+  </script>
 
 </x-app-layout>

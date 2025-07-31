@@ -160,7 +160,7 @@ class LeadTasksController extends Controller
              $lead_task->update(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time, 'priority'=>$request->priority,'status'=>$request->status]);
             $request->session()->flash('message_success',__('Lead Task Update successfully.'));
         }else{
-            $lead_note = LeadTask::create(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time, 'priority'=>$request->priority,'status'=>$request->status]);
+            $lead_task = LeadTask::create(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time, 'priority'=>$request->priority,'status'=>$request->status]);
             $request->session()->flash('message_success',__('Lead Task Added successfully.'));
         }
         if($request->status == 'open'){

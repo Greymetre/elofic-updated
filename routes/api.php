@@ -320,4 +320,5 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('leads', [LeadController::class, 'getLeads']);
     Route::get('getLeadStatusSource', [LeadController::class, 'leadStatusSource']);
     Route::post('leadCreate', [LeadController::class, 'leadCreate']);
+    Route::get('leadDetails', [LeadController::class, 'leadDetails']);
 });

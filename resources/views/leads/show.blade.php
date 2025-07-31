@@ -719,7 +719,7 @@
                         <div class="nav-tabs-wrapper new_id">
                             <h4 class="card-title ">
                             Company Overview </h4>
-
+                            <a href="{{route('leads.index')}}"><i class="material-icons">arrow_circle_left</i></a>
                         </div>
                     </div>
                 </div>
@@ -762,12 +762,12 @@
 <div class="container-fluid p-4 mpadding">
 
 <!--  -->
-<button type="button" data-toggle="modal" data-target="#updateLeadModel" class="btn btn-primary btn-sm btn-icon-split float-right btnsmall">
+<!-- <button type="button" data-toggle="modal" data-target="#updateLeadModel" class="btn btn-primary btn-sm btn-icon-split float-right btnsmall">
     <span class="text">Update Leads</span>
     <button type="button" data-toggle="modal" data-target="#AddAddressModel" onclick="openAddAddressModel()" class="btn btn-primary btn-sm btn-icon-split float-right btnsmall">
         <span class="text">Add Address</span>
     </button>
-</button>
+</button> -->
 <!--  -->
 <!-- Header -->
 <div class="card p-0 px-3 py-3">
@@ -778,7 +778,7 @@
             </div>
             <div class="infomation-data">
                 <!-- <h3>{{$lead->company_name??''}} <span class="badge badge-pill badge-info">{{$lead->status_is?$lead->status_is->display_name:'Pending'}}</span> </h3> -->
-                <h3 style="display: flex;align-items: center;justify-content: space-between">{{$lead->company_name??''}}
+                <span style="display: flex;align-items: center;justify-content: space-between"><h3>{{$lead->company_name??''}}<a href="{{route('leads.edit',[$lead->id])}}"><i class="material-icons">edit</i></a></h3>
                     <select name="status" id="status" class="form-control selectpicker">
                         <option value="0" {{$lead->status == 0 ? 'selected' : ''}}>Pending</option>
                         @if($status->count() > 0)
@@ -787,7 +787,7 @@
                         @endforeach
                         @endif
                     </select>
-                </h3>
+                </span>
                 <a href="{{$lead->company_url??''}}" target="_blank">{{$lead->company_url??''}}</a>
                 <p>{{$address_data??''}}</p>
                 <ul>
@@ -1343,6 +1343,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
             </div>
             <div class="listdata">
                 @if($lead_note->type == 'note')
+                <h5>Note</h5>
                 <h5>{!! $lead_note->note??''!!}</h5>
                 @else
                 <h5>Task <span class="badge badge-info" style="font-family: 'Poppins', sans-serif;font-size: 10px;font-weight:700;padding: 4px,6px"> {{$lead_task->priority??''}}</span></h5>
@@ -1354,7 +1355,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                 <p class="date-list">{{$noteTime}}</p>
             </div>
         </div>
-        @if($lead_note->type == 'note')
+        @if($lead_note->type == 'noteee')
         <div class="list-two">
             <div class="dropdown">
                 <button class="dropdown-toggle" type="button" id="dropdownMenuButton"
@@ -1364,7 +1365,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
             </button>
 
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <div class="dropdown-item"  onclick="editNote('{{$lead_note}}')">
+            <div class="dropdown-item" onclick='editNote(@json($lead_note))'>
                     <a>Edit</a>
                 </div>
                 <div class="dropdown-item">
@@ -1455,7 +1456,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
 
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <div class="dropdown-item">
-                    <a onclick="editNote('{{$lead_note}}')">Edit</a>
+                    <a onclick='editNote(@json($lead_note))'>Edit</a>
                 </div>
                 <div class="dropdown-item">
                     <form action="{{ route('lead-notes.destroy', $lead_note->id) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Do you really want to delete?')">
@@ -1587,7 +1588,7 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                     </div>
                     <div class="d-flex flex-row">
                         <div class="editbox" onclick="editTask('{{$lead_task}}')"> <img src="{{ url('/').'/'.asset('assets/img/ph_note-pencil-fill.svg') }}"></div>
-                        <div class="deletebox editbox">
+                        <div class="deletebox editbox ml-2">
                             <form action="{{ route('lead-tasks.destroy', $lead_task->id) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Do you really want to delete?')">
                                 @csrf
                                 @method('DELETE')
@@ -2070,8 +2071,10 @@ $('#frmLeadOpportunitiesCreate #o_amount').val(opportunity_data.amount);
 
     function editNote(note){
 
+        console.log(note);
         if (typeof note === "string") {
-            note = JSON.parse(note);
+            note = JSON.parse(note, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+            console.log(note);
         }
 
         $('#frmLeadNotesAdd').show();
@@ -2110,7 +2113,7 @@ $('#frmLeadOpportunitiesCreate #o_amount').val(opportunity_data.amount);
     var status = this.value;
     Swal.fire({
         title: 'Are you sure?',
-        text: "You won't be able to revert this!",
+        text: "",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',

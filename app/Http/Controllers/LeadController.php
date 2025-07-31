@@ -41,7 +41,11 @@ class LeadController extends Controller
         $userids = getUsersReportingToAuth();
         $users = User::where('active', '=', 'Y')->whereDoesntHave('roles', function ($query) {
             $query->whereIn('id', config('constants.customer_roles'));
-        })->where(function ($query) use ($userids) { if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) { $query->whereIn('id', $userids); } })->select('id', 'name')->orderBy('id')->get();
+        })->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->select('id', 'name')->orderBy('id')->get();
         $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
         $lead_sources = config('constants.LEAD_SOURCES');
         $pincodes = Pincode::where('active', '=', 'Y')
@@ -91,6 +95,11 @@ class LeadController extends Controller
                         $subQuery->where('name', 'like', "%{$search}%");
                     });
             });
+        }
+
+        if ($request->input('assign_to') != "") {
+            $assign_to = $request->input('assign_to');
+            $leads->where('assign_to', $assign_to);
         }
 
         if ($request->input('status') != "") {
@@ -151,11 +160,11 @@ class LeadController extends Controller
                     return "<span class='badge badge-warning' style='background-color: orange'>Pending</span>";
                 } else {
                     if ($lead->status_is) {
-                        if($lead->status_is->status_name == 'Hot'){
+                        if ($lead->status_is->status_name == 'Hot') {
                             return "<span class='badge badge-danger'>" . $lead->status_is->status_name . "</span>";
-                        }else if($lead->status_is->status_name == 'Warm'){
+                        } else if ($lead->status_is->status_name == 'Warm') {
                             return "<span class='badge badge-warning' style='background-color: yellow;color: black'>" . $lead->status_is->status_name . "</span>";
-                        }else if($lead->status_is->status_name == 'Cold'){
+                        } else if ($lead->status_is->status_name == 'Cold') {
                             return "<span class='badge badge-success'>" . $lead->status_is->status_name . "</span>";
                         }
                         return "<span class='badge badge-success'>" . $lead->status_is->status_name . "</span>";
@@ -165,18 +174,26 @@ class LeadController extends Controller
                 }
             })
             ->editColumn('others', function ($lead) {
-                if(!is_array($lead->others)){
+                if (!is_array($lead->others)) {
                     $jsonData = '';
-                    $lead->others = json_decode($lead->others, true); 
+                    $lead->others = json_decode($lead->others, true);
                 }
-                if(!empty($lead->others) && count($lead->others) > 0){
+                if (!empty($lead->others) && count($lead->others) > 0) {
                     foreach ($lead->others as $key => $value) {
                         $jsonData .= "<strong>" . ucwords(str_replace('_', ' ', $key)) . ":</strong> " . $value . "<br>";
                     }
                 }
                 return $jsonData;
             })
-            ->rawColumns(['action', 'company_name', 'checkbox', 'status', 'others'])
+            ->editColumn('note', function ($lead) {
+                $lastNote = $lead->notes->sortByDesc('created_at')->first();
+                if ($lastNote) {
+                    return $lastNote->note;
+                }
+                return '';
+            })
+            ->with('records_filtered_count', $leads->get()->count())
+            ->rawColumns(['action', 'company_name', 'checkbox', 'status', 'others', 'note'])
             ->make(true);
     }
 
@@ -430,11 +447,16 @@ class LeadController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request) {
+    public function create(Request $request)
+    {
         $userids = getUsersReportingToAuth();
         $users = User::where('active', '=', 'Y')->whereDoesntHave('roles', function ($query) {
             $query->whereIn('id', config('constants.customer_roles'));
-        })->where(function ($query) use ($userids) { if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) { $query->whereIn('id', $userids); } })->select('id', 'name')->orderBy('id')->get();
+        })->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->select('id', 'name')->orderBy('id')->get();
         $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
         $lead_sources = config('constants.LEAD_SOURCES');
         $pincodes = Pincode::where('active', '=', 'Y')->select('id', 'pincode')->orderBy('id', 'desc')->get();
@@ -456,52 +478,52 @@ class LeadController extends Controller
         ];
 
         $request->validate($rules);
-        if($request->other){
+        if ($request->other) {
             $otherData = [
                 'others' => $request->other,
             ];
             $otherData = json_encode($otherData, JSON_UNESCAPED_UNICODE);
-        }else{
+        } else {
             $otherData = null;
         }
-            $lead = Lead::create([
-                'company_name' => $request->company_name,
-                'company_url' => $request->company_url,
-                'status' => $request->status ?? 0,
-                'created_by' => Auth::id(),
-                'lead_generation_date' => date('Y-m-d'),
-                'lead_source' => $request->lead_source,
-                'assign_to' => $request->assign_to ?? null,
-                'others' => $otherData,
+        $lead = Lead::create([
+            'company_name' => $request->company_name,
+            'company_url' => $request->company_url,
+            'status' => $request->status ?? 0,
+            'created_by' => Auth::id(),
+            'lead_generation_date' => date('Y-m-d'),
+            'lead_source' => $request->lead_source,
+            'assign_to' => $request->assign_to ?? null,
+            'others' => $otherData,
+        ]);
+        if ($lead->id) {
+            Address::create([
+                'model_type' => 'App\Models\Lead',
+                'model_id' => $lead->id,
+                'address1' => $request->address ?? 'N/A',
+                'country_id' => 1,
+                'pincode_id' => $request->pincode_id ?? null,
+                'state_id' => $request->state_id ?? null,
+                'city_id' => $request->city_id ?? null,
+                'district_id' => $request->district_id ?? null,
+                'created_by' => Auth::id()
             ]);
-            if ($lead->id) {
-                Address::create([
-                    'model_type' => 'App\Models\Lead',
-                    'model_id' => $lead->id,
-                    'address1' => $request->address ?? 'N/A',
-                    'country_id' => 1,
-                    'pincode_id' => $request->pincode_id ?? null,
-                    'state_id' => $request->state_id ?? null,
-                    'city_id' => $request->city_id ?? null,
-                    'district_id' => $request->district_id ?? null,
-                    'created_by' => Auth::id()
-                ]);
-                $category = LeadContact::create([
-                    'name' => $request->contact_name,
-                    'phone_number' => $request->phone_number,
-                    'email' => $request->email,
-                    'lead_source' => $request->lead_source,
+            $category = LeadContact::create([
+                'name' => $request->contact_name,
+                'phone_number' => $request->phone_number,
+                'email' => $request->email,
+                'lead_source' => $request->lead_source,
+                'lead_id' => $lead->id,
+                'created_by' => Auth::id()
+            ]);
+            if (isset($request->note) && !empty($request->note)) {
+                $note = LeadNote::create([
+                    'note' => $request->note,
                     'lead_id' => $lead->id,
                     'created_by' => Auth::id()
                 ]);
-                if (isset($request->note) && !empty($request->note)) {
-                    $note = LeadNote::create([
-                        'note' => $request->note,
-                        'lead_id' => $lead->id,
-                        'created_by' => Auth::id()
-                    ]);
-                }
             }
+        }
         return redirect()->route('leads.show', $lead);
     }
 
@@ -557,11 +579,11 @@ class LeadController extends Controller
         $lead_opportunities = LeadOpportunity::where(['lead_id' => $lead->id])->get();
 
         $pincodes = Pincode::where('active', '=', 'Y')
-            ->whereHas('assigncitiesusers', function ($query) use ($userids) {
-                if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                    $query->whereIn('userid', $userids);
-                }
-            })
+            // ->whereHas('assigncitiesusers', function ($query) use ($userids) {
+            //     if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            //         $query->whereIn('userid', $userids);
+            //     }
+            // })
             ->select('id', 'pincode')->orderBy('id', 'desc')->get();
         $countries = Country::where('active', '=', 'Y')
             ->whereHas('countrystates', function ($query) use ($userids) {
@@ -607,7 +629,21 @@ class LeadController extends Controller
      * @param  \App\Models\Lead  $lead
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request, Lead $lead) {}
+    public function edit(Request $request, Lead $lead)
+    {
+        $userids = getUsersReportingToAuth();
+        $users = User::where('active', '=', 'Y')->whereDoesntHave('roles', function ($query) {
+            $query->whereIn('id', config('constants.customer_roles'));
+        })->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                $query->whereIn('id', $userids);
+            }
+        })->select('id', 'name')->orderBy('id')->get();
+        $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
+        $lead_sources = config('constants.LEAD_SOURCES');
+        $pincodes = Pincode::where('active', '=', 'Y')->select('id', 'pincode')->orderBy('id', 'desc')->get();
+        return view('leads.create', compact('lead', 'users', 'status', 'lead_sources', 'pincodes'));
+    }
 
     /**
      * Update the specified resource in storage.
@@ -618,15 +654,40 @@ class LeadController extends Controller
      */
     public function update(Request $request, Lead $lead)
     {
-        $rules = [
-            'company_name' => 'required',
-        ];
-
-        $request->validate($rules);
-        $data = $request->all();
-        $created_by = Auth::id();
-        $lead->update(['company_name' => $request->company_name]);
-        $request->session()->flash('message_success', __('Lead Updated successfully.'));
+        if ($request->other) {
+            $otherData = [
+                'others' => $request->other,
+            ];
+            $otherData = json_encode($otherData, JSON_UNESCAPED_UNICODE);
+        } else {
+            $otherData = null;
+        }
+        $lead->update([
+            'company_name' => $request->company_name,
+            'company_url' => $request->website,
+            'status' => $request->status ?? 0,
+            'lead_generation_date' => date('Y-m-d'),
+            'lead_source' => $request->lead_source,
+            'others' => $otherData,
+        ]);
+        Address::where('model_type', 'App\Models\Lead')->where('model_id', $lead->id)->update([
+            'address1' => $request->address ?? 'N/A',
+            'country_id' => 1,
+            'pincode_id' => $request->pincode_id ?? null,
+            'state_id' => $request->state_id ?? null,
+            'city_id' => $request->city_id ?? null,
+            'district_id' => $request->district_id ?? null,
+        ]);
+        LeadContact::where('lead_id', $lead->id)->update([
+            'name' => $request->contact_name,
+            'phone_number' => $request->phone_number,
+            'email' => $request->email,
+            'url' => $request->url,
+            'lead_source' => $request->lead_source,
+        ]);
+        LeadNote::where('lead_id', $lead->id)->update([
+            'note' => $request->note,
+        ]);
         return redirect()->route('leads.show', $lead);
     }
 

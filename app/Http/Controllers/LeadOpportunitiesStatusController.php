@@ -16,7 +16,7 @@ class LeadOpportunitiesStatusController extends Controller
                 ->addIndexColumn()
                 ->addColumn('action', function($data){
                     $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Edit" class="edit btn btn-primary btn-sm editStatus"><i class="fa fa-edit fa-sm text-white"></i></a>';
-                    //$btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Delete" class="btn btn-danger btn-sm deleteProduct">Delete</a>';
+                    $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$data->id.'" data-original-title="Delete" class="btn btn-danger btn-sm deleteStatus"><i class="fa fa-trash fa-sm text-white"></i></a>';
                     return $btn;
                 })
                 ->editColumn('created_at', function($data){
@@ -46,5 +46,11 @@ class LeadOpportunitiesStatusController extends Controller
     public function edit(OpportunitieStatus $lead_opportunities_status)
     {
         return response()->json($lead_opportunities_status);
+    }
+
+    public function destroy(OpportunitieStatus $lead_opportunities_status)
+    {
+        $lead_opportunities_status->delete();
+        return response()->json(['status' => true]);
     }
 }

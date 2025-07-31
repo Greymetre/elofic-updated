@@ -70,6 +70,7 @@
       letter-spacing: 0px;
       text-transform: capitalize;
       border-color: #E8E8E8 !important;
+      max-width: 120px !important;
       font-family: 'Poppins', sans-serif !important;
     }
 
@@ -119,7 +120,7 @@
 
     .search {
       width: 100%;
-      max-width: 500px;
+      max-width: 400px;
     }
 
     .search_inner button {
@@ -258,6 +259,10 @@
       color: #fff !important;
       border-color: transparent;
     }
+
+    .select2.select2-container--default{
+      width: 170% !important;
+    }
   </style>
   <div class="row">
     <div class="col-md-12">
@@ -266,7 +271,7 @@
           <!-- <div class="card-icon">
              <i class="material-icons">perm_identity</i> 
           </div> -->
-          <h4 class="card-title ">Leads<br><!--<span class="brig">123</span><br>-->
+          <h4 class="card-title ">Leads<span class="brig ml-2">123</span><br>
             <div class="btn-group kim" style="width: 120px;">
               <select name="status" id="status" class="form-control selectpicker">
                 <option value="">All</option>
@@ -287,9 +292,19 @@
                     <input type="search" class="searchbox" id="search_lead" placeholder="Search Lead">
                   </div>
                 </div>
+                <div>
+                  <select name="user_id_search" id="user_id_search" class="form-control select2">
+                    <option value="">Assign To</option>
+                    @if(@isset($users ))
+                    @foreach($users as $user)
+                    <option value="{!! $user['id'] !!}">{!! $user['name'] !!}</option>
+                    @endforeach
+                    @endif
+                  </select>
+                </div>
 
 
-                <div class="both_btn">
+                <div class="both_btn d-flex">
                 <a href="{{route('leads.create')}}"><button type="button" class="btn btn-primary btn-sm btn-icon-split float-right">
                     <span class="icon text-white-50">
                       <i class="material-icons">add_circle</i>
@@ -427,18 +442,19 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getLeads" class="table">
+            <table id="getLeads" class="table text-wrap">
               <thead class=" text-primary">
                 <tr>
                   <th><input type="checkbox" id="checkAll"></th>
+                  <th>Date</th>
                   <th>Company Name</th>
                   <th>Contact</th>
                   <th>Phone</th>
                   <th>Email</th>
-                  <th>Others</th>
-                  <th>Lead Status</th>
+                  <th>Status</th>
                   <th>Assigned To</th>
-                  <th>Created Date</th>
+                  <th>Note</th>
+                  <th>Others</th>
                 </tr>
               </thead>
               <tbody>
@@ -451,7 +467,7 @@
   </div>
   <!--  -->
   {{-- Add New Lead Modal --}}
-  <div class="modal fade" id="addLeadModel" tabindex="-1" role="dialog" aria-hidden="true">
+  <!-- <div class="modal fade" id="addLeadModel" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <form method="POST" action="{{ route('leads.store') }}" id="frmLeadsCreate" enctype="multipart/form-data" class="w-100">
         @csrf
@@ -606,7 +622,7 @@
         </div>
       </form>
     </div>
-  </div>
+  </div> -->
 
   <!--  -->
   <link href="{{ url('/').'/'.asset('vendor/bootstrap-daterange/daterangepicker.css') }}" rel="stylesheet">
@@ -702,6 +718,7 @@
       jQuery('#getLeads tbody').empty();
       var datetime = jQuery('#frmFilter [name=datetime]').val();
       var search = jQuery('#search_lead').val();
+      var assign_to = jQuery('#user_id_search').val();
       var status = jQuery('#status').val();
       var table = jQuery('#getLeads').DataTable({
         processing: false,
@@ -713,7 +730,8 @@
           data: {
             datetime: datetime,
             search: jQuery('#search_lead').val(),
-            status: status
+            status: status,
+            assign_to: assign_to
           }
         },
         columns: [{
@@ -721,6 +739,10 @@
             name: 'checkbox',
             orderable: false,
             searchable: false
+          },
+          {
+            data: 'created_at',
+            name: 'created_at'
           },
           {
             data: 'company_name',
@@ -745,12 +767,6 @@
             searchable: false
           },
           {
-            data: 'others',
-            name: 'others',
-            orderable: false,
-            searchable: false
-          },
-          {
             data: 'status',
             name: 'status',
             searchable: false
@@ -761,19 +777,35 @@
             searchable: false
           },
           {
-            data: 'created_at',
-            name: 'created_at'
+            data: 'note',
+            name: 'note',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'others',
+            name: 'others',
+            orderable: false,
+            searchable: false
           },
         ],
         order: [
-          [6, 'desc']
+          [1, 'desc']
         ],
         dom: 't<"bottom"lip>',
 
       });
+      table.on('xhr', function(e, settings, json) {
+          if (json && json.records_filtered_count !== undefined) {
+              jQuery('.brig.ml-2').text(json.records_filtered_count);
+          }
+      });
     }
 
     $('#search_lead').on('keyup', function() {
+      getLeads();
+    });
+    $('#user_id_search').on('change', function() {
       getLeads();
     });
     $('#status').on('change', function() {
