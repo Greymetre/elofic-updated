@@ -93,4 +93,5 @@ class Address extends Model
     {
         $this->belongsTo(Customers::class, 'customer_id', 'id');
     }
+
 }

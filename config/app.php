@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Bediya Silver'),
+    'name' => env('APP_NAME', 'Blueneba Technologies'),
 
     /*
     |--------------------------------------------------------------------------
