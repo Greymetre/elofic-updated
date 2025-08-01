@@ -111,16 +111,13 @@ class LeadOpportunitiesController extends Controller
         ];
 
         $request->validate($rules);
-        $data = $request->all();
         $created_by = Auth::id(); 
         $opportunity_id = $request->opportunity_id;
         $lead_opportunity = LeadOpportunity::where(['id'=>$opportunity_id])->first();
         if($lead_opportunity){
             $lead_opportunity->update(['note'=>$request->note,'created_by'=>$created_by,'assigned_to'=>$request->assigned_to,'lead_contact_id'=>$request->lead_contact_id,'estimated_close_date'=>$request->estimated_close_date,'confidence'=>$request->confidence,'status'=>$request->status, 'amount'=>$request->amount]);
             $request->session()->flash('message_success',__('Lead Opportunity update successfully.'));
-
         }else{
-
             $lead_opportunity = LeadOpportunity::create(['note'=>$request->note,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'assigned_to'=>$request->assigned_to,'lead_contact_id'=>$request->lead_contact_id,'amount'=>$request->amount,'type'=>$request->type,'estimated_close_date'=>$request->estimated_close_date,'confidence'=>$request->confidence,'status'=>$request->status]);
             $request->session()->flash('message_success',__('Lead Opportunity successfully.'));
         }

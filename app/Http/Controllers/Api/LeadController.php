@@ -8,9 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Address;
 use App\Models\LeadContact;
 use App\Models\LeadNote;
+use App\Models\LeadOpportunity;
 use App\Models\LeadTask;
+use App\Models\OpportunitieStatus;
 use App\Models\Status;
+use App\Models\User;
 use DB;
+use Illuminate\Support\Facades\Auth;
 
 class LeadController extends Controller
 {
@@ -277,11 +281,212 @@ class LeadController extends Controller
                 $item->type = 'task';
                 $item->created_at_formatted = $item->created_at->format('d M Y');
             });
-    
+
             $combined = $lead_notes->merge($lead_tasks)->sortByDesc('created_at')->values();
             return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'notes_tasks' => $combined], 200);
         } else {
             return response()->json(['status' => 'error', 'message' => 'Data not found.']);
         }
+    }
+
+    public function addNote(Request $request)
+    {
+        $validate = validator($request->all(), [
+            'lead_id' => 'required',
+            'note' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validate->errors()], 400);
+        }
+        if($request->note_id && !empty($request->note_id)){
+            $note = LeadNote::find($request->note_id);
+            if ($note) {
+                $note->update(['note' => $request->note]);
+                return response()->json(['status' => 'success', 'message' => 'Note updated successfully.', 'data' => $note], 200);
+            }else{
+                return response()->json(['status' => 'error', 'message' => 'Note not found.']);
+            }
+
+        }else{
+            $lead = Lead::find($request->lead_id);
+            if ($lead) {
+                $note = LeadNote::create([
+                    'note' => $request->note,
+                    'lead_id' => $lead->id,
+                    'created_by' => $request->user()->id
+                ]);
+                return response()->json(['status' => 'success', 'message' => 'Note added successfully.', 'data' => $note], 200);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Lead not found.']);
+            }
+        }
+    }
+
+    public function getTaskDropdowns(Request $request)
+    {
+        $priorities = [
+            [
+                "id" => "low",
+                "name" => "Low"
+            ],
+            [
+                "id" => "medium",
+                "name" => "Medium"
+            ],
+            [
+                "id" => "high",
+                "name" => "High"
+            ]
+        ];
+        $status = [
+            [
+                "id" => "open",
+                "name" => "Open"
+            ],
+            [
+                "id" => "in_progress",
+                "name" => "In Progress"
+            ],
+            [
+                "id" => "completed",
+                "name" => "Completed"
+            ]
+        ];
+        $user_ids = getUsersReportingToAuth($request->user()->id);
+        $users = User::select('id', 'name');
+        if ($request->user()->hasRole('superadmin')) {
+            $users->where(function ($query) use ($user_ids) {
+                $query->whereIn('id', $user_ids);
+            });
+        }
+        $users = $users->get();
+        $data = [
+            'users' => $users,
+            'priorities' => $priorities,
+            'status' => $status,
+        ];
+
+        return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
+    }
+
+    public function addleadTask(Request $request)
+    {
+        $validate = validator($request->all(), [
+            'lead_id'=>'required',
+            'assigned_to'=>'required',
+            'description'=>'required',
+            'date'=>'required',
+            'priority'=>'required',
+            'status'=>'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validate->errors()], 400);
+        }
+        $created_by = $request->user()->id; 
+        $task_id = $request->task_id;
+        $lead_task = LeadTask::where(['id'=>$task_id])->first();
+        if(!$request->status && empty($request->status)){
+            $request->status = 'open';
+        }
+        if($lead_task){
+             $lead_task->update(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time, 'priority'=>$request->priority,'status'=>$request->status]);
+             $new = false;
+        }else{
+            $lead_task = LeadTask::create(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time, 'priority'=>$request->priority,'status'=>$request->status]);
+            $new = true;
+        }
+        if($request->status == 'open'){
+            $lead_task->update(['open_date'=>date('Y-m-d')]);
+        }
+        if($request->status == 'completed'){
+            $lead_task->update(['close_date'=>date('Y-m-d')]);
+        }
+        if($new){
+            return response()->json(['status' => 'success', 'message' => 'Task added successfully.', 'data' => $lead_task], 200);
+        }else{
+            return response()->json(['status' => 'success', 'message' => 'Task updated successfully.', 'data' => $lead_task], 200);
+        }
+    }
+
+    public function getLeadContacts(Request $request)
+    {
+        $validate = validator($request->all(), [
+            'lead_id' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validate->errors()], 400);
+        }
+        $lead = Lead::find($request->lead_id);
+        $opportunity_statuses = OpportunitieStatus::select('id', 'status_name')->orderBy('ordering', 'asc')->get();
+        if ($lead) {
+            $contacts = $lead->contacts;
+            $data = [
+                'contacts' => $contacts,
+                'opportunity_statuses' => $opportunity_statuses
+            ];
+            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Data not found.']);
+        }
+    }
+
+    public function addLeadopportunity(Request $request)
+    {
+        $validate = validator($request->all(), [
+            'lead_id'=>'required',
+            'assigned_to'=>'required',
+            'lead_contact_id'=>'required',
+            'amount'=>'required',
+            //'type'=>'required',
+            'estimated_close_date'=>'required',
+            'confidence'=>'required',
+            'note'=>'required',
+            'status'=>'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validate->errors()], 400);
+        }
+        $created_by = Auth::id(); 
+        $opportunity_id = $request->opportunity_id;
+        $lead_opportunity = LeadOpportunity::where(['id'=>$opportunity_id])->first();
+        if($lead_opportunity){
+            $lead_opportunity->update(['note'=>$request->note,'created_by'=>$created_by,'assigned_to'=>$request->assigned_to,'lead_contact_id'=>$request->lead_contact_id,'estimated_close_date'=>$request->estimated_close_date,'confidence'=>$request->confidence,'status'=>$request->status, 'amount'=>$request->amount]);
+            $new = false;
+        }else{
+            $lead_opportunity = LeadOpportunity::create(['note'=>$request->note,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'assigned_to'=>$request->assigned_to,'lead_contact_id'=>$request->lead_contact_id,'amount'=>$request->amount,'type'=>$request->type,'estimated_close_date'=>$request->estimated_close_date,'confidence'=>$request->confidence,'status'=>$request->status]);
+            $new = true;
+        }
+
+        if($new){
+            return response()->json(['status' => 'success', 'message' => 'Opportunity added successfully.', 'data' => $lead_opportunity], 200);
+        }else{
+            return response()->json(['status' => 'success', 'message' => 'Opportunity updated successfully.', 'data' => $lead_opportunity], 200);
+        }
+    }
+
+    public function getAllOpportunities(Request $request)
+    {
+        $opportunity_statuses = OpportunitieStatus::select('id', 'status_name')->orderBy('ordering', 'asc')->get();
+        $data = [];
+
+        foreach ($opportunity_statuses as $key => $opportunity_status) {
+            $data[$key]['status_id'] = $opportunity_status->id;
+            $data[$key]['status_name'] = $opportunity_status->status_name;
+            $data[$key]['total_opportunities'] = LeadOpportunity::where('status', $opportunity_status->id)->count();
+            $data[$key]['total_amount'] = LeadOpportunity::where('status', $opportunity_status->id)->sum('amount');
+            $all_opportunities = LeadOpportunity::with('lead:id,company_name', 'assignUser:id,name');
+            if(!$request->user()->hasRole('superadmin')) {
+                $user_ids = getUsersReportingToAuth($request->user()->id);
+                $lead_ids = Lead::where('assign_to', $user_ids)->pluck('id');
+                $all_opportunities->where('assigned_to', $user_ids);
+            }
+            $all_opportunities = $all_opportunities->where('status', $opportunity_status->id)->get();
+            $data[$key]['opportunities'] = $all_opportunities;
+        }
+        return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
     }
 }

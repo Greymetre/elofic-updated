@@ -35,6 +35,9 @@ use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TargetController;
 use App\Http\Controllers\TasksController;
+use App\Http\Controllers\TaskDepartmentController;
+use App\Http\Controllers\TaskProjectController;
+use App\Http\Controllers\TaskPriorityController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserReportingController;
@@ -651,6 +654,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('tasks-done', [TasksController::class, 'done'])->name('tasks.done');
     Route::any('tasks-reopen', [TasksController::class, 'reopen'])->name('tasks.reopen');
     Route::any('tasksInfo', [TasksController::class, 'tasksInfo'])->name('tasks.info');
+    // Tasks Departments
+    Route::resource('task-departments', TaskDepartmentController::class);
+    // Tasks Projects
+    Route::resource('task-projects', TaskProjectController::class);
+    // Tasks Priority
+    Route::resource('task-priorities', TaskPriorityController::class);
+
     //Payment
     Route::resource('payments', PaymentController::class);
     Route::any('payments-download', [PaymentController::class, 'download'])->name('payments.download');

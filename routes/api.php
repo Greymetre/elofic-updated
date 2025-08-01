@@ -321,4 +321,10 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('getLeadStatusSource', [LeadController::class, 'leadStatusSource']);
     Route::post('leadCreate', [LeadController::class, 'leadCreate']);
     Route::get('leadDetails', [LeadController::class, 'leadDetails']);
+    Route::post('addNote', [LeadController::class, 'addNote']);
+    Route::get('getTaskDropdowns', [LeadController::class, 'getTaskDropdowns']);
+    Route::post('addleadTask', [LeadController::class, 'addleadTask']);
+    Route::get('getLeadContacts', [LeadController::class, 'getLeadContacts']);
+    Route::post('addLeadopportunity', [LeadController::class, 'addLeadopportunity']);
+    Route::get('getAllOpportunities', [LeadController::class, 'getAllOpportunities']);
 });

@@ -144,12 +144,10 @@ class LeadTasksController extends Controller
             'description'=>'required',
             'date'=>'required',
             'priority'=>'required',
-            'status'=>'required',
-            
+            'status'=>'required',            
         ];
 
         $request->validate($rules);
-        $data = $request->all();
         $created_by = Auth::id(); 
         $task_id = $request->task_id;
         $lead_task = LeadTask::where(['id'=>$task_id])->first();

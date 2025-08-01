@@ -1516,7 +1516,7 @@ return [
         'title_singular'    => 'Task',
         'create_title'      => 'New Task',
         'id'                => 'Task ID',
-        'task_title'        => 'Title',
+        'task_title'        => 'Task Title',
         'descriptions'      => 'Descriptions',
         'start_at'        => 'Start',
         'start_time'        => 'Start Time',
@@ -1533,6 +1533,11 @@ return [
         'status_id'         => 'Status',
         'task_type'         => 'Task Type',
         'associated'         => 'Associated',
+        'task_department'  => 'Task Department',
+        'project_name'     =>  'Project Name',
+        'assigned_to'     =>  'Assigned To',
+        'priority'     =>  'Priority',
+
     ],
     
     'payment'           => [

@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Http\Requests\TaskRequest;
 use App\Models\Customers;
 use App\Models\User;
+use App\Models\TaskDepartment;
+use App\Models\TaskProject;
+use App\Models\TaskPriority;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
@@ -61,7 +64,13 @@ class TasksController extends Controller
                             })
         ->select('id', 'name','mobile')
         ->get();
-        return view('tasks.create',compact('users','customers'))->with('tasks',$this->tasks);
+        $departments = TaskDepartment::select('id','name')->get();
+        $projects = TaskProject::select('id','name')->get();
+        $priorities = TaskPriority::select('id','name')->get();
+
+        
+                        
+        return view('tasks.create',compact('users','customers','departments','projects','priorities'))->with('tasks',$this->tasks);
     }
 
     /**
