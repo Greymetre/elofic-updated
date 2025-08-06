@@ -23,9 +23,11 @@ use App\Models\LeadOpportunity;
 use App\Models\Pincode;
 use App\Models\Country;
 use App\Models\Address;
+use App\Models\LeadNotification;
 use App\Models\OpportunitieStatus;
 use App\Models\State;
 use App\Models\Status;
+use Carbon\Carbon;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class LeadController extends Controller
@@ -92,7 +94,8 @@ class LeadController extends Controller
             $leads->where(function ($query) use ($search) {
                 $query->where('company_name', 'like', "%{$search}%")
                     ->orWhereHas('contacts', function ($subQuery) use ($search) {
-                        $subQuery->where('name', 'like', "%{$search}%");
+                        $subQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('phone_number', 'like', "%{$search}%");
                     });
             });
         }
@@ -146,7 +149,7 @@ class LeadController extends Controller
                 return "";
             })
             ->editColumn('created_at', function ($lead) {
-                return \Carbon\Carbon::parse($lead->created_at)->format('M j, Y \a\t g:i a');
+                return $lead->lead_generation_date ? \Carbon\Carbon::parse($lead->lead_generation_date)->format('M j, Y \a\t g:i a') : \Carbon\Carbon::parse($lead->created_at)->format('M j, Y \a\t g:i a');
             })
 
             ->addColumn('checkbox', function ($lead) {
@@ -197,9 +200,6 @@ class LeadController extends Controller
             ->make(true);
     }
 
-
-
-
     function exportLeads(Request $request)
     {
         $filename = 'leads.xlsx';
@@ -239,11 +239,28 @@ class LeadController extends Controller
             }
         }
 
+        if($request->assign_to && !empty($request->assign_to)){
+            $leads->where('assign_to', $request->assign_to);
+        }
+
         $leads = $leads->orderBy('created_at', 'desc')->groupBy('id')->get();
 
         $allOtherKeys = [];
+        $othersMap = [];
 
-        $data = $leads->map(function ($item) use (&$allOtherKeys) {
+        // First pass: collect all unique keys from 'others' and store decoded per item
+        foreach ($leads as $item) {
+            $othersData = is_array($item->others)
+                ? $item->others
+                : (is_string($item->others) ? json_decode($item->others, true) : []);
+            $othersData = is_array($othersData) ? $othersData : [];
+
+            $allOtherKeys = array_unique(array_merge($allOtherKeys, array_keys($othersData)));
+            $othersMap[$item->id] = $othersData;
+        }
+
+        // Build rows
+        $rows = $leads->map(function ($item) use ($allOtherKeys, $othersMap) {
             $contact = $item->contacts->first();
 
             $contacts_name = $contact?->name ?? '';
@@ -253,17 +270,48 @@ class LeadController extends Controller
 
             $address = $item->address;
 
-            // ✅ Safely decode 'others' field
-            $othersData = is_array($item->others)
-                ? $item->others
-                : (is_string($item->others) ? json_decode($item->others, true) : []);
+            $othersData = $othersMap[$item->id] ?? [];
 
-            $othersData = is_array($othersData) ? $othersData : [];
+            // Latest task
+            $latestTaskModel = $item->tasks->sortByDesc('created_at')->first();
+            $latestTask = $latestTaskModel
+                ? sprintf(
+                    '%s (%s)',
+                    $latestTaskModel->description ?? '',
+                    $latestTaskModel->created_at?->format('d-m-Y') ?? ''
+                )
+                : '-';
 
-            // ✅ Collect all unique keys
-            $allOtherKeys = array_unique(array_merge($allOtherKeys, array_keys($othersData)));
+            // Lead time: difference between lead_generation_date and created_at if both present
+            $leadTime = '';
+            if ($item->lead_generation_date && $item->created_at) {
+                try {
+                    $leadTime = Carbon::parse($item->lead_generation_date)
+                        ->diffInDays(Carbon::parse($item->created_at)) . ' days';
+                } catch (\Exception $e) {
+                    $leadTime = '';
+                }
+            }
 
-            // ✅ Base export row
+            // Latest 5 notes (newest first)
+            $latestNotes = $item->notes->sortByDesc('created_at')->take(5)->values();
+            $noteCols = [];
+            for ($i = 0; $i < 5; $i++) {
+                if (isset($latestNotes[$i])) {
+                    $n = $latestNotes[$i];
+                    $dateStr = $n->created_at?->format('d-m-Y') ?? '';
+                    $noteText = trim(($n->note ?? ''));
+                    //Removed HTML tags
+                    $noteText = strip_tags($noteText);
+                    $noteCols[] = $noteText;
+                    $noteCols[] = $dateStr;
+                } else {
+                    $noteCols[] = '';
+                    $noteCols[] = '';
+                }
+            }
+
+            // Base export row
             $baseRow = [
                 $item->id,
                 $item->lead_generation_date,
@@ -280,12 +328,15 @@ class LeadController extends Controller
                 $item->assign_user?->name ?? '',
                 '', // Lead Status (custom field?)
                 $item->close_duration ?? '',
-                $item->createdby->name ?? '',
-                '',
+                $item->createdby?->name ?? '',
+                $leadTime,
                 $item->opportunities->sum('amount') ?? '0',
+                $latestTask,
+                // latest 5 notes:
+                ...$noteCols,
             ];
 
-            // ✅ Add 'others' values in consistent order
+            // Add ordered others consistently
             $orderedOthers = collect($allOtherKeys)->mapWithKeys(function ($key) use ($othersData) {
                 return [$key => $othersData[$key] ?? ''];
             })->toArray();
@@ -293,7 +344,7 @@ class LeadController extends Controller
             return array_merge($baseRow, $orderedOthers);
         })->toArray();
 
-        // ✅ Header
+        // Build headers
         $baseHeaders = [
             'ID',
             'Lead Generation Date',
@@ -308,17 +359,30 @@ class LeadController extends Controller
             'Lead Type',
             'Address',
             'Assignee',
-            'Lead Status',
+            'Lead Status', // custom field placeholder
             'Close Duration',
             'Created By',
             'Lead Time',
             'Sales Value',
+            'Task',
+            'Note 1',
+            'Note 1 Date',
+            'Note 2',
+            'Note 2 Date',
+            'Note 3',
+            'Note 3 Date',
+            'Note 4',
+            'Note 4 Date',
+            'Note 5',
+            'Note 5 Date',
         ];
 
-        $finalHeaders = array_merge($baseHeaders, $allOtherKeys);
+        // Append dynamic "others" headers in the same order
+        $allOtherKeys = array_values($allOtherKeys); // reindex to preserve order
+        $headers = array_merge($baseHeaders, $allOtherKeys);
 
         // ✅ Export
-        $export = new ExcelExport($finalHeaders, $data);
+        $export = new ExcelExport($headers, $rows);
         return Excel::download($export, $filename);
     }
 
@@ -523,7 +587,12 @@ class LeadController extends Controller
                     'created_by' => Auth::id()
                 ]);
             }
+            if(!empty($request->assign_to)){
+                SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.');
+                StoreLeadNotification($lead->id, 'Assigned Lead', '🟢 You have been assigned 1 new lead.', $request->assign_to);
+            }
         }
+
         return redirect()->route('leads.show', $lead);
     }
 
@@ -662,12 +731,19 @@ class LeadController extends Controller
         } else {
             $otherData = null;
         }
+
+        if($lead->assign_to != $request->assign_to){
+            SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.');
+            StoreLeadNotification($lead->id, 'Assigned Lead', '🟢 You have been assigned 1 new lead.', $request->assign_to);
+        }
+
         $lead->update([
             'company_name' => $request->company_name,
-            'company_url' => $request->website,
+            'company_url' => $request->company_url,
             'status' => $request->status ?? 0,
             'lead_generation_date' => date('Y-m-d'),
             'lead_source' => $request->lead_source,
+            'assign_to' => $request->assign_to,
             'others' => $otherData,
         ]);
         Address::where('model_type', 'App\Models\Lead')->where('model_id', $lead->id)->update([
@@ -706,6 +782,8 @@ class LeadController extends Controller
     {
         $update = Lead::whereIn('id', $request->lead_id)->update(['assign_to' => $request->user_id]);
         if ($update) {
+            SendPushNotification($request->user_id, '🟢 You have been assigned '. count($request->lead_id) .' new lead.');
+            StoreLeadNotification(null, 'Assigned Lead', '🟢 You have been assigned '. count($request->lead_id) .' new lead.', $request->user_id);
             return response()->json(['status' => 'success', 'message' => 'Lead assigned successfully.']);
         } else {
             return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);

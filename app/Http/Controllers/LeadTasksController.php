@@ -12,7 +12,8 @@ use Auth;
 use App\Exports\ExcelExport;
 use Excel;
 
-use App\Models\Lead;
+use App\Models\Lead;use Illuminate\Support\Str;
+
 use App\Models\LeadTask;
 
 class LeadTasksController extends Controller
@@ -56,7 +57,9 @@ class LeadTasksController extends Controller
                 return '<input type="checkbox" class="lead_task-checkbox checkbox_cls" value="'.$lead_task->id.'" name="lead_task_ids[]" onclick="checkboxDelete('.$lead_task_id.')">';
             })
             ->editColumn('status', function ($lead_task) {
-                if($lead_task->status == 'open'){
+                if($lead_task->status == 'pending'){
+                    return '<button title="Change Status" class="btn btn-sm btn-danger change_status" data-status="pending" data-id="'.$lead_task->id.'">Pending</button>';
+                }else if($lead_task->status == 'open'){
                     return '<button title="Change Status" class="btn btn-sm btn-info change_status" data-status="open" data-id="'.$lead_task->id.'">Open</button>'; //<span class="badge badge-info">Open</span>';
                 }else if($lead_task->status == 'completed'){
                     return '<span class="badge badge-success">Completed</span>';
@@ -155,11 +158,27 @@ class LeadTasksController extends Controller
             $request->status = 'open';
         }
         if($lead_task){
+            if ($request->status == 'completed' && $lead_task->status != 'completed') {
+                $lead_task->update(['close_date' => date('Y-m-d')]);
+
+                $msg = '📝 Your assigned task ' . $lead_task->description .
+                    ' related to lead: ' . Str::limit($lead_task->lead->company_name, 10, '...') .
+                    ' has been completed.';
+
+
+                SendPushNotification($lead_task->created_by, $msg);
+                StoreLeadNotification($lead_task->id, 'Assigned Task', $msg, $lead_task->created_by, 'task');
+            }
+
              $lead_task->update(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time, 'priority'=>$request->priority,'status'=>$request->status]);
             $request->session()->flash('message_success',__('Lead Task Update successfully.'));
+
         }else{
             $lead_task = LeadTask::create(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time, 'priority'=>$request->priority,'status'=>$request->status]);
             $request->session()->flash('message_success',__('Lead Task Added successfully.'));
+
+            SendPushNotification($request->assigned_to, '📝 A new task has been assigned to you.');
+            StoreLeadNotification($lead_task->id, 'Assigned Task', '📝 A new task has been assigned to you.', $request->assigned_to, 'task');
         }
         if($request->status == 'open'){
             $lead_task->update(['open_date'=>date('Y-m-d')]);
@@ -231,8 +250,8 @@ class LeadTasksController extends Controller
     }
 
     public function change_status(Request $request){
-        $lead_id = $request->lead_id;
-        $lead_task = LeadTask::where(['id'=>$lead_id])->first();
+        $task_id = $request->task_id;
+        $lead_task = LeadTask::find($task_id);
         if($lead_task){
             $lead_task->update(['status'=>$request->status, 'remark'=>$request->remark]);
             $request->session()->flash('message_success',__('Lead Task status changed successfully.'));
@@ -241,6 +260,14 @@ class LeadTasksController extends Controller
             }
             if($request->status == 'completed'){
                 $lead_task->update(['close_date'=>date('Y-m-d')]);
+
+                $msg = '📝 Your assigned task ' . $lead_task->description .
+                    ' related to lead: ' . Str::limit($lead_task->lead->company_name, 10, '...') .
+                    ' has been completed.';
+
+
+                SendPushNotification($lead_task->created_by, $msg);
+                StoreLeadNotification($lead_task->id, 'Assigned Task', $msg, $lead_task->created_by, 'task');
             }
             return response()->json(['status'=>'success']);
         }else{

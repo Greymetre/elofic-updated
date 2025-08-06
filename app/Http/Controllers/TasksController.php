@@ -10,6 +10,10 @@ use App\Models\User;
 use App\Models\TaskDepartment;
 use App\Models\TaskProject;
 use App\Models\TaskPriority;
+use App\Models\Lead;
+use App\Models\TaskAssignment;
+use App\Models\TaskComment;
+use App\Models\TaskStatusLog;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +28,7 @@ use App\Exports\TasksExport;
 use App\Exports\TasksTemplate;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class TasksController extends Controller
 {
@@ -37,7 +42,19 @@ class TasksController extends Controller
     public function index(TasksDataTable $dataTable)
     {
         //abort_if(Gate::denies('tasks_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        return $dataTable->render('tasks.index');
+        $users = User::where(function($query) {
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                                {
+                                    // $query->whereIn('id',$userids);
+                                }
+                                $query->where('active','Y');
+                            })->select('id','name')->get();
+        $statuses=['Pending','Open','In progress','Completed','Reopen'];   
+
+        return $dataTable->render('tasks.index', [
+                        'users' => $users,
+                        'statuses' => $statuses
+                    ]);
     }
 
     /**
@@ -53,13 +70,15 @@ class TasksController extends Controller
         $users = User::where(function($query) use($userids){
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
-                                    $query->whereIn('id',$userids);
+                                    // $query->whereIn('id',$userids);
                                 }
+                                $query->where('active','Y');
                             })->select('id','name')->get();
+
         $customers = Customers::where('active','=','Y')->where(function($query) use($userids){
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
-                                    $query->whereIn('executive_id',$userids);
+                                    // $query->whereIn('executive_id',$userids);
                                 }
                             })
         ->select('id', 'name','mobile')
@@ -67,10 +86,11 @@ class TasksController extends Controller
         $departments = TaskDepartment::select('id','name')->get();
         $projects = TaskProject::select('id','name')->get();
         $priorities = TaskPriority::select('id','name')->get();
+        $leads = Lead::select('id','company_name')->get();
 
         
                         
-        return view('tasks.create',compact('users','customers','departments','projects','priorities'))->with('tasks',$this->tasks);
+        return view('tasks.create',compact('users','customers','departments','projects','priorities','leads'))->with('tasks',$this->tasks);
     }
 
     /**
@@ -81,11 +101,51 @@ class TasksController extends Controller
      */
     public function store(TaskRequest $request)
     {
+        $assignedTos  = $request->assigned_to??[];
+        $userId = Auth::user()->id;
         //abort_if(Gate::denies('tasks_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $request['active'] = 'Y';
-        $request['created_by'] = Auth::user()->id;
+        $request['created_by'] = $userId;
+        $request['user_id'] = $userId;
+        $taskLogs=[];
         if($task = Tasks::create($request->except(['_token'])))
-        {
+        {   
+            // Store log entry
+            $taskLogs[] = [
+                            'task_id'         => $task->id,
+                            'new_status'      => 'Pending',
+                            'changed_by'      => $userId,
+                            'comments'        =>  'Task #T'.$task->id.' was created by '.auth()->user()->name .' on '.date('d-m-Y').' at '.date('h:i A'),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+            if(count($assignedTos)){
+                foreach ($assignedTos as $assignedUserId) {
+                    TaskAssignment::create([
+                        'task_id' => $task->id,
+                        'user_id' => $assignedUserId,
+                    ]);
+                    $user = User::find($assignedUserId);
+                    $taskLogs[] = [
+                                'task_id'         => $task->id,
+                                'new_status'      => 'Pending',
+                                'changed_by'      => $userId,
+                                'comments'        =>  'Task #T'.$task->id.' was assigned to '.$user->name .' on '.date('d-m-Y').' at '.date('h:i A'),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                                ];
+                }
+            }    
+            if ($request->hasFile('files')) {
+                foreach ($request->file('files') as $file) {
+                    $task->addMedia($file)->toMediaCollection('task_admin_files');
+                }
+            }
+            
+            
+            
+            TaskStatusLog::insert($taskLogs);
+
             // $toemail = User::where('id',$request['user_id'])->pluck('email')->first();
             // Mail::send('emails.tasks.assign', ['task' => $task ], function ($message) use($task, $toemail) {
             //       $message->to($toemail)->subject($task['task_title']);
@@ -93,6 +153,8 @@ class TasksController extends Controller
 
             return Redirect::to('tasks')->with('message_success', 'Tasks Store Successfully');
         }
+
+
         return redirect()->back()->with('message_danger', 'Error in Tasks Store')->withInput(); 
     }
 
@@ -102,15 +164,69 @@ class TasksController extends Controller
      * @param  \App\Models\Tasks  $tasks
      * @return \Illuminate\Http\Response
      */
+    // public function show($id)
+    // {
+    //     //abort_if(Gate::denies('tasks_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+    //     $id = decrypt($id);
+    //     $task = Tasks::find($id);
+    //     $task['user_name'] = isset($task['users']['name']) ? $task['users']['name'] :'';
+    //     return response()->json($task);
+    //     //return view('tasks.show')->with('tasks',$task);
+    // }
+
     public function show($id)
     {
-        //abort_if(Gate::denies('tasks_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        //abort_if(Gate::denies('tasks_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $userids = getUsersReportingToAuth();
         $id = decrypt($id);
         $task = Tasks::find($id);
-        $task['user_name'] = isset($task['users']['name']) ? $task['users']['name'] :'';
-        return response()->json($task);
-        //return view('tasks.show')->with('tasks',$task);
+
+        $users = User::where(function($query) use($userids){
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                                {
+                                    // $query->whereIn('id',$userids);
+                                }
+                                $query->where('active','Y');
+                            })->select('id','name')->get();
+        $customers = Customers::where('active','=','Y')->where(function($query) use($userids){
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                                {
+                                    // $query->whereIn('executive_id',$userids);
+                                }
+                            })
+        ->select('id', 'name','mobile')
+        ->get();
+        $departments = TaskDepartment::select('id','name')->get();
+        $projects = TaskProject::select('id','name')->get();
+        $priorities = TaskPriority::select('id','name')->get();
+        $leads = Lead::select('id','company_name')->get();
+        $assignedUserIds = TaskAssignment::where('task_id',$id)->pluck('user_id')->toArray();
+        $roleName = auth()->user()->roles->pluck('name')->first();
+        $taskStatuses=['Pending','Open','In progress','Completed']; 
+        $isRestricted=true;
+        if ($roleName === 'superadmin') {
+            $isRestricted = true;
+            $taskStatuses[]='Reopen'; 
+        } else {
+            $isRestricted = true;
+            if($task->task_status =='Pending'){
+                $taskStatuses=['Pending','Open']; 
+            }elseif($task->task_status =='Open'){
+                $taskStatuses=['Open','In progress']; 
+            }
+            elseif($task->task_status =='In progress'){
+                $taskStatuses=['In progress','Completed']; 
+            }
+            elseif($task->task_status =='Reopen'){
+                $taskStatuses=['Pending','Open']; 
+            }
+
+        }        
+        $taskStatusLogs = TaskStatusLog::with('task','user')->where('task_id',$task->id)->get(); 
+        $taskComments = TaskComment::where('task_id',$id)->get();    
+        return view('tasks.show',compact('task','users','customers','departments','projects','priorities','leads','assignedUserIds','isRestricted','taskStatuses','taskComments','taskStatusLogs'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -121,17 +237,47 @@ class TasksController extends Controller
     public function edit($id)
     {
         //abort_if(Gate::denies('tasks_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+
         $userids = getUsersReportingToAuth();
         $id = decrypt($id);
         $task = Tasks::find($id);
-        $task['user_name'] = isset($task['users']['name']) ? $task['users']['name'] :'';
+
+        if(!((auth()->user()->id==$task->created_by) || (auth()->user()->roles->pluck('name')->first()=='superadmin'))){  
+            return Redirect::back()->with('message_error', 'You are not allowed to access this page');
+        }    
+
+
         $users = User::where(function($query) use($userids){
                                 if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
                                 {
-                                    $query->whereIn('id',$userids);
+                                    // $query->whereIn('id',$userids);
                                 }
+                                $query->where('active','Y');
                             })->select('id','name')->get();
-        return view('tasks.create',compact('users'))->with('tasks',$task);
+        $customers = Customers::where('active','=','Y')->where(function($query) use($userids){
+                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
+                                {
+                                    // $query->whereIn('executive_id',$userids);
+                                }
+                            })
+        ->select('id', 'name','mobile')
+        ->get();
+        $departments = TaskDepartment::select('id','name')->get();
+        $projects = TaskProject::select('id','name')->get();
+        $priorities = TaskPriority::select('id','name')->get();
+        $leads = Lead::select('id','company_name')->get();
+        $assignedUserIds = TaskAssignment::where('task_id',$id)->pluck('user_id')->toArray();
+        $roleName = auth()->user()->roles->pluck('name')->first();
+        $isRestricted=true;
+        if ($roleName === 'superadmin') {
+            $isRestricted = false;
+        } else {
+            $isRestricted = true;
+        }        
+        $taskStatuses=['Pending','Open','In progress','Completed','Reopen'];   
+        $taskComments = TaskComment::where('task_id',$id)->get();    
+        return view('tasks.edit',compact('task','users','customers','departments','projects','priorities','leads','assignedUserIds','isRestricted','taskStatuses','taskComments'));
     }
 
     /**
@@ -143,23 +289,149 @@ class TasksController extends Controller
      */
     public function update(TaskRequest $request, $id)
     {
-        abort_if(Gate::denies('tasks_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        if(Tasks::where('id',$id)->update($request->except(['_token','id','image','_method','action','associated'])) )
-        {
-            if(!empty($request['associated']))
-            {
-                foreach ($request['associated'] as $key => $user) {
-                   TaskUsers::updateOrCreate(
-                    ['task_id' => $id, 'user_id' => $user],
-                    [   'task_id' => $id,
-                        'user_id' => $user,
-                    ]);
-                }
-            }
-            return Redirect::to('tasks')->with('message_success', 'Tasks Update Successfully');
+        $assignedTos = $request->assigned_to ?? [];
+        $taskType = $request->task_type??null;
+        $comment = $request->comment??null;
+        $userId = Auth::user()->id;
+        $task_status = $request->task_status??null;
+
+        $task = Tasks::findOrFail($id);
+        $taskCreatedBy = $task->user_id??null;
+        $oldStatus = $task->task_status??null;
+        // Optional: restrict access
+        // abort_if(Gate::denies('tasks_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $request['updated_by'] = $userId;
+
+        if($taskType=='adhoc'){
+            $request['customer_id']=null;
+            $request['project_id']=null;
+            $request['lead_id']=null;
+        }elseif ($taskType=='customer') {
+            $request['project_id']=null;
+            $request['lead_id']=null;        
+        }elseif ($taskType=='project') {
+            $request['customer_id']=null;
+            $request['lead_id']=null;
+        }elseif ($taskType=='lead') {
+            $request['customer_id']=null;
+            $request['project_id']=null;
         }
-         return redirect()->back()->with('message_danger', 'Error in Tasks Update')->withInput(); 
+        // when task status is update
+        if(isset($task->task_status) && $task->task_status!=$task_status){
+        // if status is completed
+            if($task_status=='Completed'){
+                $request['completed_at']=date('Y-m-d H:i s');
+            }elseif($task_status =='Open'){
+                 $request['open_datetime']=date('Y-m-d H:i s');
+            }
+            elseif($task_status =='In progress'){
+                $request['inprogress_datetime']=date('Y-m-d H:i s');
+            }
+            elseif($task_status =='Reopen'){
+                $request['reopen_datetime']=date('Y-m-d H:i s');
+            }
+        }    
+        if ($task->update($request->except(['_token','assigned_to']))) {
+
+            // Delete existing assignments and reassign
+            // TaskAssignment::where('task_id', $task->id)->delete();
+
+            if (count($assignedTos)) {
+                $taskLogs=[];
+                foreach ($assignedTos as $assignedUserId) {
+                    $user = User::find($assignedUserId);
+                    $isExist = TaskAssignment::where(['task_id'=>$task->id,'user_id'=>$assignedUserId])->exists();
+                    if($isExist){
+                        continue;
+                    }
+                    TaskAssignment::create([
+                        'task_id' => $task->id,
+                        'user_id' => $assignedUserId,
+                    ]);
+                    
+                    $taskLogs[] = [
+                                'task_id'         => $task->id,
+                                'changed_by'      => $userId,
+                                'comments'        =>  'Task #T'.$task->id.' was assigned to '.$user->name .' on '.date('d-m-Y').' at '.date('h:i A'),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                                ];
+                }
+                $deletedAssignments = TaskAssignment::where(['task_id'=>$task->id])->whereNotIn('user_id',$assignedTos)->get();
+                if (count($deletedAssignments)) {
+                   foreach ($deletedAssignments as $deletedAssignment) {
+                        $userDeleted = User::find($deletedAssignment->user_id);
+                        $isDeleted=TaskAssignment::where('id',$deletedAssignment->id)->delete();
+                        if($isDeleted){
+                            $taskLogs[] = [
+                                'task_id'         => $task->id,
+                                'changed_by'      => $userId,
+                                'comments'        =>  'Task #T'.$task->id.' was removed from '.$userDeleted->name .' on '.date('d-m-Y').' at '.date('h:i A'),
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                                ];
+                        }
+                   } 
+                }    
+
+                if(count($taskLogs)){
+                    TaskStatusLog::insert($taskLogs);
+                }    
+            }
+            if($comment){
+               TaskComment::create([
+                            'task_id' => $task->id,
+                            'comment'=>$comment,
+                            'user_id'=>auth()->user()->id ]);
+            }
+
+            // Only log if status is actually changed
+            if ($oldStatus !== $task_status) {
+                
+                // Store log entry
+                TaskStatusLog::create([
+                    'task_id'         => $task->id,
+                    'previous_status' => $oldStatus,
+                    'new_status'      => $task_status,
+                    'changed_by'      => $userId,
+                    'comments'        => auth()->user()->name.' marked the task as '.$task_status.' on '.date('d-m-Y').' at '.date('h:i A'),
+                ]);
+            } 
+            if($comment){
+                // Store log entry
+                $shortComment = strlen($comment) > 50 ? substr($comment, 0, 47) . '...': $comment;
+                TaskStatusLog::create([
+                    'task_id'         => $task->id,
+                    'previous_status' => $oldStatus,
+                    'new_status'      => $task_status,
+                    'changed_by'      => $userId,
+                    'comments'        => auth()->user()->name.' commented on '.date('d-m-Y').' at '.date('h:i A').' : '.'"'.$shortComment.'"',
+                ]);
+            }
+
+            // If new files are uploaded
+            if(auth()->user()->id==$taskCreatedBy){
+                if ($request->hasFile('files')) {
+                    foreach ($request->file('files') as $file) {
+                        $task->addMedia($file)->toMediaCollection('task_admin_files');
+                    }
+                }
+            }else{
+                if ($request->hasFile('files')) {
+                    foreach ($request->file('files') as $file) {
+                        $task->addMedia($file)->toMediaCollection('task_assigned_user_files');
+                    }
+                }
+            }    
+
+
+            return Redirect::to('tasks')->with('message_success', 'Task Updated Successfully');
+        }
+
+        return Redirect::back()->with('message_error', 'Failed to update task');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -170,7 +442,10 @@ class TasksController extends Controller
     public function destroy($id)
     {
         //abort_if(Gate::denies('tasks_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        TaskUsers::where('task_id',$id)->delete();
+        // TaskUsers::where('task_id',$id)->delete();
+        TaskAssignment::where('task_id',$id)->delete();
+        TaskComment::where('task_id',$id)->delete();
+        
         if(Tasks::where('id',$id)->delete())
         {
             return response()->json(['status' => 'success','message' => 'Task deleted successfully!']);
@@ -293,6 +568,16 @@ class TasksController extends Controller
                         return $status;
                     })
                     ->make(true);
+        }
+    }
+
+    public function deleteMedia(Media $media, Request $request)
+    {
+        try {
+            $media->delete();
+            return response()->json(['status' => true, 'message' => 'File deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => 'Error deleting file.']);
         }
     }
 }

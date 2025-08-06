@@ -402,6 +402,7 @@ $(document).on('click', '.change_status', function () {
         html: `
             <select id="swal-status" class="swal2-input" required>
                 <option value="">Select Status</option>
+                <option value="pending" ${current_status == 'pending' ? 'selected' : ''}>Pending</option>
                 <option value="open" ${current_status == 'open' ? 'selected' : ''}>Open</option>
                 <option value="in_progress" ${current_status == 'in_progress' ? 'selected' : ''}>In Progress</option>
                 <option value="completed" ${current_status == 'completed' ? 'selected' : ''}>Completed</option>
@@ -427,7 +428,7 @@ $(document).on('click', '.change_status', function () {
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",
-                    lead_id: lead_id,
+                    task_id: lead_id,
                     status: status,
                     remark: remark
                 },

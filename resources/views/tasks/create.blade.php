@@ -11,6 +11,10 @@
        display: none;
        margin-top:-8px !important;
    }
+    #files {
+        display: none;
+    }
+    
 </style>
 
 <div class="row">
@@ -81,51 +85,6 @@
                   </div>
                </div>
 
-
-               <!-- Add Department Modal -->
-               <div class="modal fade" id="addDepartmentModal" tabindex="-1">
-                  <div class="modal-dialog">
-                     <form id="addDepartmentForm"> 
-                        @csrf
-                        <div class="modal-content">
-                           <div class="modal-header"><h5 class="modal-title">Add Department</h5></div>
-                           <div class="modal-body">
-                              <input name="name" id="department_name" class="form-control" placeholder="Department Name" required>
-                           </div>
-                           <div class="modal-footer">
-                              <button type="button" id="addDepartmentBtn" class="btn btn-primary mx-1">Save</button>
-                              <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                           </div>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-
-
-               <!-- Edit User Modal -->
-               <div class="modal fade" id="editDepartmentModal" tabindex="-1">
-                  <div class="modal-dialog">
-                     <form id="editDepartmentForm">
-                        @csrf
-                        <input type="hidden" id="editDepartmentId" name="id">
-                        <div class="modal-content">
-                           <div class="modal-header"><h5 class="modal-title">Edit Department</h5></div>
-                           <div class="modal-body">
-                              <input name="name" id="editDepartmentName" class="form-control" required>
-                           </div>
-                           <div class="modal-footer">
-                              <button type="submit" class="btn btn-primary">Update</button>
-                           </div>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-
-
-               <!-- task department end -->
-
                <div class="col-md-4">
                   <div class="input_section">
                      <label class="col-form-label">{!! trans('panel.task.task_title') !!} <span class="text-danger"> *</span></label>
@@ -145,10 +104,10 @@
                      <div class="input_section">
                         <label class="col-form-label">
                            <div class="radio-container1">
-                               <label><input type="radio" name="type" value="adhoc" checked> Adhoc</label>
-                               <label><input type="radio" name="type" value="customer"> Customer</label>
-                               <label><input type="radio" name="type" value="project"> Project</label>
-                               <label><input type="radio" name="type" value="lead"> Lead</label>
+                               <label><input type="radio" name="task_type" value="adhoc" checked> Adhoc</label>
+                               <label><input type="radio" name="task_type" value="customer"> Customer</label>
+                               <label><input type="radio" name="task_type" value="project"> Project</label>
+                               <label><input type="radio" name="task_type" value="lead"> Lead</label>
                            </div>
                         </label>
                         <!-- customers -->
@@ -165,7 +124,7 @@
 
                         <!-- projects -->
                         <div class="form-group bmd-form-group select-section" id="project-section">
-                           <select class="form-control select2" name="project_name" id="task_project_id" required style="width: 100%;">
+                           <select class="form-control select2" name="task_project_id" id="task_project_id" required style="width: 100%;">
                               <option value="">Select {!! trans('panel.task.project_name') !!}</option>
                               @foreach($projects as $project)
                                  <option value="{{ $project->id }}" {{ old('task_department_id', $tasks['task_department_id'] ?? '') == $project->id ? 'selected' : '' }}>
@@ -189,10 +148,10 @@
                         <div class="form-group bmd-form-group select-section" id="lead-section">
                            <select class="form-control select2" name="lead_id" id="lead_id" style="width: 100%;" required>
                               <option value="">Select Lead</option>
-                              @if(@isset($customers ))
-                              @foreach($customers as $customer)
-                              <option value="{!! $customer['id'] !!}" {{ old( 'user_id' , (!empty($tasks['user_id']))?($tasks['user_id']):('') ) == $customer['id'] ? 'selected' : '' }}>{!! $customer['id'].' '.$customer['name'] !!}</option>
-                              @endforeach
+                              @if(@isset($leads ))
+                                 @foreach($leads as $lead)
+                                    <option value="{!! $lead['id'] !!}" {{ old( 'lead_id') }}>{!! $lead['company_name'] !!}</option>
+                                 @endforeach
                               @endif
                            </select>
                         </div>
@@ -200,39 +159,24 @@
                      </div>
                   </div>
                   
-                  
-                  <!-- Add Project Modal (optional - shown on click of "+") -->
-                  <div class="modal fade" id="addProjectModal" tabindex="-1">
-                      <div class="modal-dialog">
-                          <form id="addProjectForm">
-                              <div class="modal-content">
-                                  <div class="modal-header"><h5 class="modal-title">Add Project</h5></div>
-                                  <div class="modal-body">
-                                      <input name="name" id="project_name" class="form-control" placeholder="Project Name" required>
-                                  </div>
-                                  <div class="modal-footer">
-                                      <button type="button" id="addProjectBtn" class="btn btn-primary mx-1">Save</button>
-                                      <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                                  </div>
-                              </div>
-                          </form>
-                      </div>
-                  </div>
                <!-- radio button section end -->
                <!-- assigned to -->
                <div class="col-md-4">
                   <div class="input_section">
                      <label class="col-form-label">{!! trans('panel.task.assigned_to') !!}<span class="text-danger"> *</span></label>
                         <div class="form-group bmd-form-group">
-                           <select class="form-control select2" name="assigned_to" id="assigned_to" style="width: 100%;" required>
-                              <option value="">Select {!! trans('panel.task.assigned_to') !!}</option>
-                              @if(@isset($users ))
-                              @foreach($users as $user)
-                              <option value="{!! $user['id'] !!}" {{ old( 'user_id' , (!empty($tasks['user_id']))?($tasks['user_id']):('') ) == $user['id'] ? 'selected' : '' }}>{!! $user['id'].' '.$user['name'] !!}</option>
-                              @endforeach
-                              @endif
-                           </select>
+                            <select class="form-control select2" name="assigned_to[]" id="assigned_to" style="width: 100%;" multiple required>
+                                @if(isset($users))
+                                    @foreach($users as $user)
+                                        <option value="{{ $user['id'] }}"
+                                            @if(collect(old('assigned_to', $tasks['assigned_to'] ?? []))->contains($user['id'])) selected @endif>
+                                            {{ $user['id'] . ' ' . $user['name'] }}
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
                         </div>
+
                         @if ($errors->has('users'))
                         <div class="error">
                            <p class="text-danger">{{ $errors->first('users') }}</p>
@@ -270,140 +214,29 @@
                   </div>
                </div>
 
-               <!-- Add Priority Modal -->
-               <div class="modal fade" id="addPriorityModal" tabindex="-1">
-                  <div class="modal-dialog">
-                     <form id="addPriorityForm">
-                        @csrf
-                        <div class="modal-content">
-                           <div class="modal-header"><h5 class="modal-title">Add Priority</h5></div>
-                           <div class="modal-body">
-                              <input name="name" id="priority_name" class="form-control" placeholder="Priority Name" required>
-                           </div>
-                           <div class="modal-footer">
-                              <button type="button" id="addPriorityBtn" class="btn btn-primary">Save</button>
-                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                           </div>
-                        </div>
-                     </form>
-                  </div>
-               </div>
+               
 
-               <!-- Edit Priority Modal -->
-               <div class="modal fade" id="editPriorityModal" tabindex="-1">
-                  <div class="modal-dialog">
-                     <form id="editPriorityForm">
-                        @csrf
-                        <input type="hidden" id="editPriorityId" name="id">
-                        <div class="modal-content">
-                           <div class="modal-header"><h5 class="modal-title">Edit Priority</h5></div>
-                           <div class="modal-body">
-                              <input name="name" id="editPriorityName" class="form-control" required>
-                           </div>
-                           <div class="modal-footer">
-                              <button type="submit" class="btn btn-primary">Update</button>
-                           </div>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-
-
-
-
-               <!-- Add Department Modal -->
-               <div class="modal fade" id="addPrioritytModal" tabindex="-1">
-                  <div class="modal-dialog">
-                     <form id="addPriorityForm"> 
-                        @csrf
-                        <div class="modal-content">
-                           <div class="modal-header"><h5 class="modal-title">Add Priority</h5></div>
-                           <div class="modal-body">
-                              <input name="name" id="priority_name" class="form-control" placeholder="Priority Name" required>
-                           </div>
-                           <div class="modal-footer">
-                              <button type="button" id="addPriorityBtn" class="btn btn-primary mx-1">Save</button>
-                              <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                           </div>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-
-
-
-               <!-- Edit Priority Modal -->
-               <div class="modal fade" id="editPrioritytModal" tabindex="-1">
-                  <div class="modal-dialog">
-                     <form id="addPriorityForm">
-                        @csrf
-                        <input type="hidden" id="editPriorityId" name="id">
-                        <div class="modal-content">
-                           <div class="modal-header"><h5 class="modal-title">Edit Priority</h5></div>
-                           <div class="modal-body">
-                              <input name="name" id="editPriorityName" class="form-control" required>
-                           </div>
-                           <div class="modal-footer">
-                              <button type="submit" class="btn btn-primary">Update</button>
-                           </div>
-                        </div>
-                     </form>
-                  </div>
-               </div>
-               <!-- priority end-->
+               <div class="col-md-4">
                   <div class="input_section">
-                     <label class="col-form-label">Customer</label>
+                     <label class="col-form-label">Due Date & Time<span class="text-danger"> *</span></label>
                         <div class="form-group bmd-form-group">
-                           <select class="form-control select2" name="customer_id" id="customer_id" style="width: 100%;" required>
-                              <option value="">Select Customer</option>
-                              @if(@isset($customers ))
-                              @foreach($customers as $customer)
-                              <option value="{!! $customer['id'] !!}" {{ old( 'user_id' , (!empty($tasks['user_id']))?($tasks['user_id']):('') ) == $customer['id'] ? 'selected' : '' }}>{!! $customer['id'].' '.$customer['name'] !!}</option>
-                              @endforeach
-                              @endif
-                           </select>
+                           <input type="text" name="due_datetime" id="datetime" class="form-control datetimepicker" value="{!! old( 'due_datetime', $tasks['due_datetime']) !!}">
                         </div>
-                        @if ($errors->has('customer_id'))
+                        @if ($errors->has('due_datetime'))
                         <div class="error col-lg-12">
-                           <p class="text-danger">{{ $errors->first('customer_id') }}</p>
-                        </div>
-                        @endif
-                  </div>
-               </div> -->
-               <div class="col-md-6">
-                  <div class="input_section">
-                     <label class="col-form-label">Date Time<span class="text-danger"> *</span></label>
-                        <div class="form-group bmd-form-group">
-                           <input type="text" name="datetime" id="datetime" class="form-control datetimepicker" value="{!! old( 'datetime', $tasks['datetime']) !!}">
-                        </div>
-                        @if ($errors->has('datetime'))
-                        <div class="error col-lg-12">
-                           <p class="text-danger">{{ $errors->first('datetime') }}</p>
+                           <p class="text-danger">{{ $errors->first('due_datetime') }}</p>
                         </div>
                         @endif
                   </div>
                </div>
-               <div class="col-md-6">
-                  <div class="input_section">
-                     <label class="col-form-label">Reminder</label>
-                        <div class="form-group bmd-form-group">
-                           <input type="text" name="reminder" id="reminder" class="form-control datetimepicker" value="{!! old( 'reminder', $tasks['reminder']) !!}">
-                        </div>
-                        @if ($errors->has('reminder'))
-                        <div class="error">
-                           <p class="text-danger">{{ $errors->first('reminder') }}</p>
-                        </div>
-                        @endif
-                     </div>
-               </div>
+
             </div>
             <hr class="my-3">
             <h4 class="section-heading mb-3  h4 mt-0 text-center">{!! trans('panel.task.descriptions') !!}</h4>
             <div class="row">
                <div class="col-md-12">
-                  <div class="form-group has-default bmd-form-group">
-                     <textarea class="ckeditor form-control" name="descriptions" id="descriptions">{!! old( 'descriptions', $tasks['descriptions']) !!}</textarea>
+                  <div class="form-group has-default ">
+                     <textarea class="form-control" rows="8" cols="30" name="descriptions" id="descriptions">{!! old( 'descriptions', $tasks['descriptions']) !!}</textarea>
                      @if ($errors->has('descriptions'))
                      <div class="error">
                         <p class="text-danger">{{ $errors->first('descriptions') }}</p>
@@ -412,10 +245,17 @@
                   </div>
                </div>
                <div class="col-md-12">
-               <div class="pull-right">
-                  {{ Form::submit('Submit', array('class' => 'btn btn-theme')) }}
+                   <div class="attachment-wrapper text-right">
+                       <!-- Attachment Button -->
+                       <label for="files" class="btn btn-theme" id="attachmentLabel">
+                           📎 Attachment (CSV, Excel, JPEG, PNG, PDF)
+                       </label>
+                       <input type="file" name="files[]" id="files" multiple accept=".csv,.xls,.xlsx,.jpeg,.jpg,.png,.pdf" required>
+
+                       <!-- Submit Button -->
+                       {{ Form::submit('Submit', ['class' => 'btn btn-theme']) }}
+                   </div>
                </div>
-            </div>
             </div>
          </div>
      
@@ -424,6 +264,108 @@
    </div>
 </div>
 </div>
+
+<!-- All modals -->
+   <!-- Edit Department Modal -->
+   <div class="modal fade" id="editDepartmentModal" tabindex="-1">
+      <div class="modal-dialog">
+         <form id="editDepartmentForm">
+            @csrf
+            <input type="hidden" id="editDepartmentId" name="id">
+            <div class="modal-content">
+               <div class="modal-header"><h5 class="modal-title">Edit Department</h5></div>
+               <div class="modal-body">
+                  <input name="name" id="editDepartmentName" class="form-control" required>
+               </div>
+               <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">Update</button>
+               </div>
+            </div>
+         </form>
+      </div>
+   </div>
+
+<!-- task department end -->   
+
+
+<!-- Add Priority Modal -->
+   <div class="modal fade" id="addPriorityModal" tabindex="-1">
+      <div class="modal-dialog">
+         <form id="addPriorityForm">
+            @csrf
+            <div class="modal-content">
+               <div class="modal-header"><h5 class="modal-title">Add Priority</h5></div>
+               <div class="modal-body">
+                  <input name="name" id="priority_name" class="form-control" placeholder="Priority Name" required>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" id="addPriorityBtn" class="btn btn-primary mx-1">Save</button>
+                  <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+               </div>
+            </div>
+         </form>
+      </div>
+   </div>
+
+   <!-- Edit Priority Modal -->
+   <div class="modal fade" id="editPriorityModal" tabindex="-1">
+      <div class="modal-dialog">
+         <form id="editPriorityForm">
+            @csrf
+            <input type="hidden" id="editPriorityId" name="id">
+            <div class="modal-content">
+               <div class="modal-header"><h5 class="modal-title">Edit Priority</h5></div>
+               <div class="modal-body">
+                  <input name="name" id="editPriorityName" class="form-control" required>
+               </div>
+               <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">Update</button>
+               </div>
+            </div>
+         </form>
+      </div>
+   </div>
+
+   <!-- Add Department Modal -->
+   <div class="modal fade" id="addDepartmentModal" tabindex="-1">
+      <div class="modal-dialog">
+         <form id="addDepartmentForm"> 
+            @csrf
+            <div class="modal-content">
+               <div class="modal-header"><h5 class="modal-title">Add Department</h5></div>
+               <div class="modal-body">
+                  <input name="name" id="department_name" class="form-control" placeholder="Department Name" required>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" id="addDepartmentBtn" class="btn btn-primary mx-1">Save</button>
+                  <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+               </div>
+            </div>
+         </form>
+      </div>
+   </div>
+
+   <!-- Add Project Modal  -->
+      <div class="modal fade" id="addProjectModal" tabindex="-1">
+          <div class="modal-dialog">
+              <form id="addProjectForm">
+                  <div class="modal-content">
+                      <div class="modal-header"><h5 class="modal-title">Add Project</h5></div>
+                      <div class="modal-body">
+                          <input name="name" id="project_name" class="form-control" placeholder="Project Name" required>
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" id="addProjectBtn" class="btn btn-primary mx-1">Save</button>
+                          <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                      </div>
+                  </div>
+              </form>
+          </div>
+      </div>
+            
+
+<!-- End All Modals -->
+
 <script src="//cdn.ckeditor.com/4.14.1/standard/ckeditor.js"></script>
 <script src="{{ url('/').'/'.asset('assets/js/jquery.tasks.js') }}"></script>
 
@@ -451,6 +393,7 @@ $.ajaxSetup({
       });
 
       $('#task_department_id').on('select2:select', function (e) {
+         console.log('trigger department');
          const selectedVal = e.params.data.id;
 
          if (selectedVal === '__add__') {
@@ -574,7 +517,7 @@ $.ajaxSetup({
    // radio button js
    
    $(document).ready(function () {
-    $('input[name="type"]').on('change', function () {
+    $('input[name="task_type"]').on('change', function () {
         const selected = $(this).val();
         console.log(selected);
         $('.select-section').hide();
@@ -591,7 +534,7 @@ $.ajaxSetup({
 
    $('#task_project_id').on('select2:select', function (e) {
       const selectedVal = e.params.data.id;
-
+      console.log('trigger project');
       if (selectedVal === '_add_') {
          $(this).val(null).trigger('change');
          $('#addProjectModal').modal('show');
@@ -672,7 +615,7 @@ $.ajaxSetup({
 
    $('#task_priority_id').on('select2:select', function (e) {
       const selectedVal = e.params.data.id;
-
+      console.log('trigger priority');
       if (selectedVal === '__add__') {
          $(this).val(null).trigger('change');
          $('#addPriorityModal').modal('show');
@@ -777,6 +720,15 @@ $.ajaxSetup({
       });
    });
 });
+
+   $('#files').on('change', function () {
+        const fileCount = this.files.length;
+        if (fileCount > 0) {
+            $('#attachmentLabel').text(`📎 ${fileCount} file${fileCount > 1 ? 's' : ''} selected`);
+        } else {
+            $('#attachmentLabel').text('📎 Attachment (CSV, Excel, JPEG, PNG, PDF)');
+        }
+    });
 
 
 

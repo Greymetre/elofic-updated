@@ -14,15 +14,16 @@ use App\Models\User;
 use App\Models\LeadOpportunity;
 use App\Models\LeadContact;
 use App\Models\OpportunitieStatus;
+use Illuminate\Support\Str;
 
 class LeadOpportunitiesController extends Controller
 {
-    
 
-  
+
+
     public function index(Request $request)
     {
-       // abort_if(Gate::denies('lead_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        // abort_if(Gate::denies('lead_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $userids = getUsersReportingToAuth();
         $users = User::whereDoesntHave('roles', function ($query) {
             $query->whereIn('id', config('constants.customer_roles'));
@@ -34,16 +35,17 @@ class LeadOpportunitiesController extends Controller
 
         $lead_contacts = LeadContact::get();
         $opportunity_status = OpportunitieStatus::orderBy('ordering', 'asc')->pluck('status_name', 'id')->toArray();
-        return view('leads-opportunities.index',compact('users','lead_contacts', 'opportunity_status'));
+        return view('leads-opportunities.index', compact('users', 'lead_contacts', 'opportunity_status'));
     }
 
 
-    public function getCardData(Request $request){
+    public function getCardData(Request $request)
+    {
 
         $assigned_to = $request->assigned_to;
-        $all_opportunities = LeadOpportunity::with('lead','assignUser');
-        if($assigned_to){
-            $all_opportunities->where('assigned_to',$assigned_to);
+        $all_opportunities = LeadOpportunity::with('lead', 'assignUser');
+        if ($assigned_to) {
+            $all_opportunities->where('assigned_to', $assigned_to);
         }
         if (!auth()->user()->hasRole('superadmin')) {
             $user_ids = getUsersReportingToAuth();
@@ -59,35 +61,46 @@ class LeadOpportunitiesController extends Controller
             'opportunity_status'
         ))->render();
 
-        $total_annualised_value = ($all_opportunities->sum('amount')??0);
+        $total_annualised_value = ($all_opportunities->sum('amount') ?? 0);
         return response()->json([
             'status' => true,
             'view' => $view,
             'total_annualised_value' => $total_annualised_value,
         ]);
-        
     }
 
-    public function updateCardStatus(Request $request){
+    public function updateCardStatus(Request $request)
+    {
 
-       $card_id = $request->card_id;
-       $new_status = $request->new_status;
-       $lead_opportunity = LeadOpportunity::where(['id'=>$card_id])->first();
-       if($lead_opportunity){
-            $lead_opportunity->update(['status'=>$new_status]);
-            return response()->json(['status'=>true,'message'=>'']);
-       }else{
-         return response()->json(['status'=>false,'message'=>'data not found.']);
-       }
+        $card_id = $request->card_id;
+        $new_status = $request->new_status;
+        $lead_opportunity = LeadOpportunity::where(['id' => $card_id])->first();
+        if ($lead_opportunity) {
+            $oppo_status = OpportunitieStatus::orderBy('ordering', 'desc')->first();
+            if ($new_status == $oppo_status->id) {
+                Lead::where(['id' => $lead_opportunity->lead_id])->update(['conversion_date' => date('Y-m-d')]);
+            }
+            $lead_opportunity->update(['status' => $new_status]);
 
+            $cur_status = OpportunitieStatus::where(['id' => $lead_opportunity->status])->first();
+            $msg = '🎯 Lead move to opportunity ' . $cur_status->status_name .
+                    ': ' . Str::limit($lead_opportunity->lead->company_name, 10, '...') .
+                    ' by ' . Auth::user()->name;
+            SendPushNotification($lead_opportunity->lead->created_by, $msg);
+            StoreLeadNotification($lead_opportunity->id, 'New Opportunity', $msg, $lead_opportunity->lead->created_by, 'opportunity');
+            return response()->json(['status' => true, 'message' => '']);
+        } else {
+            return response()->json(['status' => false, 'message' => 'data not found.']);
+        }
     }
 
-    public function getsingleData(Request $request){
+    public function getsingleData(Request $request)
+    {
         $id = $request->id;
-        $lead_opportunity = LeadOpportunity::where(['id'=>$id])->first();
-        return response()->json(['status'=>true,'message'=>'','data'=>$lead_opportunity]);
+        $lead_opportunity = LeadOpportunity::where(['id' => $id])->first();
+        return response()->json(['status' => true, 'message' => '', 'data' => $lead_opportunity]);
     }
-    
+
 
     /**
      * Store a newly created resource in storage.
@@ -95,38 +108,50 @@ class LeadOpportunitiesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-   public function store(Request $request)
+    public function store(Request $request)
     {
         $rules = [
-            'lead_id'=>'required',
-            'assigned_to'=>'required',
-            'lead_contact_id'=>'required',
-            'amount'=>'required',
+            'lead_id' => 'required',
+            'assigned_to' => 'required',
+            'lead_contact_id' => 'required',
+            'amount' => 'required',
             //'type'=>'required',
-            'estimated_close_date'=>'required',
-            'confidence'=>'required',
-            'note'=>'required',
-            'status'=>'required',
-            
+            'estimated_close_date' => 'required',
+            'confidence' => 'required',
+            'note' => 'required',
+            'status' => 'required',
+
         ];
 
         $request->validate($rules);
-        $created_by = Auth::id(); 
+        $created_by = Auth::id();
         $opportunity_id = $request->opportunity_id;
-        $lead_opportunity = LeadOpportunity::where(['id'=>$opportunity_id])->first();
-        if($lead_opportunity){
-            $lead_opportunity->update(['note'=>$request->note,'created_by'=>$created_by,'assigned_to'=>$request->assigned_to,'lead_contact_id'=>$request->lead_contact_id,'estimated_close_date'=>$request->estimated_close_date,'confidence'=>$request->confidence,'status'=>$request->status, 'amount'=>$request->amount]);
-            $request->session()->flash('message_success',__('Lead Opportunity update successfully.'));
-        }else{
-            $lead_opportunity = LeadOpportunity::create(['note'=>$request->note,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'assigned_to'=>$request->assigned_to,'lead_contact_id'=>$request->lead_contact_id,'amount'=>$request->amount,'type'=>$request->type,'estimated_close_date'=>$request->estimated_close_date,'confidence'=>$request->confidence,'status'=>$request->status]);
-            $request->session()->flash('message_success',__('Lead Opportunity successfully.'));
+        $lead_opportunity = LeadOpportunity::where(['id' => $opportunity_id])->first();
+        if ($lead_opportunity) {
+            if ($lead_opportunity->status != $request->status) {
+                $oppo_status = OpportunitieStatus::orderBy('ordering', 'desc')->first();
+                if ($request->status == $oppo_status->id) {
+                    Lead::where(['id' => $lead_opportunity->lead_id])->update(['conversion_date' => date('Y-m-d')]);
+                }
+            }
+            $lead_opportunity->update(['note' => $request->note, 'created_by' => $created_by, 'assigned_to' => $request->assigned_to, 'lead_contact_id' => $request->lead_contact_id, 'estimated_close_date' => $request->estimated_close_date, 'confidence' => $request->confidence, 'status' => $request->status, 'amount' => $request->amount]);
+            $request->session()->flash('message_success', __('Lead Opportunity update successfully.'));
+        } else {
+            $lead_opportunity = LeadOpportunity::create(['note' => $request->note, 'lead_id' => $request->lead_id, 'created_by' => $created_by, 'assigned_to' => $request->assigned_to, 'lead_contact_id' => $request->lead_contact_id, 'amount' => $request->amount, 'type' => $request->type, 'estimated_close_date' => $request->estimated_close_date, 'confidence' => $request->confidence, 'status' => $request->status]);
+            $request->session()->flash('message_success', __('Lead Opportunity successfully.'));
         }
-       
+        $cur_status = OpportunitieStatus::where(['id' => $lead_opportunity->status])->first();
+        $msg = '🎯 Lead move to opportunity ' . $cur_status->status_name .
+                ': ' . Str::limit($lead_opportunity->lead->company_name, 10, '...') .
+                ' by ' . Auth::user()->name;
+        SendPushNotification($lead_opportunity->lead->created_by, $msg);
+        StoreLeadNotification($lead_opportunity->id, 'New Opportunity', $msg, $lead_opportunity->lead->created_by, 'opportunity');
+
 
         return redirect()->back();
     }
 
-    
+
 
 
     /**
@@ -147,7 +172,7 @@ class LeadOpportunitiesController extends Controller
     //         'estimated_close_date'=>'required',
     //         'confidence'=>'required',
     //         'note'=>'required',
-            
+
     //     ];
 
     //     $request->validate($rules);
@@ -161,7 +186,7 @@ class LeadOpportunitiesController extends Controller
     //          $request->session()->flash('message_info',__('something went wrong.'));
 
     //     }
-       
+
     //     return redirect()->back();
     // }
 
@@ -174,7 +199,7 @@ class LeadOpportunitiesController extends Controller
     public function destroy(Request $request, LeadOpportunity $leadOpportunity)
     {
         $leadOpportunity->delete();
-        $request->session()->flash('message_success',__('Lead Opportunity deleted successfully.'));
+        $request->session()->flash('message_success', __('Lead Opportunity deleted successfully.'));
         return redirect()->back();
     }
 }

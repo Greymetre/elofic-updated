@@ -137,28 +137,32 @@ $(document).ready(function () {
         date: true,
         dateFormat: true
       },
-      reminder:
-      {
-        required:true,
-        date: true,
-        dateFormat: true
-      },
-      user_id:
-      {
-        required:true,
-        number:true,
-      },
+      // reminder:
+      // {
+      //   required:true,
+      //   date: true,
+      //   dateFormat: true
+      // },
+      // user_id:
+      // {
+      //   required:true,
+      //   number:true,
+      // },
       title:
       {
-        required:true,
-        minlength:3,
-        maxlength: 250,
+        // required:true,
+        // minlength:3,
+        // maxlength: 250,
       },
       descriptions:
       {
-        required:true,
-        maxlength: 1250,
+        // required:true,
+        // maxlength: 1250,
       },
+      due_datetime:
+      {
+        required:true
+      }
     },
     highlight: function(element) {
       $(element).closest('.error').css("display", "none");

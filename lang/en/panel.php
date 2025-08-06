@@ -1537,6 +1537,11 @@ return [
         'project_name'     =>  'Project Name',
         'assigned_to'     =>  'Assigned To',
         'priority'     =>  'Priority',
+        'assigned_date' => 'Assigned Date & Time',
+        'assigned_by' => 'Assigned By',
+        'due_datetime' => 'Due Date & Time',
+        'close_datetime' => 'Close Date & Time',
+        'start_datetime' => 'Open Date & Time',
 
     ],
     

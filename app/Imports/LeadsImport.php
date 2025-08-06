@@ -35,7 +35,7 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            
+
             if (isset($row['lead_generation_date']) && is_numeric($row['lead_generation_date'])) {
                 $excelDate = $row['lead_generation_date'] - 25569; // Adjust for Excel's epoch
                 $unixTimestamp = strtotime('+' . $excelDate . ' days', strtotime('1970-01-01'));
@@ -104,6 +104,14 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
                         'created_by' => Auth::id()
                     ]);
                 }
+            }
+        }
+        $assignees = $rows->pluck('assignee')->countBy()->toArray();
+        foreach ($assignees as $assignee => $count) {
+            $user = User::where('name', $assignee)->first();
+            if (!empty($user)) {
+                SendPushNotification($user->id, '🟢 You have been assigned ' . $count . ' new leads.');
+                StoreLeadNotification(null, 'Assigned Lead', '🟢 You have been assigned ' . $count . ' new leads.', $user->id);
             }
         }
     }

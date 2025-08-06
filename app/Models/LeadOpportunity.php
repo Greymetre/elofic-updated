@@ -27,6 +27,18 @@ class LeadOpportunity extends Model
         return $this->belongsTo(Lead::class);
     }
 
+    public function leadContact(){
+        return $this->belongsTo(LeadContact::class, 'lead_contact_id');
+    }
+
+    public function createdby(){
+        return $this->belongsTo(User::class,'created_by');
+    }
+
+    public function status_is(){
+        return $this->belongsTo(OpportunitieStatus::class,'status');
+    }
+
     public function assignUser(){
         return $this->belongsTo(User::class,'assigned_to');
     }

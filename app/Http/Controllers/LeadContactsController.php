@@ -130,16 +130,18 @@ class LeadContactsController extends Controller
         ];
 
         $request->validate($rules);
-        $data = $request->all();
+        
         $created_by = Auth::id(); 
         $contact_id = $request->contact_id;
         $lead_contact = LeadContact::where(['id'=>$contact_id])->first();
         if($lead_contact){
             $lead_contact->update(['name'=>$request->name,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'title'=>$request->title,'phone_number'=>$request->phone_number,'email'=>$request->contact_email,'url'=>$request->url]);
             $request->session()->flash('message_success',__('Lead contact Updated successfully.'));
+            // SendPushNotification($lead_contact->created_by, 'Lead contact Updated 🟢');
         }else{
             $LeadContact = LeadContact::create(['name'=>$request->name,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'title'=>$request->title,'phone_number'=>$request->phone_number,'email'=>$request->contact_email,'url'=>$request->url]);
             $request->session()->flash('message_success',__('Lead contact Added successfully.'));
+            // SendPushNotification($LeadContact->created_by, 'Lead contact Added ✅');
         }
         
 

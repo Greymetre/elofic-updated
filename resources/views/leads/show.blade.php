@@ -883,7 +883,7 @@ action="{{ route('lead-tasks.store') }}" class="form-horizontal taskform" id="fr
         <div class="col-md-12 form-group">
             <label for="status">Status<span style="color:red">*</span></label>
             <select name="status" id="status" class="select2" required>
-                <option value="">Select Status</option>
+                <option value="pending" selected>Pending</option>
                 <option value="open">Open</option>
                 <option value="in_progress">In Progress</option>
                 <option value="completed">Completed</option>
@@ -1982,6 +1982,7 @@ amount: {
         $('#frmLeadTaskCreate :input:not(:button, [type="hidden"])').val('');
         $('#frmLeadTaskCreate #assigned_to').change();
         $('#frmLeadTaskCreate #priority').change();
+        $('#frmLeadTaskCreate #status').val('pending');
         $('#frmLeadTaskCreate #status').change();
         $('#frmLeadTaskCreate').show();
     }

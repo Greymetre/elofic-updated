@@ -25,7 +25,10 @@ use App\Models\OrderDetails;
 use App\Models\Payment;
 use App\Models\Pincode;
 use App\Models\ComplaintTimeline;
+use App\Models\LeadNotification;
 use App\Models\OpeningStock;
+use Google\Auth\Credentials\ServiceAccountCredentials;
+use GuzzleHttp\Client;
 use Illuminate\Support\Str;
 
 if (! function_exists('sendmessage')) {
@@ -86,6 +89,7 @@ if (! function_exists('sendNotification')) {
             if ($response === FALSE) {
                 die('FCM Send Error: ' . curl_error($ch));
             }
+            dd($response);
             curl_close($ch);
             Notification::create([
                 'type' => isset($data['title']) ? $data['title'] : '',
@@ -1170,5 +1174,60 @@ if (!function_exists('isCustomerUser')) {
         $customerRoleIds = config('constants.customer_roles');
 
         return $user->roles->pluck('id')->intersect($customerRoleIds)->isNotEmpty();
+    }
+}
+
+if (!function_exists('SendPushNotification')) {
+    function SendPushNotification($user_id, $message)
+    {
+        $user = User::find($user_id);
+
+        $fcmToken = $user->notification_id;
+        if (!empty($fcmToken)) {
+            $title = 'FieldKonnect';
+            $credentialsPath = storage_path('app/fieldkonnectsilver-firebase-adminsdk-q2cko-dda1479ca0.json');
+            $scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
+            $projectId = 'fieldkonnectsilver';
+            $deviceToken = $fcmToken;
+            $client = new Client();
+            $credentials = new ServiceAccountCredentials($scopes, $credentialsPath);
+            $credentials->fetchAuthToken();
+            $token = $credentials->getLastReceivedToken()['access_token'];
+            $message = [
+                'message' => [
+                    'token' => $deviceToken,
+                    'notification' => [
+                        'title' => $title,
+                        'body'  => $message,
+                    ],
+                ],
+            ];
+            $response = $client->post("https://fcm.googleapis.com/v1/projects/$projectId/messages:send", [
+                'headers' => [
+                    'Authorization' => "Bearer $token",
+                    'Content-Type'  => 'application/json',
+                ],
+                'json'    => $message,
+            ]);
+            if ($response->getStatusCode() == 200) {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+}
+
+if (!function_exists('StoreLeadNotification')) {
+    function StoreLeadNotification($lead_id, $title, $body, $user_id, $model='lead')
+    {
+        LeadNotification::create([
+            'model_id' => $lead_id,
+            'title' => $title,
+            'body' => $body,
+            'user_id' => $user_id,
+            'model' => $model
+        ]);
+        return true;
     }
 }

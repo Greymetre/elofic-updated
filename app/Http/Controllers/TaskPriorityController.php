@@ -17,7 +17,7 @@ use App\Exports\DepartmentExport;
 
 
 
-class TaskDepartmentController extends Controller
+class TaskPriorityController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -72,7 +72,7 @@ class TaskDepartmentController extends Controller
             'active' => 'Y'
         ]);
 
-        return response()->json(['status' => true, 'message' => 'Department added successfully!','data'=>$taskPriority]);
+        return response()->json(['status' => true, 'message' => 'Priority added successfully!','data'=>$taskPriority]);
     }
 
     /**

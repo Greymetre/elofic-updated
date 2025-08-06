@@ -654,6 +654,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('tasks-done', [TasksController::class, 'done'])->name('tasks.done');
     Route::any('tasks-reopen', [TasksController::class, 'reopen'])->name('tasks.reopen');
     Route::any('tasksInfo', [TasksController::class, 'tasksInfo'])->name('tasks.info');
+    Route::delete('/media/{media}', [TasksController::class, 'deleteMedia'])->name('media.delete');
+    Route::get('/tasks/{token}/show', [TasksController::class, 'show'])->name('tasks.show');
+
+
     // Tasks Departments
     Route::resource('task-departments', TaskDepartmentController::class);
     // Tasks Projects

@@ -275,7 +275,7 @@
             <div class="btn-group kim" style="width: 120px;">
               <select name="status" id="status" class="form-control selectpicker">
                 <option value="">All</option>
-                <option value="0">Pending</option>
+                <!-- <option value="0">Pending</option> -->
                 @if($status->count() > 0)
                 @foreach($status as $stat)
                 <option value="{{$stat['id']}}"> {{$stat['display_name']}} </option>
@@ -284,6 +284,10 @@
               </select>
             </div>
             <span class="">
+            <button class="btn btn-info mb-3 float-right" type="button" data-toggle="collapse" data-target="#filterSection" aria-expanded="false" aria-controls="filterSection">
+              <i class="material-icons">tune</i> Filters
+              </button>
+              <div class="collapse" id="filterSection">
               <div class="pream_entry">
 
                 <div class="search">
@@ -343,6 +347,7 @@
                   </form>
                   @endif
                 </div>
+              </div>
               </div>
             </span>
           </h4>
@@ -681,7 +686,8 @@
       jQuery('#frmFilter [name="datetime"]').on('apply.daterangepicker', function(ev, picker) {
         jQuery(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
         var this_val = jQuery(this).val();
-        var export_button_url = "{{route('leads-exportLeads')}}?datetime=" + this_val;
+        var assign_to = jQuery('#user_id_search').val();
+        var export_button_url = "{{route('leads-exportLeads')}}?datetime=" + this_val + "&assign_to=" + assign_to;
         $('#export_button').attr('href', export_button_url);
         //console.log(jQuery(this).val());
         getLeads();
@@ -806,6 +812,10 @@
       getLeads();
     });
     $('#user_id_search').on('change', function() {
+      var this_val = jQuery('#frmFilter [name="datetime"]').val();
+      var assign_to = jQuery(this).val();
+      var export_button_url = "{{route('leads-exportLeads')}}?datetime=" + this_val + "&assign_to=" + assign_to;
+      $('#export_button').attr('href', export_button_url);
       getLeads();
     });
     $('#status').on('change', function() {
