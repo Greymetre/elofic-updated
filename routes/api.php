@@ -332,6 +332,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('getLeadTasks', [LeadController::class, 'getLeadTasks']);
     Route::post('changeTaskStatus', [LeadController::class, 'change_task_status']);
     Route::get('getAllLeadNotifications', [LeadController::class, 'getAllLeadNotifications']);
+    Route::post('readNotification', [LeadController::class, 'readNotification']);
 
     Route::post('leadSubmitCheckin', [LeadController::class, 'submitCheckin']);
     Route::post('leadSubmitCheckout', [LeadController::class, 'submitCheckout']);

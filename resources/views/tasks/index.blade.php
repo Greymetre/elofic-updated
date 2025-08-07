@@ -233,24 +233,27 @@ $(document).ready(function() {
       $('#status').change(function() {
         oTable.draw();
       });
-    $(document).on('click', '.show', function(){
-      var base_url =$('.baseurl').data('baseurl');
-      var id = $(this).attr('value');
-      $.ajax({
-        url: base_url + '/tasks/'+id,
-       dataType:"json",
-       success:function(data)
-       {
-        $('.task_type').html(data.task_type);
-        $('.priority').html(data.priority_name);
-        $('.title').html(data.title);
-        $('.descriptions').html(data.descriptions);
-        $('.datetime').html(data.datetime);
-        $('.due_time').html(data.due_date +' '+data.due_day+' '+data.due_time);
-        $('#showTaskData').modal('show');
-       }
-      })
-     });
+      $('#user_id').change(function() {
+        oTable.draw();
+      });
+    // $(document).on('click', '.show', function(){
+    //   var base_url =$('.baseurl').data('baseurl');
+    //   var id = $(this).attr('value');
+    //   $.ajax({
+    //     url: base_url + '/tasks/'+id,
+    //    dataType:"json",
+    //    success:function(data)
+    //    {
+    //     $('.task_type').html(data.task_type);
+    //     $('.priority').html(data.priority_name);
+    //     $('.title').html(data.title);
+    //     $('.descriptions').html(data.descriptions);
+    //     $('.datetime').html(data.datetime);
+    //     $('.due_time').html(data.due_date +' '+data.due_day+' '+data.due_time);
+    //     $('#showTaskData').modal('show');
+    //    }
+    //   })
+    //  });
 });
 </script>
 </x-app-layout>

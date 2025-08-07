@@ -921,4 +921,28 @@ class LeadController extends Controller
             ], $this->internalError);
         }
     }
+
+    public function readNotification(Request $request)
+    {
+        try {
+            $validate = validator($request->all(), [
+                'id' => 'required|exists:lead_notifications,id',
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json(['status' => 'error', 'message' => $validate->errors()], 400);
+            }
+            $user = $request->user();
+            LeadNotification::where(['user_id' => $user->id, 'id' => $request->id])->update(['read' => 1]);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Notification marked as read successfully'
+            ], $this->successStatus);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], $this->internalError);
+        }
+    }
 }

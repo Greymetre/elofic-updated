@@ -168,7 +168,10 @@ class TasksDataTable extends DataTable
     // }
     public function query(Tasks $model,Request $request)
     {
-        dd($request->all());
+        $status = $request->status??null;
+        $user_id = $request->user_id??null;
+        $start_date = $request->start_date??null;
+        $end_date = $request->end_date??null;
         $assignedTaskIds = TaskAssignment::where('user_id', auth()->user()->id)->pluck('task_id');
         $userids = getUsersReportingToAuth();
 
@@ -189,6 +192,27 @@ class TasksDataTable extends DataTable
         if (auth()->user()->roles->pluck('name')->first() !== 'superadmin') {
             $finalQuery->whereIn('id', $assignedTaskIds);
         }
+
+        if($status){
+            $finalQuery->where('task_status',$status);
+        }
+        if($user_id){
+            $assignedTaskIds = TaskAssignment::where('user_id',$user_id)->pluck('task_id');
+            $finalQuery->whereIn('id',$assignedTaskIds);
+        }
+
+        if ($start_date && $end_date) {
+            $assignedTaskNewIds = TaskAssignment::whereBetween('created_at', [
+                $start_date . " 00:00:00",
+                $end_date . " 23:59:59"
+            ])->pluck('task_id')->unique();
+
+            $finalQuery->whereIn('id', $assignedTaskNewIds);
+            
+        }
+
+
+
 
         return $finalQuery->newQuery();
     }

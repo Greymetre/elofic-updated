@@ -169,7 +169,7 @@ class TasksExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 ]);
 
                 // 3. Format date columns
-                $dateColumns = ['A', 'J', 'K', 'L', 'M', 'N'];
+                $dateColumns = ['A', 'J', 'K', 'L', 'M', 'N','O'];
                 foreach ($dateColumns as $col) {
                     $sheet->getStyle("{$col}2:{$col}{$highestRow}")
                         ->getNumberFormat()
