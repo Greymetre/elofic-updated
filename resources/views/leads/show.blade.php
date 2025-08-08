@@ -1060,16 +1060,20 @@ action="{{ route('lead-contacts.store') }}" class="form-horizontal contact-task-
         <div class="contac-link">
 
 <!-- <p><img src="{{ url('/').'/'.asset('assets/img/whatsup.svg') }}"></p> -->
-@if($lead_contact->email)
-<p><img src="{{ url('/').'/'.asset('assets/img/mail.svg') }}" alt="Mail icon" 
-    title="{{$lead_contact->email}}" 
-    data-toggle="tooltip" ></p>
+    @if($lead_contact->email)
+        <p>
+            <a href="mailto:{{ $lead_contacts[0]->email }}">
+                <img src="{{ url('/').'/'.asset('assets/img/mail.svg') }}" alt="Mail icon" title="{{$lead_contact->email}}" data-toggle="tooltip" >
+            </a>
+        </p>
     @endif
     @if($lead_contact->phone_number)
-    <p><img src="{{ url('/').'/'.asset('assets/img/phone.svg') }}" alt="Mail icon" 
-        title="{{$lead_contact->phone_number}}" 
-        data-toggle="tooltip"></p>
-        @endif
+        <p>
+            <a href="tel:{{ $lead_contacts[0]->phone_number }}">
+                <img src="{{ url('/').'/'.asset('assets/img/phone.svg') }}" alt="Mail icon" title="{{$lead_contact->phone_number}}" data-toggle="tooltip">
+            </a>
+        </p>
+    @endif
     </div>
     <div class="editdelte d-flex flex-row ">
 

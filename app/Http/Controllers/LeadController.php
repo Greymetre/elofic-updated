@@ -58,7 +58,8 @@ class LeadController extends Controller
                 }
             })
             ->select('id', 'pincode')->orderBy('id', 'desc')->get();
-        return view('leads.index', compact('users', 'status', 'lead_sources', 'pincodes'));
+        $states = State::where('active', 'Y')->select('id', 'state_name')->get();
+        return view('leads.index', compact('users', 'status', 'lead_sources', 'pincodes', 'states'));
     }
 
     public function getLeads(Request $request)
@@ -110,6 +111,23 @@ class LeadController extends Controller
             $status = $request->input('status');
             $leads->where('status', $status);
         }
+
+        if ($request->input('state_id') != "") {
+            $leads->whereHas('address', function ($query) use ($request) {
+                $query->where('state_id', $request->input('state_id'));
+            });
+            if($request->input('district_id') != "") {
+                $leads->whereHas('address', function ($query) use ($request) {
+                    $query->where('district_id', $request->input('district_id'));
+                });
+                if($request->input('city_id') != "") {
+                    $leads->whereHas('address', function ($query) use ($request) {
+                        $query->where('city_id', $request->input('city_id'));
+                    });
+                }
+            }
+        }
+
         // dd(auth()->user()->hasRole('superadmin'));
         if (!auth()->user()->hasRole('superadmin')) {
             $user_ids = getUsersReportingToAuth();
@@ -720,8 +738,9 @@ class LeadController extends Controller
         })->select('id', 'name')->orderBy('id')->get();
         $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
         $lead_sources = config('constants.LEAD_SOURCES');
-        $pincodes = Pincode::where('active', '=', 'Y')->select('id', 'pincode')->orderBy('id', 'desc')->get();
-        return view('leads.create', compact('lead', 'users', 'status', 'lead_sources', 'pincodes'));
+        // $pincodes = Pincode::where('active', '=', 'Y')->select('id', 'pincode')->orderBy('id', 'desc')->get();
+        $states = State::where('active', 'Y')->select('id', 'state_name')->get();
+        return view('leads.create', compact('lead', 'users', 'status', 'lead_sources', 'states'));
     }
 
     /**

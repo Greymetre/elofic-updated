@@ -264,6 +264,52 @@
       width: 170% !important;
     }
   </style>
+
+  <!-- <style>
+    .badge-primary {
+      background: #007bff;
+      font-size: 14px;
+      padding: 5px 10px;
+      border-radius: 12px;
+    }
+
+    .selectpicker, .select2, .form-control {
+      border-radius: 6px !important;
+    }
+
+    .filter-box {
+      background: #f9f9f9;
+      border: 1px solid #e5e5e5;
+    }
+
+    .search_inner {
+      display: flex;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .search_inner button {
+      background: transparent;
+      border: none;
+      padding: 6px 8px;
+    }
+    .search_inner input {
+      border: none;
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+
+    .btn i {
+      font-size: 18px;
+    }
+
+    .gap-2 {
+      gap: 0.5rem;
+    }
+
+  </style> -->
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -271,6 +317,116 @@
           <!-- <div class="card-icon">
              <i class="material-icons">perm_identity</i> 
           </div> -->
+          {{--<div class="card p-3 shadow-sm">
+            <!-- Header Row -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <h4 class="mb-0 mr-3 text-dark">Leads 
+                  <span class="badge badge-primary brig ml-2">123</span>
+                </h4>
+                <select name="status" id="status" class="form-control form-control-sm selectpicker">
+                  <option value="">All</option>
+                  @if($status->count() > 0)
+                    @foreach($status as $stat)
+                      <option value="{{$stat['id']}}">{{$stat['display_name']}}</option>
+                    @endforeach
+                  @endif
+                </select>
+              </div>
+
+              <button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#filterSection" aria-expanded="false" aria-controls="filterSection">
+                <i class="material-icons mr-1">tune</i> Filters
+              </button>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="collapse" id="filterSection">
+              <div class="filter-box p-3 rounded">
+                <!-- Search -->
+                <div class="search mb-3">
+                  <div class="search_inner">
+                    <button type="button"><img src="https://expertfromindia.in/bediya/public/assets/img/search.svg"></button>
+                    <input type="search" class="searchbox" id="search_lead" placeholder="Search Lead">
+                  </div>
+                </div>
+
+                <!-- Dropdown Filters -->
+                <div class="row mb-3">
+                  <div class="col-md-3 mb-2">
+                    <select name="user_id_search" id="user_id_search" class="form-control select2">
+                      <option value="">Assign To</option>
+                      @isset($users)
+                        @foreach($users as $user)
+                          <option value="{!! $user['id'] !!}">{!! $user['name'] !!}</option>
+                        @endforeach
+                      @endisset
+                    </select>
+                  </div>
+                  <div class="col-md-3 mb-2">
+                  <select class="form-control select2 state" name="state_id" id="state_id" onchange="getDistrictList()" style="width: 100%;">
+                      @if(isset($address) && $address->state_id)
+                      <option value="{!!  $address->state_id !!}">{!! $address->statename->state_name??'' !!}</option>
+                      @else
+                      <option value="">Select {!! trans('panel.global.state') !!}</option>
+                      @if($states && count($states) > 0)
+                      @foreach($states as $state)
+                      <option value="{!! $state->id !!}">{!! $state->state_name !!}</option>
+                      @endforeach
+                      @endif
+                      @endif
+                    </select>
+                  </div>
+                  <div class="col-md-3 mb-2">
+                    <select class="form-control select2 district" name="district_id" id="district_id" onchange="getCityList()" style="width: 100%;">
+                      @if(isset($lead) && $lead->address && $lead->address->district_id)
+                      <option value="{!!  $lead->address->district_id !!}" selected>{!! $lead->address->districtname->district_name ?? '' !!}</option>
+                      @else
+                      <option value="">Select {!! trans('panel.global.district') !!}</option>
+                      @endif
+                    </select>
+                  </div>
+                  <div class="col-md-3 mb-2">
+                    <select class="form-control select2 city" name="city_id" id="city_id" style="width: 100%;">
+                      @if(isset($lead) && $lead->address && $lead->address->city_id)
+                      <option value="{!!  $lead->address->city_id !!}" selected>{!! $lead->address->cityname->city_name??'' !!}</option>
+                      @else
+                      <option value="">Select {!! trans('panel.global.city') !!}</option>
+                      @endif
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap gap-2">
+                  <a href="{{route('leads.create')}}" class="btn btn-primary btn-sm">
+                    <i class="material-icons mr-1">add_circle</i> Add Lead
+                  </a>
+                  <a href="{{route('leads-exportLeads')}}" class="btn btn-success btn-sm" id="export_button">
+                    <i class="material-icons mr-1">cloud_download</i> Export
+                  </a>
+
+                  @if(auth()->user()->can(['lead_template']))
+                    <a href="{{ URL::to('lead-template') }}" class="btn btn-secondary btn-sm" title="Template Leads">
+                      <i class="material-icons">text_snippet</i>
+                    </a>
+                  @endif
+
+                  @if(auth()->user()->can(['lead_upload']))
+                    <form action="{{ URL::to('lead-upload') }}" method="post" enctype="multipart/form-data" class="d-flex align-items-center">
+                      {{ csrf_field() }}
+                      <label class="btn btn-outline-primary btn-sm m-0">
+                        <i class="material-icons">attach_file</i> Upload
+                        <input type="file" name="import_file" hidden required accept=".xls,.xlsx" />
+                      </label>
+                      <button class="btn btn-primary btn-sm ml-2" title="Upload Leads">
+                        <i class="material-icons">cloud_upload</i>
+                      </button>
+                    </form>
+                  @endif
+                </div>
+              </div>
+            </div>
+          </div>--}}
           <h4 class="card-title ">Leads<span class="brig ml-2">123</span><br>
             <div class="btn-group kim" style="width: 120px;">
               <select name="status" id="status" class="form-control selectpicker">
@@ -288,14 +444,7 @@
               <i class="material-icons">tune</i> Filters
               </button>
               <div class="collapse" id="filterSection">
-              <div class="pream_entry">
-
-                <div class="search">
-                  <div class="search_inner">
-                    <button type="button"> <img src="https://expertfromindia.in/bediya/public/assets/img/search.svg"></button>
-                    <input type="search" class="searchbox" id="search_lead" placeholder="Search Lead">
-                  </div>
-                </div>
+                <div class="d-flex" style="justify-content: space-between;">
                 <div>
                   <select name="user_id_search" id="user_id_search" class="form-control select2">
                     <option value="">Assign To</option>
@@ -306,7 +455,43 @@
                     @endif
                   </select>
                 </div>
+                <div>
+                  <select class="form-control select2 " name="state_id" id="state_id" onchange="getDistrictList()" style="width: 100%;">
+                      <option value="">Select {!! trans('panel.global.state') !!}</option>
+                      @if($states && count($states) > 0)
+                      @foreach($states as $state)
+                      <option value="{!! $state->id !!}" {{ old('state_id', isset($lead) && $lead->address ? $lead->address->state_id : '') == $state->id ? 'selected' : '' }}>{!! $state->state_name !!}</option>
+                      @endforeach
+                      @endif
+                  </select>
+                </div>
+                <div>
+                  <select class="form-control select2 district" name="district_id" id="district_id" onchange="getCityList()" style="width: 100%;">
+                      @if(isset($lead) && $lead->address && $lead->address->district_id)
+                      <option value="{!!  $lead->address->district_id !!}" selected>{!! $lead->address->districtname->district_name ?? '' !!}</option>
+                      @else
+                      <option value="">Select {!! trans('panel.global.district') !!}</option>
+                      @endif
+                    </select>
+                </div>
+                <div>
+                  <select class="form-control select2 city" name="city_id" id="city_id" onchange="getPincodeList()" style="width: 100%;">
+                      @if(isset($lead) && $lead->address && $lead->address->city_id)
+                      <option value="{!!  $lead->address->city_id !!}" selected>{!! $lead->address->cityname->city_name??'' !!}</option>
+                      @else
+                      <option value="">Select {!! trans('panel.global.city') !!}</option>
+                      @endif
+                    </select>
+                </div>
+                </div>
+              <div class="pream_entry">
 
+                <div class="search">
+                  <div class="search_inner">
+                    <button type="button"> <img src="https://expertfromindia.in/bediya/public/assets/img/search.svg"></button>
+                    <input type="search" class="searchbox" id="search_lead" placeholder="Search Lead">
+                  </div>
+                </div>
 
                 <div class="both_btn d-flex">
                 <a href="{{route('leads.create')}}"><button type="button" class="btn btn-primary btn-sm btn-icon-split float-right">
@@ -351,6 +536,7 @@
               </div>
             </span>
           </h4>
+
         </div>
         <div class="card-body">
           @if(count($errors) > 0)
@@ -725,6 +911,9 @@
       var datetime = jQuery('#frmFilter [name=datetime]').val();
       var search = jQuery('#search_lead').val();
       var assign_to = jQuery('#user_id_search').val();
+      var state_id = jQuery('#state_id').val();
+      var district_id = jQuery('#district_id').val();
+      var city_id = jQuery('#city_id').val();
       var status = jQuery('#status').val();
       var table = jQuery('#getLeads').DataTable({
         processing: false,
@@ -737,7 +926,10 @@
             datetime: datetime,
             search: jQuery('#search_lead').val(),
             status: status,
-            assign_to: assign_to
+            assign_to: assign_to,
+            state_id: state_id,
+            district_id: district_id,
+            city_id: city_id
           }
         },
         columns: [{
@@ -818,6 +1010,15 @@
       $('#export_button').attr('href', export_button_url);
       getLeads();
     });
+    $('#state_id').on('change', function() {
+      getLeads();
+    })
+    $('#district_id').on('change', function() {
+      getLeads();
+    })
+    $('#city_id').on('change', function() {
+      getLeads();
+    })
     $('#status').on('change', function() {
       getLeads();
     });

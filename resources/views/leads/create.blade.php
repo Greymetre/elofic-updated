@@ -6,7 +6,7 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title ">ADD NEW LEAD
+          <h4 class="card-title ">{{isset($lead) ? 'UPDATE' : 'ADD'}} NEW LEAD
             <span class="pull-right">
               <div class="btn-group">
                 @if(auth()->user()->can(['customer_access']))
@@ -97,24 +97,20 @@
                 {{-- Pin / City --}}
                 <div class="form-row">
                   <div class="form-group col-3 mb-2">
-                    <select class="form-control select2 state" name="state_id" id="state_id" onchange="getDistrictList()" style="width: 100%;">
-                      @if(isset($address) && $address->state_id)
-                      <option value="{!!  $address->state_id !!}">{!! $address->statename->state_name??'' !!}</option>
-                      @else
+                    <select class="form-control select2 " name="state_id" id="state_id" onchange="getDistrictList()" style="width: 100%;">
                       <option value="">Select {!! trans('panel.global.state') !!}</option>
                       @if($states && count($states) > 0)
                       @foreach($states as $state)
-                      <option value="{!! $state->id !!}">{!! $state->state_name !!}</option>
+                      <option value="{!! $state->id !!}" {{ old('state_id', isset($lead) && $lead->address ? $lead->address->state_id : '') == $state->id ? 'selected' : '' }}>{!! $state->state_name !!}</option>
                       @endforeach
-                      @endif
                       @endif
                     </select>
                     @error('state_alt') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
                   <div class="form-group col-3 mb-2">
                     <select class="form-control select2 district" name="district_id" id="district_id" onchange="getCityList()" style="width: 100%;">
-                      @if(isset($address) && $address->district_id)
-                      <option value="{!!  $address->district_id !!}">{!! $address->cityname->city_name??'' !!}</option>
+                      @if(isset($lead) && $lead->address && $lead->address->district_id)
+                      <option value="{!!  $lead->address->district_id !!}" selected>{!! $lead->address->districtname->district_name ?? '' !!}</option>
                       @else
                       <option value="">Select {!! trans('panel.global.district') !!}</option>
                       @endif
@@ -123,8 +119,8 @@
                   </div>
                   <div class="form-group col-3 mb-2">
                     <select class="form-control select2 city" name="city_id" id="city_id" onchange="getPincodeList()" style="width: 100%;">
-                      @if(isset($address) && $address->city_id)
-                      <option value="{!!  $address->city_id !!}">{!! $address->cityname->city_name??'' !!}</option>
+                      @if(isset($lead) && $lead->address && $lead->address->city_id)
+                      <option value="{!!  $lead->address->city_id !!}" selected>{!! $lead->address->cityname->city_name??'' !!}</option>
                       @else
                       <option value="">Select {!! trans('panel.global.city') !!}</option>
                       @endif
@@ -133,6 +129,9 @@
                   </div>
                   <div class="form-group col-3 mb-2">
                   <select class="form-control pincode select2" name="pincode_id" id="pincode_id" onchange="getAddressData()" style="width: 100%;">
+                    @if(isset($lead) && $lead->address && $lead->address->pincode_id)
+                    <option value="{!!  $lead->address->pincode_id !!}" selected>{!! $lead->address->pincodename->pincode !!}</option>
+                    @endif
                     <option value="">Select {!! trans('panel.global.pincode') !!}</option>
                   </select>
                   @error('pin_code') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
