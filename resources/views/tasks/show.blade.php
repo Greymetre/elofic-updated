@@ -228,7 +228,7 @@
                                           @foreach($users as $user)
                                               <option value="{{ $user['id'] }}"
                                                  @if(collect(old('assigned_to', $assignedUserIds ?? []))->contains($user['id'])) selected @endif>
-                                                 {{ $user['id'] . ' ' . $user['name'] }}
+                                                 {{ $user['name'] }}
                                              </option>
 
                                           @endforeach

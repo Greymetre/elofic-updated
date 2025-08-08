@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Address;
 use App\Models\LeadCheckIn;
 use App\Models\LeadContact;
+use App\Models\LeadLog;
 use App\Models\LeadNote;
 use App\Models\LeadNotification;
 use App\Models\LeadOpportunity;
@@ -72,11 +73,11 @@ class LeadController extends Controller
             $listQuery->whereBetween(DB::raw('DATE(created_at)'), [$request->start_date, $request->end_date]);
         }
 
-        if($request->filled('user_id')) {
+        if ($request->filled('user_id')) {
             $listQuery->where('assign_to', $request->user_id);
         }
 
-        if($request->filled('lead_source')) {
+        if ($request->filled('lead_source')) {
             $listQuery->where('lead_source', $request->lead_source);
         }
 
@@ -140,11 +141,14 @@ class LeadController extends Controller
             ];
         }
 
+        $notification_count = LeadNotification::where(['user_id' => $user->id, 'read' => 0])->count();
+
         return response()->json([
             'status'  => 'success',
             'message' => 'Data retrieved successfully.',
             'data'    => $leads,
             'counts'  => $counts,
+            'notification_count' => (string)$notification_count
         ], 200);
     }
 
@@ -211,6 +215,17 @@ class LeadController extends Controller
         $user = $request->user();
         if (isset($request->lead_id) && !empty($request->lead_id)) {
             $lead = Lead::find($request->lead_id);
+            $old_status = Status::where('id', $lead->status)->first();
+            $new_status = Status::where('id', $request->status)->first();
+            $msg = 'Lead move from ' . $old_status->display_name . ' to ' . $new_status->display_name .
+                ' by ' . $user->name;
+            // SendPushNotification($lead->created_by, $msg);
+            // StoreLeadNotification($lead->id, 'Status Changed', $msg, $lead->created_by, 'lead');
+            LeadLog::create([
+                'lead_id' => $lead->id,
+                'message' => $msg,
+                'created_by' => $user->id,
+            ]);
             if ($lead->assign_to != $request->assign_to) {
                 SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.');
                 StoreLeadNotification($lead->id, 'Assigned Lead', '🟢 You have been assigned 1 new lead.', $request->assign_to);
@@ -311,7 +326,7 @@ class LeadController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 'error', 'message' => $validate->errors()], 400);
         }
-        $lead = Lead::find($request->lead_id);
+        $lead = Lead::with('assign_user:id,name')->find($request->lead_id);
         if ($lead) {
             $data = [
                 'id' => $lead->id,
@@ -333,6 +348,8 @@ class LeadController extends Controller
                 'status' => $lead->status_is ? $lead->status_is->display_name : 'Pending',
                 'status_id' => $lead->status_is ? $lead->status_is->id : '0',
                 'lead_source' => $lead->lead_source,
+                'assign_user_id' => $lead->assign_user ? $lead->assign_user->id : null,
+                'assign_user_name' => $lead->assign_user ? $lead->assign_user->name : null,
                 'note' => ($note = optional($lead->notes()->latest()->first())->note) ? strip_tags($note) : null,
                 'lead_generation_date' => (
                     !empty($lead->lead_generation_date) && $lead->lead_generation_date != '0000-00-00'
@@ -342,11 +359,13 @@ class LeadController extends Controller
                 'conversion_date' => $lead->conversion_date ? date('d M Y', strtotime($lead->conversion_date)) : null,
                 'updated_at' => $lead->updated_at->format('d M Y'),
             ];
-            $lead_notes = LeadNote::where(['lead_id' => $lead->id])->get();
-            $lead_tasks = LeadTask::with('assignUser:id,name')->where(['lead_id' => $lead->id])->get();
+            $lead_notes = LeadNote::with('createdby:id,name')->where(['lead_id' => $lead->id])->get();
+            $lead_tasks = LeadTask::with('assignUser:id,name', 'createdby:id,name')->where(['lead_id' => $lead->id])->get();
+            $lead_logs = LeadLog::where(['lead_id' => $lead->id])->get();
             $lead_notes->each(function ($item) {
                 $item->type = 'note';
                 $item->created_at_formatted = $item->created_at->format('d M Y');
+                $item->note = strip_tags($item->note);
             });
             $lead_tasks->each(function ($item) {
                 $item->type = 'task';
@@ -354,9 +373,16 @@ class LeadController extends Controller
                 $item->assignUser = $item->assignUser ?? '';
                 $item->date = date('d-m-Y', strtotime($item->date));
             });
+            $lead_logs->each(function ($item) {
+                $item->type = 'log';
+                $item->created_at_formatted = $item->created_at->format('d M Y');
+            });
 
-            $combined = $lead_notes->merge($lead_tasks)->sortByDesc('created_at')->values();
-            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'notes_tasks' => $combined], 200);
+            // $combined = $lead_notes->merge($lead_tasks)->sortByDesc('created_at')->values();
+            $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->sortByDesc('created_at')->values();
+
+            $notification_count = LeadNotification::where(['user_id' => $request->user()->id, 'read' => 0])->count();
+            return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'notes_tasks' => $combined, 'notification_count' => $notification_count], 200);
         } else {
             return response()->json(['status' => 'error', 'message' => 'Data not found.']);
         }
@@ -598,7 +624,8 @@ class LeadController extends Controller
         $main_data['opportunities'] = $all_opportunities->items();
         $main_data['counter'] = $data;
         $main_data['users'] = $users;
-        return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $main_data], 200);
+        $notification_count = LeadNotification::where(['user_id' => $request->user()->id, 'read' => 0])->count();
+        return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $main_data, 'notification_count' => $notification_count], 200);
     }
 
     public function deleteOpportunity(Request $request)
@@ -636,6 +663,17 @@ class LeadController extends Controller
         if (!$lead) {
             return response()->json(['status' => 'error', 'message' => 'Lead not found.']);
         }
+        $old_status = Status::where('id', $lead->status)->first();
+        $new_status = Status::where('id', $request->status)->first();
+        $msg = 'Lead move from ' . $old_status->display_name . ' to ' . $new_status->display_name .
+            ' by ' . $request->user()->name;
+        // SendPushNotification($lead->created_by, $msg);
+        // StoreLeadNotification($lead->id, 'Status Changed', $msg, $lead->created_by, 'lead');
+        LeadLog::create([
+            'lead_id' => $lead->id,
+            'message' => $msg,
+            'created_by' => $request->user()->id,
+        ]);
         $lead->status = $request->status;
         if ($lead->save()) {
             return response()->json(['status' => 'success', 'message' => 'Lead status updated successfully.']);
@@ -855,10 +893,11 @@ class LeadController extends Controller
                 $task->contact = LeadContact::where('lead_id', $task->lead_id)->first();
                 $task->status = ucwords(str_replace('_', ' ', $task->status));
             });
-
+            $notification_count = LeadNotification::where(['user_id' => $request->user()->id, 'read' => 0])->count();
             return response()->json([
                 'status' => 'success',
-                'data' => $tasks->items(), // returns only the data without pagination
+                'data' => $tasks->items(),
+                'notification_count' => $notification_count,
                 'message' => 'Tasks retrieved successfully'
             ], $this->successStatus);
         } catch (\Exception $e) {
@@ -908,10 +947,10 @@ class LeadController extends Controller
     {
         try {
             $user = $request->user();
-            $notifications = LeadNotification::where(['user_id' => $user->id, 'read' => 0])->latest()->get();
+            $notifications = LeadNotification::where(['user_id' => $user->id, 'read' => 0])->latest()->paginate($request->pageSize ?? 30);
             return response()->json([
                 'status' => 'success',
-                'data' => $notifications,
+                'data' => $notifications->items(),
                 'message' => 'Notifications retrieved successfully'
             ], $this->successStatus);
         } catch (\Exception $e) {

@@ -23,6 +23,7 @@ use App\Models\LeadOpportunity;
 use App\Models\Pincode;
 use App\Models\Country;
 use App\Models\Address;
+use App\Models\LeadLog;
 use App\Models\LeadNotification;
 use App\Models\OpportunitieStatus;
 use App\Models\State;
@@ -95,7 +96,7 @@ class LeadController extends Controller
                 $query->where('company_name', 'like', "%{$search}%")
                     ->orWhereHas('contacts', function ($subQuery) use ($search) {
                         $subQuery->where('name', 'like', "%{$search}%")
-                        ->orWhere('phone_number', 'like', "%{$search}%");
+                            ->orWhere('phone_number', 'like', "%{$search}%");
                     });
             });
         }
@@ -239,7 +240,7 @@ class LeadController extends Controller
             }
         }
 
-        if($request->assign_to && !empty($request->assign_to)){
+        if ($request->assign_to && !empty($request->assign_to)) {
             $leads->where('assign_to', $request->assign_to);
         }
 
@@ -523,8 +524,8 @@ class LeadController extends Controller
         })->select('id', 'name')->orderBy('id')->get();
         $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
         $lead_sources = config('constants.LEAD_SOURCES');
-        $pincodes = Pincode::where('active', '=', 'Y')->select('id', 'pincode')->orderBy('id', 'desc')->get();
-        return view('leads.create', compact('users', 'status', 'lead_sources', 'pincodes'));
+        $states = State::where('active', 'Y')->select('id', 'state_name')->get();
+        return view('leads.create', compact('users', 'status', 'lead_sources', 'states'));
     }
 
     /**
@@ -536,9 +537,11 @@ class LeadController extends Controller
     public function store(Request $request)
     {
         $rules = [
+            'status' => 'required',
             'company_name' => 'required',
             'contact_name' => 'required',
-            'phone_number' => 'required',
+            'assign_to' => 'required|exists:users,id',
+            'lead_source' => 'required',
         ];
 
         $request->validate($rules);
@@ -587,7 +590,7 @@ class LeadController extends Controller
                     'created_by' => Auth::id()
                 ]);
             }
-            if(!empty($request->assign_to)){
+            if (!empty($request->assign_to)) {
                 SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.');
                 StoreLeadNotification($lead->id, 'Assigned Lead', '🟢 You have been assigned 1 new lead.', $request->assign_to);
             }
@@ -677,14 +680,21 @@ class LeadController extends Controller
             $address_data = "";
         }
 
+        $lead_logs = LeadLog::where(['lead_id' => $lead->id])->get();
+
         $lead_notes->each(function ($item) {
             $item->type = 'note';
         });
         $lead_tasks->each(function ($item) {
             $item->type = 'task';
         });
+        $lead_logs->each(function ($item) {
+            $item->type = 'log';
+        });
 
-        $combined = $lead_notes->merge($lead_tasks)->sortByDesc('created_at')->values();
+
+        // $combined = $lead_notes->merge($lead_tasks)->sortByDesc('created_at')->values();
+        $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->sortByDesc('created_at')->values();
 
         $media_items = $lead->getMedia('lead_file');
         $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
@@ -732,9 +742,23 @@ class LeadController extends Controller
             $otherData = null;
         }
 
-        if($lead->assign_to != $request->assign_to){
+        if ($lead->assign_to != $request->assign_to) {
             SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.');
             StoreLeadNotification($lead->id, 'Assigned Lead', '🟢 You have been assigned 1 new lead.', $request->assign_to);
+        }
+
+        if ($lead->status != $request->status) {
+            $old_status = Status::where('id', $lead->status)->first();
+            $new_status = Status::where('id', $request->status)->first();
+            $msg = 'Lead move from ' . $old_status->display_name . ' to ' . $new_status->display_name .
+                ' by ' . Auth::user()->name;
+            // SendPushNotification($lead->created_by, $msg);
+            // StoreLeadNotification($lead->id, 'Status Changed', $msg, $lead->created_by, 'lead');
+            LeadLog::create([
+                'lead_id' => $lead->id,
+                'message' => $msg,
+                'created_by' => Auth::id(),
+            ]);
         }
 
         $lead->update([
@@ -782,8 +806,8 @@ class LeadController extends Controller
     {
         $update = Lead::whereIn('id', $request->lead_id)->update(['assign_to' => $request->user_id]);
         if ($update) {
-            SendPushNotification($request->user_id, '🟢 You have been assigned '. count($request->lead_id) .' new lead.');
-            StoreLeadNotification(null, 'Assigned Lead', '🟢 You have been assigned '. count($request->lead_id) .' new lead.', $request->user_id);
+            SendPushNotification($request->user_id, '🟢 You have been assigned ' . count($request->lead_id) . ' new lead.');
+            StoreLeadNotification(null, 'Assigned Lead', '🟢 You have been assigned ' . count($request->lead_id) . ' new lead.', $request->user_id);
             return response()->json(['status' => 'success', 'message' => 'Lead assigned successfully.']);
         } else {
             return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
@@ -803,6 +827,18 @@ class LeadController extends Controller
 
     public function changeStatus(Request $request)
     {
+        $lead = Lead::where('id', $request->lead_id)->first();
+        $old_status = Status::where('id', $lead->status)->first();
+        $new_status = Status::where('id', $request->status)->first();
+        $msg = 'Lead move from ' . $old_status->display_name . ' to ' . $new_status->display_name .
+            ' by ' . Auth::user()->name;
+        // SendPushNotification($lead->created_by, $msg);
+        // StoreLeadNotification($lead->id, 'Status Changed', $msg, $lead->created_by, 'lead');
+        LeadLog::create([
+            'lead_id' => $lead->id,
+            'message' => $msg,
+            'created_by' => Auth::id(),
+        ]);
         $update = Lead::where('id', $request->lead_id)->update(['status' => $request->status]);
         if ($update) {
             return response()->json(['status' => 'success', 'message' => 'Status updated successfully.']);

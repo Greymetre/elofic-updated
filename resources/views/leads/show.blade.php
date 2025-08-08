@@ -1336,8 +1336,10 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                 <div class="greenbox">
                     @if($lead_note->type == 'note')
                     <img src="{{url('/').'/'.asset('assets/img')}}/cup.svg">
-                    @else
+                    @elseif($lead_note->type == 'task')
                     <img src="{{url('/').'/'.asset('assets/img')}}/task_logo.png" width="35">
+                    @else
+                    <img src="{{url('/').'/'.asset('assets/img')}}/log.png?" width="35">
                     @endif
                 </div>
             </div>
@@ -1345,9 +1347,14 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                 @if($lead_note->type == 'note')
                 <h5>Note</h5>
                 <h5>{!! $lead_note->note??''!!}</h5>
+                <p>Created by: {!! $lead_note->createdby? $lead_note->createdby->name : ''!!}</p>
+                @elseif($lead_note->type == 'task')
+                <h5>Task <span class="badge badge-info" style="font-family: 'Poppins', sans-serif;font-size: 10px;font-weight:700;padding: 4px,6px"> {{$lead_note->priority??''}}</span></h5>
+                <h5>{!! $lead_note->description??''!!} ({{date('d M Y', strtotime($lead_note->date))}}, {{date('h:i A', strtotime($lead_note->time))}})</h5>
+                <p>Created by: {!! $lead_note->createdby? $lead_note->createdby->name : ''!!}</p>
                 @else
-                <h5>Task <span class="badge badge-info" style="font-family: 'Poppins', sans-serif;font-size: 10px;font-weight:700;padding: 4px,6px"> {{$lead_task->priority??''}}</span></h5>
-                <h5>{!! $lead_note->description??''!!}({{date('d M Y', strtotime($lead_note->date))}}, {{date('h:i A', strtotime($lead_note->time))}})</h5>
+                <h5>Log </h5>
+                <h5>{!! $lead_note->message??''!!}</h5>
                 @endif
 
                 <p></p>

@@ -74,7 +74,7 @@
                   {{-- Mobile --}}
                   <div class="form-group col-6 mb-2">
                     <input type="tel" name="phone_number" id="phone_number" value="{{ old('phone_number', isset($lead) ? $lead->contacts?->first()->phone_number : '') }}"
-                      class="form-control form-control-lg" placeholder="Mobile Number" maxlength="15" required>
+                      class="form-control form-control-lg" placeholder="Mobile Number" maxlength="15">
                     @error('phone_number') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
                 </div>
@@ -97,28 +97,20 @@
                 {{-- Pin / City --}}
                 <div class="form-row">
                   <div class="form-group col-3 mb-2">
-                    <select class="form-control pincode select2" name="pincode_id" id="pincode_id" onchange="getAddressData()" style="width: 100%;">
-                      <option value="">Select {!! trans('panel.global.pincode') !!}</option>
-                      @if(@isset($pincodes ))
-                      @foreach($pincodes as $pincode)
-                      <option value="{!! $pincode['id'] !!}" @if(isset($lead) && $lead->address->pincode_id==$pincode['id']) selected @endif >{!! $pincode['pincode'] !!}</option>
+                    <select class="form-control select2 state" name="state_id" id="state_id" onchange="getDistrictList()" style="width: 100%;">
+                      @if(isset($address) && $address->state_id)
+                      <option value="{!!  $address->state_id !!}">{!! $address->statename->state_name??'' !!}</option>
+                      @else
+                      <option value="">Select {!! trans('panel.global.state') !!}</option>
+                      @if($states && count($states) > 0)
+                      @foreach($states as $state)
+                      <option value="{!! $state->id !!}">{!! $state->state_name !!}</option>
                       @endforeach
                       @endif
-                    </select>
-                    @error('pin_code') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
-                  </div>
-                  <div class="form-group col-3 mb-2">
-                    <select class="form-control select2 city" name="city_id" id="city_id" onchange="getPincodeList()" style="width: 100%;">
-                      @if(isset($address) && $address->city_id)
-                      <option value="{!!  $address->city_id !!}">{!! $address->cityname->city_name??'' !!}</option>
-                      @else
-                      <option value="">Select {!! trans('panel.global.city') !!}</option>
                       @endif
                     </select>
-                    @error('city') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+                    @error('state_alt') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
-
-                  {{-- State / State --}}
                   <div class="form-group col-3 mb-2">
                     <select class="form-control select2 district" name="district_id" id="district_id" onchange="getCityList()" style="width: 100%;">
                       @if(isset($address) && $address->district_id)
@@ -130,15 +122,21 @@
                     @error('state') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
                   <div class="form-group col-3 mb-2">
-                    <select class="form-control select2 state" name="state_id" id="state_id" onchange="getDistrictList()" style="width: 100%;">
-                      @if(isset($address) && $address->state_id)
-                      <option value="{!!  $address->state_id !!}">{!! $address->statename->state_name??'' !!}</option>
+                    <select class="form-control select2 city" name="city_id" id="city_id" onchange="getPincodeList()" style="width: 100%;">
+                      @if(isset($address) && $address->city_id)
+                      <option value="{!!  $address->city_id !!}">{!! $address->cityname->city_name??'' !!}</option>
                       @else
-                      <option value="">Select {!! trans('panel.global.state') !!}</option>
+                      <option value="">Select {!! trans('panel.global.city') !!}</option>
                       @endif
                     </select>
-                    @error('state_alt') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+                    @error('city') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                   </div>
+                  <div class="form-group col-3 mb-2">
+                  <select class="form-control pincode select2" name="pincode_id" id="pincode_id" onchange="getAddressData()" style="width: 100%;">
+                    <option value="">Select {!! trans('panel.global.pincode') !!}</option>
+                  </select>
+                  @error('pin_code') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+                </div>
                 </div>
 
                 {{-- Other / Lead Source --}}

@@ -2,25 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class LeadNote extends Model
+class LeadLog extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'lead_id',
-        'note',
+        'message',
         'created_by',
     ];
 
-    
-    public function lead(){
+    // Relationships
+    public function lead()
+    {
         return $this->belongsTo(Lead::class);
     }
 
-    public function createdby(){
+    public function creator()
+    {
         return $this->belongsTo(User::class, 'created_by');
     }
 }
