@@ -22,17 +22,17 @@ class SendPendingTaskNotification extends Command
             ->get();
 
         foreach ($tasks as $task) {
-            // Assuming your table has a 'time' column storing task time (HH:mm:ss format)
+            // Combine date + time into full datetime
             $taskDateTime = Carbon::parse($task->date . ' ' . $task->time);
 
-            // Subtract 10 minutes from task's datetime
-            $taskReminderTime = $taskDateTime->copy()->subMinutes(11);
+            // Calculate minutes remaining
+            $minutesRemaining = $now->diffInMinutes($taskDateTime, false);
 
-            // Check if it's time to send notification
-            if ($now->greaterThanOrEqualTo($taskReminderTime) && $now->lessThan($taskDateTime)) {
+            // Send only if remaining time is between 10 and 8 minutes
+            if ($minutesRemaining <= 10 && $minutesRemaining >= 8) {
                 SendPushNotification(
                     $task->assigned_to,
-                    '⏰ Reminder: The task "' . $task->description . '" for ' . $task->lead->company_name . ' is due today.'
+                    '⏰ Reminder: The task "' . $task->description . '" for ' . $task->lead->company_name . ' is due in ' . $minutesRemaining . ' minutes.'
                 );
             }
         }
