@@ -26,35 +26,35 @@ use App\DataTables\TasksDataTable;
 use App\Imports\TasksImport;
 use App\Exports\TasksExport;
 use App\Exports\TasksTemplate;
+use App\Models\Media as ModelsMedia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class TasksController extends Controller
 {
-    public function __construct() 
-    {     
-        $this->middleware('auth');   
-        
+    public function __construct()
+    {
+        $this->middleware('auth');
+
         $this->tasks = new Tasks();
     }
 
     public function index(TasksDataTable $dataTable)
     {
         //abort_if(Gate::denies('tasks_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $users = User::where(function($query) {
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    // $query->whereIn('id',$userids);
-                                }
-                                $query->where('active','Y');
-                            })->select('id','name')->get();
-        $statuses=['Pending','Open','In progress','Completed','Reopen'];   
+        $users = User::where(function ($query) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                // $query->whereIn('id',$userids);
+            }
+            $query->where('active', 'Y');
+        })->select('id', 'name')->get();
+        $statuses = ['Pending', 'Open', 'In progress', 'Completed', 'Reopen'];
 
         return $dataTable->render('tasks.index', [
-                        'users' => $users,
-                        'statuses' => $statuses
-                    ]);
+            'users' => $users,
+            'statuses' => $statuses
+        ]);
     }
 
     /**
@@ -67,30 +67,28 @@ class TasksController extends Controller
         //abort_if(Gate::denies('tasks_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $userids = getUsersReportingToAuth();
 
-        $users = User::where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    // $query->whereIn('id',$userids);
-                                }
-                                $query->where('active','Y');
-                            })->select('id','name')->get();
+        $users = User::where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                // $query->whereIn('id',$userids);
+            }
+            $query->where('active', 'Y');
+        })->select('id', 'name')->get();
 
-        $customers = Customers::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    // $query->whereIn('executive_id',$userids);
-                                }
-                            })
-        ->select('id', 'name','mobile')
-        ->get();
-        $departments = TaskDepartment::select('id','name')->get();
-        $projects = TaskProject::select('id','name')->get();
-        $priorities = TaskPriority::select('id','name')->get();
-        $leads = Lead::select('id','company_name')->get();
+        $customers = Customers::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                // $query->whereIn('executive_id',$userids);
+            }
+        })
+            ->select('id', 'name', 'mobile')
+            ->get();
+        $departments = TaskDepartment::select('id', 'name')->get();
+        $projects = TaskProject::select('id', 'name')->get();
+        $priorities = TaskPriority::select('id', 'name')->get();
+        $leads = Lead::select('id', 'company_name')->get();
 
-        
-                        
-        return view('tasks.create',compact('users','customers','departments','projects','priorities','leads'))->with('tasks',$this->tasks);
+
+
+        return view('tasks.create', compact('users', 'customers', 'departments', 'projects', 'priorities', 'leads'))->with('tasks', $this->tasks);
     }
 
     /**
@@ -101,25 +99,24 @@ class TasksController extends Controller
      */
     public function store(TaskRequest $request)
     {
-        $assignedTos  = $request->assigned_to??[];
+        $assignedTos  = $request->assigned_to ?? [];
         $userId = Auth::user()->id;
         //abort_if(Gate::denies('tasks_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $request['active'] = 'Y';
         $request['created_by'] = $userId;
         $request['user_id'] = $userId;
-        $taskLogs=[];
-        if($task = Tasks::create($request->except(['_token'])))
-        {   
+        $taskLogs = [];
+        if ($task = Tasks::create($request->except(['_token']))) {
             // Store log entry
             $taskLogs[] = [
-                            'task_id'         => $task->id,
-                            'new_status'      => 'Pending',
-                            'changed_by'      => $userId,
-                            'comments'        =>  'Task #T'.$task->id.' was created by '.auth()->user()->name .' on '.date('d-m-Y').' at '.date('h:i A'),
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
-            if(count($assignedTos)){
+                'task_id'         => $task->id,
+                'new_status'      => 'Pending',
+                'changed_by'      => $userId,
+                'comments'        =>  'Task #T' . $task->id . ' was created by ' . auth()->user()->name . ' on ' . date('d-m-Y') . ' at ' . date('h:i A'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            if (count($assignedTos)) {
                 foreach ($assignedTos as $assignedUserId) {
                     TaskAssignment::create([
                         'task_id' => $task->id,
@@ -127,23 +124,23 @@ class TasksController extends Controller
                     ]);
                     $user = User::find($assignedUserId);
                     $taskLogs[] = [
-                                'task_id'         => $task->id,
-                                'new_status'      => 'Pending',
-                                'changed_by'      => $userId,
-                                'comments'        =>  'Task #T'.$task->id.' was assigned to '.$user->name .' on '.date('d-m-Y').' at '.date('h:i A'),
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                                ];
+                        'task_id'         => $task->id,
+                        'new_status'      => 'Pending',
+                        'changed_by'      => $userId,
+                        'comments'        =>  'Task #T' . $task->id . ' was assigned to ' . $user->name . ' on ' . date('d-m-Y') . ' at ' . date('h:i A'),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
                 }
-            }    
+            }
             if ($request->hasFile('files')) {
                 foreach ($request->file('files') as $file) {
                     $task->addMedia($file)->toMediaCollection('task_admin_files');
                 }
             }
-            
-            
-            
+
+
+
             TaskStatusLog::insert($taskLogs);
 
             // $toemail = User::where('id',$request['user_id'])->pluck('email')->first();
@@ -155,7 +152,7 @@ class TasksController extends Controller
         }
 
 
-        return redirect()->back()->with('message_danger', 'Error in Tasks Store')->withInput(); 
+        return redirect()->back()->with('message_danger', 'Error in Tasks Store')->withInput();
     }
 
     /**
@@ -181,50 +178,45 @@ class TasksController extends Controller
         $id = decrypt($id);
         $task = Tasks::find($id);
 
-        $users = User::where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    // $query->whereIn('id',$userids);
-                                }
-                                $query->where('active','Y');
-                            })->select('id','name')->get();
-        $customers = Customers::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    // $query->whereIn('executive_id',$userids);
-                                }
-                            })
-        ->select('id', 'name','mobile')
-        ->get();
-        $departments = TaskDepartment::select('id','name')->get();
-        $projects = TaskProject::select('id','name')->get();
-        $priorities = TaskPriority::select('id','name')->get();
-        $leads = Lead::select('id','company_name')->get();
-        $assignedUserIds = TaskAssignment::where('task_id',$id)->pluck('user_id')->toArray();
+        $users = User::where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                // $query->whereIn('id',$userids);
+            }
+            $query->where('active', 'Y');
+        })->select('id', 'name')->get();
+        $customers = Customers::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                // $query->whereIn('executive_id',$userids);
+            }
+        })
+            ->select('id', 'name', 'mobile')
+            ->get();
+        $departments = TaskDepartment::select('id', 'name')->get();
+        $projects = TaskProject::select('id', 'name')->get();
+        $priorities = TaskPriority::select('id', 'name')->get();
+        $leads = Lead::select('id', 'company_name')->get();
+        $assignedUserIds = TaskAssignment::where('task_id', $id)->pluck('user_id')->toArray();
         $roleName = auth()->user()->roles->pluck('name')->first();
-        $taskStatuses=['Pending','Open','In progress','Completed']; 
-        $isRestricted=true;
+        $taskStatuses = ['Pending', 'Open', 'In progress', 'Completed'];
+        $isRestricted = true;
         if ($roleName === 'superadmin') {
             $isRestricted = true;
-            $taskStatuses[]='Reopen'; 
+            $taskStatuses[] = 'Reopen';
         } else {
             $isRestricted = true;
-            if($task->task_status =='Pending'){
-                $taskStatuses=['Pending','Open']; 
-            }elseif($task->task_status =='Open'){
-                $taskStatuses=['Open','In progress']; 
+            if ($task->task_status == 'Pending') {
+                $taskStatuses = ['Pending', 'Open'];
+            } elseif ($task->task_status == 'Open') {
+                $taskStatuses = ['Open', 'In progress'];
+            } elseif ($task->task_status == 'In progress') {
+                $taskStatuses = ['In progress', 'Completed'];
+            } elseif ($task->task_status == 'Reopen') {
+                $taskStatuses = ['Pending', 'Open'];
             }
-            elseif($task->task_status =='In progress'){
-                $taskStatuses=['In progress','Completed']; 
-            }
-            elseif($task->task_status =='Reopen'){
-                $taskStatuses=['Pending','Open']; 
-            }
-
-        }        
-        $taskStatusLogs = TaskStatusLog::with('task','user')->where('task_id',$task->id)->get(); 
-        $taskComments = TaskComment::where('task_id',$id)->get();    
-        return view('tasks.show',compact('task','users','customers','departments','projects','priorities','leads','assignedUserIds','isRestricted','taskStatuses','taskComments','taskStatusLogs'));
+        }
+        $taskStatusLogs = TaskStatusLog::with('task', 'user')->where('task_id', $task->id)->get();
+        $taskComments = TaskComment::where('task_id', $id)->get();
+        return view('tasks.show', compact('task', 'users', 'customers', 'departments', 'projects', 'priorities', 'leads', 'assignedUserIds', 'isRestricted', 'taskStatuses', 'taskComments', 'taskStatusLogs'));
     }
 
 
@@ -243,41 +235,39 @@ class TasksController extends Controller
         $id = decrypt($id);
         $task = Tasks::find($id);
 
-        if(!((auth()->user()->id==$task->created_by) || (auth()->user()->roles->pluck('name')->first()=='superadmin'))){  
+        if (!((auth()->user()->id == $task->created_by) || (auth()->user()->roles->pluck('name')->first() == 'superadmin'))) {
             return Redirect::back()->with('message_error', 'You are not allowed to access this page');
-        }    
+        }
 
 
-        $users = User::where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    // $query->whereIn('id',$userids);
-                                }
-                                $query->where('active','Y');
-                            })->select('id','name')->get();
-        $customers = Customers::where('active','=','Y')->where(function($query) use($userids){
-                                if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin'))
-                                {
-                                    // $query->whereIn('executive_id',$userids);
-                                }
-                            })
-        ->select('id', 'name','mobile')
-        ->get();
-        $departments = TaskDepartment::select('id','name')->get();
-        $projects = TaskProject::select('id','name')->get();
-        $priorities = TaskPriority::select('id','name')->get();
-        $leads = Lead::select('id','company_name')->get();
-        $assignedUserIds = TaskAssignment::where('task_id',$id)->pluck('user_id')->toArray();
+        $users = User::where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                // $query->whereIn('id',$userids);
+            }
+            $query->where('active', 'Y');
+        })->select('id', 'name')->get();
+        $customers = Customers::where('active', '=', 'Y')->where(function ($query) use ($userids) {
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                // $query->whereIn('executive_id',$userids);
+            }
+        })
+            ->select('id', 'name', 'mobile')
+            ->get();
+        $departments = TaskDepartment::select('id', 'name')->get();
+        $projects = TaskProject::select('id', 'name')->get();
+        $priorities = TaskPriority::select('id', 'name')->get();
+        $leads = Lead::select('id', 'company_name')->get();
+        $assignedUserIds = TaskAssignment::where('task_id', $id)->pluck('user_id')->toArray();
         $roleName = auth()->user()->roles->pluck('name')->first();
-        $isRestricted=true;
+        $isRestricted = true;
         if ($roleName === 'superadmin') {
             $isRestricted = false;
         } else {
             $isRestricted = true;
-        }        
-        $taskStatuses=['Pending','Open','In progress','Completed','Reopen'];   
-        $taskComments = TaskComment::where('task_id',$id)->get();    
-        return view('tasks.edit',compact('task','users','customers','departments','projects','priorities','leads','assignedUserIds','isRestricted','taskStatuses','taskComments'));
+        }
+        $taskStatuses = ['Pending', 'Open', 'In progress', 'Completed', 'Reopen'];
+        $taskComments = TaskComment::where('task_id', $id)->get();
+        return view('tasks.edit', compact('task', 'users', 'customers', 'departments', 'projects', 'priorities', 'leads', 'assignedUserIds', 'isRestricted', 'taskStatuses', 'taskComments'));
     }
 
     /**
@@ -290,140 +280,139 @@ class TasksController extends Controller
     public function update(TaskRequest $request, $id)
     {
         $assignedTos = $request->assigned_to ?? [];
-        $taskType = $request->task_type??null;
-        $comment = $request->comment??null;
+        $taskType = $request->task_type ?? null;
+        $comment = $request->comment ?? null;
         $userId = Auth::user()->id;
-        $task_status = $request->task_status??null;
+        $task_status = $request->task_status ?? null;
 
         $task = Tasks::findOrFail($id);
-        $taskCreatedBy = $task->user_id??null;
-        $oldStatus = $task->task_status??null;
+        $taskCreatedBy = $task->user_id ?? null;
+        $oldStatus = $task->task_status ?? null;
         // Optional: restrict access
         // abort_if(Gate::denies('tasks_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $request['updated_by'] = $userId;
 
-        if($taskType=='adhoc'){
-            $request['customer_id']=null;
-            $request['project_id']=null;
-            $request['lead_id']=null;
-        }elseif ($taskType=='customer') {
-            $request['project_id']=null;
-            $request['lead_id']=null;        
-        }elseif ($taskType=='project') {
-            $request['customer_id']=null;
-            $request['lead_id']=null;
-        }elseif ($taskType=='lead') {
-            $request['customer_id']=null;
-            $request['project_id']=null;
+        if ($taskType == 'adhoc') {
+            $request['customer_id'] = null;
+            $request['project_id'] = null;
+            $request['lead_id'] = null;
+        } elseif ($taskType == 'customer') {
+            $request['project_id'] = null;
+            $request['lead_id'] = null;
+        } elseif ($taskType == 'project') {
+            $request['customer_id'] = null;
+            $request['lead_id'] = null;
+        } elseif ($taskType == 'lead') {
+            $request['customer_id'] = null;
+            $request['project_id'] = null;
         }
         // when task status is update
-        if(isset($task->task_status) && $task->task_status!=$task_status){
-        // if status is completed
-            if($task_status=='Completed'){
-                $request['completed_at']=date('Y-m-d H:i s');
-            }elseif($task_status =='Open'){
-                 $request['open_datetime']=date('Y-m-d H:i s');
+        if (isset($task->task_status) && $task->task_status != $task_status) {
+            // if status is completed
+            if ($task_status == 'Completed') {
+                $request['completed_at'] = date('Y-m-d H:i s');
+            } elseif ($task_status == 'Open') {
+                $request['open_datetime'] = date('Y-m-d H:i s');
+            } elseif ($task_status == 'In progress') {
+                $request['inprogress_datetime'] = date('Y-m-d H:i s');
+            } elseif ($task_status == 'Reopen') {
+                $request['reopen_datetime'] = date('Y-m-d H:i s');
             }
-            elseif($task_status =='In progress'){
-                $request['inprogress_datetime']=date('Y-m-d H:i s');
-            }
-            elseif($task_status =='Reopen'){
-                $request['reopen_datetime']=date('Y-m-d H:i s');
-            }
-        }    
-        if ($task->update($request->except(['_token','assigned_to']))) {
+        }
+        if ($task->update($request->except(['_token', 'assigned_to']))) {
 
             // Delete existing assignments and reassign
             // TaskAssignment::where('task_id', $task->id)->delete();
 
             if (count($assignedTos)) {
-                $taskLogs=[];
+                $taskLogs = [];
                 foreach ($assignedTos as $assignedUserId) {
                     $user = User::find($assignedUserId);
-                    $isExist = TaskAssignment::where(['task_id'=>$task->id,'user_id'=>$assignedUserId])->exists();
-                    if($isExist){
+                    $isExist = TaskAssignment::where(['task_id' => $task->id, 'user_id' => $assignedUserId])->exists();
+                    if ($isExist) {
                         continue;
                     }
                     TaskAssignment::create([
                         'task_id' => $task->id,
                         'user_id' => $assignedUserId,
                     ]);
-                    
+
                     $taskLogs[] = [
-                                'task_id'         => $task->id,
-                                'changed_by'      => $userId,
-                                'comments'        =>  'Task #T'.$task->id.' was assigned to '.$user->name .' on '.date('d-m-Y').' at '.date('h:i A'),
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                                ];
+                        'task_id'         => $task->id,
+                        'changed_by'      => $userId,
+                        'comments'        =>  'Task #T' . $task->id . ' was assigned to ' . $user->name . ' on ' . date('d-m-Y') . ' at ' . date('h:i A'),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
                 }
-                $deletedAssignments = TaskAssignment::where(['task_id'=>$task->id])->whereNotIn('user_id',$assignedTos)->get();
+                $deletedAssignments = TaskAssignment::where(['task_id' => $task->id])->whereNotIn('user_id', $assignedTos)->get();
                 if (count($deletedAssignments)) {
-                   foreach ($deletedAssignments as $deletedAssignment) {
+                    foreach ($deletedAssignments as $deletedAssignment) {
                         $userDeleted = User::find($deletedAssignment->user_id);
-                        $isDeleted=TaskAssignment::where('id',$deletedAssignment->id)->delete();
-                        if($isDeleted){
+                        $isDeleted = TaskAssignment::where('id', $deletedAssignment->id)->delete();
+                        if ($isDeleted) {
                             $taskLogs[] = [
                                 'task_id'         => $task->id,
                                 'changed_by'      => $userId,
-                                'comments'        =>  'Task #T'.$task->id.' was removed from '.$userDeleted->name .' on '.date('d-m-Y').' at '.date('h:i A'),
+                                'comments'        =>  'Task #T' . $task->id . ' was removed from ' . $userDeleted->name . ' on ' . date('d-m-Y') . ' at ' . date('h:i A'),
                                 'created_at' => now(),
                                 'updated_at' => now(),
-                                ];
+                            ];
                         }
-                   } 
-                }    
+                    }
+                }
 
-                if(count($taskLogs)){
+                if (count($taskLogs)) {
                     TaskStatusLog::insert($taskLogs);
-                }    
+                }
             }
-            if($comment){
-               TaskComment::create([
-                            'task_id' => $task->id,
-                            'comment'=>$comment,
-                            'user_id'=>auth()->user()->id ]);
+            if ($comment) {
+                TaskComment::create([
+                    'task_id' => $task->id,
+                    'comment' => $comment,
+                    'user_id' => auth()->user()->id
+                ]);
             }
 
             // Only log if status is actually changed
             if ($oldStatus !== $task_status) {
-                
+
                 // Store log entry
                 TaskStatusLog::create([
                     'task_id'         => $task->id,
                     'previous_status' => $oldStatus,
                     'new_status'      => $task_status,
                     'changed_by'      => $userId,
-                    'comments'        => auth()->user()->name.' marked the task as '.$task_status.' on '.date('d-m-Y').' at '.date('h:i A'),
+                    'comments'        => auth()->user()->name . ' marked the task as ' . $task_status . ' on ' . date('d-m-Y') . ' at ' . date('h:i A'),
                 ]);
-            } 
-            if($comment){
+            }
+            if ($comment) {
                 // Store log entry
-                $shortComment = strlen($comment) > 50 ? substr($comment, 0, 47) . '...': $comment;
+                $shortComment = strlen($comment) > 50 ? substr($comment, 0, 47) . '...' : $comment;
                 TaskStatusLog::create([
                     'task_id'         => $task->id,
                     'previous_status' => $oldStatus,
                     'new_status'      => $task_status,
                     'changed_by'      => $userId,
-                    'comments'        => auth()->user()->name.' commented on '.date('d-m-Y').' at '.date('h:i A').' : '.'"'.$shortComment.'"',
+                    'comments'        => auth()->user()->name . ' commented on ' . date('d-m-Y') . ' at ' . date('h:i A') . ' : ' . '"' . $shortComment . '"',
                 ]);
             }
 
             // If new files are uploaded
-            if(auth()->user()->id==$taskCreatedBy){
+            if (auth()->user()->id == $taskCreatedBy) {
                 if ($request->hasFile('files')) {
                     foreach ($request->file('files') as $file) {
                         $task->addMedia($file)->toMediaCollection('task_admin_files');
                     }
                 }
-            }else{
+            } else {
                 if ($request->hasFile('files')) {
                     foreach ($request->file('files') as $file) {
                         $task->addMedia($file)->toMediaCollection('task_assigned_user_files');
                     }
                 }
-            }    
+            }
 
 
             return Redirect::to('tasks')->with('message_success', 'Task Updated Successfully');
@@ -443,69 +432,66 @@ class TasksController extends Controller
     {
         //abort_if(Gate::denies('tasks_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         // TaskUsers::where('task_id',$id)->delete();
-        TaskAssignment::where('task_id',$id)->delete();
-        TaskComment::where('task_id',$id)->delete();
-        
-        if(Tasks::where('id',$id)->delete())
-        {
-            return response()->json(['status' => 'success','message' => 'Task deleted successfully!']);
+        TaskAssignment::where('task_id', $id)->delete();
+        TaskComment::where('task_id', $id)->delete();
+        TaskStatusLog::where('task_id', $id)->delete();
+        ModelsMedia::where('model_id', $id)->where('model_type', 'App\Models\Tasks')->delete();
+
+        if (Tasks::where('id', $id)->delete()) {
+            return response()->json(['status' => 'success', 'message' => 'Task deleted successfully!']);
         }
-        return response()->json(['status' => 'error','message' => 'Error in Task Delete!']);
+        return response()->json(['status' => 'error', 'message' => 'Error in Task Delete!']);
     }
 
     public function active(Request $request)
     {
-        if(Tasks::where('id',$request['id'])->update(['active' => ($request['active'] == 'Y') ? 'N' :'Y']))
-        {
-            $message = ($request['active'] == 'Y') ? 'Inactive' :'Active';
-            return response()->json(['status' => 'success','message' => 'Task '.$message.' Successfully!']);
+        if (Tasks::where('id', $request['id'])->update(['active' => ($request['active'] == 'Y') ? 'N' : 'Y'])) {
+            $message = ($request['active'] == 'Y') ? 'Inactive' : 'Active';
+            return response()->json(['status' => 'success', 'message' => 'Task ' . $message . ' Successfully!']);
         }
-        return response()->json(['status' => 'error','message' => 'Error in Status Update']);
+        return response()->json(['status' => 'error', 'message' => 'Error in Status Update']);
     }
 
     public function completed(Request $request)
     {
-        if(Tasks::where('id',$request['id'])->update(['completed' => '1','completed_at' => getcurentDateTime() ]))
-        {
-            return response()->json(['status' => 'success','message' => 'Task Completed  Successfully!']);
+        if (Tasks::where('id', $request['id'])->update(['completed' => '1', 'completed_at' => getcurentDateTime()])) {
+            return response()->json(['status' => 'success', 'message' => 'Task Completed  Successfully!']);
         }
-        return response()->json(['status' => 'error','message' => 'Error in Status Update']);
+        return response()->json(['status' => 'error', 'message' => 'Error in Status Update']);
     }
     public function done(Request $request)
     {
-        if(Tasks::where('id',$request['id'])->update(['is_done' => '1']))
-        {
-            return response()->json(['status' => 'success','message' => 'Task Done  Successfully!']);
+        if (Tasks::where('id', $request['id'])->update(['is_done' => '1'])) {
+            return response()->json(['status' => 'success', 'message' => 'Task Done  Successfully!']);
         }
-        return response()->json(['status' => 'error','message' => 'Error in Status Update']);
+        return response()->json(['status' => 'error', 'message' => 'Error in Status Update']);
     }
     public function reopen(Request $request)
     {
-        if(Tasks::where('id',$request['id'])->update(['is_done' => '0','done_by' => null ]))
-        {
-            return response()->json(['status' => 'success','message' => 'Task Done  Successfully!']);
+        if (Tasks::where('id', $request['id'])->update(['is_done' => '0', 'done_by' => null])) {
+            return response()->json(['status' => 'success', 'message' => 'Task Done  Successfully!']);
         }
-        return response()->json(['status' => 'error','message' => 'Error in Status Update']);
+        return response()->json(['status' => 'error', 'message' => 'Error in Status Update']);
     }
 
-    public function upload(Request $request) 
+    public function upload(Request $request)
     {
-      abort_if(Gate::denies('tasks_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('tasks_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
-        Excel::import(new TasksImport,request()->file('import_file'));
+        Excel::import(new TasksImport, request()->file('import_file'));
         return back();
     }
     public function download()
     {
-      abort_if(Gate::denies('tasks_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('tasks_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new TasksExport, 'tasks.xlsx');
     }
     public function template()
     {
-      abort_if(Gate::denies('tasks_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('tasks_template'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new TasksTemplate, 'tasks.xlsx');
@@ -514,60 +500,48 @@ class TasksController extends Controller
     public function tasksInfo(Request $request)
     {
         if ($request->ajax()) {
-            $data = Tasks::with('priorities','statusname')
-                            ->orWhere(function($query) use ($request) {
-                                $query->where('user_id', $request['user_id'])
-                                      ->where(function ($query) use ($request) {
-                                        if($request['due_at'] == 'Today')
-                                        {
-                                            $query->whereDate('datetime', date('Y-m-d'));
-                                        }
-                                        if($request['due_at'] == 'Week')
-                                        {
-                                            $query->whereDate('datetime','>' ,date('Y-m-d'));
-                                            
-                                            $query->whereDate('datetime','<=' ,Carbon::now()->endOfWeek()->format('Y-m-d'));
-                                        }
-                                        if($request['due_at'] == 'overdue')
-                                        {
-                                            $query->whereDate('datetime','>', date('Y-m-d'));
-                                            $query->where('completed',0);
-                                        }
-                                        if($request['due_at'] == 'Completed')
-                                        {
-                                            $query->where('completed',1);
-                                        }
-                                    });
-                            })
-                            ->latest();
+            $data = Tasks::with('priorities', 'statusname')
+                ->orWhere(function ($query) use ($request) {
+                    $query->where('user_id', $request['user_id'])
+                        ->where(function ($query) use ($request) {
+                            if ($request['due_at'] == 'Today') {
+                                $query->whereDate('datetime', date('Y-m-d'));
+                            }
+                            if ($request['due_at'] == 'Week') {
+                                $query->whereDate('datetime', '>', date('Y-m-d'));
+
+                                $query->whereDate('datetime', '<=', Carbon::now()->endOfWeek()->format('Y-m-d'));
+                            }
+                            if ($request['due_at'] == 'overdue') {
+                                $query->whereDate('datetime', '>', date('Y-m-d'));
+                                $query->where('completed', 0);
+                            }
+                            if ($request['due_at'] == 'Completed') {
+                                $query->where('completed', 1);
+                            }
+                        });
+                })
+                ->latest();
             return Datatables::of($data)
-                    ->addIndexColumn()
-                    ->editColumn('start_date', function($data)
-                    {
-                        return showdateformat($data->start_date).' '.$data->start_day.' '.showdateformat($data->start_time);
-                    })
-                    ->editColumn('datetime', function($data)
-                    {
-                        return showdateformat($data->datetime).' '.$data->due_day.' '.showdateformat($data->due_time);
-                    })
-                    ->editColumn('status_id', function($data)
-                    {
-                        $status = '';
-                        if($data['is_done'] == 1)
-                        {
-                            $status = 'Done';
-                        }
-                        elseif($data['completed'] == 1)
-                        {
-                            $status = 'Completed';
-                        }
-                        else
-                        {
-                            $status = 'Open';
-                        }
-                        return $status;
-                    })
-                    ->make(true);
+                ->addIndexColumn()
+                ->editColumn('start_date', function ($data) {
+                    return showdateformat($data->start_date) . ' ' . $data->start_day . ' ' . showdateformat($data->start_time);
+                })
+                ->editColumn('datetime', function ($data) {
+                    return showdateformat($data->datetime) . ' ' . $data->due_day . ' ' . showdateformat($data->due_time);
+                })
+                ->editColumn('status_id', function ($data) {
+                    $status = '';
+                    if ($data['is_done'] == 1) {
+                        $status = 'Done';
+                    } elseif ($data['completed'] == 1) {
+                        $status = 'Completed';
+                    } else {
+                        $status = 'Open';
+                    }
+                    return $status;
+                })
+                ->make(true);
         }
     }
 

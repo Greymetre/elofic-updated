@@ -15,6 +15,10 @@ use App\Models\LeadOpportunity;
 use App\Models\LeadTask;
 use App\Models\OpportunitieStatus;
 use App\Models\Status;
+use App\Models\TaskAssignment;
+use App\Models\TaskComment;
+use App\Models\Tasks;
+use App\Models\TaskStatusLog;
 use App\Models\User;
 use App\Models\VisitReport;
 use DB;
@@ -833,6 +837,7 @@ class LeadController extends Controller
             if (!$request->user()->hasRole('superadmin')) {
                 $lead_ids = Lead::where('assign_to', $request->user()->id)
                     ->orWhere('created_by', $request->user()->id);
+
                 if ($request->input('search') != "") {
                     $search = $request->input('search');
                     $lead_ids = Lead::where(function ($query) use ($search) {
@@ -908,6 +913,57 @@ class LeadController extends Controller
         }
     }
 
+    public function getOtherTasks(Request $request)
+    {
+        try {
+            if (!$request->user()->hasRole('superadmin')) {
+                $all_task_ids = TaskAssignment::where('user_id', $request->user()->id)->pluck('task_id');
+                $other_tasks = Tasks::with('users:id,name')->where(function ($q) use ($request, $all_task_ids) {
+                    $q->where('user_id', $request->user()->id)
+                        ->orWhereIn('id', $all_task_ids);
+                });
+            } else {
+                $other_tasks = Tasks::with('users:id,name');
+            }
+
+            if ($request->input('search') != "") {
+                $search = $request->input('search');
+                $other_tasks = $other_tasks->where(function ($query) use ($search) {
+                    $query->where('task_type', 'like', "%{$search}%")
+                        ->orWhere('descriptions', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->user_id && !empty($request->user_id)) {
+                $other_tasks->where('user_id', $request->user_id);
+            }
+            if ($request->start_date && !empty($request->start_date) && $request->end_date && !empty($request->end_date)) {
+                $other_tasks->whereBetween(DB::raw('DATE(created_at)'), [$request->start_date, $request->end_date]);
+            }
+            if ($request->status_id && !empty($request->status_id)) {
+                $other_tasks->where('status', $request->status_id);
+            }
+            $other_tasks = $other_tasks->latest()->paginate($request->pageSize ?? 30);
+
+            $other_tasks->each(function ($task) {
+                $task->due_datetime = date('d M Y | h:i A', strtotime($task->due_datetime));
+                $task->completed_at = $task->completed_at ? date('d M Y', strtotime($task->completed_at)) : '';
+            });
+            $notification_count = LeadNotification::where(['user_id' => $request->user()->id, 'read' => 0])->count();
+            return response()->json([
+                'status' => 'success',
+                'data' => $other_tasks->items(),
+                'notification_count' => $notification_count,
+                'message' => 'Tasks retrieved successfully'
+            ], $this->successStatus);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], $this->internalError);
+        }
+    }
+
     public function change_task_status(Request $request)
     {
         $validate = validator($request->all(), [
@@ -938,6 +994,93 @@ class LeadController extends Controller
                 StoreLeadNotification($lead_task->id, 'Assigned Task', $msg, $lead_task->created_by, 'task');
             }
             return response()->json(['status' => 'success', 'message' => 'Task status updated successfully.']);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Task not found.']);
+        }
+    }
+
+    public function change_other_task_status(Request $request)
+    {
+        $validate = validator($request->all(), [
+            'task_id' => 'required|exists:tasks,id',
+            'task_status' => 'required|in:pending,open,in_progress,completed',
+            'comment' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validate->errors()], 400);
+        }
+
+        $task_id = $request->task_id;
+        $task = Tasks::find($task_id);
+        $request['task_status'] = ucfirst(str_replace('_', ' ', $request->task_status));
+        $task_status = ucfirst(str_replace('_', ' ', $request->task_status)) ?? null;
+        $comment = $request->comment ?? null;
+
+        if ($task) {
+            $oldStatus = $task?->task_status ?? null;
+            $taskCreatedBy = $task->user_id ?? null;
+            if (isset($task->task_status) && $task->task_status != $task_status) {
+                if ($task_status == 'Completed') {
+                    $request['completed_at'] = date('Y-m-d H:i s');
+                } elseif ($task_status == 'Open') {
+                    $request['open_datetime'] = date('Y-m-d H:i s');
+                } elseif ($task_status == 'In progress') {
+                    $request['inprogress_datetime'] = date('Y-m-d H:i s');
+                } elseif ($task_status == 'Reopen') {
+                    $request['reopen_datetime'] = date('Y-m-d H:i s');
+                }
+            }
+            // dd($request->except(['_token', 'assigned_to']));
+            if ($task->update($request->except(['_token', 'assigned_to']))) {
+
+                if ($comment) {
+                    TaskComment::create([
+                        'task_id' => $task->id,
+                        'comment' => $comment,
+                        'user_id' => $request->user()->id
+                    ]);
+                }
+
+                if ($oldStatus !== $task_status) {
+
+                    // Store log entry
+                    TaskStatusLog::create([
+                        'task_id'         => $task->id,
+                        'previous_status' => $oldStatus,
+                        'new_status'      => $task_status,
+                        'changed_by'      => $request->user()->id,
+                        'comments'        => auth()->user()->name . ' marked the task as ' . $task_status . ' on ' . date('d-m-Y') . ' at ' . date('h:i A'),
+                    ]);
+                }
+                if ($comment) {
+                    // Store log entry
+                    $shortComment = strlen($comment) > 50 ? substr($comment, 0, 47) . '...' : $comment;
+                    TaskStatusLog::create([
+                        'task_id'         => $task->id,
+                        'previous_status' => $oldStatus,
+                        'new_status'      => $task_status,
+                        'changed_by'      => $request->user()->id,
+                        'comments'        => auth()->user()->name . ' commented on ' . date('d-m-Y') . ' at ' . date('h:i A') . ' : ' . '"' . $shortComment . '"',
+                    ]);
+                }
+
+                // If new files are uploaded
+                if (auth()->user()->id == $taskCreatedBy) {
+                    if ($request->hasFile('files')) {
+                        foreach ($request->file('files') as $file) {
+                            $task->addMedia($file)->toMediaCollection('task_admin_files');
+                        }
+                    }
+                } else {
+                    if ($request->hasFile('files')) {
+                        foreach ($request->file('files') as $file) {
+                            $task->addMedia($file)->toMediaCollection('task_assigned_user_files');
+                        }
+                    }
+                }
+                return response()->json(['status' => 'success', 'message' => 'Task status updated successfully.']);
+            }
         } else {
             return response()->json(['status' => 'error', 'message' => 'Task not found.']);
         }

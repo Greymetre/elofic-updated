@@ -26,7 +26,7 @@
         <div class="card-icon">
           <i class="material-icons">perm_identity</i>
         </div>
-        <h4 class="card-title ">{!! trans('panel.task.title_singular') !!}{!! trans('panel.global.list') !!}
+        <h4 class="card-title ">{!! trans('panel.task.title_singular') !!} {!! trans('panel.global.list') !!}
               <span class="">
                 <button class="btn btn-info mb-3 float-right" type="button" data-toggle="collapse" data-target="#filterSection" aria-expanded="false" aria-controls="filterSection">
                   <i class="material-icons">tune</i> Filters
