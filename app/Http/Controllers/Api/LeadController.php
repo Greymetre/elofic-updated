@@ -231,7 +231,7 @@ class LeadController extends Controller
                 'created_by' => $user->id,
             ]);
             if ($lead->assign_to != $request->assign_to) {
-                SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.');
+                SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.', 'lead');
                 StoreLeadNotification($lead->id, 'Assigned Lead', '🟢 You have been assigned 1 new lead.', $request->assign_to);
             }
             $lead->update([
@@ -496,7 +496,7 @@ class LeadController extends Controller
             $lead_task = LeadTask::create(['assigned_to' => $request->assigned_to, 'lead_id' => $request->lead_id, 'created_by' => $created_by, 'description' => $request->description, 'date' => $request->date, 'time' => $request->time, 'priority' => $request->priority]);
             $new = true;
 
-            SendPushNotification($request->assigned_to, '📝 A new task has been assigned to you.');
+            SendPushNotification($request->assigned_to, '📝 A new task has been assigned to you.', 'task');
             StoreLeadNotification($lead_task->id, 'Assigned Task', '📝 A new task has been assigned to you.', $request->assigned_to, 'task');
         }
 
@@ -568,7 +568,7 @@ class LeadController extends Controller
         $msg = '🎯 Lead move to opportunity ' . $cur_status->status_name .
             ': ' . Str::limit($lead_opportunity->lead->company_name, 10, '...') .
             ' by ' . Auth::user()->name;
-        SendPushNotification($lead_opportunity->lead->created_by, $msg);
+        SendPushNotification($lead_opportunity->lead->created_by, $msg, 'opportunity');
         StoreLeadNotification($lead_opportunity->id, 'New Opportunity', $msg, $lead_opportunity->lead->created_by, 'opportunity');
 
         if ($new) {
@@ -918,12 +918,12 @@ class LeadController extends Controller
         try {
             if (!$request->user()->hasRole('superadmin')) {
                 $all_task_ids = TaskAssignment::where('user_id', $request->user()->id)->pluck('task_id');
-                $other_tasks = Tasks::with('users:id,name')->where(function ($q) use ($request, $all_task_ids) {
+                $other_tasks = Tasks::with('users:id,name', 'task_department', 'task_priority', 'lead:id,company_name', 'project:id,name', 'customers:id,name')->where(function ($q) use ($request, $all_task_ids) {
                     $q->where('user_id', $request->user()->id)
                         ->orWhereIn('id', $all_task_ids);
                 });
             } else {
-                $other_tasks = Tasks::with('users:id,name');
+                $other_tasks = Tasks::with('users:id,name', 'task_department', 'task_priority', 'lead:id,company_name', 'project:id,name', 'customers:id,name');
             }
 
             if ($request->input('search') != "") {
@@ -935,7 +935,11 @@ class LeadController extends Controller
             }
 
             if ($request->user_id && !empty($request->user_id)) {
-                $other_tasks->where('user_id', $request->user_id);
+                $other_tasks->whereHas('assigned_users', function ($query) use ($request) {
+                    $query->where('user_id', $request->user_id);
+                });
+                // $task_ids = TaskAssignment::where('user_id', $request->user_id)->pluck('task_id');
+                // $other_tasks->whereIn('id', $task_ids);
             }
             if ($request->start_date && !empty($request->start_date) && $request->end_date && !empty($request->end_date)) {
                 $other_tasks->whereBetween(DB::raw('DATE(created_at)'), [$request->start_date, $request->end_date]);
@@ -947,7 +951,7 @@ class LeadController extends Controller
 
             $other_tasks->each(function ($task) {
                 $task->due_datetime = date('d M Y | h:i A', strtotime($task->due_datetime));
-                $task->completed_at = $task->completed_at ? date('d M Y', strtotime($task->completed_at)) : '';
+                $task->completed_at = $task->completed_at ? date('d M Y | h:i A', strtotime($task->completed_at)) : '';
             });
             $notification_count = LeadNotification::where(['user_id' => $request->user()->id, 'read' => 0])->count();
             return response()->json([
@@ -990,7 +994,7 @@ class LeadController extends Controller
                     ' has been completed.';
 
 
-                SendPushNotification($lead_task->created_by, $msg);
+                SendPushNotification($lead_task->created_by, $msg, 'task');
                 StoreLeadNotification($lead_task->id, 'Assigned Task', $msg, $lead_task->created_by, 'task');
             }
             return response()->json(['status' => 'success', 'message' => 'Task status updated successfully.']);
@@ -1023,6 +1027,7 @@ class LeadController extends Controller
             if (isset($task->task_status) && $task->task_status != $task_status) {
                 if ($task_status == 'Completed') {
                     $request['completed_at'] = date('Y-m-d H:i s');
+                    SendPushNotification($task->created_by, '📝 Your assigned task ' . $task->title . ' has been completed. (By-  ' . $request->user()->name . ')', 'task_management');
                 } elseif ($task_status == 'Open') {
                     $request['open_datetime'] = date('Y-m-d H:i s');
                 } elseif ($task_status == 'In progress') {

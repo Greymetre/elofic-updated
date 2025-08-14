@@ -609,8 +609,8 @@ class LeadController extends Controller
                 ]);
             }
             if (!empty($request->assign_to)) {
-                SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.');
-                StoreLeadNotification($lead->id, 'Assigned Lead', '🟢 You have been assigned 1 new lead.', $request->assign_to);
+                SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.', 'lead');
+                StoreLeadNotification($lead->id, 'Assigned Lead', '🟢 You have been assigned 1 new lead.', $request->assign_to, 'lead');
             }
         }
 
@@ -762,8 +762,8 @@ class LeadController extends Controller
         }
 
         if ($lead->assign_to != $request->assign_to) {
-            SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.');
-            StoreLeadNotification($lead->id, 'Assigned Lead', '🟢 You have been assigned 1 new lead.', $request->assign_to);
+            SendPushNotification($request->assign_to, '🟢 You have been assigned 1 new lead.', 'lead');
+            StoreLeadNotification($lead->id, 'Assigned Lead', '🟢 You have been assigned 1 new lead.', $request->assign_to, 'lead');
         }
 
         if ($lead->status != $request->status) {
@@ -825,8 +825,8 @@ class LeadController extends Controller
     {
         $update = Lead::whereIn('id', $request->lead_id)->update(['assign_to' => $request->user_id]);
         if ($update) {
-            SendPushNotification($request->user_id, '🟢 You have been assigned ' . count($request->lead_id) . ' new lead.');
-            StoreLeadNotification(null, 'Assigned Lead', '🟢 You have been assigned ' . count($request->lead_id) . ' new lead.', $request->user_id);
+            SendPushNotification($request->user_id, '🟢 You have been assigned ' . count($request->lead_id) . ' new lead.', 'lead');
+            StoreLeadNotification(null, 'Assigned Lead', '🟢 You have been assigned ' . count($request->lead_id) . ' new lead.', $request->user_id, 'lead');
             return response()->json(['status' => 'success', 'message' => 'Lead assigned successfully.']);
         } else {
             return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);

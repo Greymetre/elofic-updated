@@ -18,7 +18,7 @@ class Customers extends Authenticatable
 
     protected $table = 'customers';
 
-    protected $fillable = ['active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'shop_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'otp', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'manager_name', 'manager_phone', 'contact_number', 'parent_id', 'sap_code'];
+    protected $fillable = ['active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'shop_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'otp', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'same_address', 'manager_name', 'manager_phone', 'contact_number', 'parent_id', 'sap_code'];
     protected $appends = ['full_address'];
 
     public function message()
@@ -69,7 +69,6 @@ class Customers extends Authenticatable
     public function save_data($request)
     {
         try {
-
             $created_at = getcurentDateTime();
             if (strlen(preg_replace('/\s+/', '', $request['mobile'])) == 10) {
                 $request['mobile'] = '91' . preg_replace('/\s+/', '', $request['mobile']);
@@ -88,6 +87,7 @@ class Customers extends Authenticatable
                 'contact_number' => !empty($request['contact_number']) ? $request['contact_number'] : '',
                 'notification_id' => !empty($request['notification_id']) ? $request['notification_id'] : '',
                 'latitude' => !empty($request['latitude']) ? $request['latitude'] : null,
+                'same_address' => !empty($request['same_address']) ? $request['same_address'] : 0,
                 'longitude' => !empty($request['longitude']) ? $request['longitude'] : null,
                 'device_type' => !empty($request['device_type']) ? ucfirst($request['device_type']) : '',
                 'gender' => !empty($request['gender']) ? ucfirst($request['gender']) : '',
@@ -136,6 +136,7 @@ class Customers extends Authenticatable
             $customers->customer_code = !empty($request['customer_code']) ? $request['customer_code'] : '';
             $customers->customertype =  !empty($request['customertype']) ? $request['customertype'] : $customers->customertype;
             $customers->firmtype = !empty($request['firmtype']) ? $request['firmtype'] : null;
+            $customers->same_address = !empty($request['same_address']) ? $request['same_address'] : 0;
             //$customers->executive_id = !empty($request['executive_id'])? $request['executive_id']:null;
 
             if (isset($request['password'])) {
@@ -216,6 +217,11 @@ class Customers extends Authenticatable
     public function customeraddress()
     {
         return $this->belongsTo('App\Models\Address', 'id', 'customer_id')->select('id', 'address1', 'address2', 'landmark', 'locality', 'customer_id', 'user_id', 'country_id', 'state_id', 'district_id', 'city_id', 'pincode_id', 'zipcode');
+    }
+
+    public function customershippingaddress()
+    {
+        return $this->belongsTo('App\Models\ShippingAddress', 'id', 'customer_id')->select('id', 'address1', 'address2', 'landmark', 'locality', 'customer_id', 'user_id', 'country_id', 'state_id', 'district_id', 'city_id', 'pincode_id', 'zipcode');
     }
     public function addresslists()
     {

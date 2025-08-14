@@ -97,6 +97,7 @@ use App\Http\Controllers\LeadOpportunitiesStatusController;
 use App\Http\Controllers\ServiceBillComplaintType;
 use App\Http\Controllers\OpeningStockController;
 use App\Http\Controllers\PowerBiSettingController;
+use App\Http\Controllers\TaxInvoiceController;
 use App\Models\DealerPortalSettings;
 use App\Models\PowerBiSetting;
 use Illuminate\Http\Response;
@@ -1103,6 +1104,9 @@ Route::group(['middleware' => ['auth']], function () {
     //Power BI Settings Routes
     Route::get('power_bi_setting', [PowerBiSettingController::class, 'index']);
     Route::post('power_bi_setting/store', [PowerBiSettingController::class, 'store'])->name('power_bi_setting.store');
+
+    //Tax Invoice Routes
+    Route::resource('tax_invoice', TaxInvoiceController::class);
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

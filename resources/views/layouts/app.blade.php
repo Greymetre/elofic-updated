@@ -313,6 +313,24 @@
          transform: rotate(45deg);
       }
 
+      .sidebar li.nav-link a.no-after:after {
+         display: none !important;
+      }
+
+      .sidebar li.nav-link a.active:after {
+         position: absolute;
+         content: "";
+         width: 10px;
+         height: 10px;
+         background-color: #fff;
+         border: 3px solid #3860a4;
+         right: 15px;
+         top: 15px;
+         border-top: 0px;
+         border-left: 0px;
+         transform: rotate(45deg);
+      }  
+
       .sidebar li.nav-link a:hover {
          /* background-color: var(--primary-color);
 */
@@ -863,6 +881,15 @@
                      </div>
                   </li>
                   @endif
+                  @if(auth()->user()->can('tasks_access'))
+                  <li class="nav-link {{ request()->is('tax_invoice*') ? 'active' : '' }}">
+                     <a class="hoveradd no-after" href="{{ url('tax_invoice') }}">
+                        <i class="material-icons icon">receipt_long</i>
+                        <span>Invoice</span>
+                        <div class="d-none mobile_hide"> Invoice</div>
+                     </a>
+                  </li>
+                  @endif
                   @if(auth()->user()->can(['customer_access']))
                   <li class="nav-link {{ request()->is('customers*') || request()->is('customertype*') || request()->is('firmtype*') || request()->is('customersLogin*') || request()->is('customers-survey*') || request()->is('fields*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#customerMenu" aria-expanded="false">
@@ -1243,6 +1270,15 @@
                      </div>
                   </li>
                   @endif
+                  @if(auth()->user()->can('tasks_access'))
+                  <li class="nav-link {{ request()->is('tasks*') ? 'active' : '' }}">
+                     <a class="hoveradd no-after" href="{{ url('tasks') }}">
+                        <i class="material-icons icon">check_circle</i>
+                        <span>{!! trans('panel.sidemenu.task') !!} Managment</span>
+                        <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.task') !!} Managment</div>
+                     </a>
+                  </li>
+                  @endif
                   @if(auth()->user()->can('hr_access'))
                   <li class="nav-link {{ request()->is('reports/attendancereport*') || request()->is('reports/attendancereportSummary*') || request()->is('holidays*') || request()->is('leaves*') || request()->is('appraisal*') || request()->is('sales_weightage*') || request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') || request()->is('new-joinings*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#hr" aria-expanded="false">
@@ -1349,15 +1385,6 @@
                                  <i class="material-icons icon">local_fire_department</i>
                                  <span>Departments</span>
                                  <div class="d-none mobile_hide"> Departments</div>
-                              </a>
-                           </li>
-                           @endif
-                           @if(auth()->user()->can('tasks_access'))
-                           <li class="nav-link-btn {{ request()->is('tasks*') ? 'active' : '' }}">
-                              <a class="hoveradd2" href="{{ url('tasks') }}">
-                                 <i class="material-icons icon">check_circle</i>
-                                 <span>{!! trans('panel.sidemenu.task') !!}</span>
-                                 <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.task') !!}</div>
                               </a>
                            </li>
                            @endif

@@ -131,6 +131,8 @@ class TasksController extends Controller
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
+                    SendPushNotification($assignedUserId, '📝 You have been assigned new tasks "' . $task->title . '".', 'task_management');
+                    StoreLeadNotification($task->id, 'Assigned Task', '📝 A new task has been assigned to you.', $user->id, 'task_management');
                 }
             }
             if ($request->hasFile('files')) {
@@ -312,6 +314,8 @@ class TasksController extends Controller
             // if status is completed
             if ($task_status == 'Completed') {
                 $request['completed_at'] = date('Y-m-d H:i s');
+                SendPushNotification($task->created_by, '📝 Your assigned task '. $task->title .' has been completed. (By-  '. $request->user()->name .')', 'task_management');
+                StoreLeadNotification($task->id, 'Completed Task', '📝 Your assigned task '. $task->title .' has been completed. (By-  '. $request->user()->name .')', $task->created_by, 'task_management');
             } elseif ($task_status == 'Open') {
                 $request['open_datetime'] = date('Y-m-d H:i s');
             } elseif ($task_status == 'In progress') {
@@ -455,6 +459,9 @@ class TasksController extends Controller
     public function completed(Request $request)
     {
         if (Tasks::where('id', $request['id'])->update(['completed' => '1', 'completed_at' => getcurentDateTime()])) {
+            $task = Tasks::find($request['id']);
+            SendPushNotification($task->created_by, '📝 Your assigned task '. $task->title .' has been completed. (By-  '. $request->user()->name .')', 'task_management');
+            StoreLeadNotification($task->id, 'Completed Task', '📝 Your assigned task '. $task->title .' has been completed. (By-  '. $request->user()->name .')', $task->created_by, 'task_management');
             return response()->json(['status' => 'success', 'message' => 'Task Completed  Successfully!']);
         }
         return response()->json(['status' => 'error', 'message' => 'Error in Status Update']);

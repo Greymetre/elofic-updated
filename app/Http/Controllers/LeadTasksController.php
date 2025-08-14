@@ -166,7 +166,7 @@ class LeadTasksController extends Controller
                     ' has been completed.';
 
 
-                SendPushNotification($lead_task->created_by, $msg);
+                SendPushNotification($lead_task->created_by, $msg, 'task');
                 StoreLeadNotification($lead_task->id, 'Assigned Task', $msg, $lead_task->created_by, 'task');
             }
 
@@ -177,7 +177,7 @@ class LeadTasksController extends Controller
             $lead_task = LeadTask::create(['assigned_to'=>$request->assigned_to,'lead_id'=>$request->lead_id,'created_by'=>$created_by,'description'=>$request->description,'date'=>$request->date,'time'=>$request->time, 'priority'=>$request->priority,'status'=>$request->status]);
             $request->session()->flash('message_success',__('Lead Task Added successfully.'));
 
-            SendPushNotification($request->assigned_to, '📝 A new task has been assigned to you.');
+            SendPushNotification($request->assigned_to, '📝 A new task has been assigned to you.', 'task');
             StoreLeadNotification($lead_task->id, 'Assigned Task', '📝 A new task has been assigned to you.', $request->assigned_to, 'task');
         }
         if($request->status == 'open'){
@@ -266,7 +266,7 @@ class LeadTasksController extends Controller
                     ' has been completed.';
 
 
-                SendPushNotification($lead_task->created_by, $msg);
+                SendPushNotification($lead_task->created_by, $msg, 'task');
                 StoreLeadNotification($lead_task->id, 'Assigned Task', $msg, $lead_task->created_by, 'task');
             }
             return response()->json(['status'=>'success']);

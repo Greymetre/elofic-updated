@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Customers, UserLogin, CustomerType, FirmType, Regions, Pincode, Country, CustomerDetails, Address, Attachment, SurveyData, Field, State, City, Beat, BeatCustomer, DealIn, Division, Redemption, SchemeDetails};
+use App\Models\{Customers, UserLogin, CustomerType, FirmType, Regions, Pincode, Country, CustomerDetails, Address, Attachment, SurveyData, Field, State, City, Beat, BeatCustomer, DealIn, Division, Redemption, SchemeDetails, ShippingAddress};
 use App\Models\User;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,6 +35,7 @@ class CustomerController extends Controller
         $this->customers = new Customers();
         $this->customerdetails = new CustomerDetails();
         $this->address = new Address();
+        $this->shippingaddress = new ShippingAddress();
         $this->path = 'customers';
     }
 
@@ -408,6 +409,7 @@ class CustomerController extends Controller
                 $request['customer_id'] = $response['customer_id'];
                 $this->customerdetails->save_data($request);
                 $this->address->save_data($request);
+                $this->shippingaddress->save_data($request);
                 $attachments = $docimages->map(function ($item, $key) use ($request) {
                     $item['customer_id'] = $request['customer_id'];
                     return $item;
@@ -540,7 +542,7 @@ class CustomerController extends Controller
         ////abort_if(Gate::denies('customer_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $userids = getUsersReportingToAuth();
         $id = decrypt($id);
-        $customers = Customers::with('surveys')->find($id);
+        $customers = Customers::with('surveys', 'customershippingaddress')->find($id);
         $deals = DealIn::where('customer_id', '=', $id)->get();
         $pincodes = Pincode::where('active', '=', 'Y')->whereHas('assigncitiesusers', function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
@@ -689,6 +691,7 @@ class CustomerController extends Controller
             if ($response['status'] == 'success') {
                 $this->customerdetails->save_data($request);
                 $this->address->save_data($request);
+                $this->shippingaddress->save_data($request);
                 $attachments = $docimages->map(function ($item, $key) use ($request) {
                     $item['customer_id'] = $request['customer_id'];
                     return $item;

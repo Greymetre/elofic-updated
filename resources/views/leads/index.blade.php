@@ -244,7 +244,7 @@
       font-weight: 600;
       background: #D7F4FF;
       border-radius: 5px;
-      width: 40px;
+      width: 50px;
       height: 27px;
       display: inline-flex;
       text-align: center;

@@ -86,7 +86,7 @@ class LeadOpportunitiesController extends Controller
             $msg = '🎯 Lead move to opportunity ' . $cur_status->status_name .
                     ': ' . Str::limit($lead_opportunity->lead->company_name, 10, '...') .
                     ' by ' . Auth::user()->name;
-            SendPushNotification($lead_opportunity->lead->created_by, $msg);
+            SendPushNotification($lead_opportunity->lead->created_by, $msg, 'opportunity');
             StoreLeadNotification($lead_opportunity->id, 'New Opportunity', $msg, $lead_opportunity->lead->created_by, 'opportunity');
             return response()->json(['status' => true, 'message' => '']);
         } else {
@@ -144,7 +144,7 @@ class LeadOpportunitiesController extends Controller
         $msg = '🎯 Lead move to opportunity ' . $cur_status->status_name .
                 ': ' . Str::limit($lead_opportunity->lead->company_name, 10, '...') .
                 ' by ' . Auth::user()->name;
-        SendPushNotification($lead_opportunity->lead->created_by, $msg);
+        SendPushNotification($lead_opportunity->lead->created_by, $msg, 'opportunity');
         StoreLeadNotification($lead_opportunity->id, 'New Opportunity', $msg, $lead_opportunity->lead->created_by, 'opportunity');
 
 

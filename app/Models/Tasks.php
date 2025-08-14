@@ -57,5 +57,10 @@ class Tasks extends Model implements HasMedia
         return $this->belongsTo('App\Models\TaskProject', 'task_project_id', 'id');
     }
 
+    public function assigned_users()
+    {
+        return $this->hasMany('App\Models\TaskAssignment', 'task_id', 'id');
+    }
+
 
 }

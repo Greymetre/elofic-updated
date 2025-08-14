@@ -1178,7 +1178,7 @@ if (!function_exists('isCustomerUser')) {
 }
 
 if (!function_exists('SendPushNotification')) {
-    function SendPushNotification($user_id, $message)
+    function SendPushNotification($user_id, $message, $model='lead')
     {
         $user = User::find($user_id);
 
@@ -1193,12 +1193,13 @@ if (!function_exists('SendPushNotification')) {
             $credentials = new ServiceAccountCredentials($scopes, $credentialsPath);
             $credentials->fetchAuthToken();
             $token = $credentials->getLastReceivedToken()['access_token'];
-            $message = [
+            $messagePayload = [
                 'message' => [
                     'token' => $deviceToken,
-                    'notification' => [
+                    'data' => [
                         'title' => $title,
                         'body'  => $message,
+                        'image' => $model,
                     ],
                 ],
             ];
@@ -1207,7 +1208,7 @@ if (!function_exists('SendPushNotification')) {
                     'Authorization' => "Bearer $token",
                     'Content-Type'  => 'application/json',
                 ],
-                'json'    => $message,
+                'json'    => $messagePayload,
             ]);
             if ($response->getStatusCode() == 200) {
                 return true;
