@@ -91,7 +91,7 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
                 ]);
                 $category = LeadContact::create([
                     'name' => $row['customer_name'],
-                    'phone_number' => $row['customer_number'],
+                    'phone_number' => (string)$row['customer_number'],
                     'email' => $row['email'],
                     'lead_source' => $row['lead_source'],
                     'lead_id' => $lead->id,

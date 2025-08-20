@@ -2510,4 +2510,20 @@ class AjaxController extends Controller
         $planSOP = PlannedSOP::sum('plan_next_month_value');
         return response()->json(['status' => false, 'total_value' => $planSOP]);
     }
+
+    public function getCustomerAddress(Request $request)
+    {
+        $customer_id = $request->customer_id ?? '';
+        $customer = Customers::where('id', $customer_id)->first();
+        if($customer && !empty($customer)){
+            $data['same_address'] = $customer->same_address;
+            $data['billing_address'] = $customer->customeraddress;
+            $data['shipping_address'] = $customer->customershippingaddress;
+            $data['phone'] = $customer->mobile;
+            $data['gstin_no'] = $customer->customerdetails?->gstin_no;
+            return response()->json(['status' => true, 'data' => $data]);
+        }else{
+            return response()->json(['status' => false]);
+        }
+    }
 }

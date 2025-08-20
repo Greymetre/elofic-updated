@@ -172,8 +172,8 @@ class TasksDataTable extends DataTable
         $user_id = $request->user_id??null;
         $start_date = $request->start_date??null;
         $end_date = $request->end_date??null;
-        $assignedTaskIds = TaskAssignment::where('user_id', auth()->user()->id)->pluck('task_id');
         $userids = getUsersReportingToAuth();
+        $assignedTaskIds = TaskAssignment::whereIn('user_id', $userids)->pluck('task_id');
 
         $finalQuery = $model->with([
                 'users',
@@ -190,7 +190,10 @@ class TasksDataTable extends DataTable
             });
 
         if (auth()->user()->roles->pluck('name')->first() !== 'superadmin') {
-            $finalQuery->whereIn('id', $assignedTaskIds);
+            $finalQuery->where(function ($q) use ($assignedTaskIds, $userids) {
+                $q->whereIn('id', $assignedTaskIds)
+                  ->orWhereIn('created_by', $userids);
+            });
         }
 
         if($status){

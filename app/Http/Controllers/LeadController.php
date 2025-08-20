@@ -131,7 +131,7 @@ class LeadController extends Controller
         // dd(auth()->user()->hasRole('superadmin'));
         if (!auth()->user()->hasRole('superadmin')) {
             $user_ids = getUsersReportingToAuth();
-            $leads->where('assign_to', $user_ids);
+            $leads->whereIn('assign_to', $user_ids);
         }
 
         $leads = $leads->orderBy('created_at', 'desc')->select(\DB::raw(with(new Lead)->getTable() . '.*'))->groupBy('id');

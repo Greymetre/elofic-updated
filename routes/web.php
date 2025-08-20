@@ -1107,6 +1107,8 @@ Route::group(['middleware' => ['auth']], function () {
 
     //Tax Invoice Routes
     Route::resource('tax_invoice', TaxInvoiceController::class);
+    Route::post('add_payment_term', [TaxInvoiceController::class, 'add_payment_term'])->name('add_payment_term');
+    Route::post('add_tax', [TaxInvoiceController::class, 'add_tax'])->name('add_tax');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);
@@ -1186,6 +1188,8 @@ Route::any('getSubCategory', [AjaxController::class, 'getSubCategory']);
 Route::any('getProductInfoListBySubcategory', [AjaxController::class, 'getProductInfoListBySubcategory']);
 Route::any('getFullDetailsOfProduct', [AjaxController::class, 'getFullDetailsOfProduct']);
 Route::any('planned-sop-fore-total', [AjaxController::class, 'getplannedForCast'])->name('getplannedForCast');
+
+Route::any('getCustomerAddress', [AjaxController::class, 'getCustomerAddress']);
 
 //Clear Cache facade value:
 Route::get('/clear-cache', function () {
