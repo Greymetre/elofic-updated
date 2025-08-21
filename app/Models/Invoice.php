@@ -4,15 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Invoice extends Model
+class Invoice extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory,InteractsWithMedia;
 
     protected $fillable = [
         'customer_id',
-        'gst',
-        'gst_no',
         'place_of_supply',
         'invoice_no',
         'order_no',
@@ -23,10 +23,13 @@ class Invoice extends Model
         'sub_total',
         'discount_type',
         'discount',
+        'discount_amount',
         'tds',
         'tds_amount',
-        't_c',
+        'adjustment',
         'grand_total',
+        'customer_notes',
+        't_c'
     ];
 
     /**
@@ -45,5 +48,10 @@ class Invoice extends Model
     public function details()
     {
         return $this->hasMany(InvoiceDetail::class, 'invoice_id');
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('invoice_files');
     }
 }

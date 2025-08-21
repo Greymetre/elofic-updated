@@ -9,82 +9,80 @@ use App\Models\PaymentTerm;
 use App\Models\Product;
 use App\Models\State;
 use App\Models\TaxInvoiceTax;
+use App\Models\TaxInvoiceTds;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\In;
 use Yajra\DataTables\Facades\DataTables;
 
 class TaxInvoiceController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->dev) {
-            if ($request->ajax()) {
-                $invoices = Invoice::with('customer')->latest();
-                return DataTables::of($invoices)
-                    ->addIndexColumn()
-                    ->editColumn('status', function ($data) {
-                        return '<span class="badge badge-paid">Paid</span>';
-                    })
-                    ->rawColumns(['status'])
-                    ->make(true);
-            }
-            return view('taxinvoice.index');
-        } else {
-            return view('work_in_progress');
+        if ($request->ajax()) {
+            $invoices = Invoice::with('customer')->latest();
+            return DataTables::of($invoices)
+                ->addIndexColumn()
+                ->editColumn('status', function ($data) {
+                    return '<span class="badge badge-paid">Paid</span>';
+                })
+                ->rawColumns(['status'])
+                ->make(true);
         }
+        return view('taxinvoice.index');
     }
     public function create(Request $request)
     {
-        if ($request->dev) {
-            $payment_terms = PaymentTerm::all();
-            $products = Product::where('active', 'Y')->get();
-            $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
-            $states = State::where('active', 'Y')->select('id', 'state_name')->get();
-            $users = User::where('active', 'Y')->select('id', 'name')->get();
+        $payment_terms = PaymentTerm::all();
+        $products = Product::where('active', 'Y')->get();
+        $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
+        $states = State::where('active', 'Y')->select('id', 'state_name')->get();
+        $users = User::where('active', 'Y')->select('id', 'name')->get();
 
-            $lastInvoice = Invoice::orderBy('id', 'desc')->first();
-            if ($lastInvoice) {
-                $parts = explode('/', $lastInvoice->invoice_no);
-                $prefix = $parts[0];
-                $lastNumber = intval(end($parts));
-                $nextNumber = $lastNumber + 1;
-                $formattedNumber = str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
-            } else {
-                $currentYear = date('y'); // e.g. 25
-                if (date('m') >= 4) {
-                    $startYear = $currentYear;
-                    $endYear   = $currentYear + 1;
-                } else {
-                    $startYear = $currentYear - 1;
-                    $endYear   = $currentYear;
-                }
-                $prefix = 'INV-' . str_pad($startYear, 2, '0', STR_PAD_LEFT) . '-' . str_pad($endYear, 2, '0', STR_PAD_LEFT);
-                $formattedNumber = '01';
-            }
-            $invoiceNumber = $prefix . '/' . $formattedNumber;
-            if (strpos($invoiceNumber, '/') !== false) {
-                [$prefixValue, $nextNumberValue] = explode('/', $invoiceNumber);
-            } else {
-                $prefixValue = $invoiceNumber;
-                $nextNumberValue = '';
-            }
-
-            $all_tax = TaxInvoiceTax::all();
-
-            return view('taxinvoice.create', compact(
-                'payment_terms',
-                'products',
-                'customers',
-                'states',
-                'invoiceNumber',
-                'prefixValue',
-                'nextNumberValue',
-                'users',
-                'all_tax'
-            ));
+        $lastInvoice = Invoice::orderBy('id', 'desc')->first();
+        if ($lastInvoice) {
+            $parts = explode('/', $lastInvoice->invoice_no);
+            $prefix = $parts[0];
+            $lastNumberPart = end($parts);
+            $digitLength = strlen($lastNumberPart);
+            $nextNumber = intval($lastNumberPart) + 1;
+            $formattedNumber = str_pad($nextNumber, $digitLength, '0', STR_PAD_LEFT);
         } else {
-            return view('work_in_progress');
+            $currentYear = date('y'); // e.g. 25
+            if (date('m') >= 4) {
+                $startYear = $currentYear;
+                $endYear   = $currentYear + 1;
+            } else {
+                $startYear = $currentYear - 1;
+                $endYear   = $currentYear;
+            }
+            $prefix = 'INV-' . str_pad($startYear, 2, '0', STR_PAD_LEFT) . '-' . str_pad($endYear, 2, '0', STR_PAD_LEFT);
+            $formattedNumber = '01';
         }
+        $invoiceNumber = $prefix . '/' . $formattedNumber;
+        if (strpos($invoiceNumber, '/') !== false) {
+            [$prefixValue, $nextNumberValue] = explode('/', $invoiceNumber);
+        } else {
+            $prefixValue = $invoiceNumber;
+            $nextNumberValue = '';
+        }
+
+        $all_tax = TaxInvoiceTax::all();
+        $all_tds = TaxInvoiceTds::all();
+
+        return view('taxinvoice.create', compact(
+            'payment_terms',
+            'products',
+            'customers',
+            'states',
+            'invoiceNumber',
+            'prefixValue',
+            'nextNumberValue',
+            'users',
+            'all_tax',
+            'all_tds'
+        ));
     }
     public function add_payment_term(Request $request)
     {
@@ -102,8 +100,72 @@ class TaxInvoiceController extends Controller
         $tax->save();
         return response()->json(['status' => true, 'message' => 'Tax Added Successfully!', 'data' => $tax]);
     }
+    public function add_tds(Request $request)
+    {
+        $tds = new TaxInvoiceTds();
+        $tds->tax_name = $request->tax_name;
+        $tds->rate = $request->rate;
+        $tds->section = $request->section;
+        $tds->save();
+        return response()->json(['status' => true, 'message' => 'TDS Added Successfully!', 'data' => $tds]);
+    }
     public function store(Request $request)
     {
-        dd($request->all());
+        dd('Work in progress');
+        $validator = Validator::make($request->all(), [
+            'customer_id' => 'required',
+            'invoice_no' => 'required|unique:invoices',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+        $invoice = new Invoice();
+        $invoice->customer_id          =   $request->customer_id;
+        $invoice->place_of_supply      =   $request->place_of_supply;
+        $invoice->invoice_no           =   $request->invoice_no;
+        $invoice->order_no             =   $request->order_no;
+        $invoice->invoice_date         =   $request->invoice_date;
+        $invoice->payment_term         =   $request->payment_term;
+        $invoice->due_date             =   $request->due_date;
+        $invoice->user_id              =   $request->user_id;
+        $invoice->sub_total            =   $request->sub_total;
+        $invoice->discount_type        =   $request->discount_type;
+        $invoice->discount             =   $request->discount;
+        $invoice->discount_amount      =   $request->discount_amount;
+        $invoice->tds                  =   $request->tds ?? 0.00;
+        $invoice->tds_amount           =   $request->tds_amount ?? 0.00;
+        $invoice->adjustment           =   $request->adjustment ?? 0.00;
+        $invoice->grand_total          =   $request->grand_total;
+        $invoice->customer_notes       =   $request->customer_notesss;
+        $invoice->t_c                  =   $request->t_c;
+        $invoice->save();
+
+        if ($request->hasFile('files') && count($request->file('files')) > 0) {
+            foreach ($request->file('files') as $file) {
+                $invoice->addMedia($file)->toMediaCollection('invoice_files');
+            }
+        }
+
+        foreach ($request->product_id as $k => $product) {
+            $invoice->details()->create([
+                'product_id' => $request->product_id[$k],
+                'product_dec' => $request->product_dec[$k],
+                'hsn_sac' => $request->hsn_sac[$k],
+                'quantity' => $request->quantity[$k],
+                'mrp' => $request->mrp[$k],
+                'tax' => $request->tax[$k] ?? 0.00,
+                'tax_amount' => $request->tax_amount[$k],
+                'amount' => $request->amount[$k]
+            ]);
+        }
+        return redirect()->route('tax_invoice.show', $invoice->id);
+    }
+
+    public function show(Invoice $invoice)
+    {
+        return view('taxinvoice.show', compact('invoice'));
     }
 }

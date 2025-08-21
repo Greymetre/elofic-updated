@@ -1,0 +1,554 @@
+<x-app-layout>
+  <style>
+    .page {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 6px 18px rgba(20, 30, 40, 0.08);
+      padding: 20px 28px;
+      box-sizing: border-box;
+      border-radius: 6px;
+    }
+
+    .qrcode {
+      display: flex;
+      align-items: center;
+  }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .company {
+      font-weight: 700;
+      font-size: 18px;
+      color: #111;
+    }
+
+    .company small {
+      display: block;
+      font-weight: 400;
+      color:#000;
+      margin-top: 0px;
+      font-size: 12px;
+    }
+
+    .meta {
+      text-align: right;
+      font-size: 14px;
+    }
+
+    .meta .label {
+      color: var(--muted);
+      display: block;
+      font-size: 12px;
+    }
+
+    .meta .value {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .addresses {
+      display: flex;
+      border: 1px solid #00000057;
+    }
+
+    .addr {
+      flex: 1;
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 0px;
+      min-width: 0;
+    }
+
+    .addr h4 {
+      margin: 0 0 6px 0;
+      font-size: 13px;
+    }
+
+    .addr p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    table.items {
+      width: 100%;
+      border-collapse: collapse;
+      /*margin-top: 12px;*/
+    }
+
+    table.items thead th {
+      text-align: left;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 1px 8px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    table.items tbody td {
+      padding: 3px 8px;
+      vertical-align: top;
+      font-size: 13px;
+      border-bottom: 1px dashed #eee;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .totals {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .totals table {
+      width: 360px;
+      border-collapse: collapse;
+    }
+
+    .totals td {
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    .totals tr.total-row td {
+      font-weight: 700;
+      font-size: 15px;
+      border-top: 2px solid var(--border);
+    }
+
+    .notes {
+      margin-top: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .notes .left,
+    .notes .right {
+      flex: 1;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .signature {
+      margin-top: 30px;
+      text-align: right;
+      font-size: 13px;
+    }
+
+    .bank {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .qr {
+      width: 110px;
+      height: 110px;
+      border: 1px dashed #ddd;
+      display: inline-block;
+      text-align: center;
+      line-height: 110px;
+      color: #999;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    /* Controls */
+    .controls {
+      max-width: 900px;
+      margin: 18px auto;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .logo img {
+      width: 200px;
+      height: auto;
+    }
+
+    table.items {
+      border: 1px solid #00000057;
+      border-bottom: 0px!important;
+    }
+
+    table.items thead th {
+      border: 1px solid #00000057;
+      background: #eee;
+      color: #000;
+      font-weight: 600 !important;
+    }
+
+    table.items tbody td {
+      border: 1px solid #00000057;
+    }
+
+
+    /* Print-friendly / A4 sizing when generating PDF */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .page {
+        box-shadow: none;
+        margin: 0;
+        border-radius: 0;
+        max-width: none;
+      }
+
+      .controls {
+        display: none;
+      }
+    }
+  </style>
+  <section class="invocie_main">
+    <div class="container-fluid">
+      <div class="controls">
+        <button id="downloadPdf" class="btn">Download PDF</button>
+        <button id="printBtn" class="btn secondary">Print</button>
+      </div>
+
+      <div id="invoice" class="page">
+        <header>
+          <div class="logo">
+            <img src="https://demo.fieldkonnect.io/public/assets/img/g_logo.png">
+          </div>
+          <div>
+            <div class="company">GREYMETRE CONSULTANTS <br /><small>PRIVATE LIMITED</small></div>
+            <small style="display:block;margin-top:0px;color:#000;font-size:12px;font-weight: 400;line-height: 18px;">
+              591, Scheme 114, Part 1 Dewas Naka Niranjanpur<br />
+              Indore Madhya Pradesh 452010, India<br />
+              GSTIN: 23AAICG5510G1ZZ
+            </small>
+          </div>
+
+          <div class="meta">
+
+            <h2 style="text-transform: uppercase;font-size: 20px;color: #000; font-weight: 600;">Tax Invocie</h2>
+          </div>
+        </header>
+
+        <div class="addresses" style="border-bottom:0px!important;">
+          <div class="addr" style="border-right: 1px solid #00000057;">
+            <table style="width:100%;">
+              <tr>
+                <td style="color:#000; font-weight: 400; width: 60%;font-size: 12px; line-height: 16px;">#</td>
+                <td style="color:#000; font-weight: 500; width: 40%; font-size: 12px; line-height: 16px;"> : INV-000002</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Invoice Date</td>
+                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : 05-12-2020</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Terms</td>
+                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : Due on Receipt</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Due Date</td>
+                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : 05-12-2020</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="addr">
+            <table style="width:100%;">
+              <tr>
+                <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Place Of Supply</td>
+                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : Gujarat (24)</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="addresses" style="border-bottom:0px!important;">
+          <div class="addr" style="border-right: 1px solid #00000057; padding: 0px;">
+            <table style="width:100%;">
+              <thead>
+                <tr>
+                  <th style="background:#eee;padding: 5px 5px;color: #000;font-weight: 600 !important;">Bill To</th>
+                </tr>
+              </thead>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px; padding-top:5px;">SHUBH LABH CASTING LLP</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">Invoice Date</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;line-height: 20px;">Terms</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">Due Date</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="addr" style="padding:0px;">
+            <table style="width:100%;">
+              <thead>
+                <tr>
+                  <th style="background:#eee;padding: 5px 5px;color: #000;font-weight: 600 !important;">Ship To</th>
+                </tr>
+              </thead>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; padding-top:5px; line-height: 20px;">PLOT NO. 6, SURVEY NO. 254-1, OPP. CHHARODI RAILWAY STATION</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">AHMEDABAD</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">382170 Gujarat</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">India</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <table class="items" aria-labelledby="items">
+          <thead>
+             <tr>
+              <th rowspan="2" style="width:45%; color: #000; ">Item & Description</th>
+              <th rowspan="2" style="width:12%; color: #000; ">HSN/SAC</th>
+              <th rowspan="2" style="width:8%; color: #000; " class="center">Qty</th>
+              <th rowspan="2" style="width:8%; color: #000; " class="center">Rate</th>
+              <th colspan="2"  style="width:10%; color: #000;  text-align: center;" class="center">IGST</th>
+              <th rowspan="2" style="width:13%; color: #000; " class="right">Amount</th>
+            </tr>
+            <tr>
+              <th  style="width:10%; color: #000;" class="center">%</th>
+              <th  style="width:10%; color: #000;" class="center">Amt</th>
+              
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:#000; font-weight: 400;">
+                <strong>Program Management Fees</strong>
+                <div style="color:#000;font-size:12px;margin-top:0px; line-height: 15px;">Month of Nov 2020</div>
+              </td>
+              <td style="color:#000;font-weight: 400;">9983</td>
+              <td style="color:#000;font-weight: 400;" class="center">1.00</td>
+              <td style="color:#000;font-weight: 400;" class="right">25,000.00</td>
+              <td style="color:#000;font-weight: 400;" class="center">18%</td>
+              <td style="color:#000;font-weight: 400;" class="center">4500</td>
+              <td style="color:#000;font-weight: 400;" class="right">25,000.00</td>
+            </tr>
+            <tr>
+              <td colspan="3" style="border:0px!important;">
+                <p style="margin-bottom:0px; color:#000; font-weight: 400;">Total In Words</p>
+                <p style="font-weight: bold; color:#000;line-height: 10px;">Indian Rupee Twenty-Nine Thousand Five Hundred Only</p>
+              </td>
+              <td colspan="4">
+                 <table style="width: 100%; border:0px;" border="0">
+                  <tr>
+                    <td style="border:0px; padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">Sub Total</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">25,000.00</td>
+                  </tr>
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">IGST18 (18%)</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">4,500.00</td>
+                  </tr>
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px; font-weight: bold;">Total</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px;font-weight: bold;">₹29,500.00</td>
+                  </tr>
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">Payment Made</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px; color:red;">(-) 27,625.00</td>
+                  </tr>
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px;">Amount Withheld</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;color:red;">(-) 1,875.00</td>
+                  </tr>
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px; font-weight: bold;">Balance Due</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px; font-weight: bold;">₹0.00</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr></tr>
+            <tr>
+             <td rowspan="2" colspan="3" style="border:0px!important;">
+               
+                <p style="color:#000; font-weight: 400;">Note</p>
+                <p style="color:#000; font-weight: 400; margin-bottom: 0px; line-height: 16px;">Bank Details :-<br>
+                  Bank Name - Asix Bank Ltd<br>
+                  Account No -920020063736921<br>
+                  IFSC Code -UTIB0000456<br>
+                  Branch -Dewas MP</p><br>
+             </td>
+             <td colspan="4" style="text-align: center; vertical-align: middle;">
+                 <img src="https://demo.fieldkonnect.io/public/assets/img/sill.png">
+                <p style="color:#000; font-size:12px; font-weight: 400; margin-bottom: 0px;"> Authorized Signature</p>
+
+             </td>
+            </tr>
+             <tr></tr>
+             <tr>
+             <td rowspan="2" colspan="3" style="border:0px!important;">
+                <p style="color:#000; font-weight: 400; font-size: 12px;">Thanks for your business.</p>
+                   <div class="qrcode">
+                  <img src="https://demo.fieldkonnect.io/public/assets/img/qr_code.png" style="width:100px;height: 100px;object-fit:cover;">
+                 <p style="margin-left: 10px; color:#000; font-weight: 400; font-size:12px;"> Scan the QR code to view the configured information.</p>
+                </div>
+             </td>
+            </tr>
+            <!-- <tr>
+              <td colspan="3">
+                <p style="margin-bottom:0px; color:#000;">Total In Words</p>
+                <p style="font-weight: bold; color:#000;">Indian Rupee Twenty-Nine Thousand Five Hundred Only</p>
+
+                <p style="color:#000; font-weight: 400;">Note</p>
+                <p style="color:#000; font-weight: 400; margin-bottom: 0px; line-height: 16px;">Bank Details :-<br>
+                  Bank Name - Asix Bank Ltd<br>
+                  Account No -920020063736921<br>
+                  IFSC Code -UTIB0000456<br>
+                  Branch -Dewas MP</p><br>
+                      
+                  <p style="color:#000; font-weight: 400; font-size: 12px;">Thanks for your business.</p>
+                   <div class="qrcode">
+                  <img src="https://demo.fieldkonnect.io/public/assets/img/qr_code.png" style="width:100px;height: 100px;object-fit:cover;">
+                 <p style="margin-left: 10px; color:#000; font-weight: 400; font-size:12px;"> Scan the QR code to view the configured information.</p>
+                </div>
+              </td>
+              <td colspan="4">
+
+                <table style="width: 100%; border:0px;" border="0">
+                  <tr>
+                    <td style="border:0px; padding: 0px 8px; text-align:right;color: #000;font-weight: 400;">Sub Total</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;">25,000.00</td>
+                  </tr>
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;">IGST18 (18%)</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;">4,500.00</td>
+                  </tr>
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; font-weight: bold;">Total</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; font-weight: bold;">₹29,500.00</td>
+                  </tr>
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;">Payment Made</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; color:red;">(-) 27,625.00</td>
+                  </tr>
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;">Amount Withheld</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;color:red;">(-) 1,875.00</td>
+                  </tr>
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; font-weight: bold;">Balance Due</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; font-weight: bold;">₹0.00</td>
+                  </tr>
+                  <tr>
+                    <td  colspan="2" style="height: 50px; border:0px;">  
+                    </td>
+                   
+                  </tr>
+                  <tr>
+                    <td  colspan="2" style="border:0px;padding: 0px 8px; text-align:center;color: #000;font-weight: 400; font-weight: bold;">
+                        <img src="https://demo.fieldkonnect.io/public/assets/img/sill.png">
+                       <p style="color:#000; font-size:12px; font-weight: 400;"> Authorized Signature</p>
+                    </td>
+                   
+                  </tr>
+                </table>
+              </td>
+            </tr> -->
+          </tbody>
+        </table>
+         <table class="items" aria-labelledby="items">
+          <thead>
+             <tr>
+              <th rowspan="2" style="width:45%; color: #000;">HSN/SAC</th>
+              <th rowspan="2" style="width:12%; color: #000;"> Taxable Amount</th>
+              <th style="width:8%; color: #000; text-align: center;" class="center" colspan="2">IGST</th>
+              <th style="width:13%; color: #000;" class="right" rowspan="2">Total Tax Amount  </th>
+            </tr>
+            <tr>
+              <th style="width:8%; color: #000; text-align: center;" class="center">Rate</th>
+              <th style="width:12%; color: #000; text-align: center;" class="right">Anount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:#000; font-weight: 400;">
+               9983
+              </td>
+              <td style="color:#000;font-weight: 400; text-align: right;">25,000.00</td>
+              <td style="color:#000;font-weight: 400; text-align: right;" class="center">18%</td>
+              <td style="color:#000;font-weight: 400; text-align: right;" class="right">4,500.00</td>
+              <td style="color:#000;font-weight: 400; text-align: right;" class="center">4,500.00</td>
+            </tr>
+             <tr>
+              <td style="color:#000; font-weight: 400;">
+               Total
+              </td>
+              <td style="color:#000;font-weight: 700; text-align: right;">25,000.00</td>
+              <td colspan="2" style="color:#000;font-weight: 700; text-align: right;" class="right">4,500.00</td>
+              <td style="color:#000;font-weight: 700; text-align: right;" class="center">4,500.00</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+    // Download as PDF using html2pdf
+    const btn = document.getElementById('downloadPdf');
+    const printBtn = document.getElementById('printBtn');
+
+    btn.addEventListener('click', () => {
+      const element = document.getElementById('invoice');
+
+      const opt = {
+        margin:       [8, 8, 8, 8], // top, left, bottom, right (mm treated by html2pdf)
+        filename:     'Invoice_INV-000002.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      // generate the pdf
+      html2pdf().set(opt).from(element).save();
+    });
+
+    printBtn.addEventListener('click', () => {
+      window.print();
+    });
+  </script>
+  </section>
+</x-app-layout>

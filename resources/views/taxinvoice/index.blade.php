@@ -104,6 +104,7 @@
       background-color: #3b5998;
       color: #fff;
       border: none;
+      cursor: pointer;
     }
 
     .btn-circle:hover {
@@ -340,9 +341,11 @@
                 </div>
 
                 <!-- Round Button -->
-                <button class="btn-circle">
+                 <a href="{{ route('tax_invoice.create') }}" title="Add Invoice">
+                <button class="btn-circle" title="Add Invoice">
                   <i class="fas fa-plus"></i>
                 </button>
+              </a>
               </div>
 
             </div>

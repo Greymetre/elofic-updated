@@ -351,7 +351,7 @@
       font-size: 16px !important;
       color: #111827 !important;
       padding: 8px 12px;
-      height: 45px;
+      height: 40px;
       /* allow natural height */
       text-indent: 10px;
     }
@@ -629,6 +629,15 @@
     }
   </style>
   <section class="invocie_main">
+    @if (count($errors) > 0)
+    <div class="alert alert-danger">
+      <ul>
+        @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+      </ul>
+    </div>
+    @endif
     <div class="container-fluid">
       <div class="card p-4">
         <form action="{{ route('tax_invoice.store') }}" method="post" enctype="multipart/form-data">
@@ -704,8 +713,8 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="form-group mb-3">
-                <label for="user_id" class="othercolor">Salesperson</label>
+              <div class="form-group mb-3 bmd-form-group">
+                <label for="user_id" class="othercolor bmd-label-static">Salesperson</label>
                 <select class="form-control select2 custom-select-box" id="user_id" name="user_id">
                   <option value="">Select Salesperson</option>
                   @if(!empty($users))
@@ -717,8 +726,8 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="form-group mb-3">
-                <label for="payment_term" class="othercolor">Terms</label>
+              <div class="form-group mb-3 bmd-form-group">
+                <label for="payment_term" class="othercolor bmd-label-static">Terms</label>
                 <select class="form-control select2 custom-select-box" id="payment_term" name="payment_term">
                   <option value="">Select Terms</option>
                   @if(!empty($payment_terms))
@@ -797,7 +806,8 @@
                   class="form-control customerNotes "
                   id="customerNotes"
                   rows="4"
-                  placeholder="Bank Details :- Bank Name - Axis Bank Ltd"></textarea>
+                  name="customer_notes"
+                  placeholder="Note..."></textarea>
               </div>
             </div>
             <div class="col-md-4">
@@ -809,13 +819,13 @@
                 <span class="upload-label">Upload File</span>
                 <span class="upload-note">You can upload a maximum of 10 files, 10MB each</span>
               </div>
-              <input type="file" id="fileUpload" multiple />
+              <input type="file" id="fileUpload" name="files[]" multiple />
             </div>
             <div class="col-md-4">
               <div class="summary-box">
                 <div class="form-group d-flex justify-content-between align-items-center mb-2">
                   <label class="summary-label mb-0">Sub Total</label>
-                  <span id="sub_total_span">0.00</span>
+                  <input type="text" class="" value="0.00" name="sub_total" id="sub_total" style="text-align: right;font-weight: 500;color: #000 !important;" readonly>
                 </div>
                 <div class="form-group d-flex align-items-center">
                   <div class="col-3 px-0">
@@ -829,7 +839,7 @@
                     </select>
                   </div>
                   <div class="col-3 px-0 text-right">
-                    <span id="discount_span">0.00</span>
+                    <input type="text" class="" value="0.00" name="discount_amount" id="discount_amount" style="text-align: right;font-weight: 500;color: #000 !important;" readonly>
                   </div>
                 </div>
 
@@ -841,14 +851,18 @@
                     <label class="summary-label mb-0" for="TDS">TDS</label>
                   </div>
                   <div class="col-6 px-1">
-                    <select class="form-control form-control-sm">
-                      <option>Select a Tax</option>
-                      <option>Tax 1</option>
-                      <option>Tax 2</option>
+                    <select class="form-control form-control-sm" name="tds" id="tds">
+                      <option value="">Select TDS</option>
+                      <option value="__add__"> ➕ Add New </option>
+                      @if(!empty($all_tds))
+                      @foreach($all_tds as $tds)
+                      <option value="{!! $tds['id'] !!}" data-rate="{!! $tds['rate'] !!}="">{!! $tds['tax_name'] !!} ({!! $tds['rate'] !!}% )</option>
+                      @endforeach
+                      @endif
                     </select>
                   </div>
                   <div class="col-3 px-0 text-right">
-                    <span>0.00</span>
+                    <input type="text" class="" value="0.00" name="tds_amount" style="text-align: right;font-weight: 500;color: #000 !important;" id="tds_amount" readonly>
                   </div>
                 </div>
 
@@ -858,18 +872,21 @@
                   </div>
                   <div class="col-6 px-1">
                     <input
-                      type="text"
+                      type="number"
                       class="form-control form-control-sm"
+                      step="0.01"
+                      value="0.00"
                       id="adjustment"
+                      name="adjustment"
                       placeholder="Text" />
                   </div>
                   <div class="col-3 px-0 text-right">
-                    <span>0.00</span>
+                    <span id="adjustment_amount">0.00</span>
                   </div>
                 </div>
                 <div class="form-group d-flex justify-content-between align-items-center mt-2 pt-3 border-top">
                   <div class="total-label">Total ( ₹ )</div>
-                  <div class="total-value" id="grand_total_span">0.00</div>
+                  <div class="total-value"><input type="text" class="" value="0.00" name="grand_total" style="text-align: right;font-weight: 500;color: #000 !important;" id="grand_total" readonly></div>
                 </div>
               </div>
             </div>
@@ -882,7 +899,8 @@
                   class="form-control customerNotes "
                   id="customerNotes"
                   rows="4"
-                  placeholder="Bank Details :- Bank Name - Asix Bank Ltd"></textarea>
+                  name="t_c"
+                  placeholder="Terms & Conditions ...."></textarea>
               </div>
 
             </div>
@@ -890,7 +908,7 @@
           <div class="row">
             <div class="col-md-12">
               <div class="button-section">
-                <button type="button" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Save</button>
                 <button type="button" class="btn btn-outline-primary">Cancel</button>
               </div>
             </div>
@@ -1009,6 +1027,45 @@
           </div>
           <div class="modal-footer">
             <button type="button" id="addTax" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- Modal 4 -->
+    <div class="modal fade" id="tdsModal" tabindex="-1" role="dialog" aria-labelledby="newTdsModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h5 class="modal-title" id="newTdsModalLabel">New TDS</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-12">
+                <label for="tax_name_tds" class="othercolor">Tax Name</label>
+                <input type="text" class="form-control custom-input-box"
+                  id="tax_name_tds" name="tax_name_tds">
+              </div>
+              <div class="col-md-12">
+                <label for="rate" class="othercolor">Rate</label>
+                <input type="text" class="form-control custom-input-box"
+                  id="rate" name="rate">
+              </div>
+              <div class="col-md-12">
+                <label for="section" class="othercolor">Section</label>
+                <input type="text" class="form-control custom-input-box"
+                  id="section" name="section">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="addTds" class="btn btn-primary">Save</button>
             <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
           </div>
 
@@ -1290,7 +1347,7 @@
               sub_total += parseFloat($(this).val());
             });
 
-            $('#sub_total_span').text(sub_total.toFixed(2));
+            $('#sub_total').val(sub_total.toFixed(2));
           },
           error: function() {
             alert("Something went wrong while fetching product info.");
@@ -1311,7 +1368,7 @@
         sub_total += parseFloat($(this).val());
       });
 
-      $('#sub_total_span').text(sub_total.toFixed(2));
+      $('#sub_total').val(sub_total.toFixed(2));
       $('#discount').trigger('input');
     });
     $(document).on('input', '.mrp_rowchange', function() {
@@ -1326,7 +1383,7 @@
         sub_total += parseFloat($(this).val());
       });
 
-      $('#sub_total_span').text(sub_total.toFixed(2));
+      $('#sub_total').val(sub_total.toFixed(2));
       $('#discount').trigger('input');
     });
 
@@ -1345,6 +1402,17 @@
         var tax = parseFloat($(this).find('option:selected').data('rate'));
         var tax_amount = (amount * tax) / 100;
         row.find('input[name="tax_amount[]"]').val(tax_amount.toFixed(2));
+        calculateTaxes();
+      }
+    });
+    $(document).on('change', '#tds', function(e) {
+      const selectedVal = $(this).val();
+      if (selectedVal === '__add__') {
+        $(this).val('');
+        $('#tdsModal').modal('show');
+        return;
+      } else {
+        console.log('tds');
         calculateTaxes();
       }
     });
@@ -1399,12 +1467,63 @@
         }
       });
     });
+    $('#addTds').on('click', function(e) {
+      e.preventDefault();
+
+      var tax_name = $('input[name="tax_name_tds"]').val();
+      var rate = $('input[name="rate"]').val();
+      var section = $('input[name="section"]').val();
+
+      if (!tax_name || !rate) {
+        swal({
+          toast: true,
+          position: 'top-end',
+          type: 'warning', // modern SweetAlert2 uses `icon`
+          title: 'Both Tax Name and Rate are required!',
+          showConfirmButton: false,
+          timer: 3000
+        });
+        return;
+      }
+
+      $.ajax({
+        url: '{{ route("add_tds") }}',
+        method: 'POST',
+        data: {
+          tax_name: tax_name,
+          rate: rate,
+          section: section
+        },
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+          if (response.status) {
+            $('#tdsModal').modal('hide');
+              $('#tds').find('option:last').after(`<option value="${response.data.id}" data-rate="${response.data.rate}" selected>
+                        ${response.data.tax_name} (${response.data.rate}%)
+                    </option>`);
+                    $('#tds').val(response.data.id).trigger('change');
+          }
+        },
+        error: function(xhr) {
+          console.error(xhr.responseText);
+          alert('Failed to add tds. Please try again.');
+        }
+      });
+    });
 
     $('#discount').on('input', function() {
       calculateTaxes();
     });
 
     $('#discount_type').on('change', function() {
+      calculateTaxes();
+    });
+
+    $('#adjustment').on('input', function() {
+      var adjustment = parseFloat($(this).val()) || 0;
+      // $('#adjustment_amount').text(adjustment.toFixed(2));
       calculateTaxes();
     });
 
@@ -1423,13 +1542,21 @@
 
       // Calculate discount amount
       var discount_amount = 0;
+      let tds = parseFloat($('#tds option:selected').data('rate')) || 0;
       if (discount_type === 'percentage') {
         discount_amount = (sub_total * discount) / 100;
       } else if (discount_type === 'amount') {
         discount_amount = discount;
       }
+      let tds_amount = 0;
+      if(tds > 0){
+        tds_amount = ((sub_total-discount_amount) * tds) / 100;
+        $('#tds_amount').val('-' + tds_amount.toFixed(2));
+      }else{
+        $('#tds_amount').val('0.00');
+      }
 
-      $('#discount_span').text('-' + discount_amount.toFixed(2));
+      $('#discount_amount').val('-' + discount_amount.toFixed(2));
 
       var grand_total = 0;
       var $summary = $("#taxSummary");
@@ -1465,7 +1592,6 @@
           }
           taxTotals[taxName] += taxAmount;
         }
-
         // Add row total into grand total
         grand_total += discountedRowAmount + taxAmount;
       });
@@ -1482,9 +1608,15 @@
 
       $summary.removeClass('d-none');
 
+      var adjustment = parseFloat($('#adjustment').val()) || 0;
+      
+      // if(adjustment != 0){
+      //   grand_total += adjustment;
+      // }
+
       // Update totals
-      $('#sub_total_span').text(sub_total.toFixed(2));
-      $('#grand_total_span').text(grand_total.toFixed(2));
+      $('#sub_total').val(sub_total.toFixed(2));
+      $('#grand_total').val((grand_total- tds_amount).toFixed(2));
     }
   </script>
 </x-app-layout>

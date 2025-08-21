@@ -1109,6 +1109,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('tax_invoice', TaxInvoiceController::class);
     Route::post('add_payment_term', [TaxInvoiceController::class, 'add_payment_term'])->name('add_payment_term');
     Route::post('add_tax', [TaxInvoiceController::class, 'add_tax'])->name('add_tax');
+    Route::post('add_tds', [TaxInvoiceController::class, 'add_tds'])->name('add_tds');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);
