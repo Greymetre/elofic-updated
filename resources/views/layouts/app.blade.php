@@ -881,15 +881,6 @@
                      </div>
                   </li>
                   @endif
-                  @if(auth()->user()->can('tasks_access'))
-                  <li class="nav-link {{ request()->is('tax_invoice*') ? 'active' : '' }}">
-                     <a class="hoveradd no-after" href="{{ url('tax_invoice') }}">
-                        <i class="material-icons icon">receipt_long</i>
-                        <span>Invoice</span>
-                        <div class="d-none mobile_hide"> Invoice</div>
-                     </a>
-                  </li>
-                  @endif
                   @if(auth()->user()->can(['customer_access']))
                   <li class="nav-link {{ request()->is('customers*') || request()->is('customertype*') || request()->is('firmtype*') || request()->is('customersLogin*') || request()->is('customers-survey*') || request()->is('fields*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#customerMenu" aria-expanded="false">
@@ -1486,7 +1477,7 @@
                   </li>
                   @endif
                   @if(auth()->user()->can(['account_access']))
-                  <li class="nav-link {{ request()->is('expenses*') ? 'active' : '' }}">
+                  <li class="nav-link {{ request()->is('expenses*') || request()->is('tax_invoice*') || request()->is('expenses_type*') || request()->is('estimate*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#accountMenu" aria-expanded="false">
                         <i class="material-icons icon">attribution</i>
                         <span> {!! trans('panel.sidemenu.account') !!}
@@ -1528,6 +1519,24 @@
                                  <i class="material-icons icon">request_page</i>
                                  <span>Dealer Account Statement</span>
                                  <div class="d-none mobile_hide"> Dealer Account Statement</div>
+                              </a>
+                           </li>
+                           @endif
+                           @if(auth()->user()->can('estimate_access'))
+                           <li class="nav-link-btn {{ request()->is('estimate*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('estimate') }}">
+                                 <i class="material-icons icon">request_quote</i>
+                                 <span>Estimate</span>
+                                 <div class="d-none mobile_hide"> Estimate</div>
+                              </a>
+                           </li>
+                           @endif
+                           @if(auth()->user()->can('invoice_access'))
+                           <li class="nav-link-btn {{ request()->is('tax_invoice*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('tax_invoice') }}">
+                                 <i class="material-icons icon">receipt_long</i>
+                                 <span>Invoice</span>
+                                 <div class="d-none mobile_hide"> Invoice</div>
                               </a>
                            </li>
                            @endif

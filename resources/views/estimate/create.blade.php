@@ -589,11 +589,11 @@
       }
     }
 
-    #invoice_no_div {
+    #estimate_no_div {
       position: relative;
     }
 
-    #invoice_no_settings {
+    #estimate_no_settings {
       position: absolute;
       top: 34px;
       right: 5px;
@@ -640,9 +640,9 @@
     @endif
     <div class="container-fluid">
       <div class="card p-4">
-        <form action="{{ route('tax_invoice.store') }}" method="post" enctype="multipart/form-data">
+        <form action="{{ route('estimate.store') }}" method="post" enctype="multipart/form-data">
           @csrf
-          <h5><i class="fa fa-file-text-o"></i> New Invoice</h5>
+          <h5><i class="fa fa-file-text-o"></i> New Estimate</h5>
           <div class="row">
             <div class="col-md-8">
               <div class="form-group">
@@ -693,9 +693,9 @@
           </div>
           <div class="row">
             <div class="col-md-4">
-              <div class="form-group mb-3" id="invoice_no_div">
-                <label for="invoice_no">Invoice#*</label>
-                <input type="text" class="form-control custom-input-box" id="invoice_no" name="invoice_no" value="{!! $invoiceNumber !!}"><i title="Configure Invoice Number" class="material-icons icon" id="invoice_no_settings" data-toggle="modal" data-target="#invoiceNoModal">settings</i>
+              <div class="form-group mb-3" id="estimate_no_div">
+                <label for="estimate_no">Estimate#*</label>
+                <input type="text" class="form-control custom-input-box" id="estimate_no" name="estimate_no" value="{!! $invoiceNumber !!}"><i title="Configure Invoice Number" class="material-icons icon" id="estimate_no_settings" data-toggle="modal" data-target="#invoiceNoModal">settings</i>
               </div>
             </div>
             <div class="col-md-4">
@@ -708,8 +708,8 @@
           <div class="row">
             <div class="col-md-3">
               <div class="form-group mb-3">
-                <label for="invoice_date">Invoice Date*</label>
-                <input type="date" class="form-control custom-input-box" id="invoice_date" name="invoice_date">
+                <label for="estimate_date">Estimate Date*</label>
+                <input type="date" class="form-control custom-input-box" id="estimate_date" name="estimate_date">
               </div>
             </div>
             <div class="col-md-3">
@@ -1202,7 +1202,7 @@
         });
       });
 
-      $('#invoice_date').on('change', function() {
+      $('#estimate_date').on('change', function() {
         var paymentTerm = $('#payment_term').find('option:selected').data('days');
         if (paymentTerm != undefined) {
           chnageDueDate(paymentTerm);
@@ -1293,7 +1293,7 @@
         if (!isNaN(nextNumber)) {
           nextNumber = nextNumber.padStart(2, '0');
         }
-        $('#invoice_no').val(prefix + '/' + nextNumber);
+        $('#estimate_no').val(prefix + '/' + nextNumber);
         $('#invoiceNoModal').modal('hide');
         swal({
           toast: true,
@@ -1314,10 +1314,10 @@
         $('#due_date').val('');
         return;
       }
-      if ($('#invoice_date').val() == '') {
+      if ($('#estimate_date').val() == '') {
         var dueDate = new Date();
       } else {
-        var dueDate = new Date($('#invoice_date').val());
+        var dueDate = new Date($('#estimate_date').val());
       }
       dueDate.setDate(dueDate.getDate() + days);
       var formattedDate = dueDate.toISOString().split('T')[0];

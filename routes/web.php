@@ -88,6 +88,7 @@ use App\Http\Controllers\SapStockController;
 use App\Http\Controllers\WareHouseController;
 use App\Http\Controllers\PlannedSOPController;
 use App\Http\Controllers\ClaimGenerationController;
+use App\Http\Controllers\EstimateController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LeadContactsController;
 use App\Http\Controllers\LeadNotesController;
@@ -1107,6 +1108,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     //Tax Invoice Routes
     Route::resource('tax_invoice', TaxInvoiceController::class);
+    Route::resource('estimate', EstimateController::class);
     Route::post('add_payment_term', [TaxInvoiceController::class, 'add_payment_term'])->name('add_payment_term');
     Route::post('add_tax', [TaxInvoiceController::class, 'add_tax'])->name('add_tax');
     Route::post('add_tds', [TaxInvoiceController::class, 'add_tds'])->name('add_tds');

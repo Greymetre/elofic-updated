@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CurrentTaxInvoiceNo;
 use App\Models\Customers;
+use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\PaymentTerm;
 use App\Models\Product;
@@ -16,30 +17,28 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\In;
 use Yajra\DataTables\Facades\DataTables;
 
-class TaxInvoiceController extends Controller
+class EstimateController extends Controller
 {
     public function index(Request $request)
     {
+        if(!$request->dev){
+            return view('work_in_progress');
+        }
         if ($request->ajax()) {
-            $invoices = Invoice::with('customer')->latest();
+            $invoices = Estimate::with('customer')->latest();
             return DataTables::of($invoices)
                 ->addIndexColumn()
                 ->editColumn('status', function ($data) {
-                    return '<span class="badge badge-paid">Paid</span>';
+                    if($data->status == 0){
+                        return '<span class="badge badge-warning">Pending</span>';
+                    }else{
+                        return '<span class="badge badge-paid">Converted</span>';
+                    }
                 })
-                ->editColumn('invoice_no', function ($data) {
-                    return '<a href="' . route('tax_invoice.show', $data->id) . '">' . $data->invoice_no . '</a>';
-                })
-                ->editColumn('invoice_date', function ($data) {
-                    return date('d M Y', strtotime($data->invoice_date));
-                })
-                ->editColumn('due_date', function ($data) {
-                    return date('d M Y', strtotime($data->due_date));
-                })
-                ->rawColumns(['status', 'invoice_no', 'invoice_date', 'due_date'])
+                ->rawColumns(['status'])
                 ->make(true);
         }
-        return view('taxinvoice.index');
+        return view('estimate.index');
     }
     public function create(Request $request)
     {
@@ -49,9 +48,9 @@ class TaxInvoiceController extends Controller
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
         $users = User::where('active', 'Y')->select('id', 'name')->get();
 
-        $lastInvoice = Invoice::orderBy('id', 'desc')->first();
+        $lastInvoice = Estimate::orderBy('id', 'desc')->first();
         if ($lastInvoice) {
-            $parts = explode('/', $lastInvoice->invoice_no);
+            $parts = explode('/', $lastInvoice->estimate_no);
             $prefix = $parts[0];
             $lastNumberPart = end($parts);
             $digitLength = strlen($lastNumberPart);
@@ -66,7 +65,7 @@ class TaxInvoiceController extends Controller
                 $startYear = $currentYear - 1;
                 $endYear   = $currentYear;
             }
-            $prefix = 'INV-' . str_pad($startYear, 2, '0', STR_PAD_LEFT) . '-' . str_pad($endYear, 2, '0', STR_PAD_LEFT);
+            $prefix = 'EST-' . str_pad($startYear, 2, '0', STR_PAD_LEFT) . '-' . str_pad($endYear, 2, '0', STR_PAD_LEFT);
             $formattedNumber = '01';
         }
         $invoiceNumber = $prefix . '/' . $formattedNumber;
@@ -80,7 +79,7 @@ class TaxInvoiceController extends Controller
         $all_tax = TaxInvoiceTax::all();
         $all_tds = TaxInvoiceTds::all();
 
-        return view('taxinvoice.create', compact(
+        return view('estimate.create', compact(
             'payment_terms',
             'products',
             'customers',
@@ -120,9 +119,10 @@ class TaxInvoiceController extends Controller
     }
     public function store(Request $request)
     {
+        // dd('Work in progress');
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required',
-            'invoice_no' => 'required|unique:invoices',
+            'estimate_no' => 'required|unique:estimates,estimate_no',
         ]);
 
         if ($validator->fails()) {
@@ -130,13 +130,12 @@ class TaxInvoiceController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
-        // dd($request->all());
-        $invoice = new Invoice();
+        $invoice = new Estimate();
         $invoice->customer_id          =   $request->customer_id;
         $invoice->place_of_supply      =   $request->place_of_supply;
-        $invoice->invoice_no           =   $request->invoice_no;
+        $invoice->estimate_no           =   $request->estimate_no;
         $invoice->order_no             =   $request->order_no;
-        $invoice->invoice_date         =   $request->invoice_date;
+        $invoice->estimate_date         =   $request->estimate_date;
         $invoice->payment_term         =   $request->payment_term;
         $invoice->due_date             =   $request->due_date;
         $invoice->user_id              =   $request->user_id;
@@ -154,7 +153,7 @@ class TaxInvoiceController extends Controller
 
         if ($request->hasFile('files') && count($request->file('files')) > 0) {
             foreach ($request->file('files') as $file) {
-                $invoice->addMedia($file)->toMediaCollection('invoice_files');
+                $invoice->addMedia($file)->toMediaCollection('estimate_files');
             }
         }
 
@@ -170,31 +169,11 @@ class TaxInvoiceController extends Controller
                 'amount' => $request->amount[$k]
             ]);
         }
-        return redirect()->route('tax_invoice.index');
-        // return redirect()->route('tax_invoice.show', $invoice->id);
+        return redirect()->route('estimate.show', $invoice->id);
     }
 
-    public function show(Invoice $tax_invoice)
+    public function show(Estimate $invoice)
     {
-        return view('work_in_progress');
-        $request = new Request(['customer_id' => $tax_invoice->customer_id]);
-        $customer_address_class = new AjaxController();
-        $customer_address = $customer_address_class->getCustomerAddress($request);
-        $address = $customer_address->getData(true)['data'];
-
-        $taxSummary = $tax_invoice->details
-            ->groupBy('tax') // group by tax id
-            ->map(function ($items, $taxId) {
-                $taxName = optional($items->first()->tax_details)->tax_name.' ('.optional($items->first()->tax_details)->tax_percentage.'%)'; // get tax name from relation
-                $totalAmount = $items->sum('tax_amount'); // sum tax_amount for this tax
-
-                return [
-                    'tax_id' => $taxId,
-                    'tax_name' => $taxName,
-                    'total_tax_amount' => $totalAmount,
-                ];
-            })
-            ->values();
-        return view('taxinvoice.show', compact('tax_invoice', 'address', 'taxSummary'));
+        return view('estimate.show', compact('invoice'));
     }
 }

@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class InvoiceDetail extends Model
+class EstimateDetail extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'invoice_id',
+        'estimate_id',
         'product_id',
         'product_dec',
         'hsn_sac',
@@ -22,20 +22,18 @@ class InvoiceDetail extends Model
     ];
 
     /**
-     * Relationships
+     * Get the estimate that owns the detail.
      */
-    public function invoice()
+    public function estimate()
     {
-        return $this->belongsTo(Invoice::class, 'invoice_id');
+        return $this->belongsTo(Estimate::class);
     }
 
+    /**
+     * Get the product for this estimate detail.
+     */
     public function product()
     {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
-
-    public function tax_details()
-    {
-        return $this->belongsTo(TaxInvoiceTax::class, 'tax', 'id');
+        return $this->belongsTo(Product::class);
     }
 }

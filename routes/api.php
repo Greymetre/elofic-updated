@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\MspActivityController;
 use App\Http\Controllers\Api\ComplaintApiController;
 use App\Http\Controllers\Api\ServiceBillController;
 use App\Http\Controllers\Api\ComplaintAPICustomerController;
+use App\Http\Controllers\Api\ExotelApiController;
 use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Api\ServiceBillCustController;
 use App\Http\Controllers\Api\UserLatLongController;
@@ -84,6 +85,11 @@ Route::any('insert_sap_stock', [SapStockController::class, 'insertSapStock']);
 Route::any('insert_sap_sell', [SapStockController::class, 'insertSapSell']);
 
 Route::any('emailExists', [CustomController::class, 'emailExists']);
+
+Route::post('/exotel/make-call', [ExotelApiController::class, 'makeCall']);
+Route::get('/exotel/call-details', [ExotelApiController::class, 'getCallDetails']);
+Route::get('/exotel/get-recording', [ExotelApiController::class, 'getRecording']);
+
 /*================= Customer Routes ============================*/
 Route::group(['middleware' => ['auth:customers']], function () {
     // Route::any('customer/getProfile', [LoginController::class, 'getCustomerProfile']);

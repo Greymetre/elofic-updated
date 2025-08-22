@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Invoice extends Model implements HasMedia
+class Estimate extends Model implements HasMedia
 {
-    use HasFactory,InteractsWithMedia;
+    use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'customer_id',
         'place_of_supply',
-        'invoice_no',
+        'estimate_no',
         'order_no',
-        'invoice_date',
+        'estimate_date',
         'payment_term',
         'due_date',
         'user_id',
@@ -29,33 +29,36 @@ class Invoice extends Model implements HasMedia
         'adjustment',
         'grand_total',
         'customer_notes',
-        't_c'
+        't_c',
+        'status',
     ];
 
     /**
-     * Relationships
+     * Get the customer that owns the estimate.
      */
-    public function term()
-    {
-        return $this->belongsTo(PaymentTerm::class, 'payment_term', 'id');
-    }
     public function customer()
     {
-        return $this->belongsTo(Customers::class, 'customer_id', 'id');
+        return $this->belongsTo(Customers::class);
     }
 
+    /**
+     * Get the user who created the estimate.
+     */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the details for the estimate.
+     */
     public function details()
     {
-        return $this->hasMany(InvoiceDetail::class, 'invoice_id', 'id');
+        return $this->hasMany(EstimateDetail::class);
     }
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('invoice_files');
+        $this->addMediaCollection('estimate_files');
     }
 }

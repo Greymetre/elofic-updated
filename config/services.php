@@ -31,4 +31,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'exotel' => [
+        'sid' => env('EXOTEL_SID'),
+        'api_key' => env('EXOTEL_API_KEY'),
+        'token' => env('EXOTEL_TOKEN'),
+        'virtual_number' => env('EXOTEL_VIRTUAL_NUMBER'),
+    ],
+
+
 ];
