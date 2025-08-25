@@ -310,7 +310,7 @@
                       <span class="input-group-text">
                         <img src="https://demo.fieldkonnect.io/public/assets/img/Group_calandar.png"></span>
                     </div>
-                    <input type="text" class="form-control datepicker" data-target="#startDatePicker" placeholder="Start Date" />
+                    <input type="text" class="form-control datepicker" id="start_date" data-target="#startDatePicker" placeholder="Start Date" />
                     <div class="input-group-append" data-target="#startDatePicker" data-toggle="datetimepicker">
                       <span class="input-group-text"><i class="fas fa-chevron-down"></i></span>
                     </div>
@@ -324,7 +324,7 @@
                       <span class="input-group-text">
                         <img src="https://demo.fieldkonnect.io/public/assets/img/Group_calandar.png"></span>
                     </div>
-                    <input type="text" class="form-control datepicker" data-target="#endDatePicker" placeholder="End Date" />
+                    <input type="text" class="form-control datepicker" id="end_date" data-target="#endDatePicker" placeholder="End Date" />
                     <div class="input-group-append" data-target="#endDatePicker" data-toggle="datetimepicker">
                       <span class="input-group-text"><i class="fas fa-chevron-down"></i></span>
                     </div>
@@ -337,7 +337,7 @@
                 <!-- Search Input -->
                 <div class="input-wrapper w-100">
                   <i class="fas fa-search search-icon"></i>
-                  <input type="text" class="form-control search-input" placeholder="Search Contact">
+                  <input type="text" id="searchInput" class="form-control search-input" placeholder="Search Contact">
                 </div>
 
                 <!-- Round Button -->
@@ -420,7 +420,7 @@
   <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
   <script src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap4.min.js"></script>
 
-  <script>
+  <!-- <script>
     $(function() {
       $('#startDatePicker').datetimepicker({
         format: 'DD-MM-YYYY'
@@ -436,7 +436,7 @@
         $('#startDatePicker').datetimepicker('maxDate', e.date);
       });
     });
-  </script>
+  </script> -->
 
 
   <script>
@@ -462,9 +462,9 @@
         ajax: {
           url: "{{ route('tax_invoice.index', ['dev' => true]) }}",
           data: function(d) {
-            d.executive_id = $('#executive_id').val(),
-              d.start_date = $('#start_date').val(),
-              d.end_date = $('#end_date').val()
+            d.searchInput = $('#searchInput').val(),
+            d.start_date = $('#start_date').val(),
+            d.end_date = $('#end_date').val()
           }
         },
         columns: [{
@@ -526,7 +526,7 @@
         dom: 't<"bottom"lip>',
       });
 
-      $('#executive_id').change(function() {
+      $('#searchInput').on('input', function() {
         table.draw();
       });
       $('#end_date').change(function() {

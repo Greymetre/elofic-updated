@@ -244,7 +244,7 @@
       font-weight: 600;
       background: #D7F4FF;
       border-radius: 5px;
-      width: 50px;
+      width: auto;
       height: 27px;
       display: inline-flex;
       text-align: center;
@@ -427,7 +427,7 @@
               </div>
             </div>
           </div>--}}
-          <h4 class="card-title ">Leads<span class="brig ml-2">123</span><br>
+          <h4 class="card-title ">Leads<span class="brig ml-2"></span><br>
             <div class="btn-group kim" style="width: 120px;">
               <select name="status" id="status" class="form-control selectpicker">
                 <option value="">All</option>
@@ -1002,7 +1002,7 @@
       });
       table.on('xhr', function(e, settings, json) {
           if (json && json.records_filtered_count !== undefined) {
-              jQuery('.brig.ml-2').text(json.records_filtered_count);
+              jQuery('.brig.ml-2').text(json.records_filtered_count + ' Leads');
           }
       });
     }

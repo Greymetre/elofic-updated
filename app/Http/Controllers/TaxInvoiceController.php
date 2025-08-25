@@ -21,26 +21,42 @@ class TaxInvoiceController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $invoices = Invoice::with('customer')->latest();
+            $invoices = Invoice::with('customer');
+
+            // if($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)){
+            //     $invoices = $invoices->whereBetween('invoice_date', [$request->start_date, $request->end_date]);                
+            // }
+            // if($request->searchInput && !empty($request->searchInput)){
+            //     //Useing $query orwher using bracket 
+            //     $invoices = $invoices->where(function ($query) use ($request) {
+            //         $query->where('invoice_no', 'like', '%' . $request->searchInput . '%')
+            //             ->orWhere('order_no', 'like', '%' . $request->searchInput . '%')
+            //             ->orWhereHas('customer', function ($subQuery) use ($request) {
+            //                 $subQuery->where('name', 'like', '%' . $request->searchInput . '%')
+            //                     ->orWhere('mobile', 'like', '%' . $request->searchInput . '%');
+            //             });
+            //     });
+            // }
+            $invoices = $invoices->latest();
             return DataTables::of($invoices)
                 ->addIndexColumn()
-                ->editColumn('status', function ($data) {
-                    return '<span class="badge badge-paid">Paid</span>';
-                })
                 // ->editColumn('status', function ($data) {
-                //     $today = \Carbon\Carbon::today();
-                //     $dueDate = \Carbon\Carbon::parse($data->due_date);
-
-                //     if ($dueDate->isToday()) {
-                //         return '<span class="badge badge-warning">Due Today</span>';
-                //     } elseif ($dueDate->isPast()) {
-                //         $days = $dueDate->diffInDays($today);
-                //         return '<span class="badge badge-danger">Overdue by ' . $days . ' days</span>';
-                //     } else {
-                //         $days = $today->diffInDays($dueDate);
-                //         return '<span class="badge badge-info">Due in ' . $days . ' days</span>';
-                //     }
+                //     return '<span class="badge badge-paid">Paid</span>';
                 // })
+                ->editColumn('status', function ($data) {
+                    $today = \Carbon\Carbon::today();
+                    $dueDate = \Carbon\Carbon::parse($data->due_date);
+
+                    if ($dueDate->isToday()) {
+                        return '<span class="badge badge-warning">Due Today</span>';
+                    } elseif ($dueDate->isPast()) {
+                        $days = $dueDate->diffInDays($today);
+                        return '<span class="badge badge-danger">Overdue by ' . $days . ' days</span>';
+                    } else {
+                        $days = $today->diffInDays($dueDate);
+                        return '<span class="badge badge-info">Due in ' . $days . ' days</span>';
+                    }
+                })
                 ->editColumn('invoice_no', function ($data) {
                     return '<a href="' . route('tax_invoice.show', $data->id) . '">' . $data->invoice_no . '</a>';
                 })
@@ -191,9 +207,6 @@ class TaxInvoiceController extends Controller
 
     public function show(Invoice $tax_invoice, Request $request)
     {
-        if(!$request->dev){
-            return view('work_in_progress');
-        }
         $request = new Request(['customer_id' => $tax_invoice->customer_id]);
         $customer_address_class = new AjaxController();
         $customer_address = $customer_address_class->getCustomerAddress($request);

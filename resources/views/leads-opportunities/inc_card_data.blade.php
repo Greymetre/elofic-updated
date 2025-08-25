@@ -88,7 +88,7 @@ p.dam {
     font-weight: 500 !important;
     line-height: 14px;
     padding: 5px 5px;
-    width: 87px !important;
+    width: auto !important;
     height: 36px;
     text-align: center;
     display: flex;
@@ -175,6 +175,17 @@ p.dam {
         right: 1px;
         opacity: 0;
     }
+    button.hoverbtn2 {
+        width: 20px;
+        height: 20px;
+        background: transparent!important;
+        box-shadow: unset;
+        padding: 0px;
+        position: absolute;
+        top: -5px;
+        right: 25px;
+        opacity: 0;
+    }
 
     button.hoverbtn img {
         width: 17px;
@@ -186,6 +197,7 @@ p.dam {
     }
 
 .card_drag .card-header:hover button.hoverbtn {opacity: 1;}
+.card_drag .card-header:hover button.hoverbtn2 {opacity: 1;}
 
 @media (max-width: 767px){
 
@@ -232,6 +244,7 @@ p.dam {
                                      </div>
                                 </div>
                                  <button type="button" class="hoverbtn btn" onclick="getOpportunitydata('{{$all_opportunity->id}}')"> <img src="{{ url('/').'/'.asset('assets/img')}}/ph_note-pencil-fill.svg"></button>
+                                 <!-- <button type="button" class="hoverbtn2 btn" onclick="window.location='{{ route('leads.show', $all_opportunity->lead->id) }}'"><i style="color: #263e65;" class="material-icons">visibility</i></button> -->
                             </div>
                             <div class="card-body">
                                 <div class="d-flex flex-row align-items-center">
