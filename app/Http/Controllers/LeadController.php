@@ -161,6 +161,9 @@ class LeadController extends Controller
                 }
                 return "";
             })
+            ->editColumn('city', function ($lead) {
+                return $lead->address ? $lead->address->cityname?->city_name : '-';
+            })
             ->editColumn('email', function ($lead) {
                 if (count($lead->contacts) > 0) {
                     return $contacts_name = $lead->contacts[0]->email ?? '';

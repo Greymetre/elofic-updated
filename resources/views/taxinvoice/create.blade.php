@@ -4,7 +4,7 @@
       border-radius: 12px;
     }
 
-    .invocie_main form .form-group select.form-control{
+    .invocie_main form .form-group select.form-control {
       position: unset !important;
     }
 
@@ -627,6 +627,10 @@
       top: 40px !important;
       z-index: 999999999 !important;
     }
+
+    .is-invalid {
+      border: 1px solid red !important;
+    }
   </style>
   <section class="invocie_main">
     @if (count($errors) > 0)
@@ -640,7 +644,7 @@
     @endif
     <div class="container-fluid">
       <div class="card p-4">
-        <form action="{{ route('tax_invoice.store') }}" method="post" enctype="multipart/form-data">
+        <form action="{{ route('tax_invoice.store') }}" method="post" id="createInvoiceForm" enctype="multipart/form-data">
           @csrf
           <h5><i class="fa fa-file-text-o"></i> New Invoice</h5>
           <div class="row">
@@ -650,7 +654,7 @@
                 <div class="input-group">
                   <div class="innerborder">
                     <!-- Dropdown -->
-                    <select class="custom-select select2" id="customer_id" name="customer_id">
+                    <select class="custom-select select2" id="customer_id" name="customer_id" required>
                       <option value="">Select Customer</option>
                       <option value="__add__">➕ Add New</option>
                       @if(!empty($customers))
@@ -709,7 +713,7 @@
             <div class="col-md-3">
               <div class="form-group mb-3">
                 <label for="invoice_date">Invoice Date*</label>
-                <input type="date" class="form-control custom-input-box" id="invoice_date" name="invoice_date">
+                <input type="date" class="form-control custom-input-box" id="invoice_date" name="invoice_date" required>
               </div>
             </div>
             <div class="col-md-3">
@@ -765,7 +769,7 @@
                   <tbody id="item-table-body">
                     <tr>
                       <td>
-                        <select class="form-control select2 product_rowchange" id="product_id" name="product_id[]">
+                        <select class="form-control select2 product_rowchange" id="product_id" name="product_id[]" required>
                           <option value="">Select Item</option>
                           @if(!empty($products))
                           @foreach($products as $product)
@@ -861,8 +865,8 @@
                       @endif
                     </select>
                   </div>
-                  <div class="col-3 px-0 text-right">
-                    <input type="text" class="" value="0.00" name="tds_amount" style="text-align: right;font-weight: 500;color: #000 !important;" id="tds_amount" readonly>
+                  <div class=" col-3 px-0 text-right">
+                        <input type="text" class="" value="0.00" name="tds_amount" style="text-align: right;font-weight: 500;color: #000 !important;" id="tds_amount" readonly>
                   </div>
                 </div>
 
@@ -1073,7 +1077,7 @@
       </div>
     </div>
   </section>
-
+  <script src="{{ url('/').'/'.asset('assets/js/validation_invoice.js?v='.time()) }}') }}"></script>
   <script>
     $(document).ready(function() {
       $("#addNewRow").click(function() {
@@ -1500,10 +1504,10 @@
         success: function(response) {
           if (response.status) {
             $('#tdsModal').modal('hide');
-              $('#tds').find('option:last').after(`<option value="${response.data.id}" data-rate="${response.data.rate}" selected>
+            $('#tds').find('option:last').after(`<option value="${response.data.id}" data-rate="${response.data.rate}" selected>
                         ${response.data.tax_name} (${response.data.rate}%)
                     </option>`);
-                    $('#tds').val(response.data.id).trigger('change');
+            $('#tds').val(response.data.id).trigger('change');
           }
         },
         error: function(xhr) {
@@ -1549,10 +1553,10 @@
         discount_amount = discount;
       }
       let tds_amount = 0;
-      if(tds > 0){
-        tds_amount = ((sub_total-discount_amount) * tds) / 100;
+      if (tds > 0) {
+        tds_amount = ((sub_total - discount_amount) * tds) / 100;
         $('#tds_amount').val('-' + tds_amount.toFixed(2));
-      }else{
+      } else {
         $('#tds_amount').val('0.00');
       }
 
@@ -1609,14 +1613,14 @@
       $summary.removeClass('d-none');
 
       var adjustment = parseFloat($('#adjustment').val()) || 0;
-      
-      if(adjustment != 0){
+
+      if (adjustment != 0) {
         grand_total += adjustment;
       }
 
       // Update totals
       $('#sub_total').val(sub_total.toFixed(2));
-      $('#grand_total').val((grand_total- tds_amount).toFixed(2));
+      $('#grand_total').val((grand_total - tds_amount).toFixed(2));
     }
   </script>
 </x-app-layout>

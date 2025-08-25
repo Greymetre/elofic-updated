@@ -14,7 +14,7 @@
     .qrcode {
       display: flex;
       align-items: center;
-  }
+    }
 
     header {
       display: flex;
@@ -33,7 +33,7 @@
     .company small {
       display: block;
       font-weight: 400;
-      color:#000;
+      color: #000;
       margin-top: 0px;
       font-size: 12px;
     }
@@ -200,7 +200,7 @@
 
     table.items {
       border: 1px solid #00000057;
-      border-bottom: 0px!important;
+      border-bottom: 0px !important;
     }
 
     table.items thead th {
@@ -237,8 +237,8 @@
   <section class="invocie_main">
     <div class="container-fluid">
       <div class="controls">
-        <button id="downloadPdf" class="btn">Download PDF</button>
-        <button id="printBtn" class="btn secondary">Print</button>
+      <button id="downloadPdf" class="btn" title="Download PDF"> <i class="material-icons">picture_as_pdf</i></button>
+      <button id="printBtn" class="btn secondary text-white" title="Print"> <i class="material-icons">print</i></button>
       </div>
 
       <div id="invoice" class="page">
@@ -257,7 +257,7 @@
 
           <div class="meta">
 
-            <h2 style="text-transform: uppercase;font-size: 20px;color: #000; font-weight: 600;">Tax Invocie</h2>
+            <h2 style="text-transform: uppercase;font-size: 20px;color: #000; font-weight: 600;">Estimate</h2>
           </div>
         </header>
 
@@ -266,19 +266,19 @@
             <table style="width:100%;">
               <tr>
                 <td style="color:#000; font-weight: 400; width: 60%;font-size: 12px; line-height: 16px;">#</td>
-                <td style="color:#000; font-weight: 500; width: 40%; font-size: 12px; line-height: 16px;"> : INV-000002</td>
+                <td style="color:#000; font-weight: 500; width: 40%; font-size: 12px; line-height: 16px;"> : {{$estimate->estimate_no}}</td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Invoice Date</td>
-                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : 05-12-2020</td>
+                <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Estimate Date</td>
+                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : {{date('d M Y', strtotime($estimate->estimate_date))}}</td>
               </tr>
               <tr>
                 <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Terms</td>
-                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : Due on Receipt</td>
+                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : {{$estimate->term?->term_name}}</td>
               </tr>
               <tr>
                 <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Due Date</td>
-                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : 05-12-2020</td>
+                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : {{date('d M Y', strtotime($estimate->due_date))}}</td>
               </tr>
             </table>
           </div>
@@ -287,7 +287,7 @@
             <table style="width:100%;">
               <tr>
                 <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Place Of Supply</td>
-                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : Gujarat (24)</td>
+                <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : {{ $estimate->place_of_supply ? \App\Models\State::find($estimate->place_of_supply)->state_name : '' }}</td>
               </tr>
             </table>
           </div>
@@ -301,20 +301,26 @@
                 </tr>
               </thead>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px; padding-top:5px;">SHUBH LABH CASTING LLP</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px; padding-top:5px;">{{$estimate->customer?->name}}</td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">Invoice Date</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">{{$address['billing_address']['address1']}} {{$address['billing_address']['cityname']['city_name']}}</td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;line-height: 20px;">Terms</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;line-height: 20px;">{{$address['billing_address']['districtname']['district_name']}}</td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">Due Date</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['billing_address']['pincodename']['pincode']}} {{$address['billing_address']['statename']['state_name']}}</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['billing_address']['countryname']['country_name']}}</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">GSTIN : {{$address['gstin_no']}}</td>
               </tr>
             </table>
           </div>
-
+          @if($address['same_address'] == 0)
           <div class="addr" style="padding:0px;">
             <table style="width:100%;">
               <thead>
@@ -323,67 +329,103 @@
                 </tr>
               </thead>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; padding-top:5px; line-height: 20px;">PLOT NO. 6, SURVEY NO. 254-1, OPP. CHHARODI RAILWAY STATION</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">{{$address['shipping_address']['address1']}} {{$address['shipping_address']['cityname']['city_name']}}</td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">AHMEDABAD</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;line-height: 20px;">{{$address['shipping_address']['districtname']['district_name']}}</td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">382170 Gujarat</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['shipping_address']['pincodename']['pincode']}} {{$address['shipping_address']['statename']['state_name']}}</td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">India</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['shipping_address']['countryname']['country_name']}}</td>
               </tr>
             </table>
           </div>
+          @else
+          <div class="addr" style="padding:0px;">
+            <table style="width:100%;">
+              <thead>
+                <tr>
+                  <th style="background:#eee;padding: 5px 5px;color: #000;font-weight: 600 !important;">Ship To</th>
+                </tr>
+              </thead>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">{{$address['billing_address']['address1']}} {{$address['billing_address']['cityname']['city_name']}}</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;line-height: 20px;">{{$address['billing_address']['districtname']['district_name']}}</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['billing_address']['pincodename']['pincode']}} {{$address['billing_address']['statename']['state_name']}}</td>
+              </tr>
+              <tr>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['billing_address']['countryname']['country_name']}}</td>
+              </tr>
+            </table>
+          </div>
+          @endif
         </div>
         <table class="items" aria-labelledby="items">
           <thead>
-             <tr>
+            <tr>
               <th rowspan="2" style="width:45%; color: #000; ">Item & Description</th>
               <th rowspan="2" style="width:12%; color: #000; ">HSN/SAC</th>
               <th rowspan="2" style="width:8%; color: #000; " class="center">Qty</th>
               <th rowspan="2" style="width:8%; color: #000; " class="center">Rate</th>
-              <th colspan="2"  style="width:10%; color: #000;  text-align: center;" class="center">IGST</th>
+              <th colspan="2" style="width:10%; color: #000;  text-align: center;" class="center">IGST</th>
               <th rowspan="2" style="width:13%; color: #000; " class="right">Amount</th>
             </tr>
             <tr>
-              <th  style="width:10%; color: #000;" class="center">%</th>
-              <th  style="width:10%; color: #000;" class="center">Amt</th>
-              
+              <th style="width:10%; color: #000;" class="center">%</th>
+              <th style="width:10%; color: #000;" class="center">Amt</th>
+
             </tr>
           </thead>
           <tbody>
+            @foreach($estimate->details as $item)
             <tr>
               <td style="color:#000; font-weight: 400;">
-                <strong>Program Management Fees</strong>
-                <div style="color:#000;font-size:12px;margin-top:0px; line-height: 15px;">Month of Nov 2020</div>
+                <strong>{{$item->product->display_name}}</strong>
+                <div style="color:#000;font-size:12px;margin-top:0px; line-height: 15px;">{{$item->product_dec}}</div>
               </td>
-              <td style="color:#000;font-weight: 400;">9983</td>
-              <td style="color:#000;font-weight: 400;" class="center">1.00</td>
-              <td style="color:#000;font-weight: 400;" class="right">25,000.00</td>
-              <td style="color:#000;font-weight: 400;" class="center">18%</td>
-              <td style="color:#000;font-weight: 400;" class="center">4500</td>
-              <td style="color:#000;font-weight: 400;" class="right">25,000.00</td>
+              <td style="color:#000;font-weight: 400;">{{$item->hsn_sac}}</td>
+              <td style="color:#000;font-weight: 400;" class="center">{{$item->quantity}}</td>
+              <td style="color:#000;font-weight: 400;" class="right">{{$item->mrp}}</td>
+              <td style="color:#000;font-weight:400;" class="center">
+                {{ $item->tax_details ? $item->tax_details->tax_name . ' ' . $item->tax_details->tax_percentage . '%' : '' }}
+              </td>
+
+              <td style="color:#000;font-weight: 400;" class="center">{{$item->tax_amount}}</td>
+              <td style="color:#000;font-weight: 400;" class="right">{{$item->amount}}</td>
             </tr>
+            @endforeach
             <tr>
               <td colspan="3" style="border:0px!important;">
                 <p style="margin-bottom:0px; color:#000; font-weight: 400;">Total In Words</p>
-                <p style="font-weight: bold; color:#000;line-height: 10px;">Indian Rupee Twenty-Nine Thousand Five Hundred Only</p>
+                <p style="font-weight: bold; color:#000;line-height: 10px;"> {{ numberToWords($estimate->grand_total) }} </p>
               </td>
               <td colspan="4">
-                 <table style="width: 100%; border:0px;" border="0">
+                <table style="width: 100%; border:0px;" border="0">
                   <tr>
                     <td style="border:0px; padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">Sub Total</td>
-                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">25,000.00</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">{{$estimate->sub_total}}</td>
                   </tr>
                   <tr>
-                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">IGST18 (18%)</td>
-                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">4,500.00</td>
+                    <td style="border:0px; padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">Discount</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">{{$estimate->discount}} {{$estimate->discount_type == 'percentage' ? '%' : ''}}</td>
                   </tr>
+                  @if($taxSummary && count($taxSummary) > 0)
+                  @foreach($taxSummary as $tax)
+                  <tr>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">{{$tax['tax_name']}}</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">{{$tax['total_tax_amount']}}</td>
+                  </tr>
+                  @endforeach
+                  @endif
                   <tr>
                     <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px; font-weight: bold;">Total</td>
-                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px;font-weight: bold;">₹29,500.00</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px;font-weight: bold;">₹{{number_format($estimate->grand_total, 2)}}</td>
                   </tr>
                   <tr>
                     <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">Payment Made</td>
@@ -402,30 +444,26 @@
             </tr>
             <tr></tr>
             <tr>
-             <td rowspan="2" colspan="3" style="border:0px!important;">
-               
+              <td rowspan="2" colspan="3" style="border:0px!important;">
+
                 <p style="color:#000; font-weight: 400;">Note</p>
-                <p style="color:#000; font-weight: 400; margin-bottom: 0px; line-height: 16px;">Bank Details :-<br>
-                  Bank Name - Asix Bank Ltd<br>
-                  Account No -920020063736921<br>
-                  IFSC Code -UTIB0000456<br>
-                  Branch -Dewas MP</p><br>
-             </td>
-             <td colspan="4" style="text-align: center; vertical-align: middle;">
-                 <img src="https://demo.fieldkonnect.io/public/assets/img/sill.png">
+                <p style="color:#000; font-weight: 400; margin-bottom: 0px; line-height: 16px;">{!! nl2br(e($estimate->customer_notes)) !!}</p><br>
+              </td>
+              <td colspan="4" style="text-align: center; vertical-align: middle;">
+                <img src="https://demo.fieldkonnect.io/public/assets/img/sill.png">
                 <p style="color:#000; font-size:12px; font-weight: 400; margin-bottom: 0px;"> Authorized Signature</p>
 
-             </td>
+              </td>
             </tr>
-             <tr></tr>
-             <tr>
-             <td rowspan="2" colspan="3" style="border:0px!important;">
+            <tr></tr>
+            <tr>
+              <td rowspan="2" colspan="3" style="border:0px!important;">
                 <p style="color:#000; font-weight: 400; font-size: 12px;">Thanks for your business.</p>
-                   <div class="qrcode">
+                <!-- <div class="qrcode">
                   <img src="https://demo.fieldkonnect.io/public/assets/img/qr_code.png" style="width:100px;height: 100px;object-fit:cover;">
-                 <p style="margin-left: 10px; color:#000; font-weight: 400; font-size:12px;"> Scan the QR code to view the configured information.</p>
-                </div>
-             </td>
+                  <p style="margin-left: 10px; color:#000; font-weight: 400; font-size:12px;"> Scan the QR code to view the configured information.</p>
+                </div> -->
+              </td>
             </tr>
             <!-- <tr>
               <td colspan="3">
@@ -489,13 +527,13 @@
             </tr> -->
           </tbody>
         </table>
-         <table class="items" aria-labelledby="items">
+        <table class="items" aria-labelledby="items">
           <thead>
-             <tr>
+            <tr>
               <th rowspan="2" style="width:45%; color: #000;">HSN/SAC</th>
               <th rowspan="2" style="width:12%; color: #000;"> Taxable Amount</th>
               <th style="width:8%; color: #000; text-align: center;" class="center" colspan="2">IGST</th>
-              <th style="width:13%; color: #000;" class="right" rowspan="2">Total Tax Amount  </th>
+              <th style="width:13%; color: #000;" class="right" rowspan="2">Total Tax Amount </th>
             </tr>
             <tr>
               <th style="width:8%; color: #000; text-align: center;" class="center">Rate</th>
@@ -505,16 +543,16 @@
           <tbody>
             <tr>
               <td style="color:#000; font-weight: 400;">
-               9983
+                9983
               </td>
               <td style="color:#000;font-weight: 400; text-align: right;">25,000.00</td>
               <td style="color:#000;font-weight: 400; text-align: right;" class="center">18%</td>
               <td style="color:#000;font-weight: 400; text-align: right;" class="right">4,500.00</td>
               <td style="color:#000;font-weight: 400; text-align: right;" class="center">4,500.00</td>
             </tr>
-             <tr>
+            <tr>
               <td style="color:#000; font-weight: 400;">
-               Total
+                Total
               </td>
               <td style="color:#000;font-weight: 700; text-align: right;">25,000.00</td>
               <td colspan="2" style="color:#000;font-weight: 700; text-align: right;" class="right">4,500.00</td>
@@ -527,28 +565,39 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
-    // Download as PDF using html2pdf
-    const btn = document.getElementById('downloadPdf');
-    const printBtn = document.getElementById('printBtn');
+      // Download as PDF using html2pdf
+      const btn = document.getElementById('downloadPdf');
+      const printBtn = document.getElementById('printBtn');
 
-    btn.addEventListener('click', () => {
-      const element = document.getElementById('invoice');
+      btn.addEventListener('click', () => {
+        const element = document.getElementById('invoice');
 
-      const opt = {
-        margin:       [8, 8, 8, 8], // top, left, bottom, right (mm treated by html2pdf)
-        filename:     'Invoice_INV-000002.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
+        const opt = {
+          margin: [8, 8, 8, 8], // top, left, bottom, right (mm treated by html2pdf)
+          filename: 'Invoice_INV-000002.pdf',
+          image: {
+            type: 'jpeg',
+            quality: 0.98
+          },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false
+          },
+          jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+          }
+        };
 
-      // generate the pdf
-      html2pdf().set(opt).from(element).save();
-    });
+        // generate the pdf
+        html2pdf().set(opt).from(element).save();
+      });
 
-    printBtn.addEventListener('click', () => {
-      window.print();
-    });
-  </script>
+      printBtn.addEventListener('click', () => {
+        window.print();
+      });
+    </script>
   </section>
 </x-app-layout>

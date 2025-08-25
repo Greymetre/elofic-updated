@@ -36,4 +36,9 @@ class EstimateDetail extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function tax_details()
+    {
+        return $this->belongsTo(TaxInvoiceTax::class, 'tax', 'id');
+    }
 }

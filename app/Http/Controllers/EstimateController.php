@@ -35,7 +35,16 @@ class EstimateController extends Controller
                         return '<span class="badge badge-paid">Converted</span>';
                     }
                 })
-                ->rawColumns(['status'])
+                ->editColumn('estimate_no', function ($data) {
+                    return '<a href="' . route('estimate.show', $data->id) . '">' . $data->estimate_no . '</a>';
+                })
+                ->editColumn('estimate_date', function ($data) {
+                    return date('d M Y', strtotime($data->estimate_date));
+                })
+                ->editColumn('due_date', function ($data) {
+                    return date('d M Y', strtotime($data->due_date));
+                })
+                ->rawColumns(['status', 'estimate_no', 'estimate_date', 'due_date'])
                 ->make(true);
         }
         return view('estimate.index');
@@ -147,7 +156,7 @@ class EstimateController extends Controller
         $invoice->tds_amount           =   $request->tds_amount ?? 0.00;
         $invoice->adjustment           =   $request->adjustment ?? 0.00;
         $invoice->grand_total          =   $request->grand_total;
-        $invoice->customer_notes       =   $request->customer_notesss;
+        $invoice->customer_notes       =   $request->customer_notes;
         $invoice->t_c                  =   $request->t_c;
         $invoice->save();
 
@@ -172,8 +181,26 @@ class EstimateController extends Controller
         return redirect()->route('estimate.show', $invoice->id);
     }
 
-    public function show(Estimate $invoice)
+    public function show(Estimate $estimate)
     {
-        return view('estimate.show', compact('invoice'));
+        $request = new Request(['customer_id' => $estimate->customer_id]);
+        $customer_address_class = new AjaxController();
+        $customer_address = $customer_address_class->getCustomerAddress($request);
+        $address = $customer_address->getData(true)['data'];
+
+        $taxSummary = $estimate->details
+            ->groupBy('tax') // group by tax id
+            ->map(function ($items, $taxId) {
+                $taxName = optional($items->first()->tax_details)->tax_name.' ('.optional($items->first()->tax_details)->tax_percentage.'%)'; // get tax name from relation
+                $totalAmount = $items->sum('tax_amount'); // sum tax_amount for this tax
+
+                return [
+                    'tax_id' => $taxId,
+                    'tax_name' => $taxName,
+                    'total_tax_amount' => $totalAmount,
+                ];
+            })
+            ->values();
+        return view('estimate.show', compact('estimate', 'address', 'taxSummary'));
     }
 }

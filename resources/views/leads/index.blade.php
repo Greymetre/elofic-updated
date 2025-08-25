@@ -642,6 +642,7 @@
                   <th>Contact</th>
                   <th>Phone</th>
                   <th>Email</th>
+                  <th>City</th>
                   <th>Status</th>
                   <th>Assigned To</th>
                   <th>Note</th>
@@ -961,6 +962,12 @@
           {
             data: 'email',
             name: 'email',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'city',
+            name: 'city',
             orderable: false,
             searchable: false
           },

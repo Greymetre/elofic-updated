@@ -237,8 +237,8 @@
   <section class="invocie_main">
     <div class="container-fluid">
       <div class="controls">
-        <button id="downloadPdf" class="btn">Download PDF</button>
-        <button id="printBtn" class="btn secondary">Print</button>
+        <button id="downloadPdf" class="btn" title="Download PDF"> <i class="material-icons">picture_as_pdf</i></button>
+        <button id="printBtn" class="btn secondary text-white" title="Print"> <i class="material-icons">print</i></button>
       </div>
 
       <div id="invoice" class="page">
@@ -411,6 +411,10 @@
                     <td style="border:0px; padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">Sub Total</td>
                     <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">{{$tax_invoice->sub_total}}</td>
                   </tr>
+                  <tr>
+                    <td style="border:0px; padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">Discount</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">{{$tax_invoice->discount}} {{$tax_invoice->discount_type == 'percentage' ? '%' : ''}}</td>
+                  </tr>
                   @if($taxSummary && count($taxSummary) > 0)
                   @foreach($taxSummary as $tax)
                   <tr>
@@ -421,7 +425,7 @@
                   @endif
                   <tr>
                     <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px; font-weight: bold;">Total</td>
-                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px;font-weight: bold;">₹29,500.00</td>
+                    <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400; line-height: 20px;font-weight: bold;">₹{{number_format($tax_invoice->grand_total, 2)}}</td>
                   </tr>
                   <tr>
                     <td style="border:0px;padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">Payment Made</td>
@@ -443,11 +447,7 @@
               <td rowspan="2" colspan="3" style="border:0px!important;">
 
                 <p style="color:#000; font-weight: 400;">Note</p>
-                <p style="color:#000; font-weight: 400; margin-bottom: 0px; line-height: 16px;">Bank Details :-<br>
-                  Bank Name - Asix Bank Ltd<br>
-                  Account No -920020063736921<br>
-                  IFSC Code -UTIB0000456<br>
-                  Branch -Dewas MP</p><br>
+                <p style="color:#000; font-weight: 400; margin-bottom: 0px; line-height: 16px;">{!! nl2br(e($tax_invoice->customer_notes)) !!}</p><br>
               </td>
               <td colspan="4" style="text-align: center; vertical-align: middle;">
                 <img src="https://demo.fieldkonnect.io/public/assets/img/sill.png">
@@ -459,10 +459,10 @@
             <tr>
               <td rowspan="2" colspan="3" style="border:0px!important;">
                 <p style="color:#000; font-weight: 400; font-size: 12px;">Thanks for your business.</p>
-                <div class="qrcode">
+                <!-- <div class="qrcode">
                   <img src="https://demo.fieldkonnect.io/public/assets/img/qr_code.png" style="width:100px;height: 100px;object-fit:cover;">
                   <p style="margin-left: 10px; color:#000; font-weight: 400; font-size:12px;"> Scan the QR code to view the configured information.</p>
-                </div>
+                </div> -->
               </td>
             </tr>
             <!-- <tr>

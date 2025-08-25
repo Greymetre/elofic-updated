@@ -27,6 +27,20 @@ class TaxInvoiceController extends Controller
                 ->editColumn('status', function ($data) {
                     return '<span class="badge badge-paid">Paid</span>';
                 })
+                // ->editColumn('status', function ($data) {
+                //     $today = \Carbon\Carbon::today();
+                //     $dueDate = \Carbon\Carbon::parse($data->due_date);
+
+                //     if ($dueDate->isToday()) {
+                //         return '<span class="badge badge-warning">Due Today</span>';
+                //     } elseif ($dueDate->isPast()) {
+                //         $days = $dueDate->diffInDays($today);
+                //         return '<span class="badge badge-danger">Overdue by ' . $days . ' days</span>';
+                //     } else {
+                //         $days = $today->diffInDays($dueDate);
+                //         return '<span class="badge badge-info">Due in ' . $days . ' days</span>';
+                //     }
+                // })
                 ->editColumn('invoice_no', function ($data) {
                     return '<a href="' . route('tax_invoice.show', $data->id) . '">' . $data->invoice_no . '</a>';
                 })
@@ -148,7 +162,7 @@ class TaxInvoiceController extends Controller
         $invoice->tds_amount           =   $request->tds_amount ?? 0.00;
         $invoice->adjustment           =   $request->adjustment ?? 0.00;
         $invoice->grand_total          =   $request->grand_total;
-        $invoice->customer_notes       =   $request->customer_notesss;
+        $invoice->customer_notes       =   $request->customer_notes;
         $invoice->t_c                  =   $request->t_c;
         $invoice->save();
 
@@ -159,6 +173,7 @@ class TaxInvoiceController extends Controller
         }
 
         foreach ($request->product_id as $k => $product) {
+            if(empty($request->product_id[$k])) continue;
             $invoice->details()->create([
                 'product_id' => $request->product_id[$k],
                 'product_dec' => $request->product_dec[$k],
@@ -174,9 +189,11 @@ class TaxInvoiceController extends Controller
         // return redirect()->route('tax_invoice.show', $invoice->id);
     }
 
-    public function show(Invoice $tax_invoice)
+    public function show(Invoice $tax_invoice, Request $request)
     {
-        return view('work_in_progress');
+        if(!$request->dev){
+            return view('work_in_progress');
+        }
         $request = new Request(['customer_id' => $tax_invoice->customer_id]);
         $customer_address_class = new AjaxController();
         $customer_address = $customer_address_class->getCustomerAddress($request);

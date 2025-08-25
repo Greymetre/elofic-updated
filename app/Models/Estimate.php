@@ -33,6 +33,11 @@ class Estimate extends Model implements HasMedia
         'status',
     ];
 
+    public function term()
+    {
+        return $this->belongsTo(PaymentTerm::class, 'payment_term', 'id');
+    }
+
     /**
      * Get the customer that owns the estimate.
      */
