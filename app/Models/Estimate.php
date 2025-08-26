@@ -31,6 +31,7 @@ class Estimate extends Model implements HasMedia
         'customer_notes',
         't_c',
         'status',
+        'invoice_id',
     ];
 
     public function term()

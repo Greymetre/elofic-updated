@@ -244,7 +244,7 @@ p.dam {
                                      </div>
                                 </div>
                                  <button type="button" class="hoverbtn btn" onclick="getOpportunitydata('{{$all_opportunity->id}}')"> <img src="{{ url('/').'/'.asset('assets/img')}}/ph_note-pencil-fill.svg"></button>
-                                 <!-- <button type="button" class="hoverbtn2 btn" onclick="window.location='{{ route('leads.show', $all_opportunity->lead->id) }}'"><i style="color: #263e65;" class="material-icons">visibility</i></button> -->
+                                 <button type="button" class="hoverbtn2 btn" onclick="window.location='{{ route('leads.show', $all_opportunity->lead->id) }}'"><i style="color: #263e65;" class="material-icons">visibility</i></button>
                             </div>
                             <div class="card-body">
                                 <div class="d-flex flex-row align-items-center">

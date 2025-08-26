@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CurrentTaxInvoiceNo;
 use App\Models\Customers;
+use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\PaymentTerm;
 use App\Models\Product;
@@ -23,20 +24,20 @@ class TaxInvoiceController extends Controller
         if ($request->ajax()) {
             $invoices = Invoice::with('customer');
 
-            // if($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)){
-            //     $invoices = $invoices->whereBetween('invoice_date', [$request->start_date, $request->end_date]);                
-            // }
-            // if($request->searchInput && !empty($request->searchInput)){
-            //     //Useing $query orwher using bracket 
-            //     $invoices = $invoices->where(function ($query) use ($request) {
-            //         $query->where('invoice_no', 'like', '%' . $request->searchInput . '%')
-            //             ->orWhere('order_no', 'like', '%' . $request->searchInput . '%')
-            //             ->orWhereHas('customer', function ($subQuery) use ($request) {
-            //                 $subQuery->where('name', 'like', '%' . $request->searchInput . '%')
-            //                     ->orWhere('mobile', 'like', '%' . $request->searchInput . '%');
-            //             });
-            //     });
-            // }
+            if($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)){
+                $invoices = $invoices->whereBetween('invoice_date', [$request->start_date, $request->end_date]);                
+            }
+            if($request->searchInput && !empty($request->searchInput)){
+                //Useing $query orwher using bracket 
+                $invoices = $invoices->where(function ($query) use ($request) {
+                    $query->where('invoice_no', 'like', '%' . $request->searchInput . '%')
+                        ->orWhere('order_no', 'like', '%' . $request->searchInput . '%')
+                        ->orWhereHas('customer', function ($subQuery) use ($request) {
+                            $subQuery->where('name', 'like', '%' . $request->searchInput . '%')
+                                ->orWhere('mobile', 'like', '%' . $request->searchInput . '%');
+                        });
+                });
+            }
             $invoices = $invoices->latest();
             return DataTables::of($invoices)
                 ->addIndexColumn()
@@ -123,6 +124,60 @@ class TaxInvoiceController extends Controller
             'all_tds'
         ));
     }
+    public function convert_to_tax_invoice(Request $request, Estimate $convert_estimate)
+    {
+        return view('work_in_progress');
+        $payment_terms = PaymentTerm::all();
+        $products = Product::where('active', 'Y')->get();
+        $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
+        $states = State::where('active', 'Y')->select('id', 'state_name')->get();
+        $users = User::where('active', 'Y')->select('id', 'name')->get();
+
+        $lastInvoice = Invoice::orderBy('id', 'desc')->first();
+        if ($lastInvoice) {
+            $parts = explode('/', $lastInvoice->invoice_no);
+            $prefix = $parts[0];
+            $lastNumberPart = end($parts);
+            $digitLength = strlen($lastNumberPart);
+            $nextNumber = intval($lastNumberPart) + 1;
+            $formattedNumber = str_pad($nextNumber, $digitLength, '0', STR_PAD_LEFT);
+        } else {
+            $currentYear = date('y'); // e.g. 25
+            if (date('m') >= 4) {
+                $startYear = $currentYear;
+                $endYear   = $currentYear + 1;
+            } else {
+                $startYear = $currentYear - 1;
+                $endYear   = $currentYear;
+            }
+            $prefix = 'INV-' . str_pad($startYear, 2, '0', STR_PAD_LEFT) . '-' . str_pad($endYear, 2, '0', STR_PAD_LEFT);
+            $formattedNumber = '01';
+        }
+        $invoiceNumber = $prefix . '/' . $formattedNumber;
+        if (strpos($invoiceNumber, '/') !== false) {
+            [$prefixValue, $nextNumberValue] = explode('/', $invoiceNumber);
+        } else {
+            $prefixValue = $invoiceNumber;
+            $nextNumberValue = '';
+        }
+
+        $all_tax = TaxInvoiceTax::all();
+        $all_tds = TaxInvoiceTds::all();
+
+        return view('taxinvoice.convert', compact(
+            'payment_terms',
+            'products',
+            'customers',
+            'states',
+            'invoiceNumber',
+            'prefixValue',
+            'nextNumberValue',
+            'users',
+            'all_tax',
+            'all_tds',
+            'convert_estimate'
+        ));
+    }
     public function add_payment_term(Request $request)
     {
         $payment_term = new PaymentTerm();
@@ -182,6 +237,10 @@ class TaxInvoiceController extends Controller
         $invoice->t_c                  =   $request->t_c;
         $invoice->save();
 
+        if(isset($request->convert_estimate_id) && !empty($request->convert_estimate_id)){
+            Estimate::where('id', $request->convert_estimate_id)->update(['invoice_id' => $invoice->id, 'status' => 1]);
+        }
+
         if ($request->hasFile('files') && count($request->file('files')) > 0) {
             foreach ($request->file('files') as $file) {
                 $invoice->addMedia($file)->toMediaCollection('invoice_files');
@@ -201,8 +260,8 @@ class TaxInvoiceController extends Controller
                 'amount' => $request->amount[$k]
             ]);
         }
-        return redirect()->route('tax_invoice.index');
-        // return redirect()->route('tax_invoice.show', $invoice->id);
+        // return redirect()->route('tax_invoice.index');
+        return redirect()->route('tax_invoice.show', $invoice->id);
     }
 
     public function show(Invoice $tax_invoice, Request $request)

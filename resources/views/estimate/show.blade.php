@@ -237,8 +237,13 @@
   <section class="invocie_main">
     <div class="container-fluid">
       <div class="controls">
-      <button id="downloadPdf" class="btn" title="Download PDF"> <i class="material-icons">picture_as_pdf</i></button>
-      <button id="printBtn" class="btn secondary text-white" title="Print"> <i class="material-icons">print</i></button>
+        @if($estimate->status == 1)
+        <a href="{{ route('tax_invoice.show', ['tax_invoice' => $estimate->invoice_id]) }}" class="btn btn-success">Converted</a>
+        @else
+        <a href="{{ route('convert_to_tax_invoice', ['convert_estimate' => $estimate->id]) }}" id="convert" class="btn" title="Convert to PDF"> Convert</a>
+        @endif
+        <button id="downloadPdf" class="btn" title="Download PDF"> <i class="material-icons">picture_as_pdf</i></button>
+        <button id="printBtn" class="btn secondary text-white" title="Print"> <i class="material-icons">print</i></button>
       </div>
 
       <div id="invoice" class="page">
@@ -301,26 +306,41 @@
                 </tr>
               </thead>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px; padding-top:5px;">{{$estimate->customer?->name}}</td>
+                <td style="color:#000; font-weight: 500;font-size: 13px; padding: 0px 5px; line-height: 20px; padding-top:5px;">
+                  {{ $estimate->customer?->name ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">{{$address['billing_address']['address1']}} {{$address['billing_address']['cityname']['city_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['billing_address']['address1'] ?? '' }}
+                  {{ $address['billing_address']['cityname']['city_name'] ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;line-height: 20px;">{{$address['billing_address']['districtname']['district_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['billing_address']['districtname']['district_name'] ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['billing_address']['pincodename']['pincode']}} {{$address['billing_address']['statename']['state_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['billing_address']['pincodename']['pincode'] ?? '' }}
+                  {{ $address['billing_address']['statename']['state_name'] ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['billing_address']['countryname']['country_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['billing_address']['countryname']['country_name'] ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">GSTIN : {{$address['gstin_no']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  GSTIN : {{ $address['gstin_no'] ?? '' }}
+                </td>
               </tr>
             </table>
+
           </div>
-          @if($address['same_address'] == 0)
+          @if(($address['same_address'] ?? 1) == 0)
           <div class="addr" style="padding:0px;">
             <table style="width:100%;">
               <thead>
@@ -329,16 +349,26 @@
                 </tr>
               </thead>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">{{$address['shipping_address']['address1']}} {{$address['shipping_address']['cityname']['city_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['shipping_address']['address1'] ?? '' }}
+                  {{ $address['shipping_address']['cityname']['city_name'] ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;line-height: 20px;">{{$address['shipping_address']['districtname']['district_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['shipping_address']['districtname']['district_name'] ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['shipping_address']['pincodename']['pincode']}} {{$address['shipping_address']['statename']['state_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['shipping_address']['pincodename']['pincode'] ?? '' }}
+                  {{ $address['shipping_address']['statename']['state_name'] ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['shipping_address']['countryname']['country_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['shipping_address']['countryname']['country_name'] ?? '' }}
+                </td>
               </tr>
             </table>
           </div>
@@ -351,20 +381,31 @@
                 </tr>
               </thead>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">{{$address['billing_address']['address1']}} {{$address['billing_address']['cityname']['city_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['billing_address']['address1'] ?? '' }}
+                  {{ $address['billing_address']['cityname']['city_name'] ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;line-height: 20px;">{{$address['billing_address']['districtname']['district_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['billing_address']['districtname']['district_name'] ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['billing_address']['pincodename']['pincode']}} {{$address['billing_address']['statename']['state_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['billing_address']['pincodename']['pincode'] ?? '' }}
+                  {{ $address['billing_address']['statename']['state_name'] ?? '' }}
+                </td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px;  line-height: 20px;">{{$address['billing_address']['countryname']['country_name']}}</td>
+                <td style="color:#000; font-weight: 400;font-size: 12px; padding: 0px 5px; line-height: 20px;">
+                  {{ $address['billing_address']['countryname']['country_name'] ?? '' }}
+                </td>
               </tr>
             </table>
           </div>
           @endif
+
         </div>
         <table class="items" aria-labelledby="items">
           <thead>

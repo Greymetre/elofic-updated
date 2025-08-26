@@ -21,11 +21,24 @@ class EstimateController extends Controller
 {
     public function index(Request $request)
     {
-        if(!$request->dev){
-            return view('work_in_progress');
-        }
         if ($request->ajax()) {
-            $invoices = Estimate::with('customer')->latest();
+            $invoices = Estimate::with('customer');
+
+            if($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)){
+                $invoices = $invoices->whereBetween('estimate_date', [$request->start_date, $request->end_date]);                
+            }
+            if($request->searchInput && !empty($request->searchInput)){
+                //Useing $query orwher using bracket 
+                $invoices = $invoices->where(function ($query) use ($request) {
+                    $query->where('estimate_no', 'like', '%' . $request->searchInput . '%')
+                        ->orWhere('order_no', 'like', '%' . $request->searchInput . '%')
+                        ->orWhereHas('customer', function ($subQuery) use ($request) {
+                            $subQuery->where('name', 'like', '%' . $request->searchInput . '%')
+                                ->orWhere('mobile', 'like', '%' . $request->searchInput . '%');
+                        });
+                });
+            }
+            $invoices = $invoices->latest();
             return DataTables::of($invoices)
                 ->addIndexColumn()
                 ->editColumn('status', function ($data) {
