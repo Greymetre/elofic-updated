@@ -20,6 +20,7 @@ class Lead extends Model implements HasMedia
         'lead_source',
         'lead_generation_date',
         'conversion_date',
+        'customer_id',
         'others',
         'created_by',
     ];

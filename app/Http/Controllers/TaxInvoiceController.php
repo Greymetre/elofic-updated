@@ -24,10 +24,10 @@ class TaxInvoiceController extends Controller
         if ($request->ajax()) {
             $invoices = Invoice::with('customer');
 
-            if($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)){
-                $invoices = $invoices->whereBetween('invoice_date', [$request->start_date, $request->end_date]);                
+            if ($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)) {
+                $invoices = $invoices->whereBetween('invoice_date', [$request->start_date, $request->end_date]);
             }
-            if($request->searchInput && !empty($request->searchInput)){
+            if ($request->searchInput && !empty($request->searchInput)) {
                 //Useing $query orwher using bracket 
                 $invoices = $invoices->where(function ($query) use ($request) {
                     $query->where('invoice_no', 'like', '%' . $request->searchInput . '%')
@@ -126,7 +126,6 @@ class TaxInvoiceController extends Controller
     }
     public function convert_to_tax_invoice(Request $request, Estimate $convert_estimate)
     {
-        return view('work_in_progress');
         $payment_terms = PaymentTerm::all();
         $products = Product::where('active', 'Y')->get();
         $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
@@ -236,8 +235,8 @@ class TaxInvoiceController extends Controller
         $invoice->customer_notes       =   $request->customer_notes;
         $invoice->t_c                  =   $request->t_c;
         $invoice->save();
-
-        if(isset($request->convert_estimate_id) && !empty($request->convert_estimate_id)){
+        
+        if (isset($request->convert_estimate_id) && !empty($request->convert_estimate_id)) {
             Estimate::where('id', $request->convert_estimate_id)->update(['invoice_id' => $invoice->id, 'status' => 1]);
         }
 
@@ -248,7 +247,7 @@ class TaxInvoiceController extends Controller
         }
 
         foreach ($request->product_id as $k => $product) {
-            if(empty($request->product_id[$k])) continue;
+            if (empty($request->product_id[$k])) continue;
             $invoice->details()->create([
                 'product_id' => $request->product_id[$k],
                 'product_dec' => $request->product_dec[$k],
@@ -274,7 +273,7 @@ class TaxInvoiceController extends Controller
         $taxSummary = $tax_invoice->details
             ->groupBy('tax') // group by tax id
             ->map(function ($items, $taxId) {
-                $taxName = optional($items->first()->tax_details)->tax_name.' ('.optional($items->first()->tax_details)->tax_percentage.'%)'; // get tax name from relation
+                $taxName = optional($items->first()->tax_details)->tax_name . ' (' . optional($items->first()->tax_details)->tax_percentage . '%)'; // get tax name from relation
                 $totalAmount = $items->sum('tax_amount'); // sum tax_amount for this tax
 
                 return [

@@ -29,7 +29,9 @@ class Invoice extends Model implements HasMedia
         'adjustment',
         'grand_total',
         'customer_notes',
-        't_c'
+        't_c',
+        'paid_amount',
+        'status_id',
     ];
 
     /**

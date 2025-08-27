@@ -12,7 +12,7 @@ use App\Imports\LeadsImport;
 use Excel;
 
 use DataTables;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\Lead;
 use App\Models\LeadContact;
@@ -23,6 +23,8 @@ use App\Models\LeadOpportunity;
 use App\Models\Pincode;
 use App\Models\Country;
 use App\Models\Address;
+use App\Models\Customers;
+use App\Models\EmployeeDetail;
 use App\Models\LeadLog;
 use App\Models\LeadNotification;
 use App\Models\OpportunitieStatus;
@@ -116,11 +118,11 @@ class LeadController extends Controller
             $leads->whereHas('address', function ($query) use ($request) {
                 $query->where('state_id', $request->input('state_id'));
             });
-            if($request->input('district_id') != "") {
+            if ($request->input('district_id') != "") {
                 $leads->whereHas('address', function ($query) use ($request) {
                     $query->where('district_id', $request->input('district_id'));
                 });
-                if($request->input('city_id') != "") {
+                if ($request->input('city_id') != "") {
                     $leads->whereHas('address', function ($query) use ($request) {
                         $query->where('city_id', $request->input('city_id'));
                     });
@@ -884,5 +886,53 @@ class LeadController extends Controller
         if (ob_get_contents()) ob_end_clean();
         ob_start();
         return Excel::download(new LeadsTemplate, 'LeadTemplate.xlsx');
+    }
+
+    public function convert_lead(Request $request)
+    {
+        foreach ($request->lead_id as $lead_id) {
+            $lead = Lead::where('id', $lead_id)->first();
+            $len = $lead->contacts && count($lead->contacts) > 0 ? strlen(preg_replace('/\s+/', '', $lead->contacts[0]->phone_number)) : 0;
+            $phone = $lead->contacts && count($lead->contacts) > 0 ? $lead->contacts[0]->phone_number : '';
+            if (($len === 12 && substr($phone, 0, 2) === '91') ||
+                ($len === 13 && substr($phone, 0, 3) === '+91')
+            ) {
+                $phone = preg_replace('/^\+?91/', '', $phone); // remove +91 or 91 from start
+            }
+            $check_customer = Customers::where('mobile', 'like', '%' . $phone . '%')->first();
+            if($check_customer && $check_customer->id){
+                return response()->json(['status' => 'error', 'message' => 'Customer already exist with this phone number.']);
+            }
+            $data = [
+                'name' => $lead->company_name,
+                'first_name' => $lead->contacts && count($lead->contacts) > 0 ? $lead->contacts[0]->name : '',
+                'email' => $lead->contacts && count($lead->contacts) > 0 ? $lead->contacts[0]->email : '',
+                'mobile' => $lead->contacts && count($lead->contacts) > 0 ? $lead->contacts[0]->phone_number : '',
+                'creation_date' => date('Y-m-d'),
+                'customertype' => 9,
+                'created_by' => Auth::id(),
+            ];
+            $customer = new Customers();
+            $response = $customer->save_data($data);
+            if ($response['status'] == 'success') {
+                $new_customer_id = $response['customer_id'];
+                $lead->customer_id = $new_customer_id;
+                $lead->save();
+                if ($lead->address && !empty($lead->address)) {
+                    Address::where('id', $lead->address->id)->update(['customer_id' => $new_customer_id]);
+                    $employeeDetail = EmployeeDetail::create(
+                        [
+                            'customer_id' => $new_customer_id,
+                            'user_id' => $lead->assign_to ?? Auth::id(),
+                            'created_by' => Auth::id(),
+                        ]
+                    );
+                }
+
+                return response()->json(['status' => 'success', 'message' => 'Lead converted successfully.']);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
+            }
+        }
     }
 }

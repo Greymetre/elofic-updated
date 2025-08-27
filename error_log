@@ -101,3 +101,4 @@ Stack trace:
 [25-Sep-2024 11:46:00 Asia/Kolkata] PHP Fatal error:  Allowed memory size of 536870912 bytes exhausted (tried to allocate 20480 bytes) in /home/expertfr/public_html/bediya/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php on line 600
 [25-Sep-2024 11:49:58 Asia/Kolkata] PHP Fatal error:  Allowed memory size of 536870912 bytes exhausted (tried to allocate 20480 bytes) in /home/expertfr/public_html/bediya/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Model.php on line 600
 [03-Oct-2024 12:09:20 Asia/Kolkata] PHP Fatal error:  Allowed memory size of 536870912 bytes exhausted (tried to allocate 20480 bytes) in /home/expertfr/public_html/bediya/vendor/laravel/framework/src/Illuminate/Collections/Arr.php on line 116
+[27-Aug-2025 06:32:42 UTC] PHP Warning:  Module "pdo_mysql" is already loaded in Unknown on line 0

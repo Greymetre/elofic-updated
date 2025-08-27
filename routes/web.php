@@ -181,6 +181,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('leads-deleteMedia', [LeadController::class, 'deleteMedia'])->name('leads-deleteMedia');
     Route::get('leads-exportLeads', [LeadController::class, 'exportLeads'])->name('leads-exportLeads');
     Route::post('leads/changeStatus', [LeadController::class, 'changeStatus'])->name('leads.changeStatus');
+    Route::post('convert_lead', [LeadController::class, 'convert_lead'])->name('leads.convert');
 
     //Contacts Management
     Route::resource('lead-contacts', LeadContactsController::class);

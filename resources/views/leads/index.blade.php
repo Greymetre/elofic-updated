@@ -606,7 +606,8 @@
                     @endif
                   </select>
                 </div>
-                <button type="button" class="btn mr-3 ml-3" id="del_btn"><i class="material-icons icon">delete</i>Delete</button>
+                <button type="button" class="btn mr-3 ml-3" id="del_btn"><i class="material-icons icon mr-1">delete</i>Delete</button>
+                <button type="button" class="btn mr-3 ml-3" id="convert_btn"><i class="material-icons icon mr-1">transcribe</i>Convert to Customer</button>
               </div>
               {{--<div class="btn-group">
                 <button class="btn sort_btns filter_btn  dropdown-toggle"
@@ -1117,6 +1118,53 @@
           if (result.value) {
             $.ajax({
               url: "{{ route('leads.deleteLead') }}",
+              method: 'POST',
+              data: {
+                lead_id: selectedIds,
+                _token: '{{ csrf_token() }}'
+              },
+              success: function(res) {
+                if (res.status == 'success') {
+                  getLeads();
+                  $('.ass_del').addClass('d-none');
+                  Swal.fire({
+                    icon: 'success',
+                    title: res.message
+                  });
+                } else {
+                  Swal.fire({
+                    icon: 'error',
+                    title: res.message
+                  });
+                }
+              }
+            })
+          }
+        })
+      } else {
+        // None selected
+        $('.ass_del').addClass('d-none');
+        // $('#deleteButton').prop('disabled', true);
+      }
+    });
+    $('#convert_btn').on('click', function() {
+      let selectedIds = [];
+      $('.checkbox_cls:checked').each(function() {
+        selectedIds.push($(this).val()); // or $(this).data('id')
+      });
+      if (selectedIds.length > 0) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You won't convert leads into Customer!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, convert it!'
+        }).then((result) => {
+          if (result.value) {
+            $.ajax({
+              url: "{{ route('leads.convert') }}",
               method: 'POST',
               data: {
                 lead_id: selectedIds,

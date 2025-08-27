@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use DataTables;
 use Validator;
 use Gate;
-use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation, ServiceChargeChargeType, OrderDetails, ServiceComplaintReason, ServiceBillComplaintType, ServiceGroupComplaint, OpeningStock, BranchOprningQuantity, PlannedSOP};
+use App\Models\{Pincode, City, District, State, Country, Customers, Category, Product, Address, Attachment, Attendance, Branch, BranchStock, Order, Status, Settings, Tasks, ProductDetails, Sales, UserReporting, CheckIn, Complaint, ComplaintTimeline, ComplaintWorkDone, CompOffLeave, CustomerDetails, CustomerOutstanting, DealerAppointment, DealerAppointmentKyc, EmployeeDetail, EndUser, Expenses, GiftModel, GiftSubcategory, Marketing, MspActivity, Notes, OrderSchemeDetail, ParentDetail, PrimarySales, PrimaryScheme, Redemption, SalesTargetUsers, SchemeDetails, ServiceBill, ServiceChargeCategories, ServiceChargeProducts, Services, Subcategory, TourProgramme, TransactionHistory, User, UserCityAssign, WarrantyActivation, ServiceChargeChargeType, OrderDetails, ServiceComplaintReason, ServiceBillComplaintType, ServiceGroupComplaint, OpeningStock, BranchOprningQuantity, Invoice, PlannedSOP};
 use App\Models\UserLiveLocation;
 use App\Models\UserActivity;
 use App\Http\Controllers\SendNotifications;
@@ -673,9 +673,9 @@ class AjaxController extends Controller
     {
         try {
             $customer_id = $request->input('customer_id');
-            $data = Sales::where('buyer_id', '=', $customer_id)
-                ->whereIn('status_id', [4, 5])
-                ->select('id', 'invoice_date', 'invoice_no', 'grand_total', 'order_id', 'status_id', 'paid_amount')
+            $data = Invoice::where('user_id', '=', $customer_id)
+                ->where('status_id', 0)
+                ->select('id', 'invoice_date', 'invoice_no', 'grand_total', 'order_no', 'status_id', 'paid_amount')
                 ->get();
             $sales = collect([]);
             if (!empty($data)) {
