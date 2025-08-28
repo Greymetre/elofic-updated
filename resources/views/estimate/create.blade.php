@@ -595,7 +595,7 @@
 
     #estimate_no_settings {
       position: absolute;
-      top: 34px;
+      top: 30px;
       right: 5px;
       color: #3B82F6 !important;
       cursor: pointer;
@@ -640,7 +640,7 @@
     @endif
     <div class="container-fluid">
       <div class="card p-4">
-        <form action="{{ route('estimate.store') }}" method="post" enctype="multipart/form-data">
+        <form action="{{ route('estimate.store') }}" method="post" id="createEstimateForm" enctype="multipart/form-data">
           @csrf
           <h5><i class="fa fa-file-text-o"></i> New Estimate</h5>
           <div class="row">
@@ -650,7 +650,7 @@
                 <div class="input-group">
                   <div class="innerborder">
                     <!-- Dropdown -->
-                    <select class="custom-select select2" id="customer_id" name="customer_id">
+                    <select class="custom-select select2" id="customer_id" name="customer_id" required>
                       <option value="">Select Customer</option>
                       <option value="__add__">➕ Add New</option>
                       @if(!empty($customers))
@@ -695,7 +695,7 @@
             <div class="col-md-4">
               <div class="form-group mb-3" id="estimate_no_div">
                 <label for="estimate_no">Estimate#*</label>
-                <input type="text" class="form-control custom-input-box" id="estimate_no" name="estimate_no" value="{!! $invoiceNumber !!}"><i title="Configure Invoice Number" class="material-icons icon" id="estimate_no_settings" data-toggle="modal" data-target="#invoiceNoModal">settings</i>
+                <input type="text" class="form-control custom-input-box" id="estimate_no" name="estimate_no" value="{!! $invoiceNumber !!}" readonly required><i title="Configure Invoice Number" class="material-icons icon" id="estimate_no_settings" data-toggle="modal" data-target="#invoiceNoModal">settings</i>
               </div>
             </div>
             <div class="col-md-4">
@@ -709,7 +709,7 @@
             <div class="col-md-3">
               <div class="form-group mb-3">
                 <label for="estimate_date">Estimate Date*</label>
-                <input type="date" class="form-control custom-input-box" id="estimate_date" name="estimate_date">
+                <input type="date" class="form-control custom-input-box" id="estimate_date" name="estimate_date" required>
               </div>
             </div>
             <div class="col-md-3">
@@ -1073,7 +1073,7 @@
       </div>
     </div>
   </section>
-
+  <script src="{{ url('/').'/'.asset('assets/js/validation_invoice.js?v='.time()) }}') }}"></script>
   <script>
     $(document).ready(function() {
       $("#addNewRow").click(function() {

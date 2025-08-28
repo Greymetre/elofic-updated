@@ -595,7 +595,7 @@
 
     #invoice_no_settings {
       position: absolute;
-      top: 34px;
+      top: 30px;
       right: 5px;
       color: #3B82F6 !important;
       cursor: pointer;
@@ -699,7 +699,7 @@
             <div class="col-md-4">
               <div class="form-group mb-3" id="invoice_no_div">
                 <label for="invoice_no">Invoice#*</label>
-                <input type="text" class="form-control custom-input-box" id="invoice_no" name="invoice_no" value="{!! $invoiceNumber !!}"><i title="Configure Invoice Number" class="material-icons icon" id="invoice_no_settings" data-toggle="modal" data-target="#invoiceNoModal">settings</i>
+                <input type="text" class="form-control custom-input-box" id="invoice_no" name="invoice_no" value="{!! $invoiceNumber !!}" readonly required><i title="Configure Invoice Number" class="material-icons icon" id="invoice_no_settings" data-toggle="modal" data-target="#invoiceNoModal">settings</i>
               </div>
             </div>
             <div class="col-md-4">

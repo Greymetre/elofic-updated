@@ -13,8 +13,11 @@ return [
         'Other Course',
     ],
     'pay_roll' => [
-        '1' => 'Blueneba',
-        '2' => 'Other'
+        '1' => 'PayRoll-1',
+        '2' => 'PayRoll-2',
+        '3' => 'PayRoll-3',
+        '4' => 'PayRoll-4',
+        '5' => 'PayRoll-5',
     ],
     'redeem_mode' => [
         '1' => 'Gift',

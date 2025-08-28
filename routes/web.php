@@ -1114,6 +1114,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('add_tax', [TaxInvoiceController::class, 'add_tax'])->name('add_tax');
     Route::post('add_tds', [TaxInvoiceController::class, 'add_tds'])->name('add_tds');
     Route::get('convert_to_tax_invoice/{convert_estimate}', [TaxInvoiceController::class, 'convert_to_tax_invoice'])->name('convert_to_tax_invoice');
+    Route::get('invoice_setting', [TaxInvoiceController::class, 'invoice_setting'])->name('invoice_setting');
+    Route::post('invoice_setting_store', [TaxInvoiceController::class, 'invoice_setting_store'])->name('invoice_settings.store');
+    Route::delete('/invoice-labels/{id}', [TaxInvoiceController::class, 'destroy_label'])->name('invoice_labels.destroy');
+
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

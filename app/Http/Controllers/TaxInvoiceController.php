@@ -6,6 +6,8 @@ use App\Models\CurrentTaxInvoiceNo;
 use App\Models\Customers;
 use App\Models\Estimate;
 use App\Models\Invoice;
+use App\Models\InvoiceLabel;
+use App\Models\InvoiceSetting;
 use App\Models\PaymentTerm;
 use App\Models\Product;
 use App\Models\State;
@@ -235,7 +237,7 @@ class TaxInvoiceController extends Controller
         $invoice->customer_notes       =   $request->customer_notes;
         $invoice->t_c                  =   $request->t_c;
         $invoice->save();
-        
+
         if (isset($request->convert_estimate_id) && !empty($request->convert_estimate_id)) {
             Estimate::where('id', $request->convert_estimate_id)->update(['invoice_id' => $invoice->id, 'status' => 1]);
         }
@@ -284,5 +286,102 @@ class TaxInvoiceController extends Controller
             })
             ->values();
         return view('taxinvoice.show', compact('tax_invoice', 'address', 'taxSummary'));
+    }
+
+    public function invoice_setting(Request $request)
+    {
+        // if (!$request->devs) {
+            return view('work_in_progress');
+        // }
+        $invoice_setting = InvoiceSetting::with('labels')->first();
+        return view('taxinvoice.invoice_setting', compact('invoice_setting'));
+    }
+
+    public function invoice_setting_store(Request $request)
+    {
+        $request->validate([
+            'invoice_logo' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'invoice_esign' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'labels.*.name' => 'required|string|max:255',
+            'labels.*.page' => 'required|in:2,3,4,5',
+            'labels.*.icon' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+        ]);
+
+        $pages = [];
+
+        foreach ($request->labels as $labelData) {
+            $page = $labelData['page'] ?? null;
+            $heading = $labelData['page_heading'] ?? null;
+
+            if ($page && $heading) {
+                if (isset($pages[$page]) && $pages[$page] !== $heading) {
+                    return back()->withErrors([
+                        "Page {$page} can only have one unique heading across all labels."
+                    ]);
+                }
+                $pages[$page] = $heading;
+            }
+        }
+
+        // Fetch or create first invoice setting
+        $invoiceSetting = InvoiceSetting::first() ?? new InvoiceSetting();
+        $invoiceSetting->save();
+
+        // ✅ Upload invoice logo
+        if ($request->hasFile('invoice_logo')) {
+            $invoiceSetting->clearMediaCollection('invoice_logo');
+            $invoiceSetting->addMedia($request->file('invoice_logo'))
+                ->toMediaCollection('invoice_logo');
+        }
+
+        // ✅ Upload invoice e-sign
+        if ($request->hasFile('invoice_esign')) {
+            $invoiceSetting->clearMediaCollection('invoice_esign');
+            $invoiceSetting->addMedia($request->file('invoice_esign'))
+                ->toMediaCollection('invoice_esign');
+        }
+
+        // ✅ Handle labels
+        if ($request->has('labels')) {
+            foreach ($request->labels as $index => $labelData) {
+                // Skip empty rows
+                if (empty($labelData['name']) && empty($labelData['page']) && empty($request->file("labels.$index.icon"))) {
+                    continue;
+                }
+
+                // Update existing or create new
+                $label = isset($labelData['id'])
+                    ? InvoiceLabel::find($labelData['id'])
+                    : new InvoiceLabel();
+
+                $label->invoice_setting_id = $invoiceSetting->id;
+                $label->name = $labelData['name'] ?? '';
+                $label->page = $labelData['page'] ?? null;
+                $label->page_heading = $labelData['page_heading'] ?? null;
+                $label->save();
+
+                // ✅ Upload label icon
+                if ($request->hasFile("labels.$index.icon")) {
+                    $label->clearMediaCollection('label_icon');
+                    $label->addMedia($request->file("labels.$index.icon"))
+                        ->toMediaCollection('label_icon');
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Invoice settings updated successfully!');
+    }
+
+    public function destroy_label($id)
+    {
+        $label = InvoiceLabel::find($id);
+
+        if (!$label) {
+            return response()->json(['message' => 'Label not found'], 404);
+        }
+
+        $label->delete();
+
+        return response()->json(['message' => 'Label deleted successfully']);
     }
 }

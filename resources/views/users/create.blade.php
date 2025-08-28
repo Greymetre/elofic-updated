@@ -229,7 +229,7 @@
                   <div class="input_section">
                     <label class="col-form-label">{!! trans('panel.user.marital_status') !!}</label>
                     <div class="form-group has-default bmd-form-group">
-                      <select class="form-control" name="marital_status" required>
+                      <select class="form-control" name="marital_status">
                         <option value="" disabled selected>Marital Status</option>
                         <option {{ ($user->userinfo?$user->userinfo->marital_status:'' == 'Single') ? 'selected' : '' }} value="Single">Single</option>
                         <option {{ (old('marital_status') ?? ($user->userinfo ? $user->userinfo->marital_status : '')) == 'Married' ? 'selected' : '' }} value="Married">Married</option>
@@ -669,7 +669,7 @@
                     <label class="col-form-label">{!! trans('panel.user.pay_roll') !!}</label>
                     <div class="form-group has-default bmd-form-group">
                       <div class="form-group has-default bmd-form-group">
-                        <select class="form-control" name="payroll" required>
+                        <select class="form-control" name="payroll">
                           <option value="" disabled selected>Select Pay Roll</option>
                           @foreach($pay_rolls as $key=> $pay_roll)
                           <option {{ (($key == old('payroll', $user->payroll?$user->payroll:''))) ? 'selected' : '' }} value="{{$key}}">{{$pay_roll}}</option>
@@ -1133,7 +1133,7 @@
                   <div class="input_section">
                     <label class="col-form-label">Order Mails Type<span class="text-danger"> *</span></label>
                     <div class="form-group has-default bmd-form-group">
-                      <select class="form-control select2" multiple name="order_mails_type[]" style="width: 100%;" required id="type">
+                      <select class="form-control select2" multiple name="order_mails_type[]" style="width: 100%;" id="type">
                         <option value="">Select {!! trans('panel.customers.fields.customertype') !!}</option>
                         @if(@isset($customertype ))
                         @foreach($customertype as $type)
@@ -1293,7 +1293,7 @@
   </div>
   </div>
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
-  <script src="{{ url('/').'/'.asset('assets/js/validation_users.js') }}"></script>
+  <script src="{{ url('/').'/'.asset('assets/js/validation_users.js?v='.time()) }}"></script>
   <script type="text/javascript">
     $(document).ready(function() {
       $('.submituser').click(function() {

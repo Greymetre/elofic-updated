@@ -688,7 +688,7 @@
                   <option value="">Select State</option>
                   @if(!empty($states))
                   @foreach($states as $state)
-                  <option value="{!! $state['id'] !!}" {{ old( 'place_of_supply') == $state['state_name'] ? 'selected' : '' }}>{!! $state['state_name'] !!}</option>
+                  <option value="{!! $state['id'] !!}" {{ old( 'place_of_supply', $convert_estimate->place_of_supply) == $state['id'] ? 'selected' : '' }}>{!! $state['state_name'] !!}</option>
                   @endforeach
                   @endif
                 </select>
@@ -842,8 +842,8 @@
                   <div class="col-6 px-1">
                     <input type="number" class="form-control form-control-sm" name="discount" id="discount" value="{{ old('discount', $convert_estimate->discount) }}" min="0" style="border-radius: 5px 0px 0px 5px;" />
                     <select name="discount_type" id="discount_type" class="form-control form-control-sm" style="width: 60px;padding: 0 !important;border-radius: 0px 5px 5px 0px;">
-                      <option value="percentage">%</option>
-                      <option value="amount">₹</option>
+                      <option value="percentage" {{ old('discount_type', $convert_estimate->discount_type) == 'percentage' ? 'selected' : '' }}>%</option>
+                      <option value="amount" {{ old('discount_type', $convert_estimate->discount_type) == 'amount' ? 'selected' : '' }}>₹</option>
                     </select>
                   </div>
                   <div class="col-3 px-0 text-right">
@@ -1262,7 +1262,9 @@
                 html += '<p class="mb-0">GSTIN: ' + gstNumber + '</p>';
                 return html;
               }
-              $('#place_of_supply').val(res.data.billing_address.state_id).trigger('change');
+              if(res.data.billing_address.state_id != '' && res.data.billing_address.state_id != null){
+                $('#place_of_supply').val(res.data.billing_address.state_id).trigger('change');
+              }
               var billingHtml = '<span class="address-title">Billing Address</span>';
               var shippingHtml = '<span class="address-title subh">Shipping Address</span>';
               if (res.data.same_address) {

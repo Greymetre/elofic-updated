@@ -78,10 +78,6 @@ $(document).ready(function () {
       {
         maxlength: 250,
       },
-      marital_status:
-      {
-        maxlength: 250,
-      },
       date_of_birth:
       {
         //anyDate: true
@@ -168,14 +164,6 @@ $(document).ready(function () {
       {
         number: true,
         maxlength: 50,
-      },
-      order_mails:
-      {
-        required:true,
-      },
-      order_mails_type:
-      {
-        required:true,
       },
       designation_id:
       {
@@ -307,10 +295,6 @@ $(document).ready(function () {
       {
         maxlength: 250,
       },
-      marital_status:
-      {
-        maxlength: 250,
-      },
       date_of_birth:
       {
         //anyDate: true
@@ -382,14 +366,6 @@ $(document).ready(function () {
       {
         number: true,
         maxlength: 50,
-      },
-      order_mails:
-      {
-        required:true,
-      },
-      order_mails_type:
-      {
-        required:true,
       },
       designation_id:
       {

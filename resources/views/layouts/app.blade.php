@@ -1976,6 +1976,15 @@
                         </a>
                      </li>
                      @endif
+                     @if(auth()->user()->can('invoice_setting_access'))
+                     <li class="nav-link-btn {{request()->is('invoice_setting*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('invoice_setting') }}">
+                           <i class="material-icons icon">settings</i>
+                           <span>Invoice {!! trans('panel.sidemenu.setting') !!}</span>
+                           <div class="d-none mobile_hide">Invoice {!! trans('panel.sidemenu.setting') !!}</div>
+                        </a>
+                     </li>
+                     @endif
                      @if(auth()->user()->can('loyalty_app_setting_access'))
                      <li class="nav-link-btn {{request()->is('loyalty-app-setting*') ? 'active' : '' }}">
                         <a class="hoveradd2" href="{{ url('loyalty-app-setting') }}">

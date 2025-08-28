@@ -110,11 +110,11 @@ class RolesController extends Controller
         $oldpermissions = DB::table('role_has_permissions')->where('role_id', $role['id'])->pluck('permission_id')->toArray();
         $role->update($request->all());
         $role->permissions()->sync($request->input('permissions', []));
-        $newpermissions = $request['permissions'];
-        $changes = array_merge(array_diff($newpermissions, $oldpermissions), array_diff($oldpermissions, $newpermissions));
+        // $newpermissions = $request['permissions'];
+        // $changes = array_merge(array_diff($newpermissions, $oldpermissions), array_diff($oldpermissions, $newpermissions));
         // $permissions = Permission::whereIn('id',$request['permissions'])->select('name','guard_name')->get();
-        $all_user_ids = DB::table('model_has_roles')->where('role_id', '=', $role->id)->pluck('model_id')->toArray();
-        dispatch(new SyncUserPermissionsJob($all_user_ids, $newpermissions));
+        // $all_user_ids = DB::table('model_has_roles')->where('role_id', '=', $role->id)->pluck('model_id')->toArray();
+        // dispatch(new SyncUserPermissionsJob($all_user_ids, $newpermissions));
         
         return redirect()->route('roles.index');
     }
