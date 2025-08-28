@@ -1342,8 +1342,10 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                     <img src="{{url('/').'/'.asset('assets/img')}}/cup.svg">
                     @elseif($lead_note->type == 'task')
                     <img src="{{url('/').'/'.asset('assets/img')}}/task_logo.png" width="35">
+                    @elseif($lead_note->type == 'log')
+                    <img src="{{url('/').'/'.asset('assets/img')}}/log.png" width="35">
                     @else
-                    <img src="{{url('/').'/'.asset('assets/img')}}/log.png?" width="35">
+                    <img src="{{url('/').'/'.asset('assets/img')}}/opportunity.png?" width="25">
                     @endif
                 </div>
             </div>
@@ -1353,12 +1355,18 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                 <h5>{!! $lead_note->note??''!!}</h5>
                 <p>Created by: {!! $lead_note->createdby? $lead_note->createdby->name : ''!!}</p>
                 @elseif($lead_note->type == 'task')
-                <h5>Task <span class="badge badge-info" style="font-family: 'Poppins', sans-serif;font-size: 10px;font-weight:700;padding: 4px,6px"> {{$lead_note->priority??''}}</span></h5>
+                <h5>Task <span class="badge badge-info ml-1" style="font-family: 'Poppins', sans-serif;font-size: 10px;font-weight:700;border-radius: 0px 10px !important;"> {{$lead_note->priority??''}}</span></h5>
                 <h5>{!! $lead_note->description??''!!} ({{date('d M Y', strtotime($lead_note->date))}}, {{date('h:i A', strtotime($lead_note->time))}})</h5>
                 <p>Created by: {!! $lead_note->createdby? $lead_note->createdby->name : ''!!}</p>
-                @else
+                @elseif($lead_note->type == 'log')
                 <h5>Log </h5>
                 <h5>{!! $lead_note->message??''!!}</h5>
+                @else
+                <h5>Opportunity <span class="badge badge-info ml-1" style="font-family: 'Poppins', sans-serif;font-size: 10px;font-weight:700;border-radius: 0px 10px !important;"> {{$lead_note->status_is ? $lead_note->status_is->status_name :''}}</span></h5>
+                <h5>{!! $lead_note->note??''!!} </h5>
+                <p>Estimated close date: {{date('d M Y', strtotime($lead_note->estimated_close_date))}}</p>
+                <p>Confidence: {{$lead_note->confidence??0}}%</p>
+                <p>Created by: {!! $lead_note->createdby? $lead_note->createdby->name : ''!!}</p>
                 @endif
 
                 <p></p>

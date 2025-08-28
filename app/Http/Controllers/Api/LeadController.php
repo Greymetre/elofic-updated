@@ -366,6 +366,7 @@ class LeadController extends Controller
             $lead_notes = LeadNote::with('createdby:id,name')->where(['lead_id' => $lead->id])->get();
             $lead_tasks = LeadTask::with('assignUser:id,name', 'createdby:id,name')->where(['lead_id' => $lead->id])->get();
             $lead_logs = LeadLog::where(['lead_id' => $lead->id])->get();
+            $opportunities = LeadOpportunity::where(['lead_id' => $lead->id])->get();
             $lead_notes->each(function ($item) {
                 $item->type = 'note';
                 $item->created_at_formatted = $item->created_at->format('d M Y');
@@ -381,9 +382,13 @@ class LeadController extends Controller
                 $item->type = 'log';
                 $item->created_at_formatted = $item->created_at->format('d M Y');
             });
+            $opportunities->each(function ($item) {
+                $item->type = 'opportunity';
+                $item->created_at_formatted = $item->created_at->format('d M Y');
+            });
 
-            // $combined = $lead_notes->merge($lead_tasks)->sortByDesc('created_at')->values();
-            $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->sortByDesc('created_at')->values();
+            $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->merge($opportunities)->sortByDesc('created_at')->values();
+            // $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->sortByDesc('created_at')->values();
 
             $notification_count = LeadNotification::where(['user_id' => $request->user()->id, 'read' => 0])->count();
             return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'notes_tasks' => $combined, 'notification_count' => $notification_count], 200);

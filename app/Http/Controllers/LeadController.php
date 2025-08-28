@@ -704,6 +704,7 @@ class LeadController extends Controller
         }
 
         $lead_logs = LeadLog::where(['lead_id' => $lead->id])->get();
+        $opportunities = LeadOpportunity::where(['lead_id' => $lead->id])->get();
 
         $lead_notes->each(function ($item) {
             $item->type = 'note';
@@ -714,10 +715,13 @@ class LeadController extends Controller
         $lead_logs->each(function ($item) {
             $item->type = 'log';
         });
+        $opportunities->each(function ($item) {
+            $item->type = 'opportunity';
+        });
 
 
-        // $combined = $lead_notes->merge($lead_tasks)->sortByDesc('created_at')->values();
-        $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->sortByDesc('created_at')->values();
+        $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->merge($opportunities)->sortByDesc('created_at')->values();
+        // $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->sortByDesc('created_at')->values();
 
         $media_items = $lead->getMedia('lead_file');
         $status = Status::where('module', 'LeadStatus')->where('active', 'Y')->get();
