@@ -11,9 +11,6 @@ $(document).ready(function () {
       'product_id[]': {
         required: true
       },
-      user_id: {
-        required: true
-      },
       invoice_date: {
         required: true
       },
@@ -37,9 +34,6 @@ $(document).ready(function () {
       },
       'product_id[]': {
         required: "Please select at least one Product",
-      },
-      user_id: {
-        required: "Please select User",
       },
       invoice_date: {
         required: "Please select Invoice Date",
@@ -81,9 +75,6 @@ $(document).ready(function () {
       'product_id[]': {
         required: true
       },
-      user_id: {
-        required: true
-      },
       estimate_date: {
         required: true
       },
@@ -107,9 +98,6 @@ $(document).ready(function () {
       },
       'product_id[]': {
         required: "Please select at least one Product",
-      },
-      user_id: {
-        required: "Please select User",
       },
       estimate_date: {
         required: "Please select Invoice Date",

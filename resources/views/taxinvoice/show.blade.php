@@ -244,7 +244,12 @@
       <div id="invoice" class="page">
         <header>
           <div class="logo">
-            <img src="https://demo.fieldkonnect.io/public/assets/img/g_logo.png">
+            @if($settings && $settings->hasMedia('invoice_logo'))
+            <img src="data:image/png;base64,{{ base64_encode(file_get_contents($settings->getFirstMediaUrl('invoice_logo'))) }}" alt="Invoice Logo" style="max-height:80px;">
+            @else
+            <img src="{{ asset('assets/img/g_logo.png') }}" alt="Default Logo" style="max-height:80px;">
+            @endif
+
           </div>
           <div>
             <div class="company">GREYMETRE CONSULTANTS <br /><small>PRIVATE LIMITED</small></div>
@@ -407,31 +412,66 @@
               <th rowspan="2" style="width:45%; color: #000; ">Item & Description</th>
               <th rowspan="2" style="width:12%; color: #000; ">HSN/SAC</th>
               <th rowspan="2" style="width:8%; color: #000; " class="center">Qty</th>
-              <th rowspan="2" style="width:8%; color: #000; " class="center">Rate</th>
-              <th colspan="2" style="width:10%; color: #000;  text-align: center;" class="center">IGST</th>
-              <th rowspan="2" style="width:13%; color: #000; " class="right">Amount</th>
+              <th rowspan="2" style="width:8%; color: #000;" class="center">Rate</th>
+              @if($tax_invoice->place_of_supply == 1)
+              <th colspan="2" style="width:10%; color: #000; text-align: center;" class="center">CGST</th>
+              <th colspan="2" style="width:10%; color: #000; text-align: center;" class="center">SGST</th>
+              @else
+              <th colspan="2" style="width:10%; color: #000; text-align: center;" class="center">IGST</th>
+              @endif
+
+              <th rowspan="2" style="width:13%; color: #000;" class="right">Amount</th>
             </tr>
             <tr>
+              @if($tax_invoice->place_of_supply == 1)
+              <th style="width:5%; color: #000;" class="center">%</th>
+              <th style="width:5%; color: #000;" class="center">Amt</th>
+              <th style="width:5%; color: #000;" class="center">%</th>
+              <th style="width:5%; color: #000;" class="center">Amt</th>
+              @else
               <th style="width:10%; color: #000;" class="center">%</th>
               <th style="width:10%; color: #000;" class="center">Amt</th>
-
+              @endif
             </tr>
           </thead>
           <tbody>
             @foreach($tax_invoice->details as $item)
             <tr>
               <td style="color:#000; font-weight: 400;">
-                <strong>{{$item->product->display_name}}</strong>
+                <strong>{{$item->product?->display_name}}</strong>
                 <div style="color:#000;font-size:12px;margin-top:0px; line-height: 15px;">{{$item->product_dec}}</div>
               </td>
               <td style="color:#000;font-weight: 400;">{{$item->hsn_sac}}</td>
               <td style="color:#000;font-weight: 400;" class="center">{{$item->quantity}}</td>
               <td style="color:#000;font-weight: 400;" class="right">{{$item->mrp}}</td>
+
+              @if($tax_invoice->place_of_supply == 1)
+              @php
+              $halfRate = $item->tax_details->tax_percentage / 2;
+              $halfAmount = $item->tax_amount / 2;
+              @endphp
               <td style="color:#000;font-weight:400;" class="center">
-                {{ $item->tax_details ? $item->tax_details->tax_name . ' ' . $item->tax_details->tax_percentage . '%' : '' }}
+                CGST {{ $halfRate }}%
+              </td>
+              <td style="color:#000;font-weight:400;" class="center">
+                {{ number_format($halfAmount, 2) }}
               </td>
 
-              <td style="color:#000;font-weight: 400;" class="center">{{$item->tax_amount}}</td>
+              <td style="color:#000;font-weight:400;" class="center">
+                SGST {{ $halfRate }}%
+              </td>
+              <td style="color:#000;font-weight:400;" class="center">
+                {{ number_format($halfAmount, 2) }}
+              </td>
+              @else
+              <td style="color:#000;font-weight:400;" class="center">
+                {{ $item->tax_details->tax_name }} {{ $item->tax_details->tax_percentage }}%
+              </td>
+              <td style="color:#000;font-weight:400;" class="center">
+                {{ number_format($item->tax_amount, 2) }}
+              </td>
+              @endif
+
               <td style="color:#000;font-weight: 400;" class="right">{{$item->amount}}</td>
             </tr>
             @endforeach
@@ -440,7 +480,11 @@
                 <p style="margin-bottom:0px; color:#000; font-weight: 400;">Total In Words</p>
                 <p style="font-weight: bold; color:#000;line-height: 10px;"> {{ numberToWords($tax_invoice->grand_total) }} </p>
               </td>
+              @if($tax_invoice->place_of_supply == 1)
+              <td colspan="6">
+              @else
               <td colspan="4">
+              @endif
                 <table style="width: 100%; border:0px;" border="0">
                   <tr>
                     <td style="border:0px; padding: 0px 8px; text-align:right;color: #000;font-weight: 400;line-height: 20px;">Sub Total</td>
@@ -484,10 +528,21 @@
                 <p style="color:#000; font-weight: 400;">Note</p>
                 <p style="color:#000; font-weight: 400; margin-bottom: 0px; line-height: 16px;">{!! nl2br(e($tax_invoice->customer_notes)) !!}</p><br>
               </td>
+              @if($tax_invoice->place_of_supply == 1)
+              <td colspan="6" style="text-align: center; vertical-align: middle;">
+              @else
               <td colspan="4" style="text-align: center; vertical-align: middle;">
-                <img src="https://demo.fieldkonnect.io/public/assets/img/sill.png">
-                <p style="color:#000; font-size:12px; font-weight: 400; margin-bottom: 0px;"> Authorized Signature</p>
-
+              @endif
+                @if($settings && $settings->hasMedia('invoice_esign'))
+                {{-- Dynamic E-Sign from media, converted to Base64 --}}
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents($settings->getFirstMediaUrl('invoice_esign'))) }}"
+                  alt="E-Sign" style="max-height:80px;">
+                @else
+                {{-- Default E-Sign from assets, converted to Base64 --}}
+                <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/img/sill.png'))) }}"
+                  alt="Default E-Sign" style="max-height:80px;">
+                @endif
+                <p style="color:#000; font-size:12px; font-weight: 400; margin-bottom: 0px;">Authorized Signature</p>
               </td>
             </tr>
             <tr></tr>

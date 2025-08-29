@@ -4,7 +4,7 @@
       border-radius: 12px;
     }
 
-    .invocie_main form .form-group select.form-control{
+    .invocie_main form .form-group select.form-control {
       position: unset !important;
     }
 
@@ -729,7 +729,6 @@
               <div class="form-group mb-3 bmd-form-group">
                 <label for="payment_term" class="othercolor bmd-label-static">Terms</label>
                 <select class="form-control select2 custom-select-box" id="payment_term" name="payment_term">
-                  <option value="">Select Terms</option>
                   @if(!empty($payment_terms))
                   @foreach($payment_terms as $term)
                   <option value="{{ $term->id }}" data-days="{{ $term->number_of_days }}">{{ $term->term_name }}</option>
@@ -784,7 +783,7 @@
                           <option value="__add__"> ➕ Add New </option>
                           @if(!empty($all_tax))
                           @foreach($all_tax as $tax)
-                          <option value="{!! $tax['id'] !!}" data-rate="{!! $tax['tax_percentage'] !!}">{!! $tax['tax_name'] !!} ({!! $tax['tax_percentage'] !!}% )</option>
+                          <option value="{!! $tax['id'] !!}" data-rate="{!! $tax['tax_percentage'] !!}">{!! $tax['tax_percentage'] !!}%</option>
                           @endforeach
                           @endif
                         </select>
@@ -861,8 +860,8 @@
                       @endif
                     </select>
                   </div>
-                  <div class="col-3 px-0 text-right">
-                    <input type="text" class="" value="0.00" name="tds_amount" style="text-align: right;font-weight: 500;color: #000 !important;" id="tds_amount" readonly>
+                  <div class=" col-3 px-0 text-right">
+                        <input type="text" class="" value="0.00" name="tds_amount" style="text-align: right;font-weight: 500;color: #000 !important;" id="tds_amount" readonly>
                   </div>
                 </div>
 
@@ -902,7 +901,50 @@
                   name="t_c"
                   placeholder="Terms & Conditions ...."></textarea>
               </div>
+            </div>
+          </div>
+          <!--     <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <input type="checkbox" name="custom_pdf" id="custom_pdf">
+                <label for="custom_pdf" class="othercolor">Custom PDF</label>
+              </div>
+            </div>
+          </div> -->
+          <div class="row d-none" id="custom_pdf_div">
+            <div class="col-md-12">
+              @if($settings && $settings->labels->count())
+              @php
+              // Group labels by page
+              $labelsByPage = $settings->labels->groupBy('page');
+              @endphp
 
+              @foreach($labelsByPage as $page => $labels)
+              <div class="card mb-3 shadow-sm">
+                <div class="card-header bg-light">
+                  <strong class="text-dark">{{ $labels[0]->page_heading }}</strong>
+                </div>
+                <div class="card-body">
+                  @foreach($labels as $label)
+                  <div class="form-group row align-items-center">
+                    <label class="col-md-3 col-form-label">
+                      <img src="{{ $label->getFirstMediaUrl('label_icon') }}" alt="icon" style="height:20px; width:20px;">
+                      {{ $label->label_name }}
+                    </label>
+                    <div class="col-md-9">
+                      <input type="text"
+                        class="form-control"
+                        name="custom_labels[{{ $page }}][{{ $label->id }}]"
+                        placeholder="Enter {{ $label->label_name }} value">
+                    </div>
+                  </div>
+                  @endforeach
+                </div>
+              </div>
+              @endforeach
+              @else
+              <p class="text-muted">No labels configured in Invoice Settings.</p>
+              @endif
             </div>
           </div>
           <div class="row">
@@ -1452,7 +1494,7 @@
               currentTaxDropdown
                 .find('option:last')
                 .after(`<option value="${response.data.id}" data-rate="${response.data.tax_percentage}" selected>
-                        ${response.data.tax_name} (${response.data.tax_percentage}%)
+                        ${response.data.tax_percentage}%
                     </option>`);
 
               currentTaxDropdown.val(response.data.id).trigger('change');
@@ -1500,10 +1542,10 @@
         success: function(response) {
           if (response.status) {
             $('#tdsModal').modal('hide');
-              $('#tds').find('option:last').after(`<option value="${response.data.id}" data-rate="${response.data.rate}" selected>
+            $('#tds').find('option:last').after(`<option value="${response.data.id}" data-rate="${response.data.rate}" selected>
                         ${response.data.tax_name} (${response.data.rate}%)
                     </option>`);
-                    $('#tds').val(response.data.id).trigger('change');
+            $('#tds').val(response.data.id).trigger('change');
           }
         },
         error: function(xhr) {
@@ -1518,6 +1560,9 @@
     });
 
     $('#discount_type').on('change', function() {
+      calculateTaxes();
+    });
+    $('#place_of_supply').on('change', function() {
       calculateTaxes();
     });
 
@@ -1549,10 +1594,10 @@
         discount_amount = discount;
       }
       let tds_amount = 0;
-      if(tds > 0){
-        tds_amount = ((sub_total-discount_amount) * tds) / 100;
+      if (tds > 0) {
+        tds_amount = ((sub_total - discount_amount) * tds) / 100;
         $('#tds_amount').val('-' + tds_amount.toFixed(2));
-      }else{
+      } else {
         $('#tds_amount').val('0.00');
       }
 
@@ -1599,24 +1644,57 @@
       // Update tax summary section
       $.each(taxTotals, function(tax, amount) {
         totalgst += amount;
-        $summary.append(
-          `<div class="d-flex justify-content-between">
-        <span>${tax}</span><span>${amount.toFixed(2)}</span>
+        let placeOfSupply = $('#place_of_supply').val();
+
+        if (placeOfSupply == "1") {
+          // Try to extract % number from tax name (like "IGST 18%")
+          let rateMatch = tax.match(/(\d+(\.\d+)?)%/);
+          let rate = rateMatch ? parseFloat(rateMatch[1]) : null;
+          let halfAmount = amount / 2;
+          let halfRate = rate ? (rate / 2) : null;
+
+          // Show CGST + SGST with halved amount and rate
+          $summary.append(
+            `<div class="d-flex justify-content-between">
+        <span>CGST[${halfRate ? halfRate + '%' : ''}]</span>
+        <span>${halfAmount.toFixed(2)}</span>
       </div>`
-        );
+          );
+          $summary.append(
+            `<div class="d-flex justify-content-between">
+        <span>SGST[${halfRate ? halfRate + '%' : ''}]</span>
+        <span>${halfAmount.toFixed(2)}</span>
+      </div>`
+          );
+        } else {
+          // Keep old logic (show merged tax as-is)
+          $summary.append(
+            `<div class="d-flex justify-content-between">
+        <span>IGST[${tax}]</span><span>${amount.toFixed(2)}</span>
+      </div>`
+          );
+        }
       });
 
       $summary.removeClass('d-none');
 
       var adjustment = parseFloat($('#adjustment').val()) || 0;
-      
-      if(adjustment != 0){
+
+      if (adjustment != 0) {
         grand_total += adjustment;
       }
 
       // Update totals
       $('#sub_total').val(sub_total.toFixed(2));
-      $('#grand_total').val((grand_total- tds_amount).toFixed(2));
+      $('#grand_total').val((grand_total - tds_amount).toFixed(2));
     }
+
+    $('#custom_pdf').on('change', function() {
+      if ($(this).is(':checked')) {
+        $('#custom_pdf_div').removeClass('d-none');
+      } else {
+        $('#custom_pdf_div').addClass('d-none');
+      }
+    });
   </script>
 </x-app-layout>

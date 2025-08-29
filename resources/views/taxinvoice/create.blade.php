@@ -788,7 +788,7 @@
                           <option value="__add__"> ➕ Add New </option>
                           @if(!empty($all_tax))
                           @foreach($all_tax as $tax)
-                          <option value="{!! $tax['id'] !!}" data-rate="{!! $tax['tax_percentage'] !!}">{!! $tax['tax_name'] !!} ({!! $tax['tax_percentage'] !!}% )</option>
+                          <option value="{!! $tax['id'] !!}" data-rate="{!! $tax['tax_percentage'] !!}">{!! $tax['tax_percentage'] !!}% </option>
                           @endforeach
                           @endif
                         </select>
@@ -1456,7 +1456,7 @@
               currentTaxDropdown
                 .find('option:last')
                 .after(`<option value="${response.data.id}" data-rate="${response.data.tax_percentage}" selected>
-                        ${response.data.tax_name} (${response.data.tax_percentage}%)
+                        ${response.data.tax_percentage}%
                     </option>`);
 
               currentTaxDropdown.val(response.data.id).trigger('change');
@@ -1522,6 +1522,9 @@
     });
 
     $('#discount_type').on('change', function() {
+      calculateTaxes();
+    });
+    $('#place_of_supply').on('change', function() {
       calculateTaxes();
     });
 
@@ -1603,11 +1606,36 @@
       // Update tax summary section
       $.each(taxTotals, function(tax, amount) {
         totalgst += amount;
-        $summary.append(
-          `<div class="d-flex justify-content-between">
-        <span>${tax}</span><span>${amount.toFixed(2)}</span>
+        let placeOfSupply = $('#place_of_supply').val();
+
+        if (placeOfSupply == "1") {
+          // Try to extract % number from tax name (like "IGST 18%")
+          let rateMatch = tax.match(/(\d+(\.\d+)?)%/);
+          let rate = rateMatch ? parseFloat(rateMatch[1]) : null;
+          let halfAmount = amount / 2;
+          let halfRate = rate ? (rate / 2) : null;
+
+          // Show CGST + SGST with halved amount and rate
+          $summary.append(
+            `<div class="d-flex justify-content-between">
+        <span>CGST[${halfRate ? halfRate + '%' : ''}]</span>
+        <span>${halfAmount.toFixed(2)}</span>
       </div>`
-        );
+          );
+          $summary.append(
+            `<div class="d-flex justify-content-between">
+        <span>SGST[${halfRate ? halfRate + '%' : ''}]</span>
+        <span>${halfAmount.toFixed(2)}</span>
+      </div>`
+          );
+        } else {
+          // Keep old logic (show merged tax as-is)
+          $summary.append(
+            `<div class="d-flex justify-content-between">
+        <span>IGST[${tax}]</span><span>${amount.toFixed(2)}</span>
+      </div>`
+          );
+        }
       });
 
       $summary.removeClass('d-none');

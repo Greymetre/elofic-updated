@@ -3,6 +3,12 @@
     .swal2-container.swal2-center.swal2-fade.swal2-shown {
         z-index: 9999;
     }
+    #invoice_logo{
+      cursor: pointer;
+    }
+    #invoice_esign{
+      cursor: pointer;
+    }
   </style>
   <section class="invoice_main">
     @if (count($errors) > 0)
@@ -23,7 +29,7 @@
 
           <div class="form-row">
             <!-- Invoice Logo -->
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-3">
               <label for="invoice_logo">Invoice Logo</label>
               <input type="file"
                 class="form-control-file"
@@ -42,8 +48,10 @@
               </div>
             </div>
 
+            <div class="form-group col-md-4"></div>
+
             <!-- Invoice E-Sign -->
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-3">
               <label for="invoice_esign">Invoice E-Sign</label>
               <input type="file"
                 class="form-control-file"
@@ -61,12 +69,15 @@
                 @endif
               </div>
             </div>
+
+            <div class="form-group col-md-2"></div>
+
           </div>
 
-          <hr>
+          <!-- <hr> -->
           
-          <h5><i class="fa fa-tags"></i> Invoice Labels</h5>
-          <div id="labels_wrapper">
+          <h5 class=" d-none"><i class="fa fa-tags"></i> Invoice Labels</h5>
+          <div id="labels_wrapper" class="d-none">
             @if($invoice_setting && $invoice_setting->labels->count())
             @foreach($invoice_setting->labels as $index => $label)
             <div class="form-row label-row mb-3">
@@ -158,7 +169,7 @@
             @endif
           </div>
 
-          <div class="form-group col-md-1 d-flex align-items-end">
+          <div class="form-group col-md-1 d-flex align-items-end" style="display: none !important;">
             <button type="button" class="btn btn-success btn-block" onclick="addLabelRow()">
               <i class="fa fa-plus"></i>
             </button>

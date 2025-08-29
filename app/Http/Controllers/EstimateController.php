@@ -6,6 +6,7 @@ use App\Models\CurrentTaxInvoiceNo;
 use App\Models\Customers;
 use App\Models\Estimate;
 use App\Models\Invoice;
+use App\Models\InvoiceSetting;
 use App\Models\PaymentTerm;
 use App\Models\Product;
 use App\Models\State;
@@ -24,10 +25,10 @@ class EstimateController extends Controller
         if ($request->ajax()) {
             $invoices = Estimate::with('customer');
 
-            if($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)){
-                $invoices = $invoices->whereBetween('estimate_date', [$request->start_date, $request->end_date]);                
+            if ($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)) {
+                $invoices = $invoices->whereBetween('estimate_date', [$request->start_date, $request->end_date]);
             }
-            if($request->searchInput && !empty($request->searchInput)){
+            if ($request->searchInput && !empty($request->searchInput)) {
                 //Useing $query orwher using bracket 
                 $invoices = $invoices->where(function ($query) use ($request) {
                     $query->where('estimate_no', 'like', '%' . $request->searchInput . '%')
@@ -42,9 +43,9 @@ class EstimateController extends Controller
             return DataTables::of($invoices)
                 ->addIndexColumn()
                 ->editColumn('status', function ($data) {
-                    if($data->status == 0){
+                    if ($data->status == 0) {
                         return '<span class="badge badge-warning">Pending</span>';
-                    }else{
+                    } else {
                         return '<span class="badge badge-paid">Converted</span>';
                     }
                 })
@@ -100,6 +101,7 @@ class EstimateController extends Controller
 
         $all_tax = TaxInvoiceTax::all();
         $all_tds = TaxInvoiceTds::all();
+        $settings = InvoiceSetting::with('labels')->first();
 
         return view('estimate.create', compact(
             'payment_terms',
@@ -111,7 +113,8 @@ class EstimateController extends Controller
             'nextNumberValue',
             'users',
             'all_tax',
-            'all_tds'
+            'all_tds',
+            'settings'
         ));
     }
     public function add_payment_term(Request $request)
@@ -201,19 +204,42 @@ class EstimateController extends Controller
         $customer_address = $customer_address_class->getCustomerAddress($request);
         $address = $customer_address->getData(true)['data'];
 
-        $taxSummary = $estimate->details
-            ->groupBy('tax') // group by tax id
-            ->map(function ($items, $taxId) {
-                $taxName = optional($items->first()->tax_details)->tax_name.' ('.optional($items->first()->tax_details)->tax_percentage.'%)'; // get tax name from relation
-                $totalAmount = $items->sum('tax_amount'); // sum tax_amount for this tax
+        $placeOfSupply = $estimate->place_of_supply;
 
-                return [
-                    'tax_id' => $taxId,
-                    'tax_name' => $taxName,
-                    'total_tax_amount' => $totalAmount,
-                ];
+        $taxSummary = $estimate->details
+            ->groupBy('tax')
+            ->map(function ($items, $taxId) use ($placeOfSupply) {
+                $taxName = optional($items->first()->tax_details)->tax_name;
+                $taxRate = optional($items->first()->tax_details)->tax_percentage;
+                $totalAmount = $items->sum('tax_amount');
+                $summary = [];
+
+                if ($placeOfSupply == 1) {
+                    $halfRate = $taxRate / 2;
+                    $halfAmount = $totalAmount / 2;
+                    $summary[] = [
+                        'tax_id' => $taxId . '_cgst',
+                        'tax_name' => "CGST[{$halfRate}%]",
+                        'total_tax_amount' => $halfAmount,
+                    ];
+                    $summary[] = [
+                        'tax_id' => $taxId . '_sgst',
+                        'tax_name' => "SGST[{$halfRate}%]",
+                        'total_tax_amount' => $halfAmount,
+                    ];
+                } else {
+                    $summary[] = [
+                        'tax_id' => $taxId,
+                        'tax_name' => "IGST[{$taxRate}%]",
+                        'total_tax_amount' => $totalAmount,
+                    ];
+                }
+                return $summary;
             })
+            ->flatten(1)
             ->values();
-        return view('estimate.show', compact('estimate', 'address', 'taxSummary'));
+
+        $settings = InvoiceSetting::with('labels')->first();
+        return view('estimate.show', compact('estimate', 'address', 'taxSummary', 'settings'));
     }
 }

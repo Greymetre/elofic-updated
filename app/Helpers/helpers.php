@@ -1178,7 +1178,7 @@ if (!function_exists('isCustomerUser')) {
 }
 
 if (!function_exists('SendPushNotification')) {
-    function SendPushNotification($user_id, $message, $model='lead')
+    function SendPushNotification($user_id, $message, $model = 'lead')
     {
         $user = User::find($user_id);
 
@@ -1220,7 +1220,7 @@ if (!function_exists('SendPushNotification')) {
 }
 
 if (!function_exists('StoreLeadNotification')) {
-    function StoreLeadNotification($lead_id, $title, $body, $user_id, $model='lead')
+    function StoreLeadNotification($lead_id, $title, $body, $user_id, $model = 'lead')
     {
         LeadNotification::create([
             'model_id' => $lead_id,
@@ -1236,6 +1236,12 @@ if (!function_exists('StoreLeadNotification')) {
 if (!function_exists('numberToWords')) {
     function numberToWords($number)
     {
+        $negative = '';
+        if ($number < 0) {
+            $negative = 'Minus ';
+            $number = abs($number);
+        }
+
         $no = floor($number);
         $point = round($number - $no, 2) * 100;
         $hundred = null;
@@ -1243,18 +1249,37 @@ if (!function_exists('numberToWords')) {
         $i = 0;
         $str = [];
         $words = [
-            0 => '', 1 => 'One', 2 => 'Two',
-            3 => 'Three', 4 => 'Four', 5 => 'Five',
-            6 => 'Six', 7 => 'Seven', 8 => 'Eight',
-            9 => 'Nine', 10 => 'Ten', 11 => 'Eleven',
-            12 => 'Twelve', 13 => 'Thirteen', 14 => 'Fourteen',
-            15 => 'Fifteen', 16 => 'Sixteen', 17 => 'Seventeen',
-            18 => 'Eighteen', 19 =>'Nineteen', 20 => 'Twenty',
-            30 => 'Thirty', 40 => 'Forty', 50 => 'Fifty',
-            60 => 'Sixty', 70 => 'Seventy', 80 => 'Eighty',
+            0 => '',
+            1 => 'One',
+            2 => 'Two',
+            3 => 'Three',
+            4 => 'Four',
+            5 => 'Five',
+            6 => 'Six',
+            7 => 'Seven',
+            8 => 'Eight',
+            9 => 'Nine',
+            10 => 'Ten',
+            11 => 'Eleven',
+            12 => 'Twelve',
+            13 => 'Thirteen',
+            14 => 'Fourteen',
+            15 => 'Fifteen',
+            16 => 'Sixteen',
+            17 => 'Seventeen',
+            18 => 'Eighteen',
+            19 => 'Nineteen',
+            20 => 'Twenty',
+            30 => 'Thirty',
+            40 => 'Forty',
+            50 => 'Fifty',
+            60 => 'Sixty',
+            70 => 'Seventy',
+            80 => 'Eighty',
             90 => 'Ninety'
         ];
         $digits = ['', 'Hundred', 'Thousand', 'Lakh', 'Crore'];
+
         while ($i < $digits_1) {
             $divider = ($i == 2) ? 10 : 100;
             $number = floor($no % $divider);
@@ -1263,16 +1288,17 @@ if (!function_exists('numberToWords')) {
             if ($number) {
                 $plural = (count($str) && $number > 9) ? '' : null;
                 $hundred = (count($str) == 1 && $str[0]) ? ' and ' : null;
-                $str [] = ($number < 21) ? $words[$number]." ". $digits[count($str)] .
-                $plural." ".$hundred :
-                $words[floor($number / 10) * 10]." ".$words[$number % 10]." ".
-                $digits[count($str)].$plural." ".$hundred;
+                $str[] = ($number < 21) ? $words[$number] . " " . $digits[count($str)] .
+                    $plural . " " . $hundred :
+                    $words[floor($number / 10) * 10] . " " . $words[$number % 10] . " " .
+                    $digits[count($str)] . $plural . " " . $hundred;
             } else $str[] = null;
         }
+
         $str = array_reverse($str);
         $result = implode('', $str);
-        $points = ($point) ? " and ".$words[$point / 10]." ".$words[$point = $point % 10]." Paise" : '';
-        return trim($result) . " Rupees" . $points . " Only";
+        $points = ($point) ? " and " . $words[$point / 10] . " " . $words[$point = $point % 10] . " Paise" : '';
+
+        return $negative . trim($result) . " Rupees" . $points . " Only";
     }
 }
-

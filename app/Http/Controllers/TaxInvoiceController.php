@@ -272,27 +272,48 @@ class TaxInvoiceController extends Controller
         $customer_address = $customer_address_class->getCustomerAddress($request);
         $address = $customer_address->getData(true)['data'];
 
+        $placeOfSupply = $tax_invoice->place_of_supply;
         $taxSummary = $tax_invoice->details
-            ->groupBy('tax') // group by tax id
-            ->map(function ($items, $taxId) {
-                $taxName = optional($items->first()->tax_details)->tax_name . ' (' . optional($items->first()->tax_details)->tax_percentage . '%)'; // get tax name from relation
-                $totalAmount = $items->sum('tax_amount'); // sum tax_amount for this tax
+            ->groupBy('tax')
+            ->map(function ($items, $taxId) use ($placeOfSupply) {
+                $taxName = optional($items->first()->tax_details)->tax_name;
+                $taxRate = optional($items->first()->tax_details)->tax_percentage;
+                $totalAmount = $items->sum('tax_amount');
 
-                return [
-                    'tax_id' => $taxId,
-                    'tax_name' => $taxName,
-                    'total_tax_amount' => $totalAmount,
-                ];
+                $summary = [];
+
+                if ($placeOfSupply == 1) {
+                    $halfRate = $taxRate / 2;
+                    $halfAmount = $totalAmount / 2;
+                    $summary[] = [
+                        'tax_id' => $taxId . '_cgst',
+                        'tax_name' => "CGST ({$halfRate}%)",
+                        'total_tax_amount' => $halfAmount,
+                    ];
+                    $summary[] = [
+                        'tax_id' => $taxId . '_sgst',
+                        'tax_name' => "SGST ({$halfRate}%)",
+                        'total_tax_amount' => $halfAmount,
+                    ];
+                } else {
+                    $summary[] = [
+                        'tax_id' => $taxId,
+                        'tax_name' => "{$taxName} ({$taxRate}%)",
+                        'total_tax_amount' => $totalAmount,
+                    ];
+                }
+
+                return $summary;
             })
+            ->flatten(1)
             ->values();
-        return view('taxinvoice.show', compact('tax_invoice', 'address', 'taxSummary'));
+
+        $settings = InvoiceSetting::with('labels')->first();
+        return view('taxinvoice.show', compact('tax_invoice', 'address', 'taxSummary', 'settings'));
     }
 
     public function invoice_setting(Request $request)
     {
-        // if (!$request->devs) {
-            return view('work_in_progress');
-        // }
         $invoice_setting = InvoiceSetting::with('labels')->first();
         return view('taxinvoice.invoice_setting', compact('invoice_setting'));
     }
@@ -300,8 +321,8 @@ class TaxInvoiceController extends Controller
     public function invoice_setting_store(Request $request)
     {
         $request->validate([
-            'invoice_logo' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
-            'invoice_esign' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'invoice_logo' => 'nullable|image|mimes:png,jpg,jpeg|max:9048',
+            'invoice_esign' => 'nullable|image|mimes:png,jpg,jpeg|max:9048',
             'labels.*.name' => 'required|string|max:255',
             'labels.*.page' => 'required|in:2,3,4,5',
             'labels.*.icon' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
