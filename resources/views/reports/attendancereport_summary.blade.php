@@ -177,11 +177,12 @@
                 <select class="form-control select2" name="working_type" id="working_type" style="width: 100%;" required>
                   <option value="">Select Working Type</option>
                   <option value="Tour">Tour</option>
-                  <option value="Office Work">Office Work</option>
-                  <option value="Suburban">Suburban</option>
-                  <option value="Central Market">Central Market</option>
-                  <option value="Holiday">Holiday</option>
-                  <option value="Leave">Leave</option>
+                  <option value="Office">Office</option>
+                  <option value="Local Market Visit">Local Market Visit</option>
+                  <option value="Customer Visit">Customer Visit</option>
+                  <option value="Other">Other</option>
+                  <!-- <option value="Holiday">Holiday</option>
+                  <option value="Leave">Leave</option> -->
                 </select>
               </div>
             </div>
