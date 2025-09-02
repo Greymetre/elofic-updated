@@ -15,12 +15,12 @@ class StateExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
 {
     public function collection()
     {
-        return State::select('id','state_name', 'country_id')->latest()->get();   
+        return State::select('id','state_name', 'country_id', 'gst_code')->latest()->get();   
     }
 
     public function headings(): array
     {
-        return ['id','state_name', 'country_id','country_name'];
+        return ['id','state_name', 'country_id','country_name','gst_code'];
     }
 
     public function map($data): array
@@ -30,6 +30,7 @@ class StateExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapp
             $data['state_name'],
             $data['country_id'],
             $data['countryname']['country_name'],
+            $data['gst_code'],
         ];
     }
 

@@ -64,6 +64,7 @@ class StateController extends Controller
                 $state = State::where('id',$request['id'])->first();
                 $state->state_name = isset($request['state_name']) ? $request['state_name'] :'';
                 $state->country_id = isset($request['country_id']) ? $request['country_id'] :null;
+                $state->gst_code = isset($request['gst_code']) ? $request['gst_code'] :null;
                 $state->updated_by = isset($request['updated_by']) ? $request['updated_by'] :Auth::user()->id;
                 $state->save();
             }

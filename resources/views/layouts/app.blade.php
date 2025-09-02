@@ -876,6 +876,15 @@
                                  <div class="d-none mobile_hide">Tasks</div>
                               </a>
                            </li>
+                           @if(auth()->user()->can(['lead_visit_access']))
+                           <li class="nav-link-btn {{ request()->is('lead_visit_report*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('lead_visit_report') }}">
+                                 <i class="material-icons icon">diamond</i>
+                                 <span>Visit Report</span>
+                                 <div class="d-none mobile_hide">Visit Report</div>
+                              </a>
+                           </li>
+                           @endif
                            @endif
                         </ul>
                      </div>

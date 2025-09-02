@@ -5,7 +5,7 @@
         padding: 20px;
         background: #fff;
         flex-wrap: no-wrap;
-        width: 151%;
+        width: {{$opportunity_status->count()*30}}%;
     }
 
     .skolling{
@@ -14,7 +14,7 @@
 
     .column {
         box-sizing: border-box;
-        width: calc(25% - 15px);
+        width: 100%;
         background: #fff;
         padding: 15px;
         /*min-height: 300px;*/

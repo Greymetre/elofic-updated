@@ -174,10 +174,10 @@ max-height: 437.812px;
 
 .select2-container--default .select2-selection--single {
   background-color: #FFF;
-  border-radius: 45px;
+  border-radius: 5px;
   height: 100%;
   padding-bottom: 4px;
-  border: 2px solid #1072ae;
+  border: 1px solid lightgrey !important;
 }
   .select2-container--default .select2-selection--single .select2-selection__rendered {
     color: #3c4858 !important;

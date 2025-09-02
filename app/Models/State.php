@@ -11,7 +11,7 @@ class State extends Model
 
     protected $table = 'states';
 
-    protected $fillable = [ 'active', 'state_name', 'country_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at'];
+    protected $fillable = [ 'active', 'state_name', 'country_id', 'gst_code', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at'];
 
     public function createdbyname()
     {

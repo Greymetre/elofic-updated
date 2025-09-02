@@ -71,7 +71,7 @@ class LeadsImport implements ToCollection, WithValidation, WithHeadingRow, WithB
                 'company_url' => $row['website'],
                 'status' => $status,
                 'created_by' => Auth::id(),
-                'lead_generation_date' => $row['lead_generation_date'] ?? now(),
+                'lead_generation_date' => date('Y-m-d', strtotime($row['lead_generation_date'] ?? time())),
                 'lead_source' => $row['lead_source'],
                 'assign_to' => User::where('name', $row['assignee'])->first()->id ?? null,
                 'others' => $otherData,

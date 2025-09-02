@@ -102,7 +102,7 @@
         <form method="POST" action="{{ route('state.store') }}" enctype="multipart/form-data" id="createstateForm">
         @csrf
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
               <div class="input_section">
                 <label class="col-form-label">{!! trans('panel.state.state_name') !!} <span class="text-danger"> *</span></label>
               
@@ -127,6 +127,23 @@
                         @endforeach
                         @endif
                      </select>
+                  </div>
+                  @if ($errors->has('country_id'))
+                   <div class="error">
+                      <p class="text-danger">{{ $errors->first('country_id') }}</p>
+                   </div>
+                  @endif
+                </div>
+            </div>
+          <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">GST Code<span class="text-danger"> *</span></label>
+                
+                  <div class="form-group has-default bmd-form-group">
+                    <input type="text" name="gst_code" id="gst_code" class="form-control" value="{!! old( 'gst_code') !!}" maxlength="200" required>
+                    @if ($errors->has('gst_code'))
+                      <div class="error"><p class="text-danger">{{ $errors->first('gst_code') }}</p></div>
+                    @endif
                   </div>
                   @if ($errors->has('country_id'))
                    <div class="error">
@@ -179,6 +196,7 @@
        success:function(data)
        {
         $('#state_name').val(data.state_name);
+        $('#gst_code').val(data.gst_code);
         $("#country_id").append('<option value="'+data.country_id+'" selected="selected">'+data.country_name+'</option>');
         $('#state_id').val(data.id);
         var title = '{!! trans('panel.global.edit') !!}' ;

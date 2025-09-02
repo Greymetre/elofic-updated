@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
 use App\Models\CurrentTaxInvoiceNo;
 use App\Models\Customers;
 use App\Models\Estimate;
@@ -15,6 +16,7 @@ use App\Models\TaxInvoiceTax;
 use App\Models\TaxInvoiceTds;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\In;
 use Yajra\DataTables\Facades\DataTables;
@@ -314,8 +316,12 @@ class TaxInvoiceController extends Controller
 
     public function invoice_setting(Request $request)
     {
+        if(!$request->devs){
+            return view('work_in_progress');
+        }
         $invoice_setting = InvoiceSetting::with('labels')->first();
-        return view('taxinvoice.invoice_setting', compact('invoice_setting'));
+        $states = State::where('active', 'Y')->select('id', 'state_name')->get();
+        return view('taxinvoice.invoice_setting', compact('invoice_setting', 'states'));
     }
 
     public function invoice_setting_store(Request $request)
@@ -323,6 +329,9 @@ class TaxInvoiceController extends Controller
         $request->validate([
             'invoice_logo' => 'nullable|image|mimes:png,jpg,jpeg|max:9048',
             'invoice_esign' => 'nullable|image|mimes:png,jpg,jpeg|max:9048',
+            'company_name' => 'required|string|max:255',
+            'gst_number' => 'nullable|string|max:255',
+            'pan_number' => 'nullable|string|max:255',
             'labels.*.name' => 'required|string|max:255',
             'labels.*.page' => 'required|in:2,3,4,5',
             'labels.*.icon' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
@@ -346,7 +355,24 @@ class TaxInvoiceController extends Controller
 
         // Fetch or create first invoice setting
         $invoiceSetting = InvoiceSetting::first() ?? new InvoiceSetting();
+        $invoiceSetting->company_name = $request->company_name;
+        $invoiceSetting->gst_number = $request->gst_number;
+        $invoiceSetting->pan_number = $request->pan_number;
         $invoiceSetting->save();
+
+        if($request->company_address && !empty($request->company_address)){
+            Address::create([
+                'model_type' => 'App\Models\InvoiceSetting',
+                'model_id' => $invoiceSetting->id,
+                'address1' => $request->company_address ?? 'N/A',
+                'country_id' => 1,
+                'pincode_id' => $request->pincode_id ?? null,
+                'state_id' => $request->state_id ?? null,
+                'city_id' => $request->city_id ?? null,
+                'district_id' => $request->district_id ?? null,
+                'created_by' => Auth::id()
+            ]);
+        }
 
         // ✅ Upload invoice logo
         if ($request->hasFile('invoice_logo')) {

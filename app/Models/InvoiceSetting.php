@@ -14,6 +14,9 @@ class InvoiceSetting extends Model implements HasMedia
     protected $fillable = [
         'invoice_logo',
         'invoice_esign',
+        'company_name',
+        'gst_number',
+        'pan_number',
     ];
 
     /**
@@ -31,5 +34,10 @@ class InvoiceSetting extends Model implements HasMedia
     {
         $this->addMediaCollection('invoice_logo')->singleFile();
         $this->addMediaCollection('invoice_esign')->singleFile();
+    }
+
+    public function address()
+    {
+        return $this->morphOne(Address::class, 'model');
     }
 }

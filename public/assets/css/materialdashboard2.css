@@ -2142,8 +2142,8 @@ body nav.sidebar {
     background-color: #f8f9f9;
     color: #000;
     opacity: 1;
-    border: 2px solid #1072ae !important;
-    border-radius: 45px !important;
+    border: 2px solid lightgray !important;
+    border-radius: 5px !important;
     height: 36px;
 }
 
@@ -14027,7 +14027,7 @@ thead.thead-inverse th,.table-inverse thead th {
     box-shadow: 0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12);
     background: #fff;
     color: #fff;
-    font-weight: 800;
+    font-weight: 400;
     padding: 25px 3px;
 }
 
@@ -24868,8 +24868,8 @@ select.bs-select-hidden,.bootstrap-select>select.bs-select-hidden,select.selectp
     padding-bottom: 5px!important;
     background: transparent !important;
     /* border-bottom: 1px solid #d2d2d2; */
-    border: 2px solid #1072ae !important;
-    border-radius: 42px !important;
+    border: 1px solid lightgray !important;
+    border-radius: 5px !important;
     padding-right: 10px !important;
 }
 

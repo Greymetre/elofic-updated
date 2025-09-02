@@ -257,11 +257,11 @@
 
           </div>
           <div>
-            <div class="company">GREYMETRE CONSULTANTS <br /><small>PRIVATE LIMITED</small></div>
+          <div class="company">{{$settings->company_name ?? ''}}</div>
             <small style="display:block;margin-top:0px;color:#000;font-size:12px;font-weight: 400;line-height: 18px;">
-              591, Scheme 114, Part 1 Dewas Naka Niranjanpur<br />
-              Indore Madhya Pradesh 452010, India<br />
-              GSTIN: 23AAICG5510G1ZZ
+              {{$settings->address ? $settings->address->address1 : ''}}<br />
+              {{$settings->address ? $settings->address->districtname?->district_name : ''}} {{$settings->address ? $settings->address->statename?->state_name : ''}} {{$settings->address ? $settings->address->pincodename?->pincode : ''}}, {{$settings->address ? $settings->address->countryname?->country_name : ''}}<br />
+              GSTIN: {{$settings->gst_number ?? ''}}
             </small>
           </div>
 

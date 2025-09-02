@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
 use App\Exports\ExcelExport;
+use App\Exports\LeadCheckinExport;
 use App\Exports\LeadsTemplate;
 use App\Imports\LeadsImport;
 use Excel;
@@ -23,8 +24,11 @@ use App\Models\LeadOpportunity;
 use App\Models\Pincode;
 use App\Models\Country;
 use App\Models\Address;
+use App\Models\Branch;
 use App\Models\Customers;
+use App\Models\Division;
 use App\Models\EmployeeDetail;
+use App\Models\LeadCheckIn;
 use App\Models\LeadLog;
 use App\Models\LeadNotification;
 use App\Models\OpportunitieStatus;
@@ -904,7 +908,7 @@ class LeadController extends Controller
                 $phone = preg_replace('/^\+?91/', '', $phone); // remove +91 or 91 from start
             }
             $check_customer = Customers::where('mobile', 'like', '%' . $phone . '%')->first();
-            if($check_customer && $check_customer->id){
+            if ($check_customer && $check_customer->id) {
                 return response()->json(['status' => 'error', 'message' => 'Customer already exist with this phone number.']);
             }
             $data = [
@@ -938,5 +942,77 @@ class LeadController extends Controller
                 return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
             }
         }
+    }
+
+    public function visit_report(Request $request)
+    {
+        $userids = getUsersReportingToAuth();
+        if ($request->ajax()) {
+            $data = LeadCheckIn::with('users:id,name', 'lead:id,company_name,lead_source', 'lead.address')
+                ->whereHas('users', function ($query) use ($userids, $request) {
+                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+                        $query->whereIn('id', $userids);
+                    }
+                    if ($request->user_id && $request->user_id != null && $request->user_id != '') {
+                        $query->where('user_id', $request->user_id);
+                    }
+                    if ($request->division_id && $request->division_id != null && $request->division_id != '') {
+                        $query->where('division_id', $request->division_id);
+                    }
+                    if ($request->branch_id && $request->branch_id != null && $request->branch_id != '') {
+                        $query->where('branch_id', $request->branch_id);
+                    }
+                    if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
+                        $startDate = date('Y-m-d', strtotime($request->start_date));
+                        $endDate = date('Y-m-d', strtotime($request->end_date));
+                        $query->whereDate('checkin_date', '>=', $startDate)
+                            ->whereDate('checkin_date', '<=', $endDate);
+                    }
+                })
+                ->select('id', 'checkin_date', 'checkin_time', 'user_id', 'lead_id', 'checkout_time', 'checkout_note')
+                ->orderBy('checkin_date', 'desc');
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('visit_time', function ($query) {
+                    if (!empty($query->checkout_time) && !empty($query->checkin_time)) {
+                        $parsedTime1 = Carbon::createFromFormat('H:i:s', $query->checkout_time);
+                        $parsedTime2 = Carbon::createFromFormat('H:i:s', $query->checkin_time);
+
+                        $difference = $parsedTime1->diff($parsedTime2);
+                        $interval = $difference->format('%H:%I:%S');
+                        return $interval;
+                    } else {
+                        return '-';
+                    }
+                })
+                ->addColumn('district_name', function ($query) {
+                    return isset($query['lead']['address']['districtname']['district_name']) ? $query['lead']['address']['districtname']['district_name'] : '';
+                })
+                ->addColumn('city_name', function ($query) {
+                    return  isset($query['lead']['address']['cityname']['city_name']) ? $query['lead']['address']['cityname']['city_name'] : '';
+                })
+                ->addColumn('pincode', function ($query) {
+                    return isset($query['lead']['address']['zipcode']) ? $query['lead']['address']['zipcode'] : '';
+                })
+                ->addColumn('address', function ($query) {
+                    return isset($query['lead']['address']['address1']) ? $query['lead']['address']['address1'] : '';
+                })
+                ->rawColumns(['visit_time', 'district_name', 'city_name', 'pincode', 'address'])
+                ->make(true);
+        }
+        $users = user::whereDoesntHave('roles', function ($query) {
+            $query->whereIn('id', config('constants.customer_roles'));
+        })->whereIn('id', $userids)->select('id', 'name')->orderBy('name', 'asc')->get();
+        $divisions = Division::where('active', 'Y')->get();
+        $branches = Branch::where('active', 'Y')->get();
+        return view('leads.leadvisit', compact('users', 'divisions', 'branches'));
+    }
+
+    public function visit_report_download(Request $request)
+    {
+        ////abort_if(Gate::denies('visitreport_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        if (ob_get_contents()) ob_end_clean();
+        ob_start();
+        return Excel::download(new LeadCheckinExport($request), 'Lead CheckIn.xlsx');
     }
 }

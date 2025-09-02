@@ -182,6 +182,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('leads-exportLeads', [LeadController::class, 'exportLeads'])->name('leads-exportLeads');
     Route::post('leads/changeStatus', [LeadController::class, 'changeStatus'])->name('leads.changeStatus');
     Route::post('convert_lead', [LeadController::class, 'convert_lead'])->name('leads.convert');
+    Route::any('lead_visit_report', [LeadController::class, 'visit_report'])->name('leads.visit.report');
+    Route::any('lead_checkin-download', [LeadController::class, 'visit_report_download'])->name('leads.visit.report_download');
 
     //Contacts Management
     Route::resource('lead-contacts', LeadContactsController::class);

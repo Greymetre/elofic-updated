@@ -1,12 +1,14 @@
 <x-app-layout>
   <style>
     .swal2-container.swal2-center.swal2-fade.swal2-shown {
-        z-index: 9999;
+      z-index: 9999;
     }
-    #invoice_logo{
+
+    #invoice_logo {
       cursor: pointer;
     }
-    #invoice_esign{
+
+    #invoice_esign {
       cursor: pointer;
     }
   </style>
@@ -74,10 +76,84 @@
 
           </div>
 
-          <!-- <hr> -->
-          
-          <h5 class=" d-none"><i class="fa fa-tags"></i> Invoice Labels</h5>
-          <div id="labels_wrapper" class="d-none">
+          <hr>
+
+          <h5><i class="fa fa-map-marker"></i> Company Address</h5>
+          <div id="address_wrapper">
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label>Company Name</label>
+                <input type="text" name="company_name" class="form-control"
+                  value="{{ $invoice_setting->company_name ?? '' }}" placeholder="Enter Company Name">
+              </div>
+
+              <div class="form-group col-md-8">
+                <label>Address</label>
+                <textarea name="company_address" class="form-control" rows="2"
+                  placeholder="Enter Address">{{ $invoice_setting->address->address1 ?? '' }}</textarea>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-3">
+                <label>State</label>
+                <select class="form-control select2 " name="state_id" id="state_id" onchange="getDistrictList()" style="width: 100%;">
+                  <option value="">Select {!! trans('panel.global.state') !!}</option>
+                  @if($states && count($states) > 0)
+                  @foreach($states as $state)
+                  <option value="{!! $state->id !!}" {{ old('state_id', isset($invoice_setting) && $invoice_setting->address ? $invoice_setting->address->state_id : '') == $state->id ? 'selected' : '' }}>{!! $state->state_name !!}</option>
+                  @endforeach
+                  @endif
+                </select>
+              </div>
+              <div class="form-group col-md-3">
+                <label>District</label>
+                <select class="form-control select2 district" name="district_id" id="district_id" onchange="getCityList()" style="width: 100%;">
+                  @if(isset($invoice_setting) && $invoice_setting->address && $invoice_setting->address->district_id)
+                  <option value="{!!  $invoice_setting->address->district_id !!}" selected>{!! $invoice_setting->address->districtname->district_name ?? '' !!}</option>
+                  @else
+                  <option value="">Select {!! trans('panel.global.district') !!}</option>
+                  @endif
+                </select>
+              </div>
+              <div class="form-group col-md-3">
+                <label>City</label>
+                <select class="form-control select2 city" name="city_id" id="city_id" onchange="getPincodeList()" style="width: 100%;">
+                  @if(isset($invoice_setting) && $invoice_setting->address && $invoice_setting->address->city_id)
+                  <option value="{!!  $invoice_setting->address->city_id !!}" selected>{!! $invoice_setting->address->cityname->city_name??'' !!}</option>
+                  @else
+                  <option value="">Select {!! trans('panel.global.city') !!}</option>
+                  @endif
+                </select>
+              </div>
+              <div class="form-group col-md-3">
+                <label>Pincode</label>
+                <select class="form-control pincode select2" name="pincode_id" id="pincode_id" onchange="getAddressData()" style="width: 100%;">
+                  @if(isset($invoice_setting) && $invoice_setting->address && $invoice_setting->address->pincode_id)
+                  <option value="{!!  $invoice_setting->address->pincode_id !!}" selected>{!! $invoice_setting->address->pincodename->pincode !!}</option>
+                  @endif
+                  <option value="">Select {!! trans('panel.global.pincode') !!}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-3">
+                <label>GST Number</label>
+                <input type="text" name="gst_number" class="form-control"
+                  value="{{ $invoice_setting->gst_number ?? '' }}" placeholder="Enter GST Number">
+              </div>
+              <div class="form-group col-md-3">
+                <label>PAN Number</label>
+                <input type="text" name="pan_number" class="form-control"
+                  value="{{ $invoice_setting->pan_number ?? '' }}" placeholder="Enter PAN Number">
+              </div>
+            </div>
+          </div>
+          <hr>
+
+          <h5><i class="fa fa-tags"></i> Invoice Labels</h5>
+          <div id="labels_wrapper">
             @if($invoice_setting && $invoice_setting->labels->count())
             @foreach($invoice_setting->labels as $index => $label)
             <div class="form-row label-row mb-3">
@@ -99,8 +175,8 @@
               </div>
 
               <div class="form-group col-md-3">
-                  <label>Page Heading</label>
-                  <input type="text" name="labels[{{$index}}][page_heading]" class="form-control" placeholder="Enter Page Heading" value="{{ $label->page_heading }}">
+                <label>Page Heading</label>
+                <input type="text" name="labels[{{$index}}][page_heading]" class="form-control" placeholder="Enter Page Heading" value="{{ $label->page_heading }}">
               </div>
 
               <div class="form-group col-md-2">
@@ -148,8 +224,8 @@
               </div>
 
               <div class="form-group col-md-3">
-                  <label>Page Heading</label>
-                  <input type="text" name="labels[0][page_heading]" class="form-control" placeholder="Enter Page Heading">
+                <label>Page Heading</label>
+                <input type="text" name="labels[0][page_heading]" class="form-control" placeholder="Enter Page Heading">
               </div>
 
               <div class="form-group col-md-2">
@@ -169,7 +245,7 @@
             @endif
           </div>
 
-          <div class="form-group col-md-1 d-flex align-items-end" style="display: none !important;">
+          <div class="form-group col-md-1 d-flex align-items-end">
             <button type="button" class="btn btn-success btn-block" onclick="addLabelRow()">
               <i class="fa fa-plus"></i>
             </button>
@@ -182,9 +258,13 @@
       </div>
     </div>
   </section>
-
+  <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
   <script>
-    let labelIndex = {{ $invoice_setting && $invoice_setting->labels->count() ? $invoice_setting->labels-> count() : 1 }};
+    let labelIndex = {
+      {
+        $invoice_setting && $invoice_setting - > labels - > count() ? $invoice_setting - > labels - > count() : 1
+      }
+    };
 
     function previewImage(event, previewId) {
       const input = event.target;
@@ -259,34 +339,34 @@
     }
 
     function removeLabelRow(button, labelId) {
-      if(labelId !== undefined && labelId !== null){
+      if (labelId !== undefined && labelId !== null) {
         Swal.fire({
-            title: "Are you sure?",
-            text: "This label will be permanently deleted.",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!"
+          title: "Are you sure?",
+          text: "This label will be permanently deleted.",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, delete it!"
         }).then((result) => {
-            if (result.value) {
-                $.ajax({
-                    url: "{{ route('invoice_labels.destroy', ':id') }}".replace(':id', labelId),
-                    type: "DELETE",
-                    data: {
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function (response) {
-                        Swal.fire("Deleted!", response.message, "success");
-                        button.closest('.label-row').remove();
-                    },
-                    error: function (xhr) {
-                        Swal.fire("Error!", "Something went wrong while deleting.", "error");
-                    }
-                });
-            }
+          if (result.value) {
+            $.ajax({
+              url: "{{ route('invoice_labels.destroy', ':id') }}".replace(':id', labelId),
+              type: "DELETE",
+              data: {
+                _token: "{{ csrf_token() }}"
+              },
+              success: function(response) {
+                Swal.fire("Deleted!", response.message, "success");
+                button.closest('.label-row').remove();
+              },
+              error: function(xhr) {
+                Swal.fire("Error!", "Something went wrong while deleting.", "error");
+              }
+            });
+          }
         });
-      }else{
+      } else {
         button.closest('.label-row').remove();
       }
     }

@@ -403,8 +403,10 @@ class AttendanceController extends Controller
 
   public function submitAttendances(Request $request)
   {
-    try {
-    $ipAddress = $request->server('HTTP_X_FORWARDED_FOR') ?? $request->ip();
+    // try {
+      $ipAddress = $request->server('HTTP_X_FORWARDED_FOR') 
+      ? explode(',', $request->server('HTTP_X_FORWARDED_FOR'))[0] 
+      : $request->ip();
     $accessToken = '4060dae74e438c';
     $location = Location::get($ipAddress);
     $addressP = getLatLongToAddress($location->latitude, $location->longitude);
@@ -488,9 +490,9 @@ class AttendanceController extends Controller
       return Redirect::to('reports/attendancereport')->with('message_success', 'PunchIn Successfully');
     }
     return redirect()->back()->with('message_danger', 'Error in Lead Stages')->withInput();
-    } catch (\Exception $e) {
-      return redirect()->back()->withErrors($e->getMessage())->withInput();
-    }
+    // } catch (\Exception $e) {
+    //   return redirect()->back()->withErrors($e->getMessage())->withInput();
+    // }
   }
 
   public function removePunchout(Request $request)
