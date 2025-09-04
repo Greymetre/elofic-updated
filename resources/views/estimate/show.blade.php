@@ -795,7 +795,7 @@
             $value = optional($estimate->custom_pdf_values->firstWhere('label_id', $label->id))->value ?? '-';
             $icon = $label->getFirstMediaUrl('label_icon');
             @endphp
-            <div class="col-6 col-md-4 col-lg-4 mb-3 d-none">
+            <div class="col-6 col-md-4 col-lg-4 mb-3">
               <div class="label-tile">
                 @if($icon)
                 <img class="label-icon" src="data:image/png;base64,{{ base64_encode(file_get_contents($icon)) }}" alt="{{ $label->name }} icon">
