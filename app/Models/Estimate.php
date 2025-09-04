@@ -77,4 +77,9 @@ class Estimate extends Model implements HasMedia
     {
         return $this->belongsTo(\App\Models\State::class, 'place_of_supply');
     }
+
+    public function custom_pdf_values()
+    {
+        return $this->hasMany(CustomPdfValue::class);
+    }
 }

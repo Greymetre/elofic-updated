@@ -261,7 +261,7 @@ class TaxInvoiceController extends Controller
                 'quantity' => $request->quantity[$k],
                 'mrp' => $request->mrp[$k],
                 'tax' => $request->tax[$k] ?? 0.00,
-                'tax_amount' => $request->tax_amount[$k],
+                'tax_amount' => $request->tax_amount[$k] ?? 0.00,
                 'amount' => $request->amount[$k]
             ]);
         }

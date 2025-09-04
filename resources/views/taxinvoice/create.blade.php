@@ -1352,13 +1352,7 @@
             var qty = $row.find("input[name='quantity[]']").val();
             var total = qty * res.mrp;
             $row.find("input[name='amount[]']").val(total.toFixed(2));
-
-            var sub_total = 0;
-            $(".amount").each(function() {
-              sub_total += parseFloat($(this).val());
-            });
-
-            $('#sub_total').val(sub_total.toFixed(2));
+            calculateTaxes();
           },
           error: function() {
             alert("Something went wrong while fetching product info.");

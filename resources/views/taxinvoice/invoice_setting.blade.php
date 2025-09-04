@@ -260,11 +260,7 @@
   </section>
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
   <script>
-    let labelIndex = {
-      {
-        $invoice_setting && $invoice_setting - > labels - > count() ? $invoice_setting - > labels - > count() : 1
-      }
-    };
+    let labelIndex = {{ $invoice_setting && $invoice_setting->labels-> count() ? $invoice_setting->labels-> count() : 1 }};
 
     function previewImage(event, previewId) {
       const input = event.target;

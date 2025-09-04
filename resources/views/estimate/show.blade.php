@@ -233,6 +233,85 @@
         display: none;
       }
     }
+
+    .soft-card {
+      background: #fff;
+      border: 0;
+      border-radius: .75rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
+    }
+
+    .soft-card+.soft-card {
+      margin-top: 1rem;
+    }
+
+    .soft-card .section-title {
+      font-weight: 600;
+      color: #111;
+      margin: 0;
+    }
+
+    .label-tile {
+      background: #fff;
+      border-radius: .75rem;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .05);
+      padding: 1rem;
+      text-align: center;
+      transition: transform .15s ease, box-shadow .15s ease;
+      height: 100%;
+    }
+
+    .label-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+    }
+
+    .label-icon {
+      height: 40px;
+      width: 45px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto .5rem;
+    }
+
+    .label-name {
+      font-size: .95rem;
+      font-weight: 600;
+      color: #111;
+      margin-bottom: .25rem;
+    }
+
+    .label-value {
+      font-size: .9rem;
+      color: #444;
+      margin: 0;
+      word-break: break-word;
+    }
+
+    @media (min-width: 992px) {
+      .soft-card {
+        padding: 1rem 1rem 0 1rem;
+      }
+    }
+
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+    }
+    .new_heading h5 {
+        background: #FFF;
+        border-radius: 20px 2px 20px 2px !important;
+        padding: 10px 20px;
+        color: #000;
+        font-weight: bold;
+        color: #3C4858;
+        font-family: 'Poppins', sans-serif;
+        border: 1px solid lightgrey;
+    }
+    .d-flex.align-items-center.justify-content-center.mb-2.new_heading {
+        background: lightgray;
+        margin-bottom: 50px !important;
+    }
   </style>
   <section class="invocie_main">
     <div class="container-fluid">
@@ -298,7 +377,7 @@
               <tr>
                 <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Place Of Supply</td>
                 <td style="color:#000; font-weight:500; width:40%; font-size:12px; line-height:16px;">
-                : {{ $estimate->state ? '['.$estimate->state->gst_code . ']' . $estimate->state->state_name : '' }}
+                  : {{ $estimate->state ? '['.$estimate->state->gst_code . ']' . $estimate->state->state_name : '' }}
                 </td>
 
               </tr>
@@ -488,7 +567,7 @@
             <tr>
               <td colspan="3" style="border:0px!important;">
                 <p style="margin-bottom:0px; color:#000; font-weight: 400;">Total In Words</p>
-                <p style="font-weight: bold; color:#000;line-height: 10px;"> {{ numberToWords($estimate->grand_total) }} </p>
+                <p style="font-weight: bold; color:#000;line-height: 15px;"> {{ numberToWords($estimate->grand_total) }} </p>
               </td>
               @if($estimate->place_of_supply == ($settings->address ? $settings->address->state_id : 1))
               <td colspan="6">
@@ -653,15 +732,15 @@
               <th style="width:13%; color: #000;" class="right" rowspan="2">Total Tax Amount </th>
             </tr>
             <tr>
-            @if($estimate->place_of_supply == ($settings->address ? $settings->address?->state_id : 1))
+              @if($estimate->place_of_supply == ($settings->address ? $settings->address?->state_id : 1))
               <th style="width:8%; color: #000; text-align: center;" class="center">Rate</th>
               <th style="width:12%; color: #000; text-align: center;" class="right">Anount</th>
               <th style="width:8%; color: #000; text-align: center;" class="center">Rate</th>
               <th style="width:12%; color: #000; text-align: center;" class="right">Anount</th>
-            @else
+              @else
               <th style="width:8%; color: #000; text-align: center;" class="center">Rate</th>
               <th style="width:12%; color: #000; text-align: center;" class="right">Anount</th>
-            @endif
+              @endif
             </tr>
           </thead>
           <tbody>
@@ -698,6 +777,42 @@
             </tr>
           </tbody>
         </table>
+
+        @if($estimate->custom_pdf_values && $estimate->custom_pdf_values->count() > 0)
+        @if($settings && $settings->labels->count())
+        @php
+        $labelsByPage = $settings->labels->groupBy('page');
+        @endphp
+        @foreach($labelsByPage as $page => $labels)
+        <div class="soft-card p-3 mb-3 page-break">
+          <div class="d-flex align-items-center justify-content-center mb-2 new_heading">
+            <h5 class="section-title">{{ $labels[0]->page_heading }}</h5>
+          </div>
+
+          <div class="row">
+            @foreach($labels as $label)
+            @php
+            $value = optional($estimate->custom_pdf_values->firstWhere('label_id', $label->id))->value ?? '-';
+            $icon = $label->getFirstMediaUrl('label_icon');
+            @endphp
+            <div class="col-6 col-md-4 col-lg-4 mb-3 d-none">
+              <div class="label-tile">
+                @if($icon)
+                <img class="label-icon" src="data:image/png;base64,{{ base64_encode(file_get_contents($icon)) }}" alt="{{ $label->name }} icon">
+                @else
+                <img class="label-icon" src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('assets/img/nophoto3.jpg'))) }}" alt="Default icon">
+                @endif
+                <div class="label-name">{{ $label->name }}</div>
+                <p class="label-value">{{ $value }}</p>
+              </div>
+            </div>
+            @endforeach
+          </div>
+        </div>
+        @endforeach
+        @endif
+        @endif
+
 
       </div>
     </div>

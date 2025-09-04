@@ -903,14 +903,14 @@
               </div>
             </div>
           </div>
-          <!--     <div class="row">
+          <div class="row">
             <div class="col-md-12">
               <div class="form-group">
                 <input type="checkbox" name="custom_pdf" id="custom_pdf">
                 <label for="custom_pdf" class="othercolor">Custom PDF</label>
               </div>
             </div>
-          </div> -->
+          </div>
           <div class="row d-none" id="custom_pdf_div">
             <div class="col-md-12">
               @if($settings && $settings->labels->count())
@@ -924,18 +924,18 @@
                 <div class="card-header bg-light">
                   <strong class="text-dark">{{ $labels[0]->page_heading }}</strong>
                 </div>
-                <div class="card-body">
+                <div class="card-body row">
                   @foreach($labels as $label)
-                  <div class="form-group row align-items-center">
-                    <label class="col-md-3 col-form-label">
+                  <div class="form-group row align-items-center col-md-4">
+                    <label class="col-md-6 col-form-label">
                       <img src="{{ $label->getFirstMediaUrl('label_icon') }}" alt="icon" style="height:20px; width:20px;">
-                      {{ $label->label_name }}
+                      {{ $label->name }}
                     </label>
-                    <div class="col-md-9">
+                    <div class="col-md-6">
                       <input type="text"
                         class="form-control"
-                        name="custom_labels[{{ $page }}][{{ $label->id }}]"
-                        placeholder="Enter {{ $label->label_name }} value">
+                        name="custom_labels[{{ $label->id }}]"
+                        placeholder="Enter {{ $label->name }} value">
                     </div>
                   </div>
                   @endforeach
@@ -1390,13 +1390,7 @@
             var qty = $row.find("input[name='quantity[]']").val();
             var total = qty * res.mrp;
             $row.find("input[name='amount[]']").val(total.toFixed(2));
-
-            var sub_total = 0;
-            $(".amount").each(function() {
-              sub_total += parseFloat($(this).val());
-            });
-
-            $('#sub_total').val(sub_total.toFixed(2));
+            calculateTaxes();
           },
           error: function() {
             alert("Something went wrong while fetching product info.");

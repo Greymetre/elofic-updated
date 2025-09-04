@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CurrentTaxInvoiceNo;
 use App\Models\Customers;
+use App\Models\CustomPdfValue;
 use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\InvoiceSetting;
@@ -102,7 +103,7 @@ class EstimateController extends Controller
         $all_tax = TaxInvoiceTax::all();
         $all_tds = TaxInvoiceTds::all();
         $settings = InvoiceSetting::with('labels')->first();
-
+        
         return view('estimate.create', compact(
             'payment_terms',
             'products',
@@ -144,7 +145,6 @@ class EstimateController extends Controller
     }
     public function store(Request $request)
     {
-        // dd('Work in progress');
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required',
             'estimate_no' => 'required|unique:estimates,estimate_no',
@@ -183,6 +183,15 @@ class EstimateController extends Controller
             }
         }
 
+        if(isset($request->custom_pdf) && $request->custom_pdf == 'on'){
+           foreach($request->custom_labels as $label_id => $value){
+               CustomPdfValue::updateOrCreate(
+                   ['estimate_id' => $invoice->id, 'label_id' => $label_id],
+                   ['value' => $value]
+               );
+           } 
+        }
+
         foreach ($request->product_id as $k => $product) {
             $invoice->details()->create([
                 'product_id' => $request->product_id[$k],
@@ -192,7 +201,7 @@ class EstimateController extends Controller
                 'quantity' => $request->quantity[$k],
                 'mrp' => $request->mrp[$k],
                 'tax' => $request->tax[$k] ?? 0.00,
-                'tax_amount' => $request->tax_amount[$k],
+                'tax_amount' => $request->tax_amount[$k] ?? 0.00,
                 'amount' => $request->amount[$k]
             ]);
         }
@@ -245,7 +254,6 @@ class EstimateController extends Controller
 
             $hsnSacSummary = $estimate->details
             ->whereNotNull('hsn_sac')
-            ->whereNull('hsn_sac')
             ->groupBy('hsn_sac')
             ->map(function ($items) use ($placeOfSupply) {
                 $taxRate = optional($items->first()->tax_details)->tax_percentage;
