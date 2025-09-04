@@ -211,6 +211,7 @@ class TaxInvoiceController extends Controller
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required',
             'invoice_no' => 'required|unique:invoices',
+            'hsn_sac_type.*' => 'nullable|in:HSN,SAC',
         ]);
 
         if ($validator->fails()) {
@@ -256,6 +257,7 @@ class TaxInvoiceController extends Controller
                 'product_id' => $request->product_id[$k],
                 'product_dec' => $request->product_dec[$k],
                 'hsn_sac' => $request->hsn_sac[$k],
+                'hsn_sac_type' => $request->hsn_sac_type[$k],
                 'quantity' => $request->quantity[$k],
                 'mrp' => $request->mrp[$k],
                 'tax' => $request->tax[$k] ?? 0.00,
@@ -274,51 +276,69 @@ class TaxInvoiceController extends Controller
         $customer_address = $customer_address_class->getCustomerAddress($request);
         $address = $customer_address->getData(true)['data'];
 
+        $settings = InvoiceSetting::with('address', 'labels')->first();
+
         $placeOfSupply = $tax_invoice->place_of_supply;
+
         $taxSummary = $tax_invoice->details
             ->groupBy('tax')
-            ->map(function ($items, $taxId) use ($placeOfSupply) {
+            ->map(function ($items, $taxId) use ($placeOfSupply, $settings) {
                 $taxName = optional($items->first()->tax_details)->tax_name;
                 $taxRate = optional($items->first()->tax_details)->tax_percentage;
                 $totalAmount = $items->sum('tax_amount');
-
                 $summary = [];
 
-                if ($placeOfSupply == 1) {
+                if ($placeOfSupply == ($settings->address ? $settings->address->state_id : 1)) {
                     $halfRate = $taxRate / 2;
                     $halfAmount = $totalAmount / 2;
                     $summary[] = [
                         'tax_id' => $taxId . '_cgst',
-                        'tax_name' => "CGST ({$halfRate}%)",
+                        'tax_name' => "CGST[{$halfRate}%]",
                         'total_tax_amount' => $halfAmount,
                     ];
                     $summary[] = [
                         'tax_id' => $taxId . '_sgst',
-                        'tax_name' => "SGST ({$halfRate}%)",
+                        'tax_name' => "SGST[{$halfRate}%]",
                         'total_tax_amount' => $halfAmount,
                     ];
                 } else {
                     $summary[] = [
                         'tax_id' => $taxId,
-                        'tax_name' => "{$taxName} ({$taxRate}%)",
+                        'tax_name' => "IGST[{$taxRate}%]",
                         'total_tax_amount' => $totalAmount,
                     ];
                 }
-
                 return $summary;
             })
             ->flatten(1)
             ->values();
 
-        $settings = InvoiceSetting::with('labels')->first();
-        return view('taxinvoice.show', compact('tax_invoice', 'address', 'taxSummary', 'settings'));
+        $hsnSacSummary = $tax_invoice->details
+            ->whereNotNull('hsn_sac')
+            ->whereNull('hsn_sac')
+            ->groupBy('hsn_sac')
+            ->map(function ($items) use ($placeOfSupply) {
+                $taxRate = optional($items->first()->tax_details)->tax_percentage;
+                $totalAmount = $items->sum('amount');
+                $totalTaxAmount = $items->sum('tax_amount');
+                $summary = [];
+
+                $summary[] = [
+                    'hsn_sac' => $items[0]['hsn_sac'] . ' - ' . $items[0]['hsn_sac_type'],
+                    'total_amount' => $totalAmount,
+                    'tax_name' => $taxRate,
+                    'total_tax_amount' => $totalTaxAmount,
+                ];
+                return $summary;
+            })
+            ->flatten(1)
+            ->values();
+
+        return view('taxinvoice.show', compact('tax_invoice', 'address', 'taxSummary', 'settings', 'hsnSacSummary'));
     }
 
     public function invoice_setting(Request $request)
     {
-        if(!$request->devs){
-            return view('work_in_progress');
-        }
         $invoice_setting = InvoiceSetting::with('labels')->first();
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
         return view('taxinvoice.invoice_setting', compact('invoice_setting', 'states'));
@@ -360,10 +380,11 @@ class TaxInvoiceController extends Controller
         $invoiceSetting->pan_number = $request->pan_number;
         $invoiceSetting->save();
 
-        if($request->company_address && !empty($request->company_address)){
-            Address::create([
+        if ($request->company_address && !empty($request->company_address)) {
+            Address::updateOrCreate([
                 'model_type' => 'App\Models\InvoiceSetting',
                 'model_id' => $invoiceSetting->id,
+            ], [
                 'address1' => $request->company_address ?? 'N/A',
                 'country_id' => 1,
                 'pincode_id' => $request->pincode_id ?? null,

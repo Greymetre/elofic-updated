@@ -779,7 +779,7 @@
                         </select>
                         <input type="text" class="form-control d-none" placeholder="Description" name="product_dec[]" id="product_dec" />
                       </td>
-                      <td><input type="text" name="hsn_sac[]" /></td>
+                      <td><input type="text" placeholder="HSN/SAC Code" name="hsn_sac[]" /> <input style="color: #35A3D8!important;" placeholder="Type" type="text" name="hsn_sac_type[]"></td>
                       <td><input type="number" class="form-control quantity_rowchange" name="quantity[]" min="0" step="0.01" value="1.00" /></td>
                       <td><input type="number" class="form-control mrp_rowchange" name="mrp[]" min="0" step="0.01" value="0.00" /> <input type="hidden" name="tax_amount[]"></td>
                       <td>
@@ -1341,6 +1341,13 @@
             product_id: productId
           },
           success: function(res) {
+           if(res.hsn_sac != null){
+              $row.find("input[name='hsn_sac[]']").val(res.hsn_sac_no);
+              $row.find("input[name='hsn_sac_type[]']").val(res.hsn_sac);
+            }else{
+              $row.find("input[name='hsn_sac[]']").val('');
+              $row.find("input[name='hsn_sac_type[]']").val('');
+            }
             $row.find("input[name='mrp[]']").val(res.mrp);
             var qty = $row.find("input[name='quantity[]']").val();
             var total = qty * res.mrp;

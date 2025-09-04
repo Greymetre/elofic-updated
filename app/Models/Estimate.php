@@ -39,6 +39,11 @@ class Estimate extends Model implements HasMedia
         return $this->belongsTo(PaymentTerm::class, 'payment_term', 'id');
     }
 
+    public function tds_details()
+    {
+        return $this->belongsTo(TaxInvoiceTds::class, 'tds', 'id');
+    }
+
     /**
      * Get the customer that owns the estimate.
      */
@@ -66,5 +71,10 @@ class Estimate extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('estimate_files');
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(\App\Models\State::class, 'place_of_supply');
     }
 }

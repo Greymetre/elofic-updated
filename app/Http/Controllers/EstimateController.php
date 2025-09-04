@@ -148,6 +148,7 @@ class EstimateController extends Controller
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required',
             'estimate_no' => 'required|unique:estimates,estimate_no',
+            'hsn_sac_type.*' => 'nullable|in:HSN,SAC',
         ]);
 
         if ($validator->fails()) {
@@ -187,6 +188,7 @@ class EstimateController extends Controller
                 'product_id' => $request->product_id[$k],
                 'product_dec' => $request->product_dec[$k],
                 'hsn_sac' => $request->hsn_sac[$k],
+                'hsn_sac_type' => $request->hsn_sac_type[$k],
                 'quantity' => $request->quantity[$k],
                 'mrp' => $request->mrp[$k],
                 'tax' => $request->tax[$k] ?? 0.00,
@@ -204,17 +206,19 @@ class EstimateController extends Controller
         $customer_address = $customer_address_class->getCustomerAddress($request);
         $address = $customer_address->getData(true)['data'];
 
+        $settings = InvoiceSetting::with('address', 'labels')->first();
+
         $placeOfSupply = $estimate->place_of_supply;
 
         $taxSummary = $estimate->details
             ->groupBy('tax')
-            ->map(function ($items, $taxId) use ($placeOfSupply) {
+            ->map(function ($items, $taxId) use ($placeOfSupply, $settings) {
                 $taxName = optional($items->first()->tax_details)->tax_name;
                 $taxRate = optional($items->first()->tax_details)->tax_percentage;
                 $totalAmount = $items->sum('tax_amount');
                 $summary = [];
 
-                if ($placeOfSupply == 1) {
+                if ($placeOfSupply == ($settings->address ? $settings->address->state_id : 1)) {
                     $halfRate = $taxRate / 2;
                     $halfAmount = $totalAmount / 2;
                     $summary[] = [
@@ -239,7 +243,27 @@ class EstimateController extends Controller
             ->flatten(1)
             ->values();
 
-        $settings = InvoiceSetting::with('labels')->first();
-        return view('estimate.show', compact('estimate', 'address', 'taxSummary', 'settings'));
+            $hsnSacSummary = $estimate->details
+            ->whereNotNull('hsn_sac')
+            ->whereNull('hsn_sac')
+            ->groupBy('hsn_sac')
+            ->map(function ($items) use ($placeOfSupply) {
+                $taxRate = optional($items->first()->tax_details)->tax_percentage;
+                $totalAmount = $items->sum('amount');
+                $totalTaxAmount = $items->sum('tax_amount');
+                $summary = [];
+
+                    $summary[] = [
+                        'hsn_sac' => $items[0]['hsn_sac']. ' - '.$items[0]['hsn_sac_type'],
+                        'total_amount' => $totalAmount,
+                        'tax_name' => $taxRate,
+                        'total_tax_amount' => $totalTaxAmount,
+                    ];
+                return $summary;
+            })
+            ->flatten(1)
+            ->values();
+
+        return view('estimate.show', compact('estimate', 'address', 'taxSummary', 'settings', 'hsnSacSummary'));
     }
 }

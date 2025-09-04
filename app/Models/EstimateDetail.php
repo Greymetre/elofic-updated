@@ -14,6 +14,7 @@ class EstimateDetail extends Model
         'product_id',
         'product_dec',
         'hsn_sac',
+        'hsn_sac_type',
         'quantity',
         'mrp',
         'tax',

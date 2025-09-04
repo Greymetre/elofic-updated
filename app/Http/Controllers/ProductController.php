@@ -124,6 +124,8 @@ class ProductController extends Controller
                 'part_no'       => !empty($request['part_no']) ? $request['part_no'] :'',
                 'product_no'    => !empty($request['product_no']) ? $request['product_no'] :'',
                 'model_no'      => !empty($request['model_no']) ? $request['model_no'] :'',
+                'hsn_sac'      => isset($row['hsn_sac']) ? $row['hsn_sac'] :null,
+                'hsn_sac_no'      => isset($row['hsn_sac_no']) ? $row['hsn_sac_no'] :null,
             ]))
             {
                 if(!empty($request['detail']))
@@ -253,6 +255,8 @@ class ProductController extends Controller
             $product->part_no = !empty($request['part_no']) ? $request['part_no'] :'';
             $product->product_no = !empty($request['product_no']) ? $request['product_no'] :'';
             $product->model_no = !empty($request['model_no']) ? $request['model_no'] :'';
+            $product->hsn_sac = !empty($request['hsn_sac']) ? $request['hsn_sac'] :'';
+            $product->hsn_sac_no = !empty($request['hsn_sac_no']) ? $request['hsn_sac_no'] :'';
             $product->suc_del  = !empty($request['suc_del']) ? $request['suc_del'] :'';
             if($request->file('image')){
                 $image = $request->file('image');

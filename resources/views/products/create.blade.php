@@ -76,6 +76,40 @@
                 </div>
               </div>
             </div>
+            <!-- New added coloumns for invoice -->
+
+            <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">HSN/SAC</label>
+                <div class="form-group has-default bmd-form-group">
+                  <select name="hsn_sac" id="hsn_sac" class="form-control select2">
+                    <option value="">Select HSN/SAC</option>
+                    <option value="HSN" {{($products && $products['hsn_sac'] == 'HSN')?'selected':''}}>HSN</option>
+                    <option value="SAC" {{($products && $products['hsn_sac'] == 'SAC')?'selected':''}}>SAC</option>                    
+                  </select>
+                  @if ($errors->has('hsn_sac'))
+                  <div class="error col-lg-12">
+                    <p class="text-danger">{{ $errors->first('hsn_sac') }}</p>
+                  </div>
+                  @endif
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="input_section">
+                <label class="col-form-label">HSN/SAC No></label>
+                <div class="form-group has-default bmd-form-group">
+                  <input type="number" name="hsn_sac_no" class="form-control" step="1" value="{!! old( 'hsn_sac_no', $products['hsn_sac_no']) !!}">
+                  @if ($errors->has('hsn_sac_no'))
+                  <div class="error">
+                    <p class="text-danger">{{ $errors->first('hsn_sac_no') }}</p>
+                  </div>
+                  @endif
+                </div>
+              </div>
+            </div>
+
+            <!-- New added coloumns for invoice -->
             <div class="col-md-6">
               <div class="input_section">
                 <label class="col-form-label">HP<span class="text-danger"> *</span></label>

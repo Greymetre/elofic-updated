@@ -522,7 +522,9 @@ class AjaxController extends Controller
                 'minimum' => $data['getSchemeDetail']['orderscheme']['minimum'] ?? 0,
                 'maximum' => $data['getSchemeDetail']['orderscheme']['maximum'] ?? 0,
                 'start_date' => $data['getSchemeDetail']['orderscheme']['start_date'] ?? 0,
-                'end_date' => $data['getSchemeDetail']['orderscheme']['end_date'] ?? 0,
+                'hsn_sac' => $data['hsn_sac'] ?? NULL,
+                'hsn_sac_no' => $data['hsn_sac_no'] ?? NULL,
+
 
                 'productdetails' => $data['productdetails'],
                 'categories' => $data['categories'],

@@ -64,6 +64,8 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
                 'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
                 'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
                 'phase'      => isset($row['phase']) ? $row['phase'] :null,
+                'hsn_sac'      => isset($row['hsn_sac']) ? $row['hsn_sac'] :null,
+                'hsn_sac_no'      => isset($row['hsn_sac_no']) ? $row['hsn_sac_no'] :null,
                 'branch_id'  =>  $row['branch_id'] ?? ''
 
             ]) )
@@ -96,6 +98,17 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
     {
         return [
             'product_name' => 'required|string|regex:/[a-zA-Z0-9\s]+/',
+            'hsn_sac' => 'nullable|in:HSN,SAC',
+        ];
+    }
+
+    public function customValidationMessages()
+    {
+        return [
+            'product_name.required' => 'Product name is required.',
+            'product_name.string' => 'Product name must be a string.',
+            'product_name.regex' => 'Product name format is invalid.',
+            'hsn_sac.in' => 'it should be only from HSN or SAC.',
         ];
     }
 

@@ -52,10 +52,10 @@ class LeadTasksController extends Controller
         if ($request->status && !empty($request->status) && $request->status != '') {
             $lead_tasks->where('lead_tasks.status', $request->status);
         }
-        $lead_tasks = $lead_tasks->orderBy('id', 'desc')->select(\DB::raw(with(new LeadTask)->getTable() . '.*'))->groupBy('id');
+        $lead_tasks = $lead_tasks->orderBy('date', 'asc')->select(\DB::raw(with(new LeadTask)->getTable() . '.*'))->groupBy('id');
         return DataTables::of($lead_tasks)
             ->editColumn('lead.company_name', function ($lead_task) {
-                return $lead_task->lead->company_name ?? '';
+                return $lead_task->lead? '<a href="' . route('leads.show', $lead_task->lead->id) . '">' . Str::limit($lead_task->lead->company_name, 25, '...') . '</a>': '';
             })
             ->editColumn('description', function ($lead_task) {
                 return $lead_task->description;
@@ -94,7 +94,7 @@ class LeadTasksController extends Controller
                 }
             })
             ->with('records_filtered_count', $lead_tasks->get()->count())
-            ->rawColumns(['action', 'checkbox', 'status', 'priority'])
+            ->rawColumns(['action', 'checkbox', 'status', 'priority', 'lead.company_name', 'assignUser.name'])
             ->make(true);
     }
 

@@ -9,7 +9,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Invoice extends Model implements HasMedia
 {
-    use HasFactory,InteractsWithMedia;
+    use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'customer_id',
@@ -41,6 +41,10 @@ class Invoice extends Model implements HasMedia
     {
         return $this->belongsTo(PaymentTerm::class, 'payment_term', 'id');
     }
+    public function tds_details()
+    {
+        return $this->belongsTo(TaxInvoiceTds::class, 'tds', 'id');
+    }
     public function customer()
     {
         return $this->belongsTo(Customers::class, 'customer_id', 'id');
@@ -59,5 +63,10 @@ class Invoice extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('invoice_files');
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(\App\Models\State::class, 'place_of_supply');
     }
 }
