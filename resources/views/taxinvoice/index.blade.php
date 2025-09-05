@@ -341,11 +341,20 @@
                 </div>
 
                 <!-- Round Button -->
+                @if(Auth::user()->can('invoice_create'))
                  <a href="{{ route('tax_invoice.create') }}" title="Add Invoice">
                 <button class="btn-circle" title="Add Invoice">
                   <i class="fas fa-plus"></i>
                 </button>
               </a>
+              @endif
+              @if(Auth::user()->can('invoice_export'))
+              <a id="downloadInvoice" href="javascript:void(0);" title="Download Invoice">
+                <button class="btn-circle" title="Download Invoice">
+                  <i class="fas fa-download"></i>
+                </button>
+              </a>
+              @endif
               </div>
 
             </div>
@@ -537,6 +546,14 @@
         $('#end_date').datepicker("option", "minDate", selectedStartDate);
         table.draw();
       });
+    });
+
+    $('#downloadInvoice').click(function() {
+      var startDate = $('#start_date').val();
+      var endDate = $('#end_date').val();
+      var searchInput = $('#searchInput').val();
+      var url = "{{ route('invoice.export') }}?start_date=" + startDate + "&end_date=" + endDate + "&searchInput=" + searchInput;
+      window.location.href = url;
     });
   </script>
 

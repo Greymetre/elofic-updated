@@ -157,11 +157,12 @@
           <h4 class="card-title ">Lead Tasks <span class="brig ml-2"></span><br>
             <div class="btn-group kim" style="width: 120px;">
               <select name="status" id="status" class="form-control selectpicker">
-                <option value="" >All</option>
+                <option value="">All</option>
                 <option value="pending">Pending</option>
                 <option value="open">Open</option>
                 <option value="in_progress">In Progress</option>
                 <option value="completed">Completed</option>
+                <option value="overdue">Overdue</option>
               </select>
             </div>
             <span class="">
@@ -174,6 +175,8 @@
                     <input type="search" class="searchbox" placeholder="Search Tasks" id="search_lead">
                   </div>
                 </div>
+                <div class="p-2"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                <div class="p-2"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
                 <div class="both_btn">
 
                   <div class="well mb-3 float-right" id="checkbox_option" style="display: none;">
@@ -310,8 +313,6 @@
   <!--  -->
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
   <!-- Load jQuery and moment.js -->
-  <script src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 
   <script>
     jQuery(document).ready(function() {
@@ -364,6 +365,8 @@
           method: 'POST',
           data: {
             search: jQuery('#search_lead').val(),
+            start_date: $('#start_date').val(),
+            end_date: $('#end_date').val(),
             status: status,
           }
         },
@@ -403,9 +406,9 @@
         dom: 't<"bottom"lip>',
       });
       table.on('xhr', function(e, settings, json) {
-          if (json && json.records_filtered_count !== undefined) {
-              jQuery('.brig.ml-2').text(json.records_filtered_count + ' Tasks');
-          }
+        if (json && json.records_filtered_count !== undefined) {
+          jQuery('.brig.ml-2').text(json.records_filtered_count + ' Tasks');
+        }
       });
     }
 
@@ -413,6 +416,14 @@
       getLeadTasks();
     });
     $('#status').on('change', function() {
+      getLeadTasks();
+    });
+    $('#end_date').change(function() {
+      getLeadTasks();
+    });
+    $('#start_date').change(function() {
+      var selectedStartDate = $('#start_date').datepicker('getDate');
+      $('#end_date').datepicker("option", "minDate", selectedStartDate);
       getLeadTasks();
     });
 

@@ -262,7 +262,7 @@
 
           <div class="meta">
 
-            <h2 style="text-transform: uppercase;font-size: 20px;color: #000; font-weight: 600;">Tax Invocie</h2>
+            <h2 style="text-transform: uppercase;font-size: 20px;color: #000; font-weight: 600;">Tax Invoice</h2>
           </div>
         </header>
 
@@ -448,9 +448,9 @@
               <td style="color:#000;font-weight: 400;" class="center">{{$item->quantity}}</td>
               <td style="color:#000;font-weight: 400;" class="right">{{$item->mrp}}</td>
 
-              @if($tax_invoice->place_of_supply == 1)
+              @if($tax_invoice->place_of_supply == ($settings->address ? $settings->address->state_id : 1))
               @php
-              $halfRate = $item->tax_details->tax_percentage / 2;
+              $halfRate = $item->tax_details?$item->tax_details->tax_percentage:0 / 2;
               $halfAmount = $item->tax_amount / 2;
               @endphp
               <td style="color:#000;font-weight:400;" class="center">

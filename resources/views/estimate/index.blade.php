@@ -341,11 +341,20 @@
                 </div>
 
                 <!-- Round Button -->
+                @if(Auth::user()->can('estimate_create'))
                 <a href="{{ route('estimate.create') }}" title="Add Estimate">
                   <button class="btn-circle" title="Add Estimate">
                     <i class="fas fa-plus"></i>
                   </button>
                 </a>
+                @endif
+                @if(Auth::user()->can('estimate_export'))
+                <a href="javascript:void(0);" id="downloadEstimate" title="Add Estimate">
+                  <button class="btn-circle" title="Download Estimate">
+                    <i class="fas fa-download"></i>
+                  </button>
+                </a>
+                @endif
               </div>
 
             </div>
@@ -464,14 +473,14 @@
             orderable: false
           },
           {
-            data: 'grand_total',
-            name: 'grand_total',
+            data: 'sub_total',
+            name: 'sub_total',
             "defaultContent": '',
             orderable: false
           },
           {
-            data: 'sub_total',
-            name: 'sub_total',
+            data: 'grand_total',
+            name: 'grand_total',
             "defaultContent": '',
             orderable: false
           },
@@ -490,6 +499,13 @@
         $('#end_date').datepicker("option", "minDate", selectedStartDate);
         table.draw();
       });
+    });
+
+    $('#downloadEstimate').on('click', function() {
+      var searchInput = $('#searchInput').val();
+      var start_date = $('#start_date').val();
+      var end_date = $('#end_date').val();
+      window.location.href = "{{ route('estimate.export')}}?searchInput=" + searchInput + "&start_date=" + start_date + "&end_date=" + end_date;
     });
   </script>
 

@@ -50,18 +50,35 @@ class LeadTasksController extends Controller
             });
         }
         if ($request->status && !empty($request->status) && $request->status != '') {
-            $lead_tasks->where('lead_tasks.status', $request->status);
+            if ($request->status == 'overdue') {
+                $lead_tasks->where('lead_tasks.status', 'pending')
+                    ->where('lead_tasks.date', '<', now()->toDateString());
+            } else {
+                $lead_tasks->where('lead_tasks.status', $request->status);
+            }
         }
-        $lead_tasks = $lead_tasks->orderBy('date', 'asc')->select(\DB::raw(with(new LeadTask)->getTable() . '.*'))->groupBy('id');
+        if($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)){
+            $lead_tasks->whereBetween('lead_tasks.date', [$request->start_date, $request->end_date]);
+        }
+        $lead_tasks = $lead_tasks->orderByRaw("
+                CASE 
+                    WHEN lead_tasks.status = 'pending' THEN 0
+                    WHEN lead_tasks.status = 'open' THEN 1
+                    WHEN lead_tasks.status = 'in_progress' THEN 2
+                    ELSE 3
+                END
+            ")
+            ->orderBy('date', 'asc')
+            ->orderBy('time', 'asc')->orderBy('lead_tasks.date', 'asc')->orderBy('lead_tasks.time', 'asc')->select(\DB::raw(with(new LeadTask)->getTable() . '.*'))->groupBy('id');
         return DataTables::of($lead_tasks)
             ->editColumn('lead.company_name', function ($lead_task) {
-                return $lead_task->lead? '<a href="' . route('leads.show', $lead_task->lead->id) . '">' . Str::limit($lead_task->lead->company_name, 25, '...') . '</a>': '';
+                return $lead_task->lead ? '<a href="' . route('leads.show', $lead_task->lead->id) . '">' . Str::limit($lead_task->lead->company_name, 25, '...') . '</a>' : '';
             })
             ->editColumn('description', function ($lead_task) {
                 return $lead_task->description;
             })
             ->editColumn('date', function ($lead_task) {
-                return date("M d,Y", strtotime($lead_task->date));
+                return date("M d,Y", strtotime($lead_task->date)) . ' ' . date("h:i A", strtotime($lead_task->time));
             })
             ->addColumn('action', function ($lead_task) {
                 return "";
@@ -112,7 +129,24 @@ class LeadTasksController extends Controller
             $lead_ids = Lead::where('assign_to', $user_ids)->pluck('id');
             $lead_tasks->where('assigned_to', $user_ids);
         }
-        $lead_tasks = $lead_tasks->get();
+        if ($request->status && !empty($request->status) && $request->status != '') {
+            if ($request->status == 'overdue') {
+                $lead_tasks->where('lead_tasks.status', 'pending')
+                    ->where('lead_tasks.date', '<', now()->toDateString());
+            } else {
+                $lead_tasks->where('lead_tasks.status', $request->status);
+            }
+        }
+        $lead_tasks = $lead_tasks = $lead_tasks->orderByRaw("
+                CASE 
+                    WHEN lead_tasks.status = 'pending' THEN 0
+                    WHEN lead_tasks.status = 'open' THEN 1
+                    WHEN lead_tasks.status = 'in_progress' THEN 2
+                    ELSE 3
+                END
+            ")
+            ->orderBy('date', 'asc')
+            ->orderBy('time', 'asc')->orderBy('lead_tasks.date', 'asc')->orderBy('lead_tasks.time', 'asc')->get();
         $data = $lead_tasks->map(function ($item, $key) {
 
             return [
@@ -127,9 +161,6 @@ class LeadTasksController extends Controller
                 $item->remark,
                 $item->createdby->name ?? '',
                 $item->assignUser->name ?? '',
-
-
-
             ];
         })->toArray();
 

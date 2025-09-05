@@ -693,11 +693,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('proposals-upload', [ProposalController::class, 'upload'])->name('proposals.upload');
     Route::post('proposals-active', [ProposalController::class, 'active'])->name('proposals.active');
     //Estimate
-    Route::resource('estimates', EstimateController::class);
+    Route::resource('estimate', EstimateController::class);
     Route::any('estimates-download', [EstimateController::class, 'download'])->name('estimates.download');
     Route::any('estimates-template', [EstimateController::class, 'template'])->name('estimates.template');
     Route::post('estimates-upload', [EstimateController::class, 'upload'])->name('estimates.upload');
     Route::post('estimates-active', [EstimateController::class, 'active'])->name('estimates.active');
+    Route::any('estimates_download', [EstimateController::class, 'download'])->name('estimate.export');
     //DataSource
     Route::resource('datasources', DataSourceController::class);
     Route::any('datasources-download', [DataSourceController::class, 'download'])->name('datasources.download');
@@ -1111,7 +1112,6 @@ Route::group(['middleware' => ['auth']], function () {
 
     //Tax Invoice Routes
     Route::resource('tax_invoice', TaxInvoiceController::class);
-    Route::resource('estimate', EstimateController::class);
     Route::post('add_payment_term', [TaxInvoiceController::class, 'add_payment_term'])->name('add_payment_term');
     Route::post('add_tax', [TaxInvoiceController::class, 'add_tax'])->name('add_tax');
     Route::post('add_tds', [TaxInvoiceController::class, 'add_tds'])->name('add_tds');
@@ -1119,6 +1119,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('invoice_setting', [TaxInvoiceController::class, 'invoice_setting'])->name('invoice_setting');
     Route::post('invoice_setting_store', [TaxInvoiceController::class, 'invoice_setting_store'])->name('invoice_settings.store');
     Route::delete('/invoice-labels/{id}', [TaxInvoiceController::class, 'destroy_label'])->name('invoice_labels.destroy');
+    Route::any('invoices_download', [TaxInvoiceController::class, 'download'])->name('invoice.export');
 
 });
 

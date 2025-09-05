@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ExcelExport;
 use App\Models\CurrentTaxInvoiceNo;
 use App\Models\Customers;
 use App\Models\CustomPdfValue;
@@ -17,6 +18,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\In;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class EstimateController extends Controller
@@ -103,7 +105,7 @@ class EstimateController extends Controller
         $all_tax = TaxInvoiceTax::all();
         $all_tds = TaxInvoiceTds::all();
         $settings = InvoiceSetting::with('labels')->first();
-        
+
         return view('estimate.create', compact(
             'payment_terms',
             'products',
@@ -118,31 +120,7 @@ class EstimateController extends Controller
             'settings'
         ));
     }
-    public function add_payment_term(Request $request)
-    {
-        $payment_term = new PaymentTerm();
-        $payment_term->term_name = $request->term_name;
-        $payment_term->number_of_days = $request->number_of_days;
-        $payment_term->save();
-        return response()->json(['status' => true, 'message' => 'Payment Term Added Successfully!', 'data' => $payment_term]);
-    }
-    public function add_tax(Request $request)
-    {
-        $tax = new TaxInvoiceTax();
-        $tax->tax_name = $request->tax_name;
-        $tax->tax_percentage = $request->tax_percentage;
-        $tax->save();
-        return response()->json(['status' => true, 'message' => 'Tax Added Successfully!', 'data' => $tax]);
-    }
-    public function add_tds(Request $request)
-    {
-        $tds = new TaxInvoiceTds();
-        $tds->tax_name = $request->tax_name;
-        $tds->rate = $request->rate;
-        $tds->section = $request->section;
-        $tds->save();
-        return response()->json(['status' => true, 'message' => 'TDS Added Successfully!', 'data' => $tds]);
-    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -183,13 +161,13 @@ class EstimateController extends Controller
             }
         }
 
-        if(isset($request->custom_pdf) && $request->custom_pdf == 'on'){
-           foreach($request->custom_labels as $label_id => $value){
-               CustomPdfValue::updateOrCreate(
-                   ['estimate_id' => $invoice->id, 'label_id' => $label_id],
-                   ['value' => $value]
-               );
-           } 
+        if (isset($request->custom_pdf) && $request->custom_pdf == 'on') {
+            foreach ($request->custom_labels as $label_id => $value) {
+                CustomPdfValue::updateOrCreate(
+                    ['estimate_id' => $invoice->id, 'label_id' => $label_id],
+                    ['value' => $value]
+                );
+            }
         }
 
         foreach ($request->product_id as $k => $product) {
@@ -252,7 +230,7 @@ class EstimateController extends Controller
             ->flatten(1)
             ->values();
 
-            $hsnSacSummary = $estimate->details
+        $hsnSacSummary = $estimate->details
             ->whereNotNull('hsn_sac')
             ->groupBy('hsn_sac')
             ->map(function ($items) use ($placeOfSupply) {
@@ -261,17 +239,72 @@ class EstimateController extends Controller
                 $totalTaxAmount = $items->sum('tax_amount');
                 $summary = [];
 
-                    $summary[] = [
-                        'hsn_sac' => $items[0]['hsn_sac']. ' - '.$items[0]['hsn_sac_type'],
-                        'total_amount' => $totalAmount,
-                        'tax_name' => $taxRate,
-                        'total_tax_amount' => $totalTaxAmount,
-                    ];
+                $summary[] = [
+                    'hsn_sac' => $items[0]['hsn_sac'] . ' - ' . $items[0]['hsn_sac_type'],
+                    'total_amount' => $totalAmount,
+                    'tax_name' => $taxRate,
+                    'total_tax_amount' => $totalTaxAmount,
+                ];
                 return $summary;
             })
             ->flatten(1)
             ->values();
 
         return view('estimate.show', compact('estimate', 'address', 'taxSummary', 'settings', 'hsnSacSummary'));
+    }
+
+    public function download(Request $request)
+    {
+        $filename = 'Estimate-' . now()->format('d-m-Y') . '.xlsx';
+
+        $invoices = Estimate::with('customer');
+
+        if ($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)) {
+            $invoices = $invoices->whereBetween('estimate_date', [$request->start_date, $request->end_date]);
+        }
+        if ($request->searchInput && !empty($request->searchInput)) {
+            //Useing $query orwher using bracket 
+            $invoices = $invoices->where(function ($query) use ($request) {
+                $query->where('estimate_no', 'like', '%' . $request->searchInput . '%')
+                    ->orWhere('order_no', 'like', '%' . $request->searchInput . '%')
+                    ->orWhereHas('customer', function ($subQuery) use ($request) {
+                        $subQuery->where('name', 'like', '%' . $request->searchInput . '%')
+                            ->orWhere('mobile', 'like', '%' . $request->searchInput . '%');
+                    });
+            });
+        }
+        $invoices = $invoices->latest()->get();
+
+        // Build rows
+        $rows = [];
+        foreach ($invoices as $invoice) {
+            $rows[] = [
+                date('d M Y', strtotime($invoice->estimate_date)),
+                $invoice->estimate_no,
+                $invoice->order_no,
+                $invoice->customer->name,
+                $invoice->status == 0 ? 'Pending' : 'Converted',
+                date('d M Y', strtotime($invoice->due_date)),
+                $invoice->sub_total,
+                $invoice->grand_total,
+            ];
+        }
+
+        // Build headers
+        $headers = [
+            'Date',
+            'Estimate #',
+            'Order Number',
+            'Customer Name',
+            'STATUS',
+            'Due Date',
+            'ESTIMATE AMOUNT',
+            'Sub Total',
+        ];
+
+       
+        // ✅ Export
+        $export = new ExcelExport($headers, $rows);
+        return Excel::download($export, $filename);
     }
 }

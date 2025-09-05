@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ExcelExport;
 use App\Models\Address;
 use App\Models\CurrentTaxInvoiceNo;
 use App\Models\Customers;
@@ -19,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\In;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
 class TaxInvoiceController extends Controller
@@ -315,7 +317,6 @@ class TaxInvoiceController extends Controller
 
         $hsnSacSummary = $tax_invoice->details
             ->whereNotNull('hsn_sac')
-            ->whereNull('hsn_sac')
             ->groupBy('hsn_sac')
             ->map(function ($items) use ($placeOfSupply) {
                 $taxRate = optional($items->first()->tax_details)->tax_percentage;
@@ -451,5 +452,103 @@ class TaxInvoiceController extends Controller
         $label->delete();
 
         return response()->json(['message' => 'Label deleted successfully']);
+    }
+
+    public function download(Request $request)
+    {
+        $filename = 'Invoice-' . now()->format('d-m-Y') . '.xlsx';
+
+        $invoices = Invoice::with('customer', 'state');
+
+        if ($request->searchInput && !empty($request->searchInput)) {
+            //Useing $query orwher using bracket 
+            $invoices = $invoices->where(function ($query) use ($request) {
+                $query->where('invoice_no', 'like', '%' . $request->searchInput . '%')
+                    ->orWhere('order_no', 'like', '%' . $request->searchInput . '%')
+                    ->orWhereHas('customer', function ($subQuery) use ($request) {
+                        $subQuery->where('name', 'like', '%' . $request->searchInput . '%')
+                            ->orWhere('mobile', 'like', '%' . $request->searchInput . '%');
+                    });
+            });
+        }
+
+        if ($request->start_date && $request->end_date && !empty($request->start_date) && !empty($request->end_date)) {
+            $invoices = $invoices->whereBetween('invoice_date', [$request->start_date, $request->end_date]);
+        }
+        $invoices = $invoices->latest()->get();
+
+        // Build rows
+        $rows = [];
+        $settings = InvoiceSetting::with('address', 'labels')->first();
+        foreach ($invoices as $invoice) {
+            $today = \Carbon\Carbon::today();
+            $dueDate = \Carbon\Carbon::parse($invoice->due_date);
+
+            if ($dueDate->isToday()) {
+                $status = 'Due Today';
+            } elseif ($dueDate->isPast()) {
+                $days = $dueDate->diffInDays($today);
+                $status = 'Overdue by ' . $days . ' days';
+            } else {
+                $days = $today->diffInDays($dueDate);
+                $status = 'Due in ' . $days . ' days';
+            }
+            $igst = 0;
+            $cgst = 0;
+            $sgst = 0;
+            if($settings->address){
+                if($settings->address->state_id && $invoice->place_of_supply == $settings->address->state_id){
+                    $cgst = $invoice->details->sum('tax_amount')/2;
+                    $sgst = $invoice->details->sum('tax_amount')/2;
+                }else{
+                    $igst = $invoice->details->sum('tax_amount');
+                }
+            }else{
+                $igst = $invoice->details->sum('tax_amount');
+            }
+            $rows[] = [
+                date('d M Y', strtotime($invoice->invoice_date)),
+                $invoice->invoice_no,
+                $status,
+                $invoice->customer->id,
+                $invoice->customer->name,
+                $invoice->customer->address ? $invoice->customer->address->cityname?->city_name : 'N/A',
+                $invoice->state ? $invoice->state->gst_code.' - '.$invoice->state->state_name : 'N/A',
+                $invoice->customer->customerdetails ? $invoice->customer->customerdetails->gstin_no : 'N/A',
+                $invoice->order_no,
+                $invoice->sub_total,
+                $invoice->grand_total,
+                date('d M Y', strtotime($invoice->due_date)),
+                $invoice->grand_total,
+                $cgst,
+                $sgst,
+                $igst                
+            ];
+        }
+
+        // Build headers
+        $headers = [
+            'Invoice Date',
+            'Invoice Number',
+            'Invoice Status',
+            'Customer ID',
+            'Customer Name',
+            'City',
+            'Place of Supply',
+            'GST Number',
+            'Order Number',
+            'SubTotal',
+            'Total',
+            'Due Date',
+            'Balance',
+            'CGST',
+            'SGST',
+            'IGST',
+        ];
+
+
+        // ✅ Export
+        $export = new ExcelExport($headers, $rows);
+        return Excel::download($export, $filename);
     }
 }
