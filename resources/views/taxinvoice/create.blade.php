@@ -659,7 +659,7 @@
                       <option value="__add__">➕ Add New</option>
                       @if(!empty($customers))
                       @foreach($customers as $customer)
-                      <option value="{!! $customer['id'] !!}" {{ old( 'customer_id') == $customer['id'] ? 'selected' : '' }}>{!! $customer['name'] !!}</option>
+                      <option value="{!! $customer['id'] !!}" {{ isset($tax_invoice) && $tax_invoice->customer_id == $customer['id'] ? 'selected' : '' }}>{!! $customer['name'] !!}</option>
                       @endforeach
                       @endif
                     </select>
@@ -699,7 +699,7 @@
             <div class="col-md-4">
               <div class="form-group mb-3" id="invoice_no_div">
                 <label for="invoice_no">Invoice#*</label>
-                <input type="text" class="form-control custom-input-box" id="invoice_no" name="invoice_no" value="{!! $invoiceNumber !!}" readonly required><i title="Configure Invoice Number" class="material-icons icon" id="invoice_no_settings" data-toggle="modal" data-target="#invoiceNoModal">settings</i>
+                <input type="text" class="form-control custom-input-box" id="invoice_no" name="invoice_no" value="{!! isset($tax_invoice) && $tax_invoice->invoice_no ? $tax_invoice->invoice_no : $invoiceNumber !!}" readonly required><i title="Configure Invoice Number" class="material-icons icon" id="invoice_no_settings" data-toggle="modal" data-target="#invoiceNoModal">settings</i>
               </div>
             </div>
             <div class="col-md-4">
@@ -773,7 +773,7 @@
                           <option value="">Select Item</option>
                           @if(!empty($products))
                           @foreach($products as $product)
-                          <option value="{!! $product['id'] !!}">{!! $product['display_name'] !!}</option>
+                          <option value="{!! $product['id'] !!}">{!! $product['description'] !!}</option>
                           @endforeach
                           @endif
                         </select>

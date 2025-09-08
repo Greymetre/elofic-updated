@@ -81,7 +81,8 @@ class TaxInvoiceController extends Controller
     public function create(Request $request)
     {
         $payment_terms = PaymentTerm::all();
-        $products = Product::where('active', 'Y')->get();
+        $products = Product::where('active', 'Y')->orderBy('id', 'desc')->get();
+        
         $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
         $users = User::where('active', 'Y')->select('id', 'name')->get();
@@ -550,5 +551,48 @@ class TaxInvoiceController extends Controller
         // ✅ Export
         $export = new ExcelExport($headers, $rows);
         return Excel::download($export, $filename);
+    }
+
+    public function edit(Invoice $tax_invoice)
+    {
+        $payment_terms = PaymentTerm::all();
+        $products = Product::where('active', 'Y')->orderBy('id', 'desc')->get();
+        
+        $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
+        $states = State::where('active', 'Y')->select('id', 'state_name')->get();
+        $users = User::where('active', 'Y')->select('id', 'name')->get();
+
+        $lastInvoice = Invoice::orderBy('id', 'desc')->first();
+        if ($lastInvoice) {
+            $parts = explode('/', $lastInvoice->invoice_no);
+            $prefix = $parts[0];
+            $lastNumberPart = end($parts);
+            $digitLength = strlen($lastNumberPart);
+            $nextNumber = intval($lastNumberPart) + 1;
+            $formattedNumber = str_pad($nextNumber, $digitLength, '0', STR_PAD_LEFT);
+        } else {
+            $currentYear = date('y'); // e.g. 25
+            if (date('m') >= 4) {
+                $startYear = $currentYear;
+                $endYear   = $currentYear + 1;
+            } else {
+                $startYear = $currentYear - 1;
+                $endYear   = $currentYear;
+            }
+            $prefix = 'INV-' . str_pad($startYear, 2, '0', STR_PAD_LEFT) . '-' . str_pad($endYear, 2, '0', STR_PAD_LEFT);
+            $formattedNumber = '01';
+        }
+        $invoiceNumber = $prefix . '/' . $formattedNumber;
+        if (strpos($invoiceNumber, '/') !== false) {
+            [$prefixValue, $nextNumberValue] = explode('/', $invoiceNumber);
+        } else {
+            $prefixValue = $invoiceNumber;
+            $nextNumberValue = '';
+        }
+
+        $all_tax = TaxInvoiceTax::all();
+        $all_tds = TaxInvoiceTds::all();
+
+        return view('taxinvoice.create', compact('tax_invoice', 'payment_terms', 'products', 'customers', 'states', 'users', 'prefixValue', 'nextNumberValue', 'all_tax', 'all_tds', 'invoiceNumber'));
     }
 }

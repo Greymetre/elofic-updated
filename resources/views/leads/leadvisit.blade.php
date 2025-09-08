@@ -9,7 +9,7 @@
           <h4 class="card-title">Lead Visit Report
             <span class="">
               <div class="btn-group header-frm-btn">
-                @if(auth()->user()->can(['checkin_download']))
+                @if(auth()->user()->can(['lead_checkin_download']))
                 <form method="GET" action="{{ URL::to('lead_checkin-download') }}">
                   <div class="d-flex flex-row">
                   {{--  <div class="p-2" style="width: 200px;">

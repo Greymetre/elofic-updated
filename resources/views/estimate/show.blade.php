@@ -527,7 +527,7 @@
             @foreach($estimate->details as $item)
             <tr>
               <td style="color:#000; font-weight: 400;">
-                <strong>{{$item->product?->display_name}}</strong>
+                <strong>{{$item->product?->description}}</strong>
                 <div style="color:#000;font-size:12px;margin-top:0px; line-height: 15px;">{{$item->product_dec}}</div>
               </td>
               <td style="color:#000;font-weight: 400;">{{$item->hsn_sac}}</td>
