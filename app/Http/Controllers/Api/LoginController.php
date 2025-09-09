@@ -68,7 +68,7 @@ class LoginController extends Controller
             if ($checkLastLogin) {
                 if (!$user->hasRole('superadmin')) {
                     if ($checkLastLogin->unique_id != NULL && $checkLastLogin->unique_id != $request['unique_id'] && $checkLastLogin->multi_login == '0') {
-                        return response()->json(['status' => 'error', 'message' =>  'Multiple device login is not allowed. For support, please contact FieldKonnect at 9990828928.'], $this->noContent);
+                        return response()->json(['status' => 'error', 'message' =>  'Multiple device login is not allowed. For support, please contact FieldKonnect at 9713113280.'], $this->noContent);
                     };
                 }
 
