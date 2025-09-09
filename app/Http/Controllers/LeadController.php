@@ -135,7 +135,7 @@ class LeadController extends Controller
         }
 
         // dd(auth()->user()->hasRole('superadmin'));
-        if (!auth()->user()->hasRole('superadmin')) {
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
             $user_ids = getUsersReportingToAuth();
             $leads->whereIn('assign_to', $user_ids);
         }
@@ -237,7 +237,7 @@ class LeadController extends Controller
         $page_result = ($page_number - 1) * $results_per_page;
 
         $leads = Lead::with(['contacts', 'opportunities']);
-        if (!auth()->user()->hasRole('superadmin')) {
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
             $user_ids = getUsersReportingToAuth();
             $leads->where('assign_to', $user_ids);
         }

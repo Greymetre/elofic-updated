@@ -7,13 +7,13 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
 use DataTables;
-use Auth;
 
 use App\Models\Lead;
 use App\Models\User;
 use App\Models\LeadOpportunity;
 use App\Models\LeadContact;
 use App\Models\OpportunitieStatus;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class LeadOpportunitiesController extends Controller
@@ -47,7 +47,7 @@ class LeadOpportunitiesController extends Controller
         if ($assigned_to) {
             $all_opportunities->where('assigned_to', $assigned_to);
         }
-        if (!auth()->user()->hasRole('superadmin')) {
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
             $user_ids = getUsersReportingToAuth();
             $lead_ids = Lead::where('assign_to', $user_ids)->pluck('id');
             $all_opportunities->where('assigned_to', $user_ids);
