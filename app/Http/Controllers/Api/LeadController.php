@@ -97,6 +97,7 @@ class LeadController extends Controller
                 'id' => $lead->id,
                 'name' => $lead->company_name,
                 'address' => $lead->address ? $lead->address->full_address : '',
+                'location_address' => $lead->location_address ? $lead->location_address : 'N/A',
                 'city' => $lead->address ? $lead->address?->cityname?->city_name : '',
                 'lead_source_lead' => $lead->lead_source,
                 'status' => [
@@ -275,6 +276,10 @@ class LeadController extends Controller
                     'created_by' => auth()->id(), // if you track who created the note
                 ]);
             }
+            if(isset($request->on_location) && $request->on_location == 1){
+                $location_address = getLatLongToAddress($request->latitude, $request->longitude);
+                $lead->update(['on_location' => 1, 'latitude' => $request->latitude, 'longitude' => $request->longitude, 'location_address' => $location_address]);
+            }
             return response()->json(['status' => 'success', 'message' => 'Lead updated successfully.']);
         } else {
             $lead = Lead::create([
@@ -314,6 +319,8 @@ class LeadController extends Controller
                         'created_by' => $user->id
                     ]);
                 }
+                $location_address = getLatLongToAddress($request->latitude, $request->longitude);
+                $lead->update(['on_location' => 1, 'latitude' => $request->latitude, 'longitude' => $request->longitude, 'location_address' => $location_address]);
                 return response()->json(['status' => 'success', 'message' => 'Lead created successfully.', 'data' => $lead], 200);
             } else {
                 return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);

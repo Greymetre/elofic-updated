@@ -1180,19 +1180,25 @@ if (!function_exists('isCustomerUser')) {
 if (!function_exists('SendPushNotification')) {
     function SendPushNotification($user_id, $message, $model = 'lead')
     {
-        $user = User::find($user_id);
+        try {
+            $user = User::find($user_id);
 
-        $fcmToken = $user->notification_id;
-        if (!empty($fcmToken)) {
+            if (!$user || empty($user->notification_id)) {
+                return false; // no user or no fcm token
+            }
+
+            $fcmToken = $user->notification_id;
             $title = 'FieldKonnect';
             $credentialsPath = storage_path('app/fieldkonnectsilver-firebase-adminsdk-q2cko-90f50017b3.json');
             $scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
             $projectId = 'fieldkonnectsilver';
             $deviceToken = $fcmToken;
+
             $client = new Client();
             $credentials = new ServiceAccountCredentials($scopes, $credentialsPath);
             $credentials->fetchAuthToken();
             $token = $credentials->getLastReceivedToken()['access_token'];
+
             $messagePayload = [
                 'message' => [
                     'token' => $deviceToken,
@@ -1203,6 +1209,7 @@ if (!function_exists('SendPushNotification')) {
                     ],
                 ],
             ];
+
             $response = $client->post("https://fcm.googleapis.com/v1/projects/$projectId/messages:send", [
                 'headers' => [
                     'Authorization' => "Bearer $token",
@@ -1210,14 +1217,20 @@ if (!function_exists('SendPushNotification')) {
                 ],
                 'json'    => $messagePayload,
             ]);
+
             if ($response->getStatusCode() == 200) {
                 return true;
             }
-        } else {
+        } catch (\Exception $e) {
+            // Instead of breaking, just log and bypass
+            \Log::error("Push notification failed: " . $e->getMessage());
             return false;
         }
+
+        return false;
     }
 }
+
 
 if (!function_exists('StoreLeadNotification')) {
     function StoreLeadNotification($lead_id, $title, $body, $user_id, $model = 'lead')
