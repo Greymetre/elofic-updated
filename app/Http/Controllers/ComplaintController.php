@@ -525,12 +525,7 @@ class ComplaintController extends Controller
         $serial_number = $request->serial_number ?? '';
         $newComplaintNumber = $this->getComplaintNumber();
 
-        $roleNames = ["Service Eng", "Service Admin"]; // Add more roles as needed
-
-        $assign_users = User::whereHas('roles', function ($query) use ($roleNames) {
-            $query->whereIn('name', $roleNames); // Check for multiple roles
-        })
-        ->with(['roles' => function ($query) {
+        $assign_users = User::with(['roles' => function ($query) {
             $query->with('permissions');
         }])
         ->select('id', 'name', 'employee_codes')
@@ -663,11 +658,8 @@ class ComplaintController extends Controller
     public function show(Complaint $complaint)
     {
         $timelines = ComplaintTimeline::with('created_by_details')->where('complaint_id', $complaint->id)->orderBy('created_at', 'desc')->get();
-        $roleName = 'Service Eng';
-        $assign_users = User::whereHas('roles', function ($query) use ($roleName) {
-            $query->where('name', $roleName);
-        })
-            ->with(['roles' => function ($query) {
+        
+        $assign_users = User::with(['roles' => function ($query) {
                 $query->with('permissions');
             }])->select('id', 'name', 'employee_codes')
             ->get();
@@ -693,12 +685,7 @@ class ComplaintController extends Controller
     public function edit(Complaint $complaint)
     {
         $this->complaint = $complaint;
-        $roleName = "Service Eng";
-
-        $assign_users = User::whereHas('roles', function ($query) use ($roleName) {
-            $query->where('name', $roleName);
-        })
-            ->with(['roles' => function ($query) {
+        $assign_users = User::with(['roles' => function ($query) {
                 $query->with('permissions');
             }])->select('id', 'name')
             ->get();
