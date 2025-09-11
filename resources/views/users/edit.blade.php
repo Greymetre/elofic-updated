@@ -425,7 +425,7 @@
                      </div>
                      <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">{!! trans('panel.user.order_mail') !!}<span class="text-danger"> *</span></label>
+                           <label class="col-md-3 col-form-label">{!! trans('panel.user.order_mail') !!}</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
                                  <input type="text" name="order_mails" id="order_mails" class="form-control" value="{{$user['userinfo']?$user['userinfo']['order_mails']:'' }}">
@@ -441,10 +441,10 @@
 
                      <div class="col-md-6">
                         <div class="row">
-                           <label class="col-md-3 col-form-label">Order Mails Type<span class="text-danger"> *</span></label>
+                           <label class="col-md-3 col-form-label">Order Mails Type</label>
                            <div class="col-md-9">
                               <div class="form-group has-default bmd-form-group">
-                                 <select class="form-control select2" multiple name="order_mails_type[]" style="width: 100%;" required id="type">
+                                 <select class="form-control select2" multiple name="order_mails_type[]" style="width: 100%;" id="type">
                                     <option value="">Select {!! trans('panel.customers.fields.customertype') !!}</option>
                                     @if(@isset($customertype ))
                                     @foreach($customertype as $type)

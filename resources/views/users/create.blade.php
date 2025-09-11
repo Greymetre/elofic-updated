@@ -1118,7 +1118,7 @@
                 </div>
                 <div class="col-md-6">
                   <div class="input_section">
-                    <label class="col-form-label">{!! trans('panel.user.order_mail') !!}<span class="text-danger"> *</span></label>
+                    <label class="col-form-label">{!! trans('panel.user.order_mail') !!}</label>
                     <div class="form-group has-default bmd-form-group">
                       <input type="text" name="order_mails" id="order_mails" class="form-control" value="{!! old( 'order_mails', $user->userinfo?$user->userinfo->order_mails:'') !!}">
                       @if ($errors->has('order_mails'))
@@ -1131,7 +1131,7 @@
                 </div>
                 <div class="col-md-6">
                   <div class="input_section">
-                    <label class="col-form-label">Order Mails Type<span class="text-danger"> *</span></label>
+                    <label class="col-form-label">Order Mails Type</label>
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control select2" multiple name="order_mails_type[]" style="width: 100%;" id="type">
                         <option value="">Select {!! trans('panel.customers.fields.customertype') !!}</option>
