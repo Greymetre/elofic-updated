@@ -49,7 +49,7 @@ class CustomerController extends Controller
                 $query->whereIn('user_id', $userids);
             }
         })->select('id', 'beat_name')->get();
-        
+
         $users = User::whereDoesntHave('roles', function ($query) {
             $query->whereIn('id', config('constants.customer_roles'));
         })->where('active', '=', 'Y')->where(function ($query) use ($userids) {
@@ -1012,5 +1012,19 @@ class CustomerController extends Controller
             })
             ->rawColumns(['upload_iamge'])
             ->make(true);
+    }
+
+    // CustomerController.php
+
+    public function map()
+    {
+        // returns view which has map + side panel
+        return view('customers.map');
+    }
+
+    public function data()
+    {
+        $customers = Customers::select('id', 'name', 'mobile', 'latitude', 'longitude', 'customertype')->with('customeraddress', 'customertypes')->get();
+        return response()->json($customers);
     }
 }

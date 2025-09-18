@@ -666,7 +666,7 @@ class LeadController extends Controller
     public function updateLeadStatus(Request $request)
     {
         $validate = validator($request->all(), [
-            'lead_id' => 'required',
+            'lead_id' => 'required|exists:leads,id',
             'status' => [
                 'required',
                 Rule::exists('statuses', 'id')->where('module', 'LeadStatus'),
@@ -700,7 +700,7 @@ class LeadController extends Controller
 
     public function getCheckin(Request $request)
     {
-        try {
+        // try {
             $user = $request->user();
             if ($user->active == 'N') {
                 return response()->json(['status' => 'error', 'message' =>  'User Inactive'], 401);
@@ -710,7 +710,7 @@ class LeadController extends Controller
             $query = $this->checkin->where(function ($query) use ($user_id) {
                 $query->where('user_id', '=', $user_id);
             })
-                ->select('id', 'lead_id', 'checkin_date', 'checkin_time', 'checkin_latitude', 'checkin_longitude', 'checkin_address', 'checkout_date', 'checkout_time', 'checkout_latitude', 'checkout_longitude', 'checkout_address', 'beatscheduleid')->orderBy('checkin_date', 'desc')->orderBy('checkin_time', 'desc');
+                ->select('id', 'lead_id', 'checkin_date', 'checkin_time', 'checkin_latitude', 'checkin_longitude', 'checkin_address', 'checkout_date', 'checkout_time', 'checkout_latitude', 'checkout_longitude', 'checkout_address')->orderBy('checkin_date', 'desc')->orderBy('checkin_time', 'desc');
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
             if ($db_data->isNotEmpty()) {
@@ -718,8 +718,7 @@ class LeadController extends Controller
                     $data->push([
                         'checkin_id' => isset($value['id']) ? $value['id'] : 0,
                         'lead_id' => isset($value['lead_id']) ? $value['lead_id'] : null,
-                        'customer_name' => isset($value['customers']['name']) ? $value['customers']['name'] : $value['leads']['name'],
-                        'customer_type' => isset($value['customers']['customertypes']['customertype_name']) ? $value['customers']['customertypes']['customertype_name'] : '',
+                        'customer_name' => isset($value['leads']) && !empty($value['leads']) ? $value['leads']['name'] : '-',
                         'checkin_date' => isset($value['checkin_date']) ? $value['checkin_date'] : '',
                         'checkin_time' => isset($value['checkin_time']) ? $value['checkin_time'] : '',
                         'checkin_latitude' => isset($value['checkin_latitude']) ? $value['checkin_latitude'] : '',
@@ -730,16 +729,15 @@ class LeadController extends Controller
                         'checkout_latitude' => isset($value['checkout_latitude']) ? $value['checkout_latitude'] : '',
                         'checkout_longitude' => isset($value['checkout_longitude']) ? $value['checkout_longitude'] : '',
                         'checkout_address' => isset($value['checkout_address']) ? $value['checkout_address'] : '',
-                        'is_lead' => isset($value['lead_id']) ? 'No' : 'Yes',
-                        'beat_schedule_id' => isset($value['beatscheduleid']) ? $value['beatscheduleid'] : 0,
+                        'is_lead' => isset($value['lead_id']) ? 'No' : 'Yes'
                     ]);
                 }
                 return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
             return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
-        }
+        // } catch (\Exception $e) {
+        //     return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        // }
     }
 
     public function submitCheckin(Request $request)

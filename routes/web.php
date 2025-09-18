@@ -166,7 +166,7 @@ Route::group(['middleware' => ['auth']], function () {
         $url = PowerBiSetting::where('key', 'employee_expense')->first()->value;
         return view('dashboard.employee_expense_report', compact('url'));
     });
-    
+
     //Lead Management
     Route::resource('leads', LeadController::class);
     Route::post('leads/getLeads', [LeadController::class, 'getLeads'])->name('leads.getLeads');
@@ -189,8 +189,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('lead-contacts', LeadContactsController::class);
     Route::post('lead-contacts/getLeadContacts', [LeadContactsController::class, 'getLeadContacts'])->name('lead-contacts.getLeadContacts');
     Route::get('contacts-exportContacts', [LeadContactsController::class, 'exportContacts'])->name('contacts-exportContacts');
-     Route::post('lead-contacts/checkboxAction', [LeadContactsController::class, 'checkboxAction'])->name('lead-contacts.checkboxAction');
-     Route::post('lead-contacts-upload', [LeadContactsController::class, 'upload'])->name('lead.contacts.upload');
+    Route::post('lead-contacts/checkboxAction', [LeadContactsController::class, 'checkboxAction'])->name('lead-contacts.checkboxAction');
+    Route::post('lead-contacts-upload', [LeadContactsController::class, 'upload'])->name('lead.contacts.upload');
     Route::any('lead-contacts-template', [LeadContactsController::class, 'template'])->name('lead.contacts.template');
 
 
@@ -206,13 +206,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('lead-tasks/checkboxAction', [LeadTasksController::class, 'checkboxAction'])->name('lead-tasks.checkboxAction');
     Route::post('lead-tasks-change-status', [LeadTasksController::class, 'change_status'])->name('lead-tasks.change_status');
 
-    
+
     Route::post('lead-tasks/getLeadTasks', [LeadTasksController::class, 'getLeadTasks'])->name('lead-tasks.getLeadTasks');
-    
+
     Route::resource('lead-opportunities', LeadOpportunitiesController::class);
     Route::post('lead-opportunitiess/getLeadContacts', [LeadOpportunitiesController::class, 'getCardData'])->name('lead-opportunities.getCardData');
     Route::post('lead-opportunitiess/updateCardStatus', [LeadOpportunitiesController::class, 'updateCardStatus'])->name('lead-opportunities.updateCardStatus');
-    
+
     Route::post('lead-opportunitiess/getsingleData', [LeadOpportunitiesController::class, 'getsingleData'])->name('lead-opportunities.getsingleData');
 
     //Dashboard
@@ -1121,6 +1121,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::delete('/invoice-labels/{id}', [TaxInvoiceController::class, 'destroy_label'])->name('invoice_labels.destroy');
     Route::any('invoices_download', [TaxInvoiceController::class, 'download'])->name('invoice.export');
 
+    // Maps Routes
+    Route::get('/customer_map', [CustomerController::class, 'map'])->name('customers.map');
+    Route::get('/customer_data', [CustomerController::class, 'data'])->name('customer.data');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

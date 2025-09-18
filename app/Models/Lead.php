@@ -68,4 +68,9 @@ class Lead extends Model implements HasMedia
     public function opportunities(){
         return $this->hasMany(LeadOpportunity::class);
     }
+
+    public function callLogs()
+    {
+        return $this->hasMany(CallLog::class);
+    }
 }

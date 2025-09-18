@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\BeatController;
+use App\Http\Controllers\Api\CallLogController;
 use App\Http\Controllers\Api\CheckinController;
 use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\CouponController;
@@ -345,4 +346,8 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('leadSubmitCheckin', [LeadController::class, 'submitCheckin']);
     Route::post('leadSubmitCheckout', [LeadController::class, 'submitCheckout']);
     Route::any('leadGetCheckin', [LeadController::class, 'getCheckin']);
+
+    // Call logs routes
+    Route::post('add-call-logs', [CallLogController::class, 'store']);
+    Route::get('get-call-logs', [CallLogController::class, 'index']);
 });
