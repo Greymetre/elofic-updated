@@ -89,6 +89,7 @@ use App\Http\Controllers\WareHouseController;
 use App\Http\Controllers\PlannedSOPController;
 use App\Http\Controllers\ClaimGenerationController;
 use App\Http\Controllers\EstimateController;
+use App\Http\Controllers\GeoLocator;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LeadContactsController;
 use App\Http\Controllers\LeadNotesController;
@@ -1122,8 +1123,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('invoices_download', [TaxInvoiceController::class, 'download'])->name('invoice.export');
 
     // Maps Routes
-    Route::get('/customer_map', [CustomerController::class, 'map'])->name('customers.map');
-    Route::get('/customer_data', [CustomerController::class, 'data'])->name('customer.data');
+    Route::any('/geo_locator_setting', [GeoLocator::class, 'geo_locator_setting'])->name('geo_locator_setting');
+    Route::any('/geo_locator_store', [GeoLocator::class, 'geo_locator_setting_store'])->name('geo_locator_setting.store');
+    Route::get('/geo_locator', [GeoLocator::class, 'map'])->name('geolocator.map');
+    Route::any('/geo_locator_data', [GeoLocator::class, 'data'])->name('geolocator.data');
+    Route::any('/geo_locator_filter_data', [GeoLocator::class, 'filter_data'])->name('geolocator.filter.data');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

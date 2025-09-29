@@ -1052,14 +1052,7 @@
                      </div>
                   </li>
                   @endif
-                  @if(auth()->user()->can(['expenses_type']))
-                  <!-- <li class="nav-item {{ request()->is('expenses_type') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ url('expenses_type') }}">
-                          <i class="material-icons">dashboard</i>
-                          <p>{!! trans('panel.sidemenu.expenses_type') !!}</p>
-                        </a>
-                        </li> -->
-                  @endif
+                 
                   @if(auth()->user()->can('product_access'))
                   <li class="nav-link {{ request()->is('categories*') || request()->is('subcategories*') || request()->is('brands*') || request()->is('products*') || request()->is('units*') || request()->is('production*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#productMenu" aria-expanded="false">
@@ -1170,6 +1163,16 @@
                            @endif
                         </ul>
                      </div>
+                  </li>
+                  @endif
+
+                  @if(auth()->user()->can('geo_locator_access'))
+                  <li class="nav-link {{ request()->is('geo_locator*') ? 'active' : '' }}">
+                     <a class="hoveradd no-after" href="{{ url('geo_locator') }}">
+                        <i class="material-icons icon">location_on</i>
+                        <span>Geo Locator</span>
+                        <div class="d-none mobile_hide"> Geo Locator</div>
+                     </a>
                   </li>
                   @endif
 
@@ -1991,6 +1994,15 @@
                            <i class="material-icons icon">settings</i>
                            <span>Invoice {!! trans('panel.sidemenu.setting') !!}</span>
                            <div class="d-none mobile_hide">Invoice {!! trans('panel.sidemenu.setting') !!}</div>
+                        </a>
+                     </li>
+                     @endif
+                     @if(auth()->user()->can('geo_locator_setting_access'))
+                     <li class="nav-link-btn {{request()->is('geo_locator_setting*') ? 'active' : '' }}">
+                        <a class="hoveradd2" href="{{ url('geo_locator_setting') }}">
+                           <i class="material-icons icon">not_listed_location</i>
+                           <span>Geo Locator {!! trans('panel.sidemenu.setting') !!}</span>
+                           <div class="d-none mobile_hide">Geo Locator {!! trans('panel.sidemenu.setting') !!}</div>
                         </a>
                      </li>
                      @endif

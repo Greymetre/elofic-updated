@@ -266,7 +266,7 @@
       var table = $('#getcustomers').DataTable({
         processing: true,
         serverSide: true,
-        searching: false,
+        searching: true,
         columnDefs: [{
           className: 'control',
           orderable: false,
@@ -378,7 +378,6 @@
           },
 
         ],
-        dom: 't<"bottom"lip>',
       });
 
       $('#executive_id').change(function() {

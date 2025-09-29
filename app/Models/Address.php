@@ -91,7 +91,12 @@ class Address extends Model
 
     public function customer()
     {
-        $this->belongsTo(Customers::class, 'customer_id', 'id');
+        return $this->belongsTo(Customers::class, 'customer_id', 'id');
+    }
+
+    public function lead()
+    {
+        return $this->belongsTo(Lead::class, 'model_id', 'id');
     }
 
 }

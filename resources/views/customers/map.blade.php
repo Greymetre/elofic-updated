@@ -15,8 +15,13 @@
                         </div>
                         <div class="col-md-4">
                             <div id="sidebar">
-                                <h2 class="text-dark">Customer Details</h2>
-                                <div class="text-dark" id="customer-info">Click on a marker</div>
+                                <h2 class="text-dark">Gio Locator</h2>
+                                <div class="d-flex"  style="align-items: baseline;">
+                                    <input type="radio" name="type" value="1" id="type" class="mr-2" checked>
+                                    <p class="text-dark mr-2">Customer</p>
+                                    <input type="radio" class="mr-2" name="type" value="2" id="type">
+                                    <p class="text-dark mr-2">Lead</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -37,14 +42,15 @@
                 }, // center of India or wherever
                 zoom: 5
             });
-
+            let type = $('input[name="type"]:checked').val();
+            infoWindow = new google.maps.InfoWindow();
             // fetch customers
-            fetch("{{ route('customer.data') }}")
+            fetch("{{ route('customer.data') }}?type=" + type)
                 .then(response => response.json())
                 .then(customers => {
                     customers.forEach(cust => {
                         if (!cust.latitude || !cust.longitude) return;
-                        
+
                         let iconUrl;
                         switch (cust.customertype) {
                             case 1:
@@ -70,16 +76,19 @@
                         });
 
                         marker.addListener('click', () => {
-                            // show in sidebar
-                            document.getElementById('customer-info').innerHTML = `
-                                <p class="text-dark"><strong>${cust.name}</strong> - ${cust.customertypes.customertype_name}</p>
-                                <p class="text-dark">Mobile: ${cust.mobile}</p>
-                                <p class="text-dark">Address: ${cust.customeraddress.address1}</p>
-                                <p class="text-dark">City: ${cust.customeraddress.cityname.city_name}</p>
-                                <p class="text-dark">District: ${cust.customeraddress.districtname.district_name}</p>
-                                <p class="text-dark">State: ${cust.customeraddress.statename.state_name}</p>
-                                <!-- other info you want -->
-                            `;
+                            const contentString = `
+                        <div style="min-width:200px">
+                            <h4>${cust.name}</h4>
+                            <p class='text-dark'><strong>Type:</strong> ${cust.customertypes?.customertype_name || ''}</p>
+                            <p class='text-dark'><strong>Mobile:</strong> ${cust.mobile || ''}</p>
+                            <p class='text-dark'><strong>Address:</strong> ${cust.customeraddress?.address1 || ''}</p>
+                            <p class='text-dark'><strong>City:</strong> ${cust.customeraddress?.cityname?.city_name || ''}</p>
+                            <p class='text-dark'><strong>District:</strong> ${cust.customeraddress?.districtname?.district_name || ''}</p>
+                            <p class='text-dark'><strong>State:</strong> ${cust.customeraddress?.statename?.state_name || ''}</p>
+                        </div>
+                    `;
+                            infoWindow.setContent(contentString);
+                            infoWindow.open(map, marker);
                         });
                     });
                 })
@@ -87,5 +96,9 @@
         }
 
         window.onload = initMap;
+
+        $('input[name="type"]').on('change', function() {
+            initMap();
+        });
     </script>
 </x-app-layout>

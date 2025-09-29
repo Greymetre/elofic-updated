@@ -389,7 +389,7 @@ class LeadController extends Controller
             'Lead Type',
             'Address',
             'Assignee',
-            'Lead Status', // custom field placeholder
+            'Lead Status',
             'Close Duration',
             'Created By',
             'Lead Time',

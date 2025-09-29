@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Customers, UserLogin, CustomerType, FirmType, Regions, Pincode, Country, CustomerDetails, Address, Attachment, SurveyData, Field, State, City, Beat, BeatCustomer, DealIn, Division, Redemption, SchemeDetails, ShippingAddress};
+use App\Models\{Customers, UserLogin, CustomerType, FirmType, Regions, Pincode, Country, CustomerDetails, Address, Attachment, SurveyData, Field, State, City, Beat, BeatCustomer, DealIn, Division, Lead, Redemption, SchemeDetails, ShippingAddress};
 use App\Models\User;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -1014,17 +1014,4 @@ class CustomerController extends Controller
             ->make(true);
     }
 
-    // CustomerController.php
-
-    public function map()
-    {
-        // returns view which has map + side panel
-        return view('customers.map');
-    }
-
-    public function data()
-    {
-        $customers = Customers::select('id', 'name', 'mobile', 'latitude', 'longitude', 'customertype')->with('customeraddress', 'customertypes')->get();
-        return response()->json($customers);
-    }
 }
