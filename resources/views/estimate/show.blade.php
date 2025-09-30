@@ -346,7 +346,7 @@
 
           <div class="meta">
 
-            <h2 style="text-transform: uppercase;font-size: 20px;color: #000; font-weight: 600;">Estimate</h2>
+            <h2 style="text-transform: uppercase;font-size: 20px;color: #000; font-weight: 600;">Quotation</h2>
           </div>
         </header>
 

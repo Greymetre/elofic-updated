@@ -1538,8 +1538,8 @@
                            <li class="nav-link-btn {{ request()->is('estimate*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('estimate') }}">
                                  <i class="material-icons icon">request_quote</i>
-                                 <span>Estimate</span>
-                                 <div class="d-none mobile_hide"> Estimate</div>
+                                 <span>Quotation</span>
+                                 <div class="d-none mobile_hide"> Quotation</div>
                               </a>
                            </li>
                            @endif

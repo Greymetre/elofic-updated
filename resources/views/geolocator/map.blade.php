@@ -29,6 +29,47 @@
             border-left: 1px solid lightgrey;
             padding: 9px;
         }
+
+        ul#suggestion-list {
+            background: #7673737d;
+            width: 500px !important;
+            font-weight: 500;
+            line-height: 15px;
+        }
+
+        li.list-group-item.suggestion-item {
+            border: 1px dashed;
+            color: #FFF;
+            cursor: pointer;
+            text-shadow: 0px 1px 2px #000;
+        }
+
+        li.list-group-item.suggestion-item:hover {
+            background: #767373;
+        }
+
+        .gm-ui-hover-effect {
+            width: 35px !important;
+            /* Set custom width */
+            height: 30px !important;
+        }
+
+        /* Optionally, make the X icon itself bigger */
+        .gm-ui-hover-effect span {
+            width: 15px !important;
+            height: 15px !important;
+            margin: 8px 10px !important;
+        }
+
+        table.geodatatable tbody tr td,
+        table.geodatatable tbody tr th {
+            font-size: 12px !important;
+            padding: 4px;
+        }
+
+        table.geodatatable tbody tr th {
+            font-weight: 700 !important;
+        }
     </style>
     <div class="row">
         <div class="col-md-12">
@@ -49,6 +90,7 @@
                                         <i class="fa fa-search"></i>
                                     </div>
                                 </div>
+                                <ul id="suggestion-list" class="list-group position-absolute w-100" style="z-index:9999999;"></ul>
                             </div>
                             <div id="map"></div>
                         </div>
@@ -169,31 +211,127 @@
                             title: cust.name,
                             icon: iconUrl
                         });
-
                         marker.addListener('click', () => {
                             var contentString;
                             if (type == '1') {
                                 contentString = `
-                                <div style="min-width:200px">
-                                    <h4 class='text-dark'>${cust.name}</h4>
-                                    <p class='text-dark'><strong>Type:</strong> ${cust.customertypes?.customertype_name || ''}</p>
-                                    <p class='text-dark'><strong>Mobile:</strong> ${cust.mobile || ''}</p>
-                                    <p class='text-dark'><strong>Address:</strong> ${cust.customeraddress?.address1 || ''}</p>
-                                    <p class='text-dark'><strong>City:</strong> ${cust.customeraddress?.cityname?.city_name || ''}</p>
-                                    <p class='text-dark'><strong>District:</strong> ${cust.customeraddress?.districtname?.district_name || ''}</p>
-                                    <p class='text-dark'><strong>State:</strong> ${cust.customeraddress?.statename?.state_name || ''}</p>
-                                </div>
-                            `;
+                                    <div style="min-width:200px">
+                                        <h5 class='text-dark'>Details</h5>
+                                        <table class="table table-sm table-borderless m-0 geodatatable">
+                                            <tr>
+                                                <th>Firm Name: </th>
+                                                <td><h4 class='text-dark mb-0'>${cust.name}</h4></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Contact Person: </th>
+                                                <td class='text-dark mb-0'>${cust.first_name} ${cust.last_name}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Customer Type: </th>
+                                                <td class='text-dark mb-0'>${cust.customertypes?.customertype_name || ''}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Mobile Number: </th>
+                                                <td class='text-dark mb-0'>${cust.mobile || ''}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Pin Code: </th>
+                                                <td class='text-dark mb-0'>
+                                                    ${cust.customeraddress?.pincodename?.pincode || ''}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>City: </th>
+                                                <td class='text-dark mb-0'>
+                                                    ${cust.customeraddress?.cityname?.city_name || ''} 
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>District: </th>
+                                                <td class='text-dark mb-0'>
+                                                    ${cust.customeraddress?.districtname?.district_name || ''}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>State: </th>
+                                                <td class='text-dark mb-0'>${cust.customeraddress?.statename?.state_name || ''}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Grade: </th>
+                                                <td class='text-dark mb-0'>${cust.customerdetails?.grade || ''}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                `;
+
                             } else {
                                 contentString = `
                                 <div style="min-width:200px">
-                                    <h4 class='text-dark'>${cust.company_name}</h4>
-                                    <p class='text-dark'><strong>Address:</strong> ${cust.address?.address1 || ''}</p>
-                                    <p class='text-dark'><strong>City:</strong> ${cust.address?.cityname?.city_name || ''}</p>
-                                    <p class='text-dark'><strong>District:</strong> ${cust.address?.districtname?.district_name || ''}</p>
-                                    <p class='text-dark'><strong>State:</strong> ${cust.address?.statename?.state_name || ''}</p>
-                                </div>
-                            `;
+                                        <h5 class='text-dark'>Details</h5>
+                                        <table class="table table-sm table-borderless m-0 geodatatable">
+                                            <tr>
+                                                <th>Firm Name: </th>
+                                                <td><h4 class='text-dark mb-0'>${cust.company_name}</h4></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Customer Name: </th>
+                                                <td class='text-dark mb-0'>${cust.contacts[0]?.name || ''}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Lead Status: </th>
+                                                <td class='text-dark mb-0'>${cust.status_is?.status_name || ''}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Lead Source: </th>
+                                                <td class='text-dark mb-0'>${cust.lead_source}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Mobile Number: </th>
+                                                <td class='text-dark mb-0'>${cust.contacts[0]?.phone_number || ''}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Pin Code: </th>
+                                                <td class='text-dark mb-0'>
+                                                    ${cust.address?.pincodename?.pincode || ''}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>City: </th>
+                                                <td class='text-dark mb-0'>
+                                                    ${cust.address?.cityname?.city_name || ''} 
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>District: </th>
+                                                <td class='text-dark mb-0'>
+                                                    ${cust.address?.districtname?.district_name || ''}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>State: </th>
+                                                <td class='text-dark mb-0'>${cust.address?.statename?.state_name || ''}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Assigned To: </th>
+                                                <td class='text-dark mb-0'>${cust.assign_user?.name || ''}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Opportunity: </th>
+                                                <td class='text-dark mb-0'>
+                                                    ${
+                                                        cust.opportunities && cust.opportunities.length > 0
+                                                            ? `${cust.opportunities[0]?.status_is?.status_name || ''} - ₹${cust.opportunities[0]?.amount || ''}`
+                                                            : 'Opportunity not available'
+                                                    }
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Address: </th>
+                                                <td class='text-dark mb-0'>${cust.address?.full_address || ''}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                `;
                             }
                             infoWindow.setContent(contentString);
                             infoWindow.open(map, marker);
@@ -251,9 +389,63 @@
             initMap(filter, filter_by);
         });
 
-        // $("#search-btn").on("click", function() {
-        //     var search = $("#search").val();
-        //     initMap(search, 'search');
-        // });
+        $("#search-btn").on("click", function() {
+            var search = $("#search").val();
+            initMap(search, 'search');
+        });
+
+        $("#search").on("keypress", function(e) {
+            if (e.which === 13) { // 13 is Enter key
+                var search = $(this).val();
+                initMap(search, 'search');
+            }
+        });
+
+
+        $(document).ready(function() {
+            $('#search').on('keyup', function() {
+                let query = $(this).val();
+                var type = $('input[name="type"]:checked').val();
+                if (query.length > 1) {
+                    $.ajax({
+                        url: "{{ route('customer.suggestions') }}",
+                        type: "GET",
+                        data: {
+                            search: query,
+                            type: type
+                        },
+                        success: function(data) {
+                            $('#suggestion-list').empty();
+                            if (data.length > 0) {
+                                data.forEach(function(item) {
+                                    $('#suggestion-list').append(
+                                        '<li class="list-group-item suggestion-item">' + item.name + '</li>'
+                                    );
+                                });
+                            } else {
+                                $('#suggestion-list').append('<li class="list-group-item">No results</li>');
+                            }
+                            $('#suggestion-list').show();
+                        }
+                    });
+                } else {
+                    $('#suggestion-list').empty();
+                    $('#suggestion-list').hide();
+                }
+            });
+
+            // Click suggestion
+            $(document).on('click', '.suggestion-item', function() {
+                $('#search').val($(this).text());
+                $('#suggestion-list').empty().hide();
+            });
+
+            // Close suggestion list when clicking outside
+            $(document).click(function(event) {
+                if (!$(event.target).closest('#search, #suggestion-list').length) {
+                    $('#suggestion-list').empty().hide();
+                }
+            });
+        });
     </script>
 </x-app-layout>

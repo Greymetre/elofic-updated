@@ -1128,6 +1128,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/geo_locator', [GeoLocator::class, 'map'])->name('geolocator.map');
     Route::any('/geo_locator_data', [GeoLocator::class, 'data'])->name('geolocator.data');
     Route::any('/geo_locator_filter_data', [GeoLocator::class, 'filter_data'])->name('geolocator.filter.data');
+    Route::any('/customer-suggestions', [GeoLocator::class, 'customerSuggestions'])->name('customer.suggestions');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

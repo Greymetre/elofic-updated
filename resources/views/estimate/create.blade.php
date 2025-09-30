@@ -642,7 +642,7 @@
       <div class="card p-4">
         <form action="{{ route('estimate.store') }}" method="post" id="createEstimateForm" enctype="multipart/form-data">
           @csrf
-          <h5><i class="fa fa-file-text-o"></i> New Estimate</h5>
+          <h5><i class="fa fa-file-text-o"></i> New Quotation</h5>
           <div class="row">
             <div class="col-md-8">
               <div class="form-group">

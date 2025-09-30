@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\CustomerDetails;
 use App\Models\Customers;
 use App\Models\District;
 use App\Models\EmployeeDetail;
@@ -45,7 +46,7 @@ class GeoLocator extends Controller
 
     public function data(Request $request)
     {
-        $customers = Customers::whereNotNull('latitude')->whereNotNull('longitude')->where('latitude', '!=', '')->where('longitude', '!=', '')->select('id', 'name', 'mobile', 'latitude', 'longitude', 'customertype')->with('customeraddress', 'customertypes');
+        $customers = Customers::whereNotNull('latitude')->whereNotNull('longitude')->where('latitude', '!=', '')->where('longitude', '!=', '')->select('id', 'name', 'first_name', 'last_name', 'mobile', 'latitude', 'longitude', 'customertype')->with('customeraddress', 'customertypes', 'customerdetails');
         if ($request->type == '1') {
 
             if (isset($request->filter_by) && !empty($request->filter_by)) {
@@ -78,18 +79,26 @@ class GeoLocator extends Controller
                         $query->where('district_id', $district_id);
                     });
                 }
-                if($request->filter_by == 'Employee Name'){
-                  $user_id = User::where('name', $request->filter)->pluck('id')->first();
-                  $customer_ids = EmployeeDetail::where('user_id', $user_id)->pluck('customer_id');
-                  $customers->whereIn('id', $customer_ids);
+                if ($request->filter_by == 'Employee Name') {
+                    $user_id = User::where('name', $request->filter)->pluck('id')->first();
+                    $customer_ids = EmployeeDetail::where('user_id', $user_id)->pluck('customer_id');
+                    $customers->whereIn('id', $customer_ids);
                 }
-                if($request->filter_by == 'search'){
-                    $customers->where('name', 'like', '%' . $request->filter . '%');
+                if ($request->filter_by == 'search') {
+                    $customers->where(function ($query) use ($request) {
+                        $query->where('name', 'like', '%' . $request->filter . '%')
+                            ->orWhere('mobile', 'like', '%' . $request->filter . '%');
+                    });
+                }
+                if($request->filter_by == 'Grade'){
+                    $customers->whereHas('customerdetails', function ($query) use ($request) {
+                        $query->where('grade', $request->filter);
+                    });
                 }
             }
             $customers = $customers->get();
         } else {
-            $customers = Lead::whereNotNull('latitude')->whereNotNull('longitude')->where('latitude', '!=', '')->where('longitude', '!=', '')->select('id', 'company_name', 'lead_source', 'latitude', 'longitude')->with('address');
+            $customers = Lead::whereNotNull('latitude')->whereNotNull('longitude')->where('latitude', '!=', '')->where('longitude', '!=', '')->select('id', 'company_name', 'lead_source', 'latitude', 'longitude', 'status', 'assign_to')->with('address', 'contacts', 'status_is', 'assign_user', 'opportunities.status_is');
 
             if ($request->filter_by == 'City') {
                 $city_id = City::where('city_name', $request->filter)->pluck('id')->first();
@@ -120,7 +129,7 @@ class GeoLocator extends Controller
                     $query->where('district_id', $district_id);
                 });
             }
-            if($request->filter_by == 'search'){
+            if ($request->filter_by == 'search') {
                 $customers->where('company_name', 'like', '%' . $request->filter . '%');
             }
             $customers = $customers->get();
@@ -214,6 +223,21 @@ class GeoLocator extends Controller
                         ];
                     })
                     ->toArray();
+            } elseif ($request->filter == 'Grade') {
+                $data = CustomerDetails::whereHas('customer', function ($query) {
+                    $query->whereNotNull('latitude')->whereNotNull('longitude')->where('latitude', '!=', '')->where('longitude', '!=', '');
+                })
+                    ->whereNotNull('grade')
+                    ->where('grade', '!=', '')
+                    ->select('grade', \DB::raw('COUNT(*) as total'))
+                    ->groupBy('grade')
+                    ->get()
+                    ->mapWithKeys(function ($item) {
+                        return [
+                            $item->grade ?? 'Unknown' => $item->total
+                        ];
+                    })
+                    ->toArray();
             }
         } else {
             if ($request->filter == 'City') {
@@ -287,5 +311,25 @@ class GeoLocator extends Controller
             }
         }
         return response()->json($data);
+    }
+
+    public function customerSuggestions(Request $request)
+    {
+        $type = $request->get('type');
+        $search = $request->get('search');
+        if ($type == '1') {
+            $customers = Customers::where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('mobile', 'like', '%' . $search . '%');
+            })
+                ->whereNotNull('longitude')->where('latitude', '!=', '')
+                ->take(10)
+                ->get(['id', 'name']);
+        } else if ($type == '2') {
+            $customers = Lead::where('company_name', 'like', "%{$search}%")->whereNotNull('longitude')->where('latitude', '!=', '')
+                ->take(10)
+                ->get(['id', 'company_name  as name']);
+        }
+        return response()->json($customers);
     }
 }
