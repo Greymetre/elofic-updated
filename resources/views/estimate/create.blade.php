@@ -640,7 +640,7 @@
     @endif
     <div class="container-fluid">
       <div class="card p-4">
-        <form action="{{ route('estimate.store') }}" method="post" id="createEstimateForm" enctype="multipart/form-data">
+        <form action="{{ route('estimate.store') }}" method="post" id="createQuotationForm" enctype="multipart/form-data">
           @csrf
           <h5><i class="fa fa-file-text-o"></i> New Quotation</h5>
           <div class="row">
@@ -694,7 +694,7 @@
           <div class="row">
             <div class="col-md-4">
               <div class="form-group mb-3" id="estimate_no_div">
-                <label for="estimate_no">Estimate#*</label>
+                <label for="estimate_no">Quotation#*</label>
                 <input type="text" class="form-control custom-input-box" id="estimate_no" name="estimate_no" value="{!! $invoiceNumber !!}" readonly required><i title="Configure Invoice Number" class="material-icons icon" id="estimate_no_settings" data-toggle="modal" data-target="#invoiceNoModal">settings</i>
               </div>
             </div>
@@ -708,7 +708,7 @@
           <div class="row">
             <div class="col-md-3">
               <div class="form-group mb-3">
-                <label for="estimate_date">Estimate Date*</label>
+                <label for="estimate_date">Quotation Date*</label>
                 <input type="date" class="form-control custom-input-box" id="estimate_date" name="estimate_date" required>
               </div>
             </div>

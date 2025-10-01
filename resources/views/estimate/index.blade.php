@@ -342,15 +342,15 @@
 
                 <!-- Round Button -->
                 @if(Auth::user()->can('estimate_create'))
-                <a href="{{ route('estimate.create') }}" title="Add Estimate">
-                  <button class="btn-circle" title="Add Estimate">
+                <a href="{{ route('estimate.create') }}" title="Add Quotation">
+                  <button class="btn-circle" title="Add Quotation">
                     <i class="fas fa-plus"></i>
                   </button>
                 </a>
                 @endif
                 @if(Auth::user()->can('estimate_export'))
-                <a href="javascript:void(0);" id="downloadEstimate" title="Add Estimate">
-                  <button class="btn-circle" title="Download Estimate">
+                <a href="javascript:void(0);" id="downloadQuotation" title="Add Quotation">
+                  <button class="btn-circle" title="Download Quotation">
                     <i class="fas fa-download"></i>
                   </button>
                 </a>
@@ -368,12 +368,12 @@
               <thead class="thead-light">
                 <tr>
                   <th>Date</th>
-                  <th>Estimate #</th>
+                  <th>Quotation #</th>
                   <th>Order Number</th>
                   <th>Customer Name</th>
                   <th>STATUS</th>
                   <th>Due Date</th>
-                  <th>ESTIMATE AMOUNT</th>
+                  <th>Quotation Amount</th>
                   <th>Sub Total</th>
                 </tr>
               </thead>
@@ -501,7 +501,7 @@
       });
     });
 
-    $('#downloadEstimate').on('click', function() {
+    $('#downloadQuotation').on('click', function() {
       var searchInput = $('#searchInput').val();
       var start_date = $('#start_date').val();
       var end_date = $('#end_date').val();

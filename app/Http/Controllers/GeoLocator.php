@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Address;
+use App\Models\Branch;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\CustomerDetails;
@@ -13,6 +14,7 @@ use App\Models\GeoLocatorSetting;
 use App\Models\Lead;
 use App\Models\Pincode;
 use App\Models\State;
+use App\Models\Status;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -90,10 +92,16 @@ class GeoLocator extends Controller
                             ->orWhere('mobile', 'like', '%' . $request->filter . '%');
                     });
                 }
-                if($request->filter_by == 'Grade'){
+                if ($request->filter_by == 'Grade') {
                     $customers->whereHas('customerdetails', function ($query) use ($request) {
                         $query->where('grade', $request->filter);
                     });
+                }
+                if($request->filter_by == 'Branch Name') {
+                    $branch_id = Branch::where('branch_name', $request->filter)->pluck('id')->first();
+                    $user_id = User::where('branch_id', $branch_id)->pluck('id');
+                    $customer_ids = EmployeeDetail::whereIn('user_id', $user_id)->pluck('customer_id');
+                    $customers->whereIn('id', $customer_ids);
                 }
             }
             $customers = $customers->get();
@@ -131,6 +139,17 @@ class GeoLocator extends Controller
             }
             if ($request->filter_by == 'search') {
                 $customers->where('company_name', 'like', '%' . $request->filter . '%');
+            }
+            if ($request->filter_by == 'Lead Source') {
+                $customers->where('lead_source', $request->filter);   
+            }
+            if ($request->filter_by == 'Lead Status') {
+                $status_id = Status::where('status_name', $request->filter)->pluck('id')->first();
+                $customers->where('status', $status_id);
+            }
+            if ($request->filter_by == 'Assignee') {
+                $user_id = User::where('name', $request->filter)->pluck('id')->first();
+                $customers->where('assign_to', $user_id);
             }
             $customers = $customers->get();
         }
@@ -238,6 +257,23 @@ class GeoLocator extends Controller
                         ];
                     })
                     ->toArray();
+            } elseif ($request->filter == 'Branch Name') {
+                $data = EmployeeDetail::whereHas('customer', function ($query) {
+                    $query->whereNotNull('latitude')
+                        ->whereNotNull('longitude')
+                        ->where('latitude', '!=', '')
+                        ->where('longitude', '!=', '');
+                })
+                    ->whereHas('employee_detail', function ($query) {
+                        $query->whereNotNull('branch_id');
+                    })
+                    ->with('employee_detail.getbranch:id,branch_name') // load branch via user
+                    ->select('user_id', \DB::raw('COUNT(*) as total'))
+                    ->groupBy('user_id')
+                    ->get()
+                    ->groupBy(fn($item) => $item->employee_detail->getbranch->branch_name ?? 'Unknown')
+                    ->map(fn($group) => $group->sum('total'))
+                    ->toArray();
             }
         } else {
             if ($request->filter == 'City') {
@@ -307,6 +343,31 @@ class GeoLocator extends Controller
                             $item->districtname->district_name ?? 'Unknown' => $item->total
                         ];
                     })
+                    ->toArray();
+            } elseif ($request->filter == 'Lead Source') {
+                $data = Lead::whereNotNull('latitude')->whereNotNull('longitude')->where('latitude', '!=', '')->where('longitude', '!=', '')
+                    ->select('lead_source', \DB::raw('COUNT(*) as total'))
+                    ->groupBy('lead_source')
+                    ->get()
+                    ->pluck('total', 'lead_source')
+                    ->toArray();
+            } elseif ($request->filter == 'Lead Status') {
+                $data = Lead::whereNotNull('latitude')->whereNotNull('longitude')->where('latitude', '!=', '')->where('longitude', '!=', '')
+                    ->whereNotNull('status')
+                    ->select('status', \DB::raw('COUNT(*) as total'))
+                    ->groupBy('status')
+                    ->with('status_is:id,status_name')
+                    ->get()
+                    ->pluck('total', 'status_is.status_name')
+                    ->toArray();
+            } elseif ($request->filter == 'Assignee') {
+                $data = Lead::whereNotNull('latitude')->whereNotNull('longitude')->where('latitude', '!=', '')->where('longitude', '!=', '')
+                    ->whereNotNull('assign_to')
+                    ->select('assign_to', \DB::raw('COUNT(*) as total'))
+                    ->groupBy('assign_to')
+                    ->with('assign_user:id,name')
+                    ->get()
+                    ->pluck('total', 'assign_user.name')
                     ->toArray();
             }
         }

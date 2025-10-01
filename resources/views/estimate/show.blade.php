@@ -358,7 +358,7 @@
                 <td style="color:#000; font-weight: 500; width: 40%; font-size: 12px; line-height: 16px;"> : {{$estimate->estimate_no}}</td>
               </tr>
               <tr>
-                <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Estimate Date</td>
+                <td style="color:#000; font-weight: 400;width: 60%;font-size: 12px; line-height: 16px;">Quotation Date</td>
                 <td style="color:#000; font-weight: 500;width: 40%;font-size: 12px; line-height: 16px;"> : {{date('d M Y', strtotime($estimate->estimate_date))}}</td>
               </tr>
               <tr>
