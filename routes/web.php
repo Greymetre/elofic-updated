@@ -100,6 +100,8 @@ use App\Http\Controllers\ServiceBillComplaintType;
 use App\Http\Controllers\OpeningStockController;
 use App\Http\Controllers\PowerBiSettingController;
 use App\Http\Controllers\TaxInvoiceController;
+use App\Http\Controllers\CustomerCustomFieldController;
+use App\Models\CustomerCustomField;
 use App\Models\DealerPortalSettings;
 use App\Models\PowerBiSetting;
 use Illuminate\Http\Response;
@@ -1129,6 +1131,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('/geo_locator_data', [GeoLocator::class, 'data'])->name('geolocator.data');
     Route::any('/geo_locator_filter_data', [GeoLocator::class, 'filter_data'])->name('geolocator.filter.data');
     Route::any('/customer-suggestions', [GeoLocator::class, 'customerSuggestions'])->name('customer.suggestions');
+
+    // Customer Custom Fields Routes
+    Route::resource('customer-custom-fields', CustomerCustomFieldController::class);
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

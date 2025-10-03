@@ -909,6 +909,15 @@
                               </a>
                            </li>
                            @endif
+                           @if(auth()->user()->can(['customer_custom_field_access']))
+                           <li class="nav-link-btn {{ request()->is('customer-custom-fields*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('customer-custom-fields') }}">
+                                 <i class="material-icons icon">adjust</i>
+                                 <span>Custom Fields</span>
+                                 <div class="d-none mobile_hide">Custom Fields</div>
+                              </a>
+                           </li>
+                           @endif
                            @if(auth()->user()->can(['customer_balance_confirmation_upload']))
                            <li class="nav-link-btn {{ request()->is('customer_balance*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('customer_balance') }}">

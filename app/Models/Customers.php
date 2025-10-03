@@ -18,7 +18,7 @@ class Customers extends Authenticatable
 
     protected $table = 'customers';
 
-    protected $fillable = ['active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'shop_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'otp', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'same_address', 'manager_name', 'manager_phone', 'contact_number', 'parent_id', 'sap_code'];
+    protected $fillable = ['active', 'name', 'first_name', 'last_name', 'mobile', 'email', 'password', 'notification_id', 'latitude', 'longitude', 'device_type', 'gender', 'profile_image', 'shop_image', 'customer_code', 'status_id', 'region_id', 'customertype', 'firmtype', 'created_by', 'updated_by', 'executive_id', 'otp', 'custom_fields', 'deleted_at', 'created_at', 'updated_at', 'beatscheduleid', 'same_address', 'manager_name', 'manager_phone', 'contact_number', 'parent_id', 'sap_code'];
     protected $appends = ['full_address'];
 
     public function message()
@@ -97,6 +97,7 @@ class Customers extends Authenticatable
                 'status_id' =>  !empty($request['status_id']) ? $request['status_id'] : 2,
                 'customertype' =>  !empty($request['customertype']) ? $request['customertype'] : 1,
                 'firmtype' =>  !empty($request['firmtype']) ? $request['firmtype'] : null,
+                'custom_fields' =>  !empty($request['custom_fields']) ? $request['custom_fields'] : null,
                 //'executive_id' =>  !empty($request['executive_id'])? $request['executive_id'] : $request['created_by'],
                 //'parent_id' =>  !empty($request['parent_id'])? $request['parent_id'] : null,
                 'created_by' =>  !empty($request['created_by']) ? $request['created_by'] : null,
@@ -137,7 +138,7 @@ class Customers extends Authenticatable
             $customers->customertype =  !empty($request['customertype']) ? $request['customertype'] : $customers->customertype;
             $customers->firmtype = !empty($request['firmtype']) ? $request['firmtype'] : null;
             $customers->same_address = !empty($request['same_address']) ? $request['same_address'] : 0;
-            //$customers->executive_id = !empty($request['executive_id'])? $request['executive_id']:null;
+            $customers->custom_fields = !empty($request['custom_fields'])? $request['custom_fields']:null;
 
             if (isset($request['password'])) {
                 $customers->password = !empty($request['password']) ? Hash::make($request['password']) : '';

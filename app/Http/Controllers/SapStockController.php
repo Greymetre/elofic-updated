@@ -16,6 +16,7 @@ use Gate;
 use App\Models\Customers;
 use App\Models\DealerAppointment;
 use App\Models\DealerAppointmentKyc;
+use App\Models\Lead;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -34,6 +35,24 @@ class SapStockController extends Controller
      */
     public function index(SAPStockDataTable $dataTable, Request $request)
     {
+
+        // $filters = [
+        //     'industry' => 'Saree Shop|Clothing wholesaler',
+        //     'grade' => 'A'
+        // ];
+
+        // $field = 'industry';
+        // $value = 'Saree Shop|Clothing wholesaler';
+        
+        // $query = Lead::where("others->$field", $value)->get();
+        
+        // // foreach ($filters as $field => $value) {
+        // //     $query->where("customer_fields->$field", $value);
+        // // }
+
+        // dd('done', $query);
+
+
         // $users = User::whereNotNull('customerid')->get();
 
         // foreach ($users as $user) {

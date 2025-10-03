@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Customers, UserLogin, CustomerType, FirmType, Regions, Pincode, Country, CustomerDetails, Address, Attachment, SurveyData, Field, State, City, Beat, BeatCustomer, DealIn, Division, Lead, Redemption, SchemeDetails, ShippingAddress};
 use App\Models\User;
+use App\Models\CustomerCustomField;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
@@ -320,8 +321,8 @@ class CustomerController extends Controller
         $deals = array();
 
         $parentcustomers = Customers::where('active', '=', 'Y')->where('customertype', '!=', '2')->select('id', 'name')->orderBy('id', 'desc')->get();
-
-        return view('customers.create', compact('pincodes', 'customertype', 'firmtype', 'pincodes', 'countries', 'fields', 'users', 'deals', 'parentcustomers'))->with('customers', $this->customers);
+        $custom_fields = CustomerCustomField::with('values')->orderBy('id', 'desc')->get();
+        return view('customers.create', compact('pincodes', 'customertype', 'firmtype', 'pincodes', 'countries', 'fields', 'users', 'deals', 'parentcustomers', 'custom_fields'))->with('customers', $this->customers);
     }
 
     public function createDistributor()
@@ -573,8 +574,11 @@ class CustomerController extends Controller
             }
         })->select('id', 'name')->orderBy('id', 'desc')->get();
 
+        $customers->custom_fields = json_decode($customers->custom_fields, true);
+
         $parentcustomers = Customers::where('active', '=', 'Y')->where('customertype', '!=', '2')->select('id', 'name')->orderBy('id', 'desc')->get();
-        return view('customers.create', compact('pincodes', 'customertype', 'firmtype', 'pincodes', 'countries', 'fields', 'users', 'deals', 'parentcustomers'))->with('customers', $customers);
+        $custom_fields = CustomerCustomField::with('values')->orderBy('id', 'desc')->get();
+        return view('customers.create', compact('pincodes', 'customertype', 'firmtype', 'pincodes', 'countries', 'fields', 'users', 'deals', 'parentcustomers', 'custom_fields'))->with('customers', $customers);
     }
 
     /**

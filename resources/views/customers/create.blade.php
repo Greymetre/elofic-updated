@@ -807,7 +807,7 @@
             </div>
           </div>
 
-          <hr class="my-3">
+         <hr class="my-3">
           <h4 class="section-heading mb-3  h4 mt-0 text-center text-theme2">{!! trans('panel.customers.title_kyc') !!}</h4>
           <div class="last-box">
             <div class="row">
@@ -970,6 +970,32 @@
 
             </div>
           </div>
+
+          {{-- <hr class="my-3">
+          <h4 class="section-heading mb-3  h4 mt-0 text-center text-theme2">Custom Fields</h4>
+          <div class="last-box">
+            <div class="row">
+              @foreach($custom_fields as $customfield)
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">{!! $customfield->field_name !!} </label>
+                  <div class="form-group has-default bmd-form-group">
+                    <select name="custom_fields[{{ $customfield->field_name }}]" class="form-control" id="">
+                      <option value="">Select</option>
+                      @foreach($customfield->values as $fieldvalue)
+                      <option value="{{ $fieldvalue->value }}"
+                        {{ (!empty($customers->custom_fields[$customfield->field_name]) && $customers->custom_fields[$customfield->field_name] == $fieldvalue->value) ? 'selected' : '' }}>
+                        {{ $fieldvalue->value }}
+                      </option>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+              </div>
+              @endforeach
+            </div>
+          </div> --}}
+
 
           <div class="row mt-5">
             <div class="col-md-2 col-sm-2">

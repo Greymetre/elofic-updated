@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\Customers;
 use App\Models\UserActivity;
 use App\Models\Branch;
+use App\Models\CustomerCustomField;
 use App\Models\User;
 use App\Models\Division;
 use App\Models\Designation;
@@ -47,6 +48,7 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
         $this->tenderD = ['TENDER/MANAGER'];
 
         $this->userids = getUsersReportingToAuth();
+        $this->custom_fields = CustomerCustomField::pluck('field_name')->toArray();
 
         if (!empty($this->filters['division_id'])) {
             $this->division_users = User::where('division_id', $this->filters['division_id'])->pluck('id')->toArray();
@@ -177,6 +179,10 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             'Sap Code'
         ];
 
+        // if (!empty($this->custom_fields) && count($this->custom_fields) > 0) {
+        //     $headings = array_merge($headings, $this->custom_fields);
+        // }
+
         if (!empty($this->division_users)) {
             if ($this->filters['division_id'] == '10') {
                 $headings = array_merge($headings, $this->pumpD);
@@ -217,6 +223,8 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
         // Map parent details
         $parentNames = $parentDetails->pluck('parent_detail.name')->implode(',');
         $parentIds = $parentDetails->pluck('parent_id')->implode(',');
+
+        $custom_fields_values = $data->custom_fields ? json_decode($data->custom_fields, true) : [];
 
         // Return mapped data
         $response = [
@@ -266,6 +274,12 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             $data['creation_date'],
             $data['sap_code'],
         ];
+
+        // if (!empty($this->custom_fields) && count($this->custom_fields) > 0) {
+        //     foreach ($this->custom_fields as $key => $value) {
+        //         $response[] = $custom_fields_values[$value] ?? '-';
+        //     }
+        // }
 
 
         if (!empty($this->division_users)) {
