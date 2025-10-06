@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 
-class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping
+class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
     protected $filters = [];
     protected $division_users = [];
@@ -179,9 +179,9 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             'Sap Code'
         ];
 
-        // if (!empty($this->custom_fields) && count($this->custom_fields) > 0) {
-        //     $headings = array_merge($headings, $this->custom_fields);
-        // }
+        if (!empty($this->custom_fields) && count($this->custom_fields) > 0) {
+            $headings = array_merge($headings, $this->custom_fields);
+        }
 
         if (!empty($this->division_users)) {
             if ($this->filters['division_id'] == '10') {
@@ -275,11 +275,11 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
             $data['sap_code'],
         ];
 
-        // if (!empty($this->custom_fields) && count($this->custom_fields) > 0) {
-        //     foreach ($this->custom_fields as $key => $value) {
-        //         $response[] = $custom_fields_values[$value] ?? '-';
-        //     }
-        // }
+        if (!empty($this->custom_fields) && count($this->custom_fields) > 0) {
+            foreach ($this->custom_fields as $key => $value) {
+                $response[] = $custom_fields_values[$value] ?? '-';
+            }
+        }
 
 
         if (!empty($this->division_users)) {
@@ -378,5 +378,55 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
 
 
         return $response;
+    }
+
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+                $lastRow = $sheet->getHighestDataRow();
+                $lastColumn = $sheet->getHighestDataColumn();
+
+                $firstRowRange = 'A1:' . $lastColumn . '1';
+                $sheet->getRowDimension(1)->setRowHeight(25);
+                $sheet->getStyle($firstRowRange)->getAlignment()->setWrapText(true);
+                $sheet->getStyle($firstRowRange)->getFont()->setSize(14);
+
+                $event->sheet->getStyle($firstRowRange)->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '00aadb'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                ]);
+
+                $event->sheet->getStyle('A1:' . $lastColumn . '' . $lastRow)->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '000000'],
+                        ],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                    ],
+                ]);
+            },
+        ];
     }
 }

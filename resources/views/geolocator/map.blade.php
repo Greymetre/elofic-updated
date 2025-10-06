@@ -112,7 +112,12 @@
                                         <option value="">Customer Filter</option>
                                         @if($customerFilters && count($customerFilters) > 0)
                                         @foreach($customerFilters as $filter)
-                                        <option value="{{ $filter }}">{{ $filter }}</option>
+                                        <option value="{{ $filter }}" data-custom_field="false">{{ $filter }}</option>
+                                        @endforeach
+                                        @endif
+                                        @if($cutom_fields && count($cutom_fields) > 0)
+                                        @foreach($cutom_fields as $field)
+                                        <option value="{{ $field->field_name }}" data-custom_field="true">{{ $field->field_name }}</option>
                                         @endforeach
                                         @endif
                                     </select>
@@ -120,7 +125,7 @@
                                         <option value="">Lead Filter</option>
                                         @if($leadFilters && count($leadFilters) > 0)
                                         @foreach($leadFilters as $filter)
-                                        <option value="{{ $filter }}">{{ $filter }}</option>
+                                        <option value="{{ $filter }}" data-custom_field="false">{{ $filter }}</option>
                                         @endforeach
                                         @endif
                                     </select>
@@ -153,7 +158,7 @@
         }
         let map;
 
-        function initMap(filter = '', filter_by = '') {
+        function initMap(filter = '', filter_by = '', custom_field = false) {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: {
                     lat: 20.5937,
@@ -164,7 +169,7 @@
             let type = $('input[name="type"]:checked').val();
             infoWindow = new google.maps.InfoWindow();
             // fetch customers
-            fetch("{{ route('geolocator.data') }}?type=" + type + "&filter=" + filter + "&filter_by=" + filter_by)
+            fetch("{{ route('geolocator.data') }}?type=" + type + "&filter=" + filter + "&filter_by=" + filter_by + "&custom_field=" + custom_field)
                 .then(response => response.json())
                 .then(customers => {
                     if (!customers.length) return;
@@ -361,10 +366,12 @@
             var type = $('input[name="type"]:checked').val();
             if (type == '1') {
                 var filter = $('#customer_filter').val();
+                var custom_field = $('#customer_filter option:selected').data('custom_field');
             } else {
                 var filter = $('#lead_filter').val();
+                var custom_field = $('#lead_filter option:selected').data('custom_field');
             }
-            fetch("{{ route('geolocator.filter.data') }}?type=" + type + "&filter=" + filter)
+            fetch("{{ route('geolocator.filter.data') }}?type=" + type + "&filter=" + filter + "&custom_field=" + custom_field)
                 .then(response => response.json())
                 .then(response => {
                     $('.filter-data').html('');
@@ -383,10 +390,12 @@
             var type = $('input[name="type"]:checked').val();
             if (type == '1') {
                 var filter_by = $('#customer_filter').val();
+                var custom_field = $('#customer_filter option:selected').data('custom_field');
             } else {
                 var filter_by = $('#lead_filter').val();
+                var custom_field = $('#lead_filter option:selected').data('custom_field');
             }
-            initMap(filter, filter_by);
+            initMap(filter, filter_by, custom_field);
         });
 
         $("#search-btn").on("click", function() {

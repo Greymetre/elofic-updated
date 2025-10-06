@@ -87,7 +87,7 @@ class Customers extends Authenticatable
                 'contact_number' => !empty($request['contact_number']) ? $request['contact_number'] : '',
                 'notification_id' => !empty($request['notification_id']) ? $request['notification_id'] : '',
                 'latitude' => !empty($request['latitude']) ? $request['latitude'] : null,
-                'same_address' => !empty($request['same_address']) ? $request['same_address'] : 0,
+                'same_address' => !empty($request['same_address']) ? 1 : 0,
                 'longitude' => !empty($request['longitude']) ? $request['longitude'] : null,
                 'device_type' => !empty($request['device_type']) ? ucfirst($request['device_type']) : '',
                 'gender' => !empty($request['gender']) ? ucfirst($request['gender']) : '',
@@ -137,7 +137,7 @@ class Customers extends Authenticatable
             $customers->customer_code = !empty($request['customer_code']) ? $request['customer_code'] : '';
             $customers->customertype =  !empty($request['customertype']) ? $request['customertype'] : $customers->customertype;
             $customers->firmtype = !empty($request['firmtype']) ? $request['firmtype'] : null;
-            $customers->same_address = !empty($request['same_address']) ? $request['same_address'] : 0;
+            $customers->same_address = !empty($request['same_address']) ? 1 : 0;
             $customers->custom_fields = !empty($request['custom_fields'])? $request['custom_fields']:null;
 
             if (isset($request['password'])) {
