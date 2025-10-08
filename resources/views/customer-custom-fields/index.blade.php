@@ -43,6 +43,7 @@
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.global.action') !!}</th>
                 <th> Field Name</th>
+                <th> Field Type</th>
                 <th> Created By</th>
               </thead>
               <tbody>
@@ -85,6 +86,11 @@
           {
             data: 'field_name',
             name: 'field_name',
+            "defaultContent": ''
+          },
+          {
+            data: 'field_type',
+            name: 'field_type',
             "defaultContent": ''
           },
           {

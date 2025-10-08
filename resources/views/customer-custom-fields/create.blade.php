@@ -80,7 +80,7 @@
                     </div>
           
                 </div>
-              </div>
+              </div> --}}
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Field Type <span class="text-danger"> *</span></label>
@@ -88,7 +88,7 @@
                     <div class="form-group has-default bmd-form-group">
                       <select class="form-control select2" name="field_type" id="field_type" style="width: 100%;" required>
                         <option value="" selected disabled>Select Field Type</option>
-                        <!-- <option value="Input" {{ old( 'field_type' , (!empty($fields->field_type)) ? ($fields->field_type) :('') ) == 'Input' ? 'selected' : '' }}>Input</option> -->
+                        <option value="Input" {{ old( 'field_type' , (!empty($fields->field_type)) ? ($fields->field_type) :('') ) == 'Input' ? 'selected' : '' }}>Input</option>
                         <option value="Select" {{ old( 'field_type' , (!empty($fields->field_type)) ? ($fields->field_type) :('') ) == 'Select' ? 'selected' : '' }}>Select</option>
                         <!-- <option value="Radio" {{ old( 'field_type' , (!empty($fields->field_type)) ? ($fields->field_type) :('') ) == 'Radio' ? 'selected' : '' }}>Radio</option> -->
                         <!-- <option value="Checkbox" {{ old( 'field_type' , (!empty($fields->field_type)) ? ($fields->field_type) :('') ) == 'Checkbox' ? 'selected' : '' }}>Checkbox</option> -->
@@ -102,7 +102,7 @@
                   </div>
              
               </div>
-              <div class="col-md-6">
+             {{-- <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Module Type <span class="text-danger"> *</span></label>
                 
@@ -257,8 +257,8 @@
 
 <script type="text/javascript">
   $(document).ready(function(){
-    $('.multipleshow').show();
-    $('.fielddata').show();
+    $('.multipleshow').hide();
+    $('.fielddata').hide();
     // var field_type = $('select[name="field_type"]').val() ;
     // if(field_type == 'Select' || field_type == 'Radio'|| field_type == 'Checkbox')
     // {
