@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CallLog;
+use App\Models\Status;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -75,7 +76,7 @@ class CallLogController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
-        if($request->has('date') && !empty($request->date)) {
+        if ($request->has('date') && !empty($request->date)) {
             $query->whereDate('started_at', $request->date);
         }
 
@@ -100,7 +101,7 @@ class CallLogController extends Controller
         $noResponse    = $allLogs->where('status', 0)->count();
 
         foreach ($logs as $log) {
-            $log->contact_name = $log->lead->contacts ? $log->lead->contacts->first()->name : '';
+            $log->contact_name = $log->lead ? $log->lead->contacts->first()->name : '';
             $log->duration = gmdate('i:s', $log->duration);
         }
 
@@ -114,6 +115,59 @@ class CallLogController extends Controller
             'connected'      => $connected,
             'no_response'    => $noResponse,
             'total_duration' => gmdate('H:i:s', $totalDuration),
+        ]);
+    }
+
+    public function last_call(Request $request)
+    {
+        $user_id = $request->user()->id;
+        $last_call = CallLog::where('user_id', $user_id)->latest()->first();
+        $data['last_call_id'] = $last_call ? $last_call->id : '';
+        $data['last_call_remark'] = $last_call ? ($last_call->remark ? true : false) : true;
+        $data['lead_type'] = $last_call ? ($last_call->lead ? $last_call->lead->status_is->status_name : 'lead not found') : '';
+        $data['lead_type_id'] = $last_call ? ($last_call->lead ? $last_call->lead->status : 'lead not found') : '';
+        $data['all_types'] = Status::where('module', 'LeadStatus')->select('id', 'display_name')->get();
+        return response()->json([
+            'success' => true,
+            'data'    => $data,
+        ]);
+    }
+
+    public function update_remark(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'id' => 'required',
+            'remark' => 'required',
+            'lead_type_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'data'    => $validator->errors(),
+            ]);
+        }
+
+        $last_call = CallLog::with('lead')->findOrFail($request->id);
+
+        if (!$last_call) {
+            return response()->json([
+                'success' => false,
+                'data'    => 'Call log not found',
+            ]);
+        }
+
+        $last_call->remark = $request->remark;
+        $last_call->save();
+
+        // Update the related lead status
+        if ($last_call->lead) {
+            $last_call->lead->status = $request->lead_type_id;
+            $last_call->lead->save();
+        }
+        return response()->json([
+            'success' => true,
+            'data'    => $last_call,
         ]);
     }
 }

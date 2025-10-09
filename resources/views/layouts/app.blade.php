@@ -1175,6 +1175,16 @@
                   </li>
                   @endif
 
+                  @if(auth()->user()->can('call_log_access'))
+                  <li class="nav-link {{ request()->is('lead-call-log*') ? 'active' : '' }}">
+                     <a class="hoveradd no-after" href="{{ url('lead-call-log') }}">
+                        <i class="material-icons icon">call</i>
+                        <span>Call Managment</span>
+                        <div class="d-none mobile_hide"> Call Management</div>
+                     </a>
+                  </li>
+                  @endif
+
                   @if(auth()->user()->can('geo_locator_access'))
                   <li class="nav-link {{ request()->is('geo_locator*') ? 'active' : '' }}">
                      <a class="hoveradd no-after" href="{{ url('geo_locator') }}">

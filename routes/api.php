@@ -350,4 +350,6 @@ Route::group(['middleware' => ['auth:users']], function () {
     // Call logs routes
     Route::post('add-call-logs', [CallLogController::class, 'store']);
     Route::get('get-call-logs', [CallLogController::class, 'index']);
+    Route::get('get-last-call', [CallLogController::class, 'last_call']);
+    Route::post('update-call-remark', [CallLogController::class, 'update_remark']);
 });

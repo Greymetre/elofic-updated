@@ -101,6 +101,7 @@ use App\Http\Controllers\OpeningStockController;
 use App\Http\Controllers\PowerBiSettingController;
 use App\Http\Controllers\TaxInvoiceController;
 use App\Http\Controllers\CustomerCustomFieldController;
+use App\Http\Controllers\LeadCallLogController;
 use App\Models\CustomerCustomField;
 use App\Models\DealerPortalSettings;
 use App\Models\PowerBiSetting;
@@ -1134,6 +1135,10 @@ Route::group(['middleware' => ['auth']], function () {
 
     // Customer Custom Fields Routes
     Route::resource('customer-custom-fields', CustomerCustomFieldController::class);
+
+    //Lead call log routes
+    Route::any('lead-call-log', [LeadCallLogController::class, 'index'])->name('lead-call-log');
+    Route::any('call-log-download', [LeadCallLogController::class, 'download'])->name('lead-call-log-download');
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);
