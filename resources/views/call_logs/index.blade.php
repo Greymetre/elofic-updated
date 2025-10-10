@@ -1,4 +1,13 @@
 <x-app-layout>
+  <style>
+    .card {
+      transition: transform 0.2s ease;
+    }
+
+    .active-card {
+      transform: scale(1.06);
+    }
+  </style>
   <div class="row">
     <div class="col-md-12">
       <div class="card">
@@ -224,11 +233,10 @@
 
     function filterByStatus(status, div) {
       // Remove border from all cards first
-      $('.card').css('border', 'none');
-
-      // Add border to the clicked one
-      $(div).find('.card').css('border', '2px solid #000');
-
+      $('.card').removeClass('active-card'); // remove active class from all
+      $('.card-text').css('font-weight', '300');
+      $(div).find('.card').fadeOut(100).fadeIn(200).addClass('active-card');
+      $(div).find('.card-text').css('font-weight', '600');
       // Filter table data
       table.column(5).search(status).draw();
     }

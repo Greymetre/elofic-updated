@@ -76,14 +76,14 @@ class CustomController extends Controller
     {
         try {
             $data = collect([
-                collect(["type" => 'Tour', "is_city" => true, "is_beat" => true, 'image' => true, 'summary' => true, 'city_required' => true, 'beat_required' => true]),
-                collect(["type" => 'Office', "is_city" => true, "is_beat" => false, 'image' => true, 'summary' => true, 'city_required' => true, 'beat_required' => false]),
-                // collect(["type" => 'Plumber Meet', "is_city" => true, "is_beat" => false, 'image' => false, 'summary' => false, 'city_required' => false, 'beat_required' => false]),
-                // collect(["type" => 'Service Center Visit', "is_city" => true, "is_beat" => false, 'image' => false, 'summary' => false, 'city_required' => false, 'beat_required' => false]),
+                collect(["type" => 'Office Meeting', "is_city" => true, "is_beat" => false, 'image' => true, 'summary' => true, 'city_required' => true, 'beat_required' => false]),
                 collect(["type" => 'Local Market Visit', "is_city" => true, "is_beat" => false, 'image' => false, 'summary' => false, 'city_required' => false, 'beat_required' => false]),
+                collect(["type" => 'Tour', "is_city" => true, "is_beat" => true, 'image' => true, 'summary' => true, 'city_required' => true, 'beat_required' => true]),
+                // collect(["type" => 'Plumber Meet', "is_city" => true, "is_beat" => false, 'image' => false, 'summary' => false, 'city_required' => false, 'beat_required' => false]),
+                collect(["type" => 'Project Visit', "is_city" => true, "is_beat" => false, 'image' => false, 'summary' => false, 'city_required' => false, 'beat_required' => false]),
                 collect(["type" => 'Customer Visit', "is_city" => true, "is_beat" => false, 'image' => false, 'summary' => false, 'city_required' => false, 'beat_required' => false]),
 
-                collect(["type" => 'Other', "is_city" => true, "is_beat" => false, 'image' => false, 'summary' => false, 'city_required' => false, 'beat_required' => false]),
+                collect(["type" => 'Other Visit', "is_city" => true, "is_beat" => false, 'image' => false, 'summary' => false, 'city_required' => false, 'beat_required' => false]),
 
 
             ]);

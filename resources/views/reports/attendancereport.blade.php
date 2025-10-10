@@ -203,12 +203,12 @@
                   <label class="col-form-label">Working Type</label>
                   <select class="form-control " name="working_type" id="working_type" style="width: 100%;" required>
                     <option value="">Select Working Type</option>
-                    <option value="Tour" data-is-city="true">Tour</option>
-                    <option value="Office Work" data-is-city="true">Office Work</option>
-                    <option value="Plumber Meet" data-is-city="true">Plumber Meet</option>
-                    <option value="Service Center Visit" data-is-city="true">Service Center Visit</option>
+                    <option value="Office Meeting" data-is-city="true">Office Meeting</option>
                     <option value="Local Market Visit" data-is-city="true">Local Market Visit</option>
-                    <option value="Retailer Meet" data-is-city="true">Retailer Meet</option>
+                    <option value="Tour" data-is-city="true">Tour</option>
+                    <option value="Project Visit" data-is-city="true">Project Visit</option>
+                    <option value="Customer Visit" data-is-city="true">Customer Visit</option>
+                    <option value="Other Visit" data-is-city="true">Other Visit</option>
                   </select>
                 </div>
               </div>
@@ -742,8 +742,8 @@
             $("#tour_name").val(res.data.town);
             $("#tourid").val(res.data.id);
           } else {
-            $("#tour_error").removeClass("d-none");
-            $("#add_attend").prop('disabled', true);
+            // $("#tour_error").removeClass("d-none");
+            // $("#add_attend").prop('disabled', true);
           }
         }
       });
