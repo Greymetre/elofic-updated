@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActiveCustomerProcessController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AjaxController;
 use App\Http\Controllers\AppraisalController;
@@ -101,6 +102,7 @@ use App\Http\Controllers\OpeningStockController;
 use App\Http\Controllers\PowerBiSettingController;
 use App\Http\Controllers\TaxInvoiceController;
 use App\Http\Controllers\CustomerCustomFieldController;
+use App\Http\Controllers\CustomerProcessController;
 use App\Http\Controllers\LeadCallLogController;
 use App\Models\CustomerCustomField;
 use App\Models\DealerPortalSettings;
@@ -1139,6 +1141,10 @@ Route::group(['middleware' => ['auth']], function () {
     //Lead call log routes
     Route::any('lead-call-log', [LeadCallLogController::class, 'index'])->name('lead-call-log');
     Route::any('call-log-download', [LeadCallLogController::class, 'download'])->name('lead-call-log-download');
+
+    //Process Management Routes
+    Route::resource('customer_process', CustomerProcessController::class);
+    Route::resource('active_customer_process', ActiveCustomerProcessController::class);
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

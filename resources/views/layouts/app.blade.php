@@ -24,6 +24,8 @@
    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
    <meta http-equiv="Cache-Control" content="no-store" />
    <style>
+      /* Google Font Import - Poppins */
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
       .iconimg {
          background: #fff;
          padding: 0px;
@@ -38,8 +40,6 @@
          padding: 0 !important;
       }
 
-      /* Google Font Import - Poppins */
-      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
       * {
          margin: 0;
@@ -329,7 +329,7 @@
          border-top: 0px;
          border-left: 0px;
          transform: rotate(45deg);
-      }  
+      }
 
       .sidebar li.nav-link a:hover {
          /* background-color: var(--primary-color);
@@ -490,6 +490,7 @@
          width: 75%;
          padding: 10px 5px;
       }
+
       .logo-main.mobile img {
          width: 68%;
       }
@@ -846,7 +847,7 @@
                               </a>
                            </li>
 
-                            <li class="nav-link-btn {{ request()->is('lead-contacts*') ? 'active' : '' }}">
+                           <li class="nav-link-btn {{ request()->is('lead-contacts*') ? 'active' : '' }}">
                               <a class="hoveradd2" href="{{ url('lead-contacts') }}">
                                  <i class="material-icons icon">diamond</i>
                                  <span>Contacts</span>
@@ -1061,7 +1062,7 @@
                      </div>
                   </li>
                   @endif
-                 
+
                   @if(auth()->user()->can('product_access'))
                   <li class="nav-link {{ request()->is('categories*') || request()->is('subcategories*') || request()->is('brands*') || request()->is('products*') || request()->is('units*') || request()->is('production*') ? 'active' : '' }}">
                      <a class="collapsed hoveradd" data-toggle="collapse" href="#productMenu" aria-expanded="false">
@@ -1192,6 +1193,38 @@
                         <span>Geo Locator</span>
                         <div class="d-none mobile_hide"> Geo Locator</div>
                      </a>
+                  </li>
+                  @endif
+
+                  @if(auth()->user()->can('process_management_access'))
+                  <li class="nav-link {{ request()->is('customer_process*') || request()->is('active_customer_process*') ? 'active' : '' }}">
+                     <a class="collapsed hoveradd" data-toggle="collapse" href="#forecastMenu" aria-expanded="false">
+                        <i class="material-icons icon">account_tree</i>
+                        <span> Process Management </span>
+                        <div class="d-none mobile_hide"> Process Management</div>
+                     </a>
+                     <div class="collapse" id="forecastMenu" style="">
+                        <ul class="navd">
+                           @if(auth()->user()->can('active_process_access'))
+                           <li class="nav-link-btn {{ request()->is('active_customer_process*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('active_customer_process') }}">
+                                 <i class="material-icons icon">scale</i>
+                                 <span>Active Process</span>
+                                 <div class="d-none mobile_hide"> Active Process</div>
+                              </a>
+                           </li>
+                           @endif
+                           @if(auth()->user()->can('process_access'))
+                           <li class="nav-link-btn {{ request()->is('customer_process*') ? 'active' : '' }}">
+                              <a class="hoveradd2" href="{{ url('customer_process') }}">
+                                 <i class="material-icons icon">view_timeline</i>
+                                 <span>Processes</span>
+                                 <div class="d-none mobile_hide"> Processes</div>
+                              </a>
+                           </li>
+                           @endif
+                        </ul>
+                     </div>
                   </li>
                   @endif
 
@@ -2563,9 +2596,9 @@
       <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
          <div class="container-fluid" style="background: transparent; !important">
             <div class="new_demo">
-            <!-- <img class="rounded ml-2 iconimg" alt="Blueneba" src="{!! url('/').'/'.asset('assets/img/bnt_logo.png') !!}?" width="120"> -->
-            <!-- <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100"> -->
-         </div>
+               <!-- <img class="rounded ml-2 iconimg" alt="Blueneba" src="{!! url('/').'/'.asset('assets/img/bnt_logo.png') !!}?" width="120"> -->
+               <!-- <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100"> -->
+            </div>
             <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
             <div class="navbar-wrapper">
                <div class="navbar-minimize">
