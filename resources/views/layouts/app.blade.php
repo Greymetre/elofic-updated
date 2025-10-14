@@ -1198,12 +1198,12 @@
 
                   @if(auth()->user()->can('process_management_access'))
                   <li class="nav-link {{ request()->is('customer_process*') || request()->is('active_customer_process*') ? 'active' : '' }}">
-                     <a class="collapsed hoveradd" data-toggle="collapse" href="#forecastMenu" aria-expanded="false">
+                     <a class="collapsed hoveradd" data-toggle="collapse" href="#processManagementtMenu" aria-expanded="false">
                         <i class="material-icons icon">account_tree</i>
                         <span> Process Management </span>
                         <div class="d-none mobile_hide"> Process Management</div>
                      </a>
-                     <div class="collapse" id="forecastMenu" style="">
+                     <div class="collapse" id="processManagementtMenu" style="">
                         <ul class="navd">
                            @if(auth()->user()->can('active_process_access'))
                            <li class="nav-link-btn {{ request()->is('active_customer_process*') ? 'active' : '' }}">

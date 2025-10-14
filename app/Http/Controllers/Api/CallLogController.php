@@ -44,14 +44,14 @@ class CallLogController extends Controller
                 'success' => true,
                 'message' => 'Call log created successfully',
                 'data'    => $callLog,
-            ], 201);
+            ], 200);
         } catch (\Exception $e) {
             Log::info($e);
             return response()->json([
                 'success' => false,
                 'message' => 'Call log created successfully',
                 'data'    => [],
-            ], 201);
+            ], 200);
         }
     }
 
