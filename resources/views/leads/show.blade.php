@@ -1314,7 +1314,6 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                 </div>
             </form>
         </div>--}}
-
         @php
         $previousDate = null;
         @endphp
@@ -1344,6 +1343,8 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                     <img src="{{url('/').'/'.asset('assets/img')}}/task_logo.png" width="35">
                     @elseif($lead_note->type == 'log')
                     <img src="{{url('/').'/'.asset('assets/img')}}/log.png" width="35">
+                    @elseif($lead_note->type == 'call_log')
+                    <img src="{{url('/').'/'.asset('assets/img')}}/call_log.png" width="35">
                     @else
                     <img src="{{url('/').'/'.asset('assets/img')}}/opportunity.png?" width="25">
                     @endif
@@ -1361,6 +1362,10 @@ action="{{ route('lead-opportunities.store') }}" class="form-horizontal taskform
                 @elseif($lead_note->type == 'log')
                 <h5>Log </h5>
                 <h5>{!! $lead_note->message??''!!}</h5>
+                @elseif($lead_note->type == 'call_log')
+                <h5>Call Log </h5>
+                <h5>{!! $lead_note->remark??''!!}</h5>
+                <p>Created by: {!! $lead_note->user? $lead_note->user->name : ''!!}</p>
                 @else
                 <h5>Opportunity <span class="badge badge-info ml-1" style="font-family: 'Poppins', sans-serif;font-size: 10px;font-weight:700;border-radius: 0px 10px !important;"> {{$lead_note->status_is ? $lead_note->status_is->status_name :''}}</span></h5>
                 <h5>{!! $lead_note->note??''!!} </h5>

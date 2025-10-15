@@ -28,6 +28,11 @@ class ActiveCustomerProcessController extends Controller
         }
         $users_ids = getUsersReportingToAuth();
         $customer_ids = EmployeeDetail::whereIn('user_id', $users_ids)->pluck('customer_id')->toArray();
+        $customers = Customers::where('active', 'Y');
+        if (!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Admin')) {
+            $customers->whereIn('id', $customer_ids);
+        }
+        $customers = $customers->select('id', 'name')->get();
         if ($request->ajax()) {
             $completedCustomerIds = ActiveCustomerProcess::select('customer_id')
                 ->groupBy('customer_id')
@@ -45,13 +50,29 @@ class ActiveCustomerProcessController extends Controller
                 $query->whereIn('customer_id', $customer_ids);
             }
 
-            if($request->status == 'closed'){
+            if ($request->customer_id && !empty($request->customer_id)) {
+                $query->where('customer_id', $request->customer_id);
+            }
+
+            if ($request->start_date && !empty($request->start_date)) {
+                $query->whereHas('customer', function ($query) use ($request) {
+                    $query->where('creation_date', '>=', $request->start_date);
+                });
+            }
+
+            if ($request->end_date && !empty($request->end_date)) {
+                $query->whereHas('customer', function ($query) use ($request) {
+                    $query->where('creation_date', '<=', $request->end_date);
+                });
+            }
+
+            if ($request->status == 'closed') {
                 $query->whereIn('customer_id', $completedCustomerIds);
-            }else if($request->status == 'active'){
+            } else if ($request->status == 'active') {
                 $query->whereNotIn('customer_id', $completedCustomerIds);
             }
 
-            $query = $query->whereRaw('0 = 1')->select('active_customer_processes.*');
+            $query = $query->select('active_customer_processes.*');
 
             return DataTables::of($query)
                 ->addIndexColumn()
@@ -65,12 +86,22 @@ class ActiveCustomerProcessController extends Controller
                 })
 
                 ->editColumn('customer.creation_date', function ($row) {
-                    return isset($row->customer->creation_date) ? date('d M Y', strtotime($row->customer->creation_date)) : '';
+                    $date = $row->customer->creation_date ?? null;
+
+                    if (!empty($date) && strtotime($date)) {
+                        return date('d M Y', strtotime($date));
+                    }
+
+                    return '';
                 })
-                ->rawColumns(['action'])
+
+                ->addColumn('steps', function ($row) {
+                    return '<button class="btn btn-sm btn-info steps" data-id="' . $row->id . '" title="Steps"><i class="material-icons">list</i></button>';
+                })
+                ->rawColumns(['action', 'steps'])
                 ->make(true);
         }
-        return view('active_customer_process.index');
+        return view('active_customer_process.index', compact('customers'));
     }
 
     /**
@@ -173,6 +204,44 @@ class ActiveCustomerProcessController extends Controller
      */
     public function destroy(ActiveCustomerProcess $activeCustomerProcess)
     {
-        //
+        abort_if(Gate::denies('active_process_delete'), Response::HTTP_FORBIDDEN, '403 Forbidden, You do not have permission to delete this process!');
+        if ($activeCustomerProcess->delete()) {
+            return response()->json(['status'  => 'success', 'message' => 'Active Process deleted successfully!']);
+        }
+        return response()->json(['status'  => 'error', 'message' => 'Error in Process Delete!']);
+    }
+
+    public function getActiveProcessSteps(ActiveCustomerProcess $activeCustomerProcess)
+    {
+        return response()->json(['status' => 'success', 'steps' => $activeCustomerProcess->steps->load('step', 'completedByUser')]);
+    }
+
+    public function completeProcessStep(ActiveCustomerProcessStep $step, Request $request)
+    {
+        $request->validate([
+            'remarks' => 'required|string|max:255',
+        ]);
+
+        $step->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+            'remark' => $request->remarks,
+        ]);
+
+        $process = $step->activeProcess; // assuming you have a relation in step model
+
+        $allCompleted = $process->steps()->where('status', '!=', 'completed')->count() === 0;
+
+        if ($allCompleted) {
+            $process->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Step marked as completed successfully.',
+        ]);
     }
 }

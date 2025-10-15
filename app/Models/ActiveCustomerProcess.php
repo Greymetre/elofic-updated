@@ -42,8 +42,7 @@ class ActiveCustomerProcess extends Model
 
     public function steps()
     {
-        return $this->hasMany(ActiveCustomerProcessStep::class, 'active_customer_process_id')
-                    ->orderBy('sort_order');
+        return $this->hasMany(ActiveCustomerProcessStep::class, 'active_customer_process_id');
     }
 
     public function assignedBy()

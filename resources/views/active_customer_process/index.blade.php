@@ -80,6 +80,27 @@
           <h4 class="card-title ">Active Customer Process
             <span class="">
               <div class="btn-group header-frm-btn">
+
+                <form method="GET" action="{{ URL::to('call-log-download') }}">
+                  <div class="d-flex flex-wrap flex-row">
+                    <div class="p-2" style="width:200px;">
+                      <select class="select2" name="customer_id" id="customer_id" data-style="select-with-transition" title="Select Customer">
+                        <option value="">Select Customer</option>
+                        @if(@isset($customers ))
+                        @foreach($customers as $customer)
+                        <option value="{!! $customer['id'] !!}" {{ old( 'customer_id') == $customer->id ? 'selected' : '' }}>{!! $customer['name'] !!}</option>
+                        @endforeach
+                        @endif
+                      </select>
+                    </div>
+                    <div class="p-2" style="width:150px;"><input type="text" class="form-control datepicker" id="start_date" name="start_date" placeholder="Start Date" autocomplete="off" readonly></div>
+                    <div class="p-2" style="width:150px;"><input type="text" class="form-control datepicker" id="end_date" name="end_date" placeholder="End Date" autocomplete="off" readonly></div>
+                    {{--@if(auth()->user()->can(['call_log_download']))
+                    <div class="p-2"><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!}  Call Logs"><i class="material-icons">cloud_download</i></button></div>
+                    @endif--}}
+                  </div>
+                </form>
+
                 <div class="next-btn">
                   @if(auth()->user()->can('active_process_create'))
                   <a href="{{ route('active_customer_process.create') }}" class="btn btn-just-icon btn-theme" title="Assign Process"><i class="material-icons">add_circle</i></a>
@@ -131,6 +152,7 @@
                     <th> Customer Number</th>
                     <th>Customer Created Date</th>
                     <th> Process</th>
+                    <th>Steps</th>
                   </thead>
                   <tbody>
                   </tbody>
@@ -147,6 +169,7 @@
                     <th> Customer Number</th>
                     <th>Customer Created Date</th>
                     <th> Process</th>
+                    <th>Steps</th>
                   </thead>
                   <tbody>
                   </tbody>
@@ -158,6 +181,46 @@
       </div>
     </div>
 
+    <!-- Steps model -->
+    <!-- Steps Modal -->
+    <div class="modal fade" id="stepsModal" tabindex="-1" role="dialog" aria-labelledby="stepsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="stepsModalLabel">Process Steps</h5>
+            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped mb-0">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>#</th>
+                    <th>Step Name</th>
+                    <th>Status</th>
+                    <th>Completed Date</th>
+                    <th>Remarks</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="stepsTableBody">
+                  <tr>
+                    <td colspan="5" class="text-center text-muted">No steps found.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
     <script type="text/javascript">
       $(function() {
@@ -166,164 +229,260 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
           }
         });
-        var table2 = $('#getClosedProcess').DataTable({
-          processing: true,
-          serverSide: true,
-          "order": [
-            [0, 'desc']
-          ],
-          ajax: {
-            url: "{{ route('active_customer_process.index') }}",
-            data: function(d) {
-              d.user_id = $('#executive_id').val(),
-              d.start_date = $('#start_date').val(),
-              d.end_date = $('#end_date').val(),
-              d.status = 'closed'
-            }
-          },
-          columns: [{
-              data: 'DT_RowIndex',
-              name: 'DT_RowIndex',
-              orderable: false,
-              searchable: false
+
+        function initializeProcessTable(tableId, status) {
+          return $('#' + tableId).DataTable({
+            processing: true,
+            serverSide: true,
+            order: [
+              [0, 'desc']
+            ],
+            ajax: {
+              url: "{{ route('active_customer_process.index') }}",
+              data: function(d) {
+                d.customer_id = $('#customer_id').val();
+                d.start_date = $('#start_date').val();
+                d.end_date = $('#end_date').val();
+                d.status = status;
+              }
             },
-            {
-              data: 'action',
-              name: 'action',
-              "defaultContent": '',
-              orderable: false,
-              searchable: false
-            },
-            {
-              data: 'customer.name',
-              name: 'customer.name',
-              "defaultContent": ''
-            },
-            {
-              data: 'customer.mobile',
-              name: 'customer.mobile',
-              "defaultContent": ''
-            },
-            {
-              data: 'customer.creation_date',
-              name: 'customer.creation_date',
-              "defaultContent": ''
-            },
-            {
-              data: 'process.process_name',
-              name: 'process.process_name',
-              "defaultContent": ''
-            },
-          ]
+            columns: [{
+                data: 'DT_RowIndex',
+                name: 'DT_RowIndex',
+                orderable: false,
+                searchable: false
+              },
+              {
+                data: 'action',
+                name: 'action',
+                defaultContent: '',
+                orderable: false,
+                searchable: false
+              },
+              {
+                data: 'customer.name',
+                name: 'customer.name',
+                defaultContent: ''
+              },
+              {
+                data: 'customer.mobile',
+                name: 'customer.mobile',
+                defaultContent: ''
+              },
+              {
+                data: 'customer.creation_date',
+                name: 'customer.creation_date',
+                defaultContent: '',
+                searchable: false,
+                orderable: false
+              },
+              {
+                data: 'process.process_name',
+                name: 'process.process_name',
+                defaultContent: ''
+              },
+              {
+                data: 'steps',
+                name: 'steps',
+                defaultContent: '',
+                searchable: false,
+                orderable: false
+              }
+            ]
+          });
+        }
+
+        // Initialize both tables
+        var activeTable = initializeProcessTable('getActiveProcess', 'active');
+        var closedTable = initializeProcessTable('getClosedProcess', 'closed');
+
+        // Common event handling for filters
+        function redrawTables() {
+          activeTable.draw();
+          closedTable.draw();
+        }
+
+        $('#customer_id, #end_date').change(function() {
+          redrawTables();
         });
 
+        $('#start_date').change(function() {
+          var selectedStartDate = $('#start_date').datepicker('getDate');
+          $('#end_date').datepicker("option", "minDate", selectedStartDate);
+          redrawTables();
+        });
+
+        // Common delete event for both tables
         $('body').on('click', '.delete', function() {
-          var id = $(this).attr("value");
+          var id = $(this).data("id");
           var token = $("meta[name='csrf-token']").attr("content");
-          if (!confirm("Are You sure want to delete ?")) {
-            return false;
-          }
-          $.ajax({
-            url: "{{ url('customer-custom-fields') }}" + '/' + id,
-            type: 'DELETE',
-            data: {
-              _token: token,
-              id: id
-            },
-            success: function(data) {
-              $('.alert').show();
-              if (data.status == 'success') {
-                $('.alert').addClass("alert-success");
-              } else {
-                $('.alert').addClass("alert-danger");
-              }
-              $('.message').append(data.message);
-              table2.draw();
-            },
+
+          Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!"
+          }).then((result) => {
+            if (result.value) {
+              $.ajax({
+                url: "{{ url('active_customer_process') }}" + '/' + id,
+                type: 'DELETE',
+                data: {
+                  _token: token,
+                  id: id
+                },
+                success: function(data) {
+                  if (data.status == 'success') {
+                    Swal.fire("Deleted!", data.message, "success");
+                  } else {
+                    Swal.fire("Error!", data.message, "error");
+                  }
+                  redrawTables();
+                },
+                error: function(xhr) {
+                  let message = "Something went wrong!";
+                  if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                  } else if (xhr.responseText) {
+                    message = xhr.responseText;
+                  }
+                  Swal.fire("Error!", message, "error");
+                }
+              });
+            }
           });
         });
 
-      });
-      $(function() {
-        $.ajaxSetup({
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          }
-        });
-        var table = $('#getActiveProcess').DataTable({
-          processing: true,
-          serverSide: true,
-          "order": [
-            [0, 'desc']
-          ],
-          ajax: {
-            url: "{{ route('active_customer_process.index') }}",
-            data: function(d) {
-              d.user_id = $('#executive_id').val(),
-              d.start_date = $('#start_date').val(),
-              d.end_date = $('#end_date').val(),
-              d.status = 'active'
-            }
-          },
-          columns: [{
-              data: 'DT_RowIndex',
-              name: 'DT_RowIndex',
-              orderable: false,
-              searchable: false
-            },
-            {
-              data: 'action',
-              name: 'action',
-              "defaultContent": '',
-              orderable: false,
-              searchable: false
-            },
-            {
-              data: 'customer.name',
-              name: 'customer.name',
-              "defaultContent": ''
-            },
-            {
-              data: 'customer.mobile',
-              name: 'customer.mobile',
-              "defaultContent": ''
-            },
-            {
-              data: 'customer.creation_date',
-              name: 'customer.creation_date',
-              "defaultContent": ''
-            },
-            {
-              data: 'process.process_name',
-              name: 'process.process_name',
-              "defaultContent": ''
-            },
-          ]
-        });
-
-        $('body').on('click', '.delete', function() {
-          var id = $(this).attr("value");
+        $('body').on('click', '.steps', function() {
+          return false;
+          var id = $(this).data("id");
           var token = $("meta[name='csrf-token']").attr("content");
-          if (!confirm("Are You sure want to delete ?")) {
-            return false;
-          }
           $.ajax({
-            url: "{{ url('customer-custom-fields') }}" + '/' + id,
-            type: 'DELETE',
+            url: "{{ url('get_active_process_steps') }}" + '/' + id,
+            type: 'GET',
             data: {
               _token: token,
               id: id
             },
             success: function(data) {
-              $('.alert').show();
               if (data.status == 'success') {
-                $('.alert').addClass("alert-success");
+                const steps = data.steps || [];
+                let html = '';
+
+                if (steps.length > 0) {
+                  steps.forEach((step, index) => {
+                    const isPending = step.status === 'pending';
+                    html += `
+                                      <tr style="background-color: ${isPending ? '#f8d7da' : '#d4edda'};">
+                                        <td>${index + 1}</td>
+                                        <td>${step.step.value || ''}</td>
+                                        <td>
+                                          <span class="badge badge-${step.status === 'completed' ? 'success' : 'secondary'}">
+                                            ${step.status ? step.status.charAt(0).toUpperCase() + step.status.slice(1) : ''}
+                                          </span>
+                                        </td>
+                                        <td>${step.completed_at ? moment(step.completed_at).format('DD MMM YYYY') : '-'}</td>
+                                        <td>${step.remark || '-'}</td>
+                                        <td>
+                                          ${isPending ? `
+                                            <button class="btn btn-sm btn-success complete-step" data-id="${step.id}">
+                                              <i class="fa fa-check"></i> Mark Complete
+                                            </button>
+                                          ` : '<i class="text-muted">—</i>'}
+                                        </td>
+                                      </tr>
+                                    `;
+                  });
+                } else {
+                  html = `<tr><td colspan="5" class="text-center text-muted">No steps found.</td></tr>`;
+                }
+
+                // Inject rows into modal table
+                $('#stepsTableBody').html(html);
+
+                // Show the modal
+                $('#stepsModal').modal('show');
               } else {
-                $('.alert').addClass("alert-danger");
+                Swal.fire("Error!", data.message, "error");
               }
-              $('.message').append(data.message);
-              table.draw();
+              redrawTables();
             },
+            error: function(xhr) {
+              let message = "Something went wrong!";
+              if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+              } else if (xhr.responseText) {
+                message = xhr.responseText;
+              }
+              Swal.fire("Error!", message, "error");
+            }
+          });
+        });
+
+        $('body').on('click', '.complete-step', function() {
+          return false;
+          $('#stepsModal').modal('hide');
+          var stepId = $(this).data('id');
+          var token = $("meta[name='csrf-token']").attr("content");
+          var $row = $(this).closest('tr');
+
+          // SweetAlert input for remark
+          Swal.fire({
+            title: "Complete Step",
+            input: "textarea",
+            inputLabel: "Enter completion remark",
+            inputPlaceholder: "Type your remark here...",
+            inputAttributes: {
+              'aria-label': 'Type your remark here'
+            },
+            showCancelButton: true,
+            confirmButtonText: "Mark as Complete",
+            cancelButtonText: "Cancel",
+            inputValidator: (value) => {
+              if (!value) {
+                return "Remark is required!";
+              }
+            }
+          }).then((result) => {
+            if (result.value) {
+              var remark = result.value;
+
+              $.ajax({
+                url: "{{ url('complete_process_step') }}/" + stepId,
+                type: "POST",
+                data: {
+                  _token: token,
+                  remarks: remark
+                },
+                success: function(res) {
+                  if (res.status === 'success') {
+                    Swal.fire("Done!", res.message, "success");
+
+                    // Update row instantly
+                    $row.find('td:eq(2) .badge')
+                      .removeClass('badge-warning')
+                      .addClass('badge-success')
+                      .text('Completed');
+
+                    $row.find('td:eq(3)').text(moment().format('DD MMM YYYY'));
+                    $row.find('td:eq(4)').text(remark);
+                    $row.find('td:eq(5)').html('<i class="text-muted">—</i>');
+                    redrawTables();
+                  } else {
+                    Swal.fire("Error!", res.message, "error");
+                  }
+                },
+                error: function(xhr) {
+                  let message = "Something went wrong!";
+                  if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                  }
+                  Swal.fire("Error!", message, "error");
+                }
+              });
+            }
           });
         });
 

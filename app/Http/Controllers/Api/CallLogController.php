@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CallLog;
+use App\Models\LeadLog;
 use App\Models\Status;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -162,8 +163,17 @@ class CallLogController extends Controller
 
         // Update the related lead status
         if ($last_call->lead) {
+            $old_status = Status::where('id', $last_call->lead->status)->first();
             $last_call->lead->status = $request->lead_type_id;
             $last_call->lead->save();
+            $new_status = Status::where('id', $request->lead_type_id)->first();
+            $msg = 'Lead move from ' . $old_status->display_name . ' to ' . $new_status->display_name .
+                ' by ' . Auth::user()->name;
+            LeadLog::create([
+                'lead_id' => $last_call->lead->id,
+                'message' => $msg,
+                'created_by' => Auth::id(),
+            ]);
         }
         return response()->json([
             'success' => true,

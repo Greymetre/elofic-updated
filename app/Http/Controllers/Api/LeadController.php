@@ -6,6 +6,7 @@ use App\Models\Lead;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Address;
+use App\Models\CallLog;
 use App\Models\LeadCheckIn;
 use App\Models\LeadContact;
 use App\Models\LeadLog;
@@ -373,7 +374,8 @@ class LeadController extends Controller
             $lead_notes = LeadNote::with('createdby:id,name')->where(['lead_id' => $lead->id])->get();
             $lead_tasks = LeadTask::with('assignUser:id,name', 'createdby:id,name')->where(['lead_id' => $lead->id])->get();
             $lead_logs = LeadLog::where(['lead_id' => $lead->id])->get();
-            $opportunities = LeadOpportunity::where(['lead_id' => $lead->id])->get();
+            $opportunities = LeadOpportunity::with('createdby:id,name')->where(['lead_id' => $lead->id])->get();
+            $call_logs = CallLog::with('user:id,name')->where(['lead_id' => $lead->id])->whereNotNull('remark')->get();
             $lead_notes->each(function ($item) {
                 $item->type = 'note';
                 $item->created_at_formatted = $item->created_at->format('d M Y');
@@ -392,10 +394,16 @@ class LeadController extends Controller
             $opportunities->each(function ($item) {
                 $item->type = 'opportunity';
                 $item->created_at_formatted = $item->created_at->format('d M Y');
+                $item->status = $item->status_is ? $item->status_is->status_name : 'Pending';
+            });
+            $call_logs->each(function ($item) {
+                $item->type = 'call_log';
+                $item->created_at_formatted = $item->created_at->format('d M Y');
+                $item->createdby = $item->user ? $item->user : '';
             });
 
-            // $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->merge($opportunities)->sortByDesc('created_at')->values();
-            $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->sortByDesc('created_at')->values();
+            $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->merge($opportunities)->merge($call_logs)->sortByDesc('created_at')->values();
+            // $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->sortByDesc('created_at')->values();
 
             $notification_count = LeadNotification::where(['user_id' => $request->user()->id, 'read' => 0])->count();
             return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'notes_tasks' => $combined, 'notification_count' => $notification_count], 200);

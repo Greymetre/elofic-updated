@@ -1145,6 +1145,9 @@ Route::group(['middleware' => ['auth']], function () {
     //Process Management Routes
     Route::resource('customer_process', CustomerProcessController::class);
     Route::resource('active_customer_process', ActiveCustomerProcessController::class);
+    Route::any('get_active_process_steps/{activeCustomerProcess}', [ActiveCustomerProcessController::class, 'getActiveProcessSteps'])->name('get_active_process_steps');
+    Route::post('complete_process_step/{step}', [ActiveCustomerProcessController::class, 'completeProcessStep']);
+
 });
 
 Route::any('getState', [AjaxController::class, 'getState']);

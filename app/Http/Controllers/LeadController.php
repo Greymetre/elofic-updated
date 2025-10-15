@@ -25,6 +25,7 @@ use App\Models\Pincode;
 use App\Models\Country;
 use App\Models\Address;
 use App\Models\Branch;
+use App\Models\CallLog;
 use App\Models\Customers;
 use App\Models\Division;
 use App\Models\EmployeeDetail;
@@ -711,6 +712,7 @@ class LeadController extends Controller
 
         $lead_logs = LeadLog::where(['lead_id' => $lead->id])->get();
         $opportunities = LeadOpportunity::where(['lead_id' => $lead->id])->get();
+        $call_logs = CallLog::where(['lead_id' => $lead->id])->whereNotNull('remark')->get();
 
         $lead_notes->each(function ($item) {
             $item->type = 'note';
@@ -724,9 +726,12 @@ class LeadController extends Controller
         $opportunities->each(function ($item) {
             $item->type = 'opportunity';
         });
+        $call_logs->each(function ($item) {
+            $item->type = 'call_log';
+        });
 
 
-        $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->merge($opportunities)->sortByDesc('created_at')->values();
+        $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->merge($opportunities)->merge($call_logs)->sortByDesc('created_at')->values();
         // $combined = $lead_notes->merge($lead_tasks)->merge($lead_logs)->sortByDesc('created_at')->values();
 
         $media_items = $lead->getMedia('lead_file');
