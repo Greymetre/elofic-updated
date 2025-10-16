@@ -244,4 +244,20 @@ class ActiveCustomerProcessController extends Controller
             'message' => 'Step marked as completed successfully.',
         ]);
     }
+
+    public function updateRemark(Request $request, ActiveCustomerProcessStep $step)
+    {
+        $request->validate([
+            'remark' => 'required|string|max:255',
+        ]);
+
+        $step->remark = $request->remark;
+        $step->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Remark updated successfully.',
+            'remark' => $step->remark,
+        ]);
+    }
 }

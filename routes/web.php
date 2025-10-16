@@ -1147,6 +1147,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('active_customer_process', ActiveCustomerProcessController::class);
     Route::any('get_active_process_steps/{activeCustomerProcess}', [ActiveCustomerProcessController::class, 'getActiveProcessSteps'])->name('get_active_process_steps');
     Route::post('complete_process_step/{step}', [ActiveCustomerProcessController::class, 'completeProcessStep']);
+    Route::post('/steps/{step}/remark', [ActiveCustomerProcessController::class, 'updateRemark'])
+     ->name('steps.updateRemark');
 
 });
 

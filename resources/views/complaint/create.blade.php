@@ -314,7 +314,7 @@
                         @endif
                      </div>
                   </div>
-                  <div class="col-md-3">
+                 <!--  <div class="col-md-3">
                      <div class="input_section">
                         <label class="col-form-label">HP </label>
                         <input readonly type="text" name="specification" id="specification" class="form-control" value="{!! old( 'specification', $complaints['specification']) !!}">
@@ -346,7 +346,7 @@
                         </div>
                         @endif
                      </div>
-                  </div>
+                  </div> -->
                   <div class="col-md-3">
                      <div class="input_section">
                         <label class="col-form-label">Bill By Company (Party Name)</label>
@@ -462,7 +462,9 @@
                            <option value="">Service Paid/Free</option>
                            <option value="Paid" {!! old('service_type', $complaints['service_type'])=='Paid' ? 'selected' :'' !!}>Paid</option>
                            <option value="Free" {!! old('service_type', $complaints['service_type'])=='Free' ? 'selected' :'' !!}>Free</option>
-                           <option value="later_update" {!! old('service_type', $complaints['service_type'])=='later_update' ? 'selected' :'' !!}>F&A Later Update</option>
+                           <option value="Other" {!! old('service_type', $complaints['service_type'])=='Other' ? 'selected' :'' !!}>Other</option>
+                           <option value="amc" {!! old('service_type', $complaints['service_type'])=='amc' ? 'selected' :'' !!}>amc</option>
+                           <!-- <option value="later_update" {!! old('service_type', $complaints['service_type'])=='later_update' ? 'selected' :'' !!}>F&A Later Update</option> -->
                         </select>
                         @if ($errors->has('service_type'))
                         <div class="error">
@@ -532,16 +534,25 @@
                         </div>
 
                         <div class="col-md-3">
-                           <div class="input_section">
-                              <label class="col-form-label"> Customer Name </label>
-                              <input type="text" readonly name="customer_name" id="customer_name" class="form-control" value="{!! old( 'customer_name', $complaints['customer_name']) !!}">
-                              @if ($errors->has('customer_name'))
-                              <div class="error">
-                                 <p class="text-danger">{{ $errors->first('customer_name') }}</p>
-                              </div>
-                              @endif
-                           </div>
+                            <div class="input_section">
+                                <label class="col-form-label"> Customer Name </label>
+                                 <select name="customer_name" id="customer_name" class="form-control">
+                                     <option value="">Select Customer</option>
+                                     @foreach($end_users as $user)
+                                         <option value="{{ $user->customer_name  }}" data-number="{{ $user->customer_number }}">
+                                             {{ $user->customer_name }} ({{ $user->customer_number }})
+                                         </option>
+                                     @endforeach
+                                 </select>
+
+                                @if ($errors->has('customer_name'))
+                                    <div class="error">
+                                        <p class="text-danger">{{ $errors->first('customer_name') }}</p>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
+
 
                         <div class="col-md-3">
                            <div class="input_section">
@@ -1117,6 +1128,12 @@
             $('#service_type').val('Free').trigger('change');
          }
       })
+
+      $('#customer_name').on('change', function() {
+          let number = $(this).find(':selected').data('number') || '';
+          $('#customer_number').val(number);
+            $("#customer_number").keyup();
+      });
 
       $("#customer_number").on("keyup", function() {
          var customer_number = $(this).val();

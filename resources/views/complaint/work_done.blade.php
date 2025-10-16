@@ -65,6 +65,7 @@
                         <option value="Replacement">Replacement</option>
                         <option value="Telephonic Complaint Resolve">Telephonic Complaint Resolve</option>
                         <option value="Complaint Cancelltion">Complaint Cancelltion</option>
+                         <option value="Other">Other</option>
                       </select>
                     </div>
                   </div>

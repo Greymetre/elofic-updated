@@ -531,6 +531,8 @@ class ComplaintController extends Controller
         ->select('id', 'name', 'employee_codes')
         ->get();
 
+        $end_users = EndUser::where('status' , 1)->select('id' , 'customer_name' , 'customer_number')->get();
+
 
         $service_centers = Customers::where('customertype', '4')->select('id', 'name', 'customer_code')->get();
         $branchs = Branch::where('active', 'Y')->select('id', 'branch_name', 'branch_code')->get();
@@ -542,7 +544,7 @@ class ComplaintController extends Controller
             $this->complaint['serail_number'] = $request->serial_no;
         }
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
-        return view('complaint.create', compact('serial_number','assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types', 'newComplaintNumber', 'products', 'states'))->with('complaints', $this->complaint);
+        return view('complaint.create', compact('serial_number','assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types', 'newComplaintNumber', 'products', 'states' , 'end_users'))->with('complaints', $this->complaint);
     }
 
     /**
@@ -638,10 +640,10 @@ class ComplaintController extends Controller
                 }
             
             }
-            $this->sendMsgToCustomer($complaint , $type=1);
-            if(isset($complaint->service_center)){
-                $this->sendMsgToServiceCenter($complaint);
-            }
+            // $this->sendMsgToCustomer($complaint , $type=1);
+            // if(isset($complaint->service_center)){
+            //     $this->sendMsgToServiceCenter($complaint);
+            // }
 
             return Redirect::to('complaints')->with('message_success', 'Complaint Store Successfully and the complaint number is <span title="Copy" id="copyText">' . $newComplaintNumber . '</span>');
         }else {
@@ -689,6 +691,7 @@ class ComplaintController extends Controller
                 $query->with('permissions');
             }])->select('id', 'name')
             ->get();
+        $end_users = EndUser::where('status' , 1)->select('id' , 'customer_name' , 'customer_number')->get();
         $service_centers = Customers::where('customertype', '4')->select('id', 'name')->get();
         $branchs = Branch::where('active', 'Y')->select('id', 'branch_name', 'branch_code')->get();
         $pincodes = Pincode::where('active', 'Y')->select('id', 'pincode')->get();
@@ -696,7 +699,7 @@ class ComplaintController extends Controller
         $complaint_types = ComplaintType::where('active', 'Y')->select('id', 'name')->get();
         $products = Product::where('active', 'Y')->select('product_name', 'id')->get();
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
-        return view('complaint.create', compact('assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types', 'products', 'states'))->with('complaints', $this->complaint);
+        return view('complaint.create', compact('assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types', 'products', 'states' , 'end_users'))->with('complaints', $this->complaint);
     }
 
     /**
@@ -894,13 +897,14 @@ class ComplaintController extends Controller
             'status' => '101',
         ]);
 
-        $this->sendMsgToServiceCenter($compalint);
+        // $this->sendMsgToServiceCenter($compalint);
         return response()->json(['status' => 'success', 'message' => 'Service Center assign successfully.']);
     }
 
     public function checkCompleteComplaint(Request $request)
     {
         $complaint = Complaint::find($request->id);
+        return response()->json(['status' => 'success', 'message' => 'Take remark and complete complaint.']);
         if ($complaint) {
             $warranty = WarrantyActivation::where('product_serail_number', $complaint->product_serail_number)->where('status', '1')->first();
             $work_done = ComplaintWorkDone::where('complaint_id', $complaint->id)->latest()->first();
@@ -999,7 +1003,7 @@ class ComplaintController extends Controller
 
         $encoded_template = urlencode($template);
         $message_res = sendMessageByInfisms($service_center_mobile , $encoded_template , $SenderId);
-        $this->sendMsgToCustomer($compalint , $type=2);
+        // $this->sendMsgToCustomer($compalint , $type=2);
     }
 
     private function sendMsgToCustomer($compalint , $type=1){

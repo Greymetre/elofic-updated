@@ -148,10 +148,10 @@
                   <thead class=" text-primary">
                     <th>{!! trans('panel.global.no') !!}</th>
                     <th>{!! trans('panel.global.action') !!}</th>
-                    <th> Customer Name</th>
-                    <th> Customer Number</th>
+                    <th>Customer Name</th>
+                    <th>Customer Number</th>
                     <th>Customer Created Date</th>
-                    <th> Process</th>
+                    <th>Process</th>
                     <th>Steps</th>
                   </thead>
                   <tbody>
@@ -165,10 +165,10 @@
                   <thead class=" text-primary">
                     <th>{!! trans('panel.global.no') !!}</th>
                     <th>{!! trans('panel.global.action') !!}</th>
-                    <th> Customer Name</th>
-                    <th> Customer Number</th>
+                    <th>Customer Name</th>
+                    <th>Customer Number</th>
                     <th>Customer Created Date</th>
-                    <th> Process</th>
+                    <th>Process</th>
                     <th>Steps</th>
                   </thead>
                   <tbody>
@@ -181,7 +181,6 @@
       </div>
     </div>
 
-    <!-- Steps model -->
     <!-- Steps Modal -->
     <div class="modal fade" id="stepsModal" tabindex="-1" role="dialog" aria-labelledby="stepsModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg" role="document">
@@ -195,7 +194,7 @@
           <div class="modal-body">
             <div class="table-responsive">
               <table class="table table-bordered table-striped mb-0">
-                <thead class="thead-dark">
+                <thead class="thead-light">
                   <tr>
                     <th>#</th>
                     <th>Step Name</th>
@@ -214,11 +213,36 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary text-white" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Remark Modal -->
+    <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="remarkModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <form id="remarkForm">
+            <div class="modal-header">
+              <h5 class="modal-title" id="remarkModalLabel">Add / Update Remark</h5>
+              <button type="button" class="close" data-dismiss="modal">
+                <span>&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <textarea class="form-control" id="remarkText" rows="4" placeholder="Enter remark" required></textarea>
+            </div>
+            <div class="modal-footer">
+              <input type="hidden" id="remarkStepId">
+              <button type="button" class="btn btn-secondary mr-2 text-white" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-success">Save Remark</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
 
 
     <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
@@ -356,7 +380,7 @@
         });
 
         $('body').on('click', '.steps', function() {
-          return false;
+          // return false;
           var id = $(this).data("id");
           var token = $("meta[name='csrf-token']").attr("content");
           $.ajax({
@@ -374,26 +398,36 @@
                 if (steps.length > 0) {
                   steps.forEach((step, index) => {
                     const isPending = step.status === 'pending';
+                    const hasRemark = step.remark && step.remark.trim() !== '';
                     html += `
-                                      <tr style="background-color: ${isPending ? '#f8d7da' : '#d4edda'};">
-                                        <td>${index + 1}</td>
-                                        <td>${step.step.value || ''}</td>
-                                        <td>
-                                          <span class="badge badge-${step.status === 'completed' ? 'success' : 'secondary'}">
-                                            ${step.status ? step.status.charAt(0).toUpperCase() + step.status.slice(1) : ''}
-                                          </span>
-                                        </td>
-                                        <td>${step.completed_at ? moment(step.completed_at).format('DD MMM YYYY') : '-'}</td>
-                                        <td>${step.remark || '-'}</td>
-                                        <td>
-                                          ${isPending ? `
-                                            <button class="btn btn-sm btn-success complete-step" data-id="${step.id}">
-                                              <i class="fa fa-check"></i> Mark Complete
-                                            </button>
-                                          ` : '<i class="text-muted">—</i>'}
-                                        </td>
-                                      </tr>
-                                    `;
+                              <tr style="background-color: ${isPending ? '#f8d7da' : '#d4edda'};">
+                                <td>${index + 1}</td>
+                                <td>${step.step.value || ''}</td>
+                                <td>
+                                  <span class="badge badge-${step.status === 'completed' ? 'success' : 'secondary'}">
+                                    ${step.status ? step.status.charAt(0).toUpperCase() + step.status.slice(1) : ''}
+                                  </span>
+                                </td>
+                                <td>${step.completed_at ? moment(step.completed_at).format('DD MMM YYYY') : '-'}</td>
+                                <td>
+                                ${hasRemark 
+                                  ? `<button class="btn btn-sm btn-info view-remark" data-id="${step.id}" data-remark="${step.remark}">
+                                      <i class="fa fa-eye"></i>
+                                    </button>` 
+                                  : `<button class="btn btn-sm btn-primary add-remark" data-id="${step.id}">
+                                      <i class="fa fa-plus"></i>
+                                    </button>`
+                                }
+                              </td>
+                                <td>
+                                  ${isPending ? `
+                                    <button class="btn btn-sm btn-success complete-step" data-remark="${step.remark}" data-id="${step.id}">
+                                      <i class="fa fa-check"></i> Complete
+                                    </button>
+                                  ` : '<i class="text-muted">—</i>'}
+                                </td>
+                              </tr>
+                            `;
                   });
                 } else {
                   html = `<tr><td colspan="5" class="text-center text-muted">No steps found.</td></tr>`;
@@ -422,9 +456,10 @@
         });
 
         $('body').on('click', '.complete-step', function() {
-          return false;
+          // return false;
           $('#stepsModal').modal('hide');
           var stepId = $(this).data('id');
+          var stepRemark = $(this).data('remark');
           var token = $("meta[name='csrf-token']").attr("content");
           var $row = $(this).closest('tr');
 
@@ -437,6 +472,7 @@
             inputAttributes: {
               'aria-label': 'Type your remark here'
             },
+            inputValue: stepRemark || '',
             showCancelButton: true,
             confirmButtonText: "Mark as Complete",
             cancelButtonText: "Cancel",
@@ -486,6 +522,76 @@
           });
         });
 
+      });
+
+      // Add new remark
+      $('body').on('click', '.add-remark', function() {
+        $('#remarkModalLabel').text('Add Remark');
+        $('#remarkStepId').val($(this).data('id'));
+        $('#remarkText').val('');
+        $('#remarkModal').modal('show');
+      });
+
+      // View / Update existing remark
+      $('body').on('click', '.view-remark', function() {
+        $('#remarkModalLabel').text('View / Update Remark');
+        $('#remarkStepId').val($(this).data('id'));
+        $('#remarkText').val($(this).data('remark'));
+        $('#remarkModal').modal('show');
+      });
+
+      // Save or Update Remark
+      $('#remarkForm').on('submit', function(e) {
+        e.preventDefault();
+
+        let stepId = $('#remarkStepId').val();
+        let remark = $('#remarkText').val();
+
+        if (remark.trim() === '') {
+          Swal.fire({
+            type: 'error',
+            title: 'Remark is required!',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+          });
+          return;
+        }
+
+        $.ajax({
+          url: `/steps/${stepId}/remark`, // 🔧 Update this route
+          type: 'POST',
+          data: {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            remark: remark
+          },
+          success: function(response) {
+            $('#remarkModal').modal('hide');
+            Swal.fire({
+              type: 'success',
+              title: 'Remark saved successfully!',
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true
+            });
+            // Reload your table data here if needed
+          },
+          error: function() {
+            Swal.fire({
+              type: 'error',
+              title: 'Something went wrong!',
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true
+            });
+          }
+        });
       });
     </script>
 </x-app-layout>
