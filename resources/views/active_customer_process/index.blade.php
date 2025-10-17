@@ -411,20 +411,17 @@
                                 <td>${step.completed_at ? moment(step.completed_at).format('DD MMM YYYY') : '-'}</td>
                                 <td>
                                 ${hasRemark 
-                                  ? `<button class="btn btn-sm btn-info view-remark" data-id="${step.id}" data-remark="${step.remark}">
-                                      <i class="fa fa-eye"></i>
+                                  ? `<button style="padding: 3px 7px !important;background: #0dcaf0 !important;" class="btn btn-sm view-remark" data-id="${step.id}" data-remark="${step.remark}" title="View Remark">
+                                      <i class="fa fa-eye" style="font-size: 14px !important;"></i>
                                     </button>` 
-                                  : `<button class="btn btn-sm btn-primary add-remark" data-id="${step.id}">
-                                      <i class="fa fa-plus"></i>
+                                  : `<button style="padding: 3px 9px !important;" class="btn btn-sm add-remark" data-id="${step.id}" title="Add Remark">
+                                      <i class="fa fa-plus" style="font-size: 14px !important;"></i>
                                     </button>`
                                 }
                               </td>
                                 <td>
-                                  ${isPending ? `
-                                    <button class="btn btn-sm btn-success complete-step" data-remark="${step.remark}" data-id="${step.id}">
-                                      <i class="fa fa-check"></i> Complete
-                                    </button>
-                                  ` : '<i class="text-muted">—</i>'}
+                                    <button style="padding: 3px 7px !important;background: #fd7e14 !important;" class="btn btn-sm complete-step" data-remark="${step.remark}" data-id="${step.id}" title="Update Step">
+                                      <i class="fa fa-edit" style="font-size: 14px !important;"></i> </button>
                                 </td>
                               </tr>
                             `;
@@ -456,53 +453,96 @@
         });
 
         $('body').on('click', '.complete-step', function() {
-          // return false;
           $('#stepsModal').modal('hide');
+
           var stepId = $(this).data('id');
           var stepRemark = $(this).data('remark');
           var token = $("meta[name='csrf-token']").attr("content");
           var $row = $(this).closest('tr');
+          var currentStatus = $row.find('td:eq(2) .badge').text().trim();
 
-          // SweetAlert input for remark
           Swal.fire({
-            title: "Complete Step",
-            input: "textarea",
-            inputLabel: "Enter completion remark",
-            inputPlaceholder: "Type your remark here...",
-            inputAttributes: {
-              'aria-label': 'Type your remark here'
-            },
-            inputValue: stepRemark || '',
+            title: "Update Step Status",
+            html: `
+              <div style="text-align:left">
+                <label><strong>Status</strong></label>
+                <select id="step-status" class="swal2-input" style="width:100%;padding: 10px !important;">
+                  <option value="completed" ${currentStatus === 'Completed' ? 'selected' : ''}>Completed</option>
+                  <option value="pending" ${currentStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+                </select>
+
+                <div id="date-container">
+                  <label><strong>Completion Date</strong></label>
+                  <input id="completion-date" type="date" class="swal2-input" value="${moment().format('YYYY-MM-DD')}" style="width:100%;">
+                </div>
+
+                <label><strong>Remark</strong></label>
+                <textarea id="step-remark" class="swal2-textarea" placeholder="Enter your remark...">${stepRemark || ''}</textarea>
+              </div>
+            `,
             showCancelButton: true,
-            confirmButtonText: "Mark as Complete",
+            confirmButtonText: "Save",
             cancelButtonText: "Cancel",
-            inputValidator: (value) => {
-              if (!value) {
-                return "Remark is required!";
+            onOpen: function() {
+              // Older SweetAlert2 versions use onOpen instead of didOpen
+              var $status = $('#step-status');
+              var $dateContainer = $('#date-container');
+
+              function toggleDate() {
+                if ($status.val() === 'completed') {
+                  $dateContainer.show();
+                } else {
+                  $dateContainer.hide();
+                }
               }
+
+              $status.on('change', toggleDate);
+              toggleDate(); // initial check
             }
           }).then((result) => {
             if (result.value) {
-              var remark = result.value;
+              const status = $('#step-status').val();
+              const remark = $('#step-remark').val().trim();
+              const date = $('#completion-date').val();
 
+              // Manual validation
+              if (!remark) {
+                Swal.fire("Warning!", "Remark is required!", "warning");
+                return false;
+              }
+              if (status === 'completed' && !date) {
+                Swal.fire("Warning!", "Completion date is required for completed steps!", "warning");
+                return false;
+              }
+
+              // Proceed with AJAX
               $.ajax({
                 url: "{{ url('complete_process_step') }}/" + stepId,
                 type: "POST",
                 data: {
                   _token: token,
-                  remarks: remark
+                  remarks: remark,
+                  status: status,
+                  completed_at: status === 'completed' ? date : null
                 },
                 success: function(res) {
                   if (res.status === 'success') {
                     Swal.fire("Done!", res.message, "success");
 
-                    // Update row instantly
-                    $row.find('td:eq(2) .badge')
-                      .removeClass('badge-warning')
-                      .addClass('badge-success')
-                      .text('Completed');
+                    if (status === 'completed') {
+                      $row.find('td:eq(2) .badge')
+                        .removeClass('badge-warning')
+                        .addClass('badge-success')
+                        .text('Completed');
+                      $row.find('td:eq(3)').text(moment(date).format('DD MMM YYYY'));
+                    } else {
+                      $row.find('td:eq(2) .badge')
+                        .removeClass('badge-success')
+                        .addClass('badge-warning')
+                        .text('Pending');
+                      $row.find('td:eq(3)').text('-');
+                    }
 
-                    $row.find('td:eq(3)').text(moment().format('DD MMM YYYY'));
                     $row.find('td:eq(4)').text(remark);
                     $row.find('td:eq(5)').html('<i class="text-muted">—</i>');
                     redrawTables();
@@ -521,6 +561,8 @@
             }
           });
         });
+
+
 
       });
 

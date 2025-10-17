@@ -23,9 +23,6 @@ class ActiveCustomerProcessController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->ip() != '111.118.252.250') {
-            return view('work_in_progress');
-        }
         $users_ids = getUsersReportingToAuth();
         $customer_ids = EmployeeDetail::whereIn('user_id', $users_ids)->pluck('customer_id')->toArray();
         $customers = Customers::where('active', 'Y');
@@ -111,9 +108,6 @@ class ActiveCustomerProcessController extends Controller
      */
     public function create(Request $request)
     {
-        if ($request->ip() != '111.118.252.250') {
-            dd("working");
-        }
         abort_if(Gate::denies('active_process_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $customers = Customers::where('active', 'Y')->select('id', 'name')->get();
         $processes = CustomerProcess::with('steps')->get();
@@ -129,9 +123,6 @@ class ActiveCustomerProcessController extends Controller
      */
     public function store(Request $request)
     {
-        if ($request->ip() != '111.118.252.250') {
-            dd("working");
-        }
         abort_if(Gate::denies('active_process_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
@@ -220,11 +211,12 @@ class ActiveCustomerProcessController extends Controller
     {
         $request->validate([
             'remarks' => 'required|string|max:255',
+            'status' => 'required|in:pending,completed',
         ]);
 
         $step->update([
-            'status' => 'completed',
-            'completed_at' => now(),
+            'status' => $request->status,
+            'completed_at' => $request->status == 'completed' ? $request->completed_at : null,
             'remark' => $request->remarks,
         ]);
 
@@ -236,6 +228,11 @@ class ActiveCustomerProcessController extends Controller
             $process->update([
                 'status' => 'completed',
                 'completed_at' => now(),
+            ]);
+        }else{
+            $process->update([
+                'status' => 'pending',
+                'completed_at' => null,
             ]);
         }
 
