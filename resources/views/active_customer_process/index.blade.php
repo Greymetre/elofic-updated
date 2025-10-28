@@ -404,7 +404,7 @@
                                 <td>${index + 1}</td>
                                 <td>${step.step.value || ''}</td>
                                 <td>
-                                  <span class="badge badge-${step.status === 'completed' ? 'success' : 'secondary'}">
+                                  <span class="badge badge-${step.status === 'completed' ? 'success' : 'danger'}">
                                     ${step.status ? step.status.charAt(0).toUpperCase() + step.status.slice(1) : ''}
                                   </span>
                                 </td>

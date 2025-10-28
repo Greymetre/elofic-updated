@@ -740,6 +740,12 @@
       body nav.sidebar.close li.nav-link ul li a.hoveradd2:hover .d-none.mobile_hide {
          display: block !important;
       }
+      #navbarDropdownProfile{
+         background-color: #00000099 !important;
+         margin: 7px 5px !important;
+         padding: 2px;
+         /* border-radius: 50% !important; */
+      }
    </style>
    </style>
    <!-- Scripts -->
@@ -2594,7 +2600,7 @@
    <div class="main-panel">
       <!-- Navbar -->
       <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
-         <div class="container-fluid" style="background: transparent; !important">
+         <div class="container-fluid" style="background: transparent; !important;min-height: 60px !important;">
             <div class="new_demo">
                <!-- <img class="rounded ml-2 iconimg" alt="Blueneba" src="{!! url('/').'/'.asset('assets/img/bnt_logo.png') !!}?" width="120"> -->
                <!-- <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100"> -->
@@ -2640,9 +2646,9 @@
                      <p class="m-0" style="font-weight: bold;">{{ auth()->user()->name }}</p>
                      <a class="nav-link" href="javascript:;" id="navbarDropdownProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         @if (auth()->user()->getMedia('profile_image')->count() > 0 && Storage::disk('s3')->exists(auth()->user()->getMedia('profile_image')[0]->getPath()))
-                        <img src="{{ auth()->user()->getMedia('profile_image')[0]->getFullUrl() }}" border="0" width="40" height="40" class="rounded-circle" />
+                        <img src="{{ auth()->user()->getMedia('profile_image')[0]->getFullUrl() }}" border="0" width="40" height="40" class="rounded" />
                         @else
-                        <i class="material-icons">person</i>
+                        <i class="material-icons" style="margin: 0 !important;">person</i>
                         @endif
                         <p class="d-lg-none d-md-block">
                            Account

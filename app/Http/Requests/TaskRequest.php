@@ -23,7 +23,7 @@ class TaskRequest extends FormRequest
                 $rules = [
                     'user_id'       => 'nullable|numeric|exists:users,id',
                     'title'    => 'required|max:200|string|regex:/[a-zA-Z0-9\s]+/',
-                    'descriptions'  => 'required|max:400|string|regex:/[a-zA-Z0-9\s]+/',
+                    'descriptions'  => 'required|max:1000|string|regex:/[a-zA-Z0-9\s]+/',
                     // 'datetime'    => 'nullable|date_format:Y-m-d H:i:s',
                     // 'reminder'      => 'nullable|date_format:Y-m-d H:i:s',
                     'status_id'     => 'nullable|numeric|exists:statuses,id',
@@ -33,7 +33,7 @@ class TaskRequest extends FormRequest
                 $rules = [
                     'user_id'       => 'nullable|numeric|exists:users,id',
                     'title'    => 'required|max:200|string|regex:/[a-zA-Z0-9\s]+/',
-                    'descriptions'  => 'required|max:400|string|regex:/[a-zA-Z0-9\s]+/',
+                    'descriptions'  => 'required|max:1000|string|regex:/[a-zA-Z0-9\s]+/',
                     // 'datetime'    => 'nullable|date_format:Y-m-d H:i:s',
                     // 'reminder'      => 'nullable|date_format:Y-m-d H:i:s',
                     'customer_id'   => 'nullable|numeric|exists:customers,id',
