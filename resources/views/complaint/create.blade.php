@@ -524,7 +524,7 @@
                               value="{!! old('customer_number', $complaints['customer'] ? $complaints['customer']['customer_number'] : '') !!}" 
                               required maxlength="10">
                               <input type="hidden" name="end_user_id" id="end_user_id">
-                              <span id="customer_number_error" style="color: red; display: none;"></span>
+                              <!-- <span id="customer_number_error" style="color: red; display: none;"></span> -->
                               @if ($errors->has('customer_number'))
                               <div class="error">
                                  <p class="text-danger">{{ $errors->first('customer_number') }}</p>
@@ -534,24 +534,30 @@
                         </div>
 
                         <div class="col-md-3">
-                            <div class="input_section">
-                                <label class="col-form-label"> Customer Name </label>
-                                 <select name="customer_name" id="customer_name" class="form-control">
-                                     <option value="">Select Customer</option>
-                                     @foreach($end_users as $user)
-                                         <option value="{{ $user->customer_name  }}" data-number="{{ $user->customer_number }}">
-                                             {{ $user->customer_name }} ({{ $user->customer_number }})
-                                         </option>
-                                     @endforeach
-                                 </select>
+                          <div class="input_section">
+                             <label class="col-form-label">Customer Name</label>
+                             <select name="customer_name" id="customer_name" class="form-control">
+                                 <option value="">Select Customer</option>
+                                 @foreach($end_users as $user)
+                                     <option value="{{ $user->customer_name }}" data-number="{{ $user->customer_number }}">
+                                         {{ $user->customer_name }} ({{ $user->customer_number }})
+                                     </option>
+                                 @endforeach
+                                 <option value="other">Other</option>
+                             </select>
 
-                                @if ($errors->has('customer_name'))
-                                    <div class="error">
-                                        <p class="text-danger">{{ $errors->first('customer_name') }}</p>
-                                    </div>
-                                @endif
-                            </div>
+                             <input type="text" name="customer_name" id="custom_customer_name"
+                                    class="form-control mt-2" placeholder="Enter custom customer name"
+                                    style="display:none;">
+
+                             @if ($errors->has('customer_name'))
+                                 <div class="error">
+                                     <p class="text-danger">{{ $errors->first('customer_name') }}</p>
+                                 </div>
+                             @endif
+                           </div>
                         </div>
+
 
 
                         <div class="col-md-3">
@@ -832,8 +838,19 @@
       </div>
    </div>
    
-
    <script>
+      document.getElementById('customer_name').addEventListener('change', function() {
+          const input = document.getElementById('custom_customer_name');
+          if (this.value === 'other') {
+              input.style.display = 'block';
+          } else {
+              input.style.display = 'none';
+              input.value = '';
+          }
+      });
+   </script>
+   <script>
+
       setTimeout(() => {
          var $customerSelect = $('#party_name').select2({
             placeholder: 'Purchased Party Name ',
@@ -1147,6 +1164,8 @@
             },
             success: function(res) {
                if (res.status === true) {
+                  $('#custom_customer_name').css('display','none');
+                  $('#customer_name').css('display','block');
                   $("#customer_name").val(res.data.customer_name);
                   $("#end_user_id").val(res.data.id);
                   $("#customer_email").val(res.data.customer_email);
@@ -1164,6 +1183,8 @@
                   }, 2000);
 
                } else {
+                  $('#custom_customer_name').css('display','block');
+                  $('#customer_name').css('display','none');
                   $("#customer_name").val("");
 
                   $("#end_user_id").val("");
@@ -1184,6 +1205,7 @@
                   $("#customer_city").prop('readonly', false);
                   $("#customer_name").prop('readonly', false);
                   $("#customer_email").prop('readonly', false);
+
                }
             }
          });
