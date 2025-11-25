@@ -2602,7 +2602,7 @@
       <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
          <div class="container-fluid" style="background: transparent; !important;min-height: 60px !important;">
             <div class="new_demo">
-               <!-- <img class="rounded ml-2 iconimg" alt="Blueneba" src="{!! url('/').'/'.asset('assets/img/bnt_logo.png') !!}?" width="120"> -->
+               <img class="rounded ml-2 iconimg" alt="Elofic" src="{!! url('/').'/'.asset('assets/img/elofic.png') !!}?" width="120">
                <!-- <img class="rounded ml-2  iconimg" src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="100"> -->
             </div>
             <!-- <img src="{!! url('/').'/'.asset('assets/img/logo.png') !!}" width="50"> -->
