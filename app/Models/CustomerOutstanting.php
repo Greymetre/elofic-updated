@@ -9,13 +9,13 @@ class CustomerOutstanting extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['branch_id', 'customer_id', 'user_id', 'division_id', 'customer_name', 'amount', 'days', 'year', 'quarter', 'created_at', 'updated_at'];
+    protected $fillable = ['posting_date','customer_code','branch_id', 'customer_id', 'user_id', 'division_id','reference','customer_name','due_date', 'amount', 'days', 'year', 'quarter','payment_term', 'created_at', 'updated_at'];
 
     public $timestamps = true;
 
-    public function customer()
+    public function distributor()
     {
-        return $this->belongsTo('App\Models\Customers', 'customer_id', 'id');
+        return $this->belongsTo(\App\Models\MasterDistributor::class, 'customer_id', 'id');
     }
 
     public function branch()

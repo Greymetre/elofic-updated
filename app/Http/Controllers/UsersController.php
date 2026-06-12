@@ -94,6 +94,18 @@ class UsersController extends Controller
     public function store(UserRequest $request)
     {
 
+$latitude = null;
+    $longitude = null;
+
+    if ($request->filled('base_location_coordinates')) {
+        $parts = array_map('trim', explode(',', $request->base_location_coordinates, 2));
+        
+        if (count($parts) === 2) {
+            $latitude  = is_numeric($parts[0]) ? $parts[0] : null;
+            $longitude = is_numeric($parts[1]) ? $parts[1] : null;
+        }
+    }
+
         $user = User::create([
             'active'   =>  isset($request['active']) ? $request['active'] : 'Y',
             'name'   =>  isset($request['name']) ? $request['name'] : $request['first_name'] . ' ' . $request['last_name'],
@@ -110,12 +122,14 @@ class UsersController extends Controller
             'device_type'   =>  isset($request['device_type']) ? $request['device_type'] : '',
             'gender'   =>  isset($request['gender']) ? $request['gender'] : '',
             'profile_image'   =>  isset($request['profile_image']) ? $request['profile_image'] : '',
-            'latitude'   =>  isset($request['latitude']) ? $request['latitude'] : '',
-            'longitude' => isset($request['longitude']) ? $request['longitude'] : '',
+            // 'latitude'   =>  isset($request['latitude']) ? $request['latitude'] : '',
+            // 'longitude' => isset($request['longitude']) ? $request['longitude'] : '',
+            'latitude'  => $latitude,
+    'longitude' => $longitude,
             'location' => !empty($request['location']) ? $request['location'] : '',
             'branch_id' => (isset($request['branch_id']) && count($request['branch_id']) > 0) ? implode(',', $request['branch_id']) : '',
-            'primary_branch_id' => isset($request['primary_branch_id']) ? $request['primary_branch_id'] : '',
-            'branch_show' => isset($request['branch_show']) ? implode(',', $request['branch_show']) : NULL,
+            // 'primary _branch_id' => isset($request['primary_branch_id']) ? $request['primary_branch_id'] : '',
+            // 'branch_show' => isset($request['branch_show']) ? implode(',', $request['branch_show']) : NULL,
             'department_id' => isset($request['department_id']) ? $request['department_id'] : '',
             'employee_codes' => isset($request['employee_codes']) ? $request['employee_codes'] : '',
             'designation_id' => isset($request['designation_id']) ? $request['designation_id'] : '',
@@ -125,8 +139,14 @@ class UsersController extends Controller
             'payroll' => isset($request['payroll']) ? $request['payroll'] : '',
             'warehouse_id' => isset($request['warehouse_id']) ? $request['warehouse_id'] : NULL,
             'customerid' => isset($request['customerid']) ? $request['customerid'] : NULL,
+            'earned_leave_balance'    => $request->input('earned_leave_balance', '0.00'),
+            'casual_leave_balance'    => $request->input('casual_leave_balance', '0.00'),
+            'sick_leave_balance'      => $request->input('sick_leave_balance', '0.00'),
+            'date_of_joining' => $request->input('date_of_joining'),   
         ]);
         $user->roles()->sync($request->input('roles', []));
+
+        
         $permissions = $user->getPermissionsViaRoles()->pluck('name');
         $user->givePermissionTo($permissions);
 
@@ -200,7 +220,7 @@ class UsersController extends Controller
             'previous_exp'   =>  isset($request['previous_exp']) ? $request['previous_exp'] : null,
             'current_company_tenture'   =>  isset($request['current_company_tenture']) ? $request['current_company_tenture'] : null,
             'total_exp'   =>  isset($request['total_exp']) ? $request['total_exp'] : null,
-
+            
         ]);
         if ($request->education_detail && count($request->education_detail) > 0) {
             foreach ($request->education_detail as $education_detail) {
@@ -257,6 +277,18 @@ class UsersController extends Controller
     //public function update(Request $request, User $user)
     public function update(Request $request, $id)
     {
+
+        $latitude = null;
+    $longitude = null;
+
+    if ($request->filled('base_location_coordinates')) {
+        $parts = array_map('trim', explode(',', $request->base_location_coordinates, 2));
+        
+        if (count($parts) === 2) {
+            $latitude  = is_numeric($parts[0]) ? $parts[0] : null;
+            $longitude = is_numeric($parts[1]) ? $parts[1] : null;
+        }
+    }
         $details_updated = UserDetails::updateOrCreate(['user_id' => $id], [
             'marital_status'   =>  isset($request['marital_status']) ? $request['marital_status'] : null,
             'date_of_birth'   =>  isset($request['date_of_birth']) ? $request['date_of_birth'] : null,
@@ -312,6 +344,9 @@ class UsersController extends Controller
             'previous_exp'   =>  isset($request['previous_exp']) ? (int)$request['previous_exp'] : 0,
             'current_company_tenture'   =>  isset($request['current_company_tenture']) ? (int)$request['current_company_tenture'] : 0,
             'total_exp'   =>  isset($request['total_exp']) ? (int)$request['total_exp'] : 0,
+            'earned_leave_balance'    => $request->input('earned_leave_balance', $user->earned_leave_balance ?? '0.00'),
+    'casual_leave_balance'    => $request->input('casual_leave_balance', $user->casual_leave_balance ?? '0.00'),
+    'sick_leave_balance'      => $request->input('sick_leave_balance', $user->sick_leave_balance ?? '0.00'),
         ]);
         if ($request->education_detail && count($request->education_detail) > 0) {
             foreach ($request->education_detail as $education_detail) {
@@ -356,6 +391,8 @@ class UsersController extends Controller
         $user->blood_group = isset($request['blood_group']) ? $request['blood_group'] : NULL;
         $user->personal_number = isset($request['personal_number']) ? $request['personal_number'] : NULL;
         $user->show_attandance_report = isset($request['show_attandance_report']) ? $request['show_attandance_report'] : '';
+        $user->latitude  = $latitude;
+    $user->longitude = $longitude;
         if ($request['password'] && !empty($request['password'])) {
             $user->password = isset($request['password']) ? Hash::make($request['password']) : '';
             $user->password_string = $request['password'];
@@ -378,6 +415,12 @@ class UsersController extends Controller
         $user->warehouse_id = isset($request['warehouse_id']) ? $request['warehouse_id'] : null;
         $user->branch_show = isset($request['branch_show']) ? implode(',', $request['branch_show']) : null;
         $user->sales_type = isset($request['sales_type']) ? $request['sales_type'] : '';
+        // $user->leave_balance           = $request->leave_balance ?? $user->leave_balance ?? '0.00';
+$user->earned_leave_balance    = $request->earned_leave_balance ?? $user->earned_leave_balance ?? '0.00';
+$user->casual_leave_balance    = $request->casual_leave_balance ?? $user->casual_leave_balance ?? '0.00';
+$user->sick_leave_balance      = $request->sick_leave_balance ?? $user->sick_leave_balance ?? '0.00';
+$user->date_of_joining = $request->input('date_of_joining');
+$user->save();
         if ($user->save()) {
             $user->roles()->sync($request->input('roles', []));
             $permissions = $user->getPermissionsViaRoles()->pluck('name');

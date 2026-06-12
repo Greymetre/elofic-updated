@@ -101,7 +101,7 @@ class AddressController extends Controller
                 if (!empty($district_id)) {
                     $query->where('district_id', '=', $district_id);
                 }
-            })->select('id', 'city_name');
+            })->select('id', 'city_name', 'grade');
 
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
             $data = collect([]);
@@ -110,6 +110,7 @@ class AddressController extends Controller
                     $data->push([
                         'city_id' => isset($value['id']) ? $value['id'] : 0,
                         'city_name' => isset($value['city_name']) ? $value['city_name'] : '',
+                        'grade' => isset($value['grade']) ? $value['grade'] : '',
                     ]);
                 }
                 return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);

@@ -23,6 +23,7 @@ use App\Models\ServiceBill;
 use App\Models\State;
 use App\Models\User;
 use App\Models\WarrantyActivation;
+use App\Models\MasterDistributor;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Gate;
@@ -66,27 +67,37 @@ class ComplaintController extends Controller
         $service_centers  = Customers::whereIn('id' , $service_centers_id)->get();
         $complaint_types =  ComplaintType::where('active' , 'Y')->select('id' , 'name')->get();
         $categories = Category::where('active' , 'Y')->select('id' , 'category_name')->get();
-        return view('complaint.index' , compact('service_centers' , 'assign_users' , 'complaint_types' , 'categories'));
+        $distributors = MasterDistributor::select('id', 'trade_name')
+        ->orderBy('trade_name')
+        ->get();
+        return view('complaint.index' , compact('service_centers' , 'assign_users' , 'complaint_types' , 'categories','distributors'));
         // return $dataTable->render('complaint.index');
     }
 
     public function getComplaints(ComplaintDataTable $dataTable, Request $request){
 
-         $query = Complaint::with([
-            'party',
-            'service_center_details',
-            'customer.pincodeDetails',
-            'complaint_type_details',
-            'product_details.categories',
-            'division_details',
-            'complaint_time_line', // Ensure this is included
-            'service_bill',
-            'purchased_branch_details',
-            'product_details.categories',
-            'createdbyname',
-            'complaint_work_dones',
-            'warranty_details',
-            'assign_users'
+        //  $query = Complaint::with([
+        //     'party',
+        //     'service_center_details',
+        //     'customer.pincodeDetails',
+        //     'complaint_type_details',
+        //     'product_details.categories',
+        //     'division_details',
+        //     'complaint_time_line', // Ensure this is included
+        //     'service_bill',
+        //     'purchased_branch_details',
+        //     'product_details.categories',
+        //     'createdbyname',
+        //     'complaint_work_dones',
+        //     'warranty_details',
+        //     'assign_users'
+        // ])
+        
+        $query = Complaint::with([
+            'customer',
+            'complaint_type_details:id,name',
+            'distributor',
+            'createdbyname'
         ])->latest()->newQuery();
         if(!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Service Admin') &&  !Auth::user()->hasRole('CRM_Support')){
            $query->where('assign_user' , Auth::user()->id);
@@ -108,19 +119,28 @@ class ComplaintController extends Controller
         if (isset($request->complaint_number)) {
             $query->where('complaint_number', 'like', '%' . $request->complaint_number . '%');
         }
-        if (!empty($request->service_center_name) && collect($request->service_center_name)->filter()->isNotEmpty()) {
-            $query->whereIn('service_center', (array) $request->service_center_name);
+        // if (!empty($request->service_center_name) && collect($request->service_center_name)->filter()->isNotEmpty()) {
+        //     $query->whereIn('service_center', (array) $request->service_center_name);
+        // }
+        // if (!empty($request->assign_user) && collect($request->assign_user)->filter()->isNotEmpty()) {
+        //     $query->whereIn('assign_user', (array) $request->assign_user);
+        // }
+        // if (isset($request->service_center_code)) {
+        //     $query->whereHas('service_center_details', function($q) use ($request) {
+        //         $q->where('customer_code', 'like', '%' . $request->service_center_code . '%');
+        //     });
+        // }
+        // if (isset($request->seller)) {
+        //     $query->where('seller', 'like', '%' . $request->seller . '%');
+        // }
+        if ($request->part_number) {
+            $query->where('part_number', 'like', '%' . $request->part_number . '%');
         }
-        if (!empty($request->assign_user) && collect($request->assign_user)->filter()->isNotEmpty()) {
-            $query->whereIn('assign_user', (array) $request->assign_user);
+         if ($request->batch_code) {
+            $query->where('batch_code', 'like', '%' . $request->batch_code . '%');
         }
-        if (isset($request->service_center_code)) {
-            $query->whereHas('service_center_details', function($q) use ($request) {
-                $q->where('customer_code', 'like', '%' . $request->service_center_code . '%');
-            });
-        }
-        if (isset($request->seller)) {
-            $query->where('seller', 'like', '%' . $request->seller . '%');
+        if (!empty($request->distributor_id)) {
+            $query->where('distributor_id', $request->distributor_id);
         }
         if (isset($request->customer_name)) {
             $query->whereHas('customer', function($q) use ($request) {
@@ -137,148 +157,148 @@ class ComplaintController extends Controller
                 $q->where('customer_number', 'like', '%' . $request->customer_number . '%');
             });
         }
-        if (isset($request->customer_address)) {
-            $query->whereHas('customer', function($q) use ($request) {
-                $q->where('customer_address', 'like', '%' . $request->customer_address . '%');
-            });
-        }
-        if (isset($request->customer_place)) {
-            $query->whereHas('customer', function($q) use ($request) {
-                $q->where('customer_place', 'like', '%' . $request->customer_place . '%');
-            });
-        }
-        if (isset($request->customer_country)) {
-            $query->whereHas('customer', function($q) use ($request) {
-                $q->where('customer_country', 'like', '%' . $request->customer_country . '%');
-            });
-        }
-        if (isset($request->customer_state)) {
-            $query->whereHas('customer', function($q) use ($request) {
-                $q->where('customer_state', 'like', '%' . $request->customer_state . '%');
-            });
-        }
+        // if (isset($request->customer_address)) {
+        //     $query->whereHas('customer', function($q) use ($request) {
+        //         $q->where('customer_address', 'like', '%' . $request->customer_address . '%');
+        //     });
+        // }
+        // if (isset($request->customer_place)) {
+        //     $query->whereHas('customer', function($q) use ($request) {
+        //         $q->where('customer_place', 'like', '%' . $request->customer_place . '%');
+        //     });
+        // }
+        // if (isset($request->customer_country)) {
+        //     $query->whereHas('customer', function($q) use ($request) {
+        //         $q->where('customer_country', 'like', '%' . $request->customer_country . '%');
+        //     });
+        // }
+        // if (isset($request->customer_state)) {
+        //     $query->whereHas('customer', function($q) use ($request) {
+        //         $q->where('customer_state', 'like', '%' . $request->customer_state . '%');
+        //     });
+        // }
         if (isset($request->customer_city)) {
             $query->whereHas('customer', function($q) use ($request) {
                 $q->where('customer_city', 'like', '%' . $request->customer_city . '%');
             });
         }
-        if (isset($request->pincode) && $request->pincode != '') {
-            $query->whereHas('customer.pincodeDetails', function($query) use ($request) {
-                $query->where('pincode', 'like', '%' . $request->pincode . '%'); // Filter pincode
-            });
-        }
+        // if (isset($request->pincode) && $request->pincode != '') {
+        //     $query->whereHas('customer.pincodeDetails', function($query) use ($request) {
+        //         $query->where('pincode', 'like', '%' . $request->pincode . '%'); // Filter pincode
+        //     });
+        // }
         if (isset($request->customer_complaint_type) && $request->customer_complaint_type != '') {
             $query->whereHas('complaint_type_details', function($query) use ($request) {
                 $query->where('name', 'like', '%' . $request->customer_complaint_type . '%'); // Filter pincode
             });
         }
-        if (isset($request->category_name) && $request->category_name != '') {
-            $query->whereHas('product_details.categories', function($query) use ($request) {
-                $query->where('category_name', 'like', '%' . $request->category_name . '%'); // Filter pincode
-            });
-        }
-        if (isset($request->product_name) && $request->product_name != '') {
-            $query->whereHas('product_details', function($query) use ($request) {
-                $query->where('product_name', 'like', '%' . $request->product_name . '%'); // Filter pincode
-            });
-        }
-        if (isset($request->product_code) && $request->product_code != '') {
-            $query->whereHas('product_details', function($query) use ($request) {
-                $query->where('product_code', 'like', '%' . $request->product_code . '%'); // Filter pincode
-            });
-        }
-        if (isset($request->product_serail_number)) {
-            $query->where('product_serail_number', 'like', '%' . $request->product_serail_number . '%');
-        }
-        if (isset($request->specification) && $request->specification != '') {
-            $query->whereHas('product_details', function($query) use ($request) {
-                $query->where('specification', 'like', '%' . $request->specification . '%'); // Filter pincode
-            });
-        }
-        if (isset($request->product_no) && $request->product_no != '') {
-            $query->whereHas('product_details', function($query) use ($request) {
-                $query->where('product_no', 'like', '%' . $request->product_no . '%'); // Filter pincode
-            });
-        }
-         if (isset($request->phase) && $request->phase != '') {
-            $query->whereHas('product_details', function($query) use ($request) {
-                $query->where('phase', 'like', '%' . $request->phase . '%'); // Filter pincode
-            });
-        }
-        if (isset($request->category_name_1) && $request->category_name_1 != '') {
-            $query->whereHas('product_details.categories', function($query) use ($request) {
-                $query->where('category_name', 'like', '%' . $request->category_name_1 . '%'); // Filter pincode
-            });
-        }
-        if (isset($request->customer_bill_date)) {
-            try{
-                 $complaintDate = Carbon::parse($request->customer_bill_date)->format('Y-m-d');
-                $query->whereDate('customer_bill_date', '=', $complaintDate);
-            }catch(\Exception $e){
+        // if (isset($request->category_name) && $request->category_name != '') {
+        //     $query->whereHas('product_details.categories', function($query) use ($request) {
+        //         $query->where('category_name', 'like', '%' . $request->category_name . '%'); // Filter pincode
+        //     });
+        // }
+        // if (isset($request->product_name) && $request->product_name != '') {
+        //     $query->whereHas('product_details', function($query) use ($request) {
+        //         $query->where('product_name', 'like', '%' . $request->product_name . '%'); // Filter pincode
+        //     });
+        // }
+        // if (isset($request->product_code) && $request->product_code != '') {
+        //     $query->whereHas('product_details', function($query) use ($request) {
+        //         $query->where('product_code', 'like', '%' . $request->product_code . '%'); // Filter pincode
+        //     });
+        // }
+        // if (isset($request->product_serail_number)) {
+        //     $query->where('product_serail_number', 'like', '%' . $request->product_serail_number . '%');
+        // }
+        // if (isset($request->specification) && $request->specification != '') {
+        //     $query->whereHas('product_details', function($query) use ($request) {
+        //         $query->where('specification', 'like', '%' . $request->specification . '%'); // Filter pincode
+        //     });
+        // }
+        // if (isset($request->product_no) && $request->product_no != '') {
+        //     $query->whereHas('product_details', function($query) use ($request) {
+        //         $query->where('product_no', 'like', '%' . $request->product_no . '%'); // Filter pincode
+        //     });
+        // }
+        //  if (isset($request->phase) && $request->phase != '') {
+        //     $query->whereHas('product_details', function($query) use ($request) {
+        //         $query->where('phase', 'like', '%' . $request->phase . '%'); // Filter pincode
+        //     });
+        // }
+        // if (isset($request->category_name_1) && $request->category_name_1 != '') {
+        //     $query->whereHas('product_details.categories', function($query) use ($request) {
+        //         $query->where('category_name', 'like', '%' . $request->category_name_1 . '%'); // Filter pincode
+        //     });
+        // }
+        // if (isset($request->customer_bill_date)) {
+        //     try{
+        //          $complaintDate = Carbon::parse($request->customer_bill_date)->format('Y-m-d');
+        //         $query->whereDate('customer_bill_date', '=', $complaintDate);
+        //     }catch(\Exception $e){
                 
-            }
-        }
-        if (isset($request->customer_bill_date_1)) {
-             try{
-                 $complaintDate = Carbon::parse($request->customer_bill_date_1)->format('Y-m-d');
-                $query->whereDate('customer_bill_date', '=', $complaintDate);
-            }catch(\Exception $e){
+        //     }
+        // }
+        // if (isset($request->customer_bill_date_1)) {
+        //      try{
+        //          $complaintDate = Carbon::parse($request->customer_bill_date_1)->format('Y-m-d');
+        //         $query->whereDate('customer_bill_date', '=', $complaintDate);
+        //     }catch(\Exception $e){
                 
-            }
-        }
-        if (isset($request->service_type)) {
-            $query->where('service_type', 'like', '%' . $request->service_type . '%');
-        }
-        if (isset($request->last_update_date)) {
-            try{
-                 $complaintDate = Carbon::parse($request->last_update_date)->format('Y-m-d');
-                 $query->whereDate('updated_at', '=', $complaintDate);
-            }catch(\Exception $e){
+        //     }
+        // }
+        // if (isset($request->service_type)) {
+        //     $query->where('service_type', 'like', '%' . $request->service_type . '%');
+        // }
+        // if (isset($request->last_update_date)) {
+        //     try{
+        //          $complaintDate = Carbon::parse($request->last_update_date)->format('Y-m-d');
+        //          $query->whereDate('updated_at', '=', $complaintDate);
+        //     }catch(\Exception $e){
                 
-            }
-        }
-        if (isset($request->service_status) && $request->service_status != '') {
-            $query->whereHas('service_bill', function($query) use ($request) {
-                $query->where('status', $request->service_status); // Filter pincode
-            });
-        }
+        //     }
+        // }
+        // if (isset($request->service_status) && $request->service_status != '') {
+        //     $query->whereHas('service_bill', function($query) use ($request) {
+        //         $query->where('status', $request->service_status); // Filter pincode
+        //     });
+        // }
         if (isset($request->description)) {
             $query->where('description', 'like', '%' . $request->description . '%');
         }
 
-        if (isset($request->service_branch) && $request->service_branch != '') {
-            $query->whereHas('purchased_branch_details', function ($subQuery) use ($request) {
-                $subQuery->whereRaw("CONCAT(branch_code, ' ', branch_name) LIKE ?", ['%' . $request->service_branch . '%']);
-            });
-        }
-        if (isset($request->purchased_party_name) && $request->purchased_party_name != '') {
-            $query->whereHas('customer', function ($subQuery) use ($request) {
-                $subQuery->whereRaw("CONCAT(customer_name, ' ', customer_number) LIKE ?", ['%' . $request->purchased_party_name . '%']);
-            });
-        }
-        if (isset($request->warranty_bill)) {
-            $query->where('warranty_bill', 'like', '%' . $request->warranty_bill . '%');
-        }
-        if($request->customer_bill_no){
-            $query->where('customer_bill_no', 'like', '%' . $request->customer_bill_no . '%');
-        }
-        if($request->under_warranty){
-            $query->where('under_warranty', 'like', '%' . $request->under_warranty . '%');
-        }
-        if (isset($request->service_type_1)) {
-            $query->where('service_type', 'like', '%' . $request->service_type_1 . '%');
-        }
-        if (isset($request->company_sale_bill_no)) {
-            $query->where('company_sale_bill_no', 'like', '%' . $request->company_sale_bill_no . '%');
-        }
-        if (isset($request->company_sale_bill_date)) {
-            try{
-                 $complaintDate = Carbon::parse($request->company_sale_bill_date)->format('Y-m-d');
-                 $query->whereDate('company_sale_bill_date', '=', $complaintDate);
-            }catch(\Exception $e){
+        // if (isset($request->service_branch) && $request->service_branch != '') {
+        //     $query->whereHas('purchased_branch_details', function ($subQuery) use ($request) {
+        //         $subQuery->whereRaw("CONCAT(branch_code, ' ', branch_name) LIKE ?", ['%' . $request->service_branch . '%']);
+        //     });
+        // }
+        // if (isset($request->purchased_party_name) && $request->purchased_party_name != '') {
+        //     $query->whereHas('customer', function ($subQuery) use ($request) {
+        //         $subQuery->whereRaw("CONCAT(customer_name, ' ', customer_number) LIKE ?", ['%' . $request->purchased_party_name . '%']);
+        //     });
+        // }
+        // if (isset($request->warranty_bill)) {
+        //     $query->where('warranty_bill', 'like', '%' . $request->warranty_bill . '%');
+        // }
+        // if($request->customer_bill_no){
+        //     $query->where('customer_bill_no', 'like', '%' . $request->customer_bill_no . '%');
+        // }
+        // if($request->under_warranty){
+        //     $query->where('under_warranty', 'like', '%' . $request->under_warranty . '%');
+        // }
+        // if (isset($request->service_type_1)) {
+        //     $query->where('service_type', 'like', '%' . $request->service_type_1 . '%');
+        // }
+        // if (isset($request->company_sale_bill_no)) {
+        //     $query->where('company_sale_bill_no', 'like', '%' . $request->company_sale_bill_no . '%');
+        // }
+        // if (isset($request->company_sale_bill_date)) {
+        //     try{
+        //          $complaintDate = Carbon::parse($request->company_sale_bill_date)->format('Y-m-d');
+        //          $query->whereDate('company_sale_bill_date', '=', $complaintDate);
+        //     }catch(\Exception $e){
                 
-            }
-        }
+        //     }
+        // }
         if (isset($request->register_by)) {
             $query->where('register_by', 'like', '%' . $request->register_by . '%');
         }
@@ -303,21 +323,52 @@ class ComplaintController extends Controller
         return DataTables::of($query)
             ->addIndexColumn()
             ->addIndexColumn()
-            ->addColumn('status', function ($query) {
-                if($query->complaint_status == '0'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-secondary">Open</span></a>';
-                }elseif($query->complaint_status == '1'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-warning">Pending</span></a>';
-                }elseif($query->complaint_status == '2'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-info">Work Done</span></a>';
-                }elseif($query->complaint_status == '3'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-success">Completed</span></a>';
-                }elseif($query->complaint_status == '4'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-primary">Closed</span></a>';
-                }elseif($query->complaint_status == '5'){
-                    return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-danger">Canceled</span></a>';
-                }
-            })
+            // ->addColumn('status', function ($query) {
+            //     if($query->complaint_status == '0'){
+            //         return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-secondary">Open</span></a>';
+            //     }elseif($query->complaint_status == '1'){
+            //         return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-warning">Pending</span></a>';
+            //     }elseif($query->complaint_status == '2'){
+            //         return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-info">Work Done</span></a>';
+            //     }elseif($query->complaint_status == '3'){
+            //         return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-success">Completed</span></a>';
+            //     }elseif($query->complaint_status == '4'){
+            //         return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-primary">Closed</span></a>';
+            //     }elseif($query->complaint_status == '5'){
+            //         return '<a href="'.route('complaints.show', $query->id).'" value="' . $query->id . '" title="' . trans('panel.global.show') . ' Complaint"><span class="badge badge-danger">Canceled</span></a>';
+            //     }
+            // })
+            ->addColumn('status', function ($row) {
+
+    $statusClass = match ((int)$row->complaint_status) {
+        0 => 'status-open',
+        1 => 'status-pending',
+        2 => 'status-workdone',
+        3 => 'status-completed',
+        4 => 'status-closed',
+        5 => 'status-canceled',
+        default => '',
+    };
+
+    return '
+        <select class="form-control change-status '.$statusClass.'"
+                data-id="'.$row->id.'">
+            <option value="1" '.($row->complaint_status == 1 ? 'selected' : '').'>Pending</option>
+            <option value="4" '.($row->complaint_status == 4 ? 'selected' : '').'>Closed</option>
+            <option value="5" '.($row->complaint_status == 5 ? 'selected' : '').'>Rejected</option>
+        </select>
+    ';
+})
+
+->addColumn('action', function ($row) {
+    return '
+        <a href="'.route('complaints.show', $row->id).'"
+           class="btn btn-primary btn-sm">
+            <i class="material-icons">visibility</i>
+        </a>';
+})
+
+
             ->editColumn('created_at' , function($query){
                 try {
                     return $query->created_at ? Carbon::parse($query->created_at)->format('d-m-Y h:i:s') : '';
@@ -325,173 +376,173 @@ class ComplaintController extends Controller
                     return ''; // Return null if parsing fails
                 }
             })
-            ->addColumn('last_status', function ($query) {
-                if($query->complaint_status == '0'){
-                    return '<span class="badge badge-secondary">Open</span>';
-                }elseif($query->complaint_status == '1'){
-                    return '<span class="badge badge-warning">Pending</span>';
-                }elseif($query->complaint_status == '2'){
-                    return '<span class="badge badge-info">Work Done</span>';
-                }elseif($query->complaint_status == '3'){
-                    return '<span class="badge badge-success">Completed</span>';
-                }elseif($query->complaint_status == '4'){
-                    return '<span class="badge badge-primary">Closed</span>';
-                }elseif($query->complaint_status == '5'){
-                    return '<span class="badge badge-danger">Canceled</span>';
-                }
-            })
-            ->addColumn('work_done_time', function ($query) {
-                $date = $query->complaint_time_line->where('status',2)->sortByDesc('id')->first();
-                if(isset($date)){
-                   return Carbon::parse($date->created_at)->format('d-m-Y h:i a');
-                } 
-                return "NOT DONE";
-            })
-            ->addColumn('complaint_work_dones', function ($query) {
-                $data = $query->complaint_work_dones->sortByDesc('id')->first();
-                if(isset($data)){
-                    return $data->done_by ?? '';
-                } 
-                return "NOT DONE";
-            })
-            ->addColumn('customer_pindcode', function ($query) {
-                 return getPincode($query->customer->customer_pindcode)??'';    
-            })
-            ->addColumn('complaint_work_remark', function ($query) {
-                $data = $query->complaint_work_dones->sortByDesc('id')->first();
-                if(isset($data)){
-                    return $data->remark ?? '';
-                } 
-                return "NOT DONE";
-            })
-            ->addColumn('pending_tat', function ($query) {
-                $complaint_status_date = $query->complaint_time_line
-                    ->where('status', '1')
-                    ->sortByDesc('id') // Correct ordering method for collections
-                    ->first();
-              if(isset($complaint_status_date->created_at) && isset($query->created_at)){
-                return calculatedTAT($complaint_status_date->created_at,$query->created_at);
-              }
-              return "00:00:00";
-            })
-            ->addColumn('open_tat', function ($query) {
-                $complaint_status_date = $query->complaint_time_line
-                    ->where('status', '0')
-                    ->sortByDesc('id') // Correct ordering method for collections
-                    ->first();
-              if(isset($complaint_status_date->created_at) && isset($query->created_at)){
-                return calculatedTAT($complaint_status_date->created_at,$query->created_at);
-              }
-              return "Action Not Performed";
-            })
-            ->addColumn('canceled_tat', function ($query) {
-                $complaint_status_date = $query->complaint_time_line
-                    ->where('status', '5')
-                    ->sortByDesc('id') // Correct ordering method for collections
-                    ->first();
-              if(isset($complaint_status_date->created_at) && isset($query->created_at)){
-                return calculatedTAT($complaint_status_date->created_at,$query->created_at);
-              }
-              return "Action Not Performed";
-            })
-             ->addColumn('work_done_tat', function ($query) {
-                $complaint_status_date = $query->complaint_time_line
-                    ->where('status', '2')
-                    ->sortByDesc('id') // Correct ordering method for collections
-                    ->first();
-              if(isset($complaint_status_date->created_at) && isset($query->created_at)){
-                return calculatedTAT($complaint_status_date->created_at,$query->created_at);
-              }
-              return "Action Not Performed";
-            })
-            ->addColumn('compleated_tat', function ($query) {
-                $complaint_status_date = $query->complaint_time_line
-                    ->where('status', '3')
-                    ->sortByDesc('id') // Correct ordering method for collections
-                    ->first();
-              if(isset($complaint_status_date->created_at) && isset($query->created_at)){
-                return calculatedTAT($complaint_status_date->created_at,$query->created_at);
-              }
-              return "Action Not Performed";
-            })
-            ->addColumn('close_tat', function ($query) {
-                $complaint_status_date = $query->complaint_time_line
-                    ->where('status', '4')
-                    ->sortByDesc('id') // Correct ordering method for collections
-                    ->first();
-              if(isset($complaint_status_date->created_at) && isset($query->created_at)){
-                return calculatedTAT($complaint_status_date->created_at,$query->created_at);
-              }
-              return "Action Not Performed";
-            })
-            ->addColumn('service_bill_status', function ($query) {
-                if (!$query->service_bill) {
-                    return "No Action"; // Handle the case where service_bill is null
-                }
+        //     ->addColumn('last_status', function ($query) {
+        //         if($query->complaint_status == '0'){
+        //             return '<span class="badge badge-secondary">Open</span>';
+        //         }elseif($query->complaint_status == '1'){
+        //             return '<span class="badge badge-warning">Pending</span>';
+        //         }elseif($query->complaint_status == '2'){
+        //             return '<span class="badge badge-info">Work Done</span>';
+        //         }elseif($query->complaint_status == '3'){
+        //             return '<span class="badge badge-success">Completed</span>';
+        //         }elseif($query->complaint_status == '4'){
+        //             return '<span class="badge badge-primary">Closed</span>';
+        //         }elseif($query->complaint_status == '5'){
+        //             return '<span class="badge badge-danger">Canceled</span>';
+        //         }
+        //     })
+        //     ->addColumn('work_done_time', function ($query) {
+        //         $date = $query->complaint_time_line->where('status',2)->sortByDesc('id')->first();
+        //         if(isset($date)){
+        //            return Carbon::parse($date->created_at)->format('d-m-Y h:i a');
+        //         } 
+        //         return "NOT DONE";
+        //     })
+        //     ->addColumn('complaint_work_dones', function ($query) {
+        //         $data = $query->complaint_work_dones->sortByDesc('id')->first();
+        //         if(isset($data)){
+        //             return $data->done_by ?? '';
+        //         } 
+        //         return "NOT DONE";
+        //     })
+        //     ->addColumn('customer_pindcode', function ($query) {
+        //          return getPincode($query->customer->customer_pindcode)??'';    
+        //     })
+        //     ->addColumn('complaint_work_remark', function ($query) {
+        //         $data = $query->complaint_work_dones->sortByDesc('id')->first();
+        //         if(isset($data)){
+        //             return $data->remark ?? '';
+        //         } 
+        //         return "NOT DONE";
+        //     })
+        //     ->addColumn('pending_tat', function ($query) {
+        //         $complaint_status_date = $query->complaint_time_line
+        //             ->where('status', '1')
+        //             ->sortByDesc('id') // Correct ordering method for collections
+        //             ->first();
+        //       if(isset($complaint_status_date->created_at) && isset($query->created_at)){
+        //         return calculatedTAT($complaint_status_date->created_at,$query->created_at);
+        //       }
+        //       return "00:00:00";
+        //     })
+        //     ->addColumn('open_tat', function ($query) {
+        //         $complaint_status_date = $query->complaint_time_line
+        //             ->where('status', '0')
+        //             ->sortByDesc('id') // Correct ordering method for collections
+        //             ->first();
+        //       if(isset($complaint_status_date->created_at) && isset($query->created_at)){
+        //         return calculatedTAT($complaint_status_date->created_at,$query->created_at);
+        //       }
+        //       return "Action Not Performed";
+        //     })
+        //     ->addColumn('canceled_tat', function ($query) {
+        //         $complaint_status_date = $query->complaint_time_line
+        //             ->where('status', '5')
+        //             ->sortByDesc('id') // Correct ordering method for collections
+        //             ->first();
+        //       if(isset($complaint_status_date->created_at) && isset($query->created_at)){
+        //         return calculatedTAT($complaint_status_date->created_at,$query->created_at);
+        //       }
+        //       return "Action Not Performed";
+        //     })
+        //      ->addColumn('work_done_tat', function ($query) {
+        //         $complaint_status_date = $query->complaint_time_line
+        //             ->where('status', '2')
+        //             ->sortByDesc('id') // Correct ordering method for collections
+        //             ->first();
+        //       if(isset($complaint_status_date->created_at) && isset($query->created_at)){
+        //         return calculatedTAT($complaint_status_date->created_at,$query->created_at);
+        //       }
+        //       return "Action Not Performed";
+        //     })
+        //     ->addColumn('compleated_tat', function ($query) {
+        //         $complaint_status_date = $query->complaint_time_line
+        //             ->where('status', '3')
+        //             ->sortByDesc('id') // Correct ordering method for collections
+        //             ->first();
+        //       if(isset($complaint_status_date->created_at) && isset($query->created_at)){
+        //         return calculatedTAT($complaint_status_date->created_at,$query->created_at);
+        //       }
+        //       return "Action Not Performed";
+        //     })
+        //     ->addColumn('close_tat', function ($query) {
+        //         $complaint_status_date = $query->complaint_time_line
+        //             ->where('status', '4')
+        //             ->sortByDesc('id') // Correct ordering method for collections
+        //             ->first();
+        //       if(isset($complaint_status_date->created_at) && isset($query->created_at)){
+        //         return calculatedTAT($complaint_status_date->created_at,$query->created_at);
+        //       }
+        //       return "Action Not Performed";
+        //     })
+        //     ->addColumn('service_bill_status', function ($query) {
+        //         if (!$query->service_bill) {
+        //             return "No Action"; // Handle the case where service_bill is null
+        //         }
 
-                switch ($query->service_bill->status) {
-                    case '0':
-                        return '<a href="' . route('service_bills.show', $query->service_bill->id) . '" title="Show Service Bill">
-                                    <span class="badge badge-secondary">Draft</span>
-                                </a>';
-                    case '1':
-                        return '<span class="badge badge-warning">Claimed</span>';
-                    case '2':
-                        return '<span class="badge badge-info">Customer Payable</span>';
-                    case '3':
-                        return '<span class="badge badge-success">Approved</span>';
-                    case '4':
-                        return '<span class="badge badge-danger">Cancelled</span>';
-                    default:
-                        return "No Action";
-                }
-            })
-            ->addColumn('service_bill_date', function ($query) {
-                if (!$query->service_bill) {
-                    return "Not Done Yet"; // Handle the case where service_bill is null
-                }
-                if($query->service_bill->status == '3'){
-                     return $query->service_bill->updated_at ?? '';
-                }else{
-                    return "Not Done Yet"; // Handle the case where service_bill is null
-                }  
-            })
-             ->addColumn('service_center_remark', function ($query) {
-                if (!isset($query->complaint_work_dones)) {
-                    return "No remark"; // Handle the case where service_bill is null
-                }
+        //         switch ($query->service_bill->status) {
+        //             case '0':
+        //                 return '<a href="' . route('service_bills.show', $query->service_bill->id) . '" title="Show Service Bill">
+        //                             <span class="badge badge-secondary">Draft</span>
+        //                         </a>';
+        //             case '1':
+        //                 return '<span class="badge badge-warning">Claimed</span>';
+        //             case '2':
+        //                 return '<span class="badge badge-info">Customer Payable</span>';
+        //             case '3':
+        //                 return '<span class="badge badge-success">Approved</span>';
+        //             case '4':
+        //                 return '<span class="badge badge-danger">Cancelled</span>';
+        //             default:
+        //                 return "No Action";
+        //         }
+        //     })
+        //     ->addColumn('service_bill_date', function ($query) {
+        //         if (!$query->service_bill) {
+        //             return "Not Done Yet"; // Handle the case where service_bill is null
+        //         }
+        //         if($query->service_bill->status == '3'){
+        //              return $query->service_bill->updated_at ?? '';
+        //         }else{
+        //             return "Not Done Yet"; // Handle the case where service_bill is null
+        //         }  
+        //     })
+        //      ->addColumn('service_center_remark', function ($query) {
+        //         if (!isset($query->complaint_work_dones)) {
+        //             return "No remark"; // Handle the case where service_bill is null
+        //         }
 
-                $service_bill = $query->complaint_work_dones->sortByDesc('id')->first();
-                if($service_bill){
-                     return  $service_bill->remark;
-                }else{
-                    return "No remark"; // Handle the case where service_bill is null
-                }
-            })
-           ->addColumn('service_branch', function ($query) {
-                return ($query->purchased_branch_details->branch_code ?? '-') . ' ' . ($query->purchased_branch_details->branch_name ?? '-');
-            })
-           ->addColumn('work_complated_duration', function ($query) {
-                $complaint_status = $query->complaint_time_line->where('status' , 3)->sortByDesc('id')->first();
-                if(isset($complaint_status->created_at) && isset($query->created_at)){
-                   return calculatedTAT($complaint_status->created_at,$query->created_at);
-                }
-                return "Not Completed Yet";
-            })
-           ->addColumn('open_duration', function ($query) {
-                $complaint_status = $query->complaint_time_line->where('status' , 0)->sortByDesc('id')->first();
-                if(isset($complaint_status->created_at) && isset($query->created_at)){
-                   return calculatedTAT($complaint_status->created_at,$query->created_at);
-                }
-                return "Not Open Yet";
-            })
-            ->addColumn('closed_date', function ($query) {
-                $complaint_status = $query->complaint_time_line->where('status' , 4)->sortByDesc('id')->first();
-                if(isset($complaint_status->created_at)){
-                    return getDateInIndFomate($complaint_status->created_at) ?? '';
-                }
-                return "Not Closed Yet";
-            })
+        //         $service_bill = $query->complaint_work_dones->sortByDesc('id')->first();
+        //         if($service_bill){
+        //              return  $service_bill->remark;
+        //         }else{
+        //             return "No remark"; // Handle the case where service_bill is null
+        //         }
+        //     })
+        //    ->addColumn('service_branch', function ($query) {
+        //         return ($query->purchased_branch_details->branch_code ?? '-') . ' ' . ($query->purchased_branch_details->branch_name ?? '-');
+        //     })
+        //    ->addColumn('work_complated_duration', function ($query) {
+        //         $complaint_status = $query->complaint_time_line->where('status' , 3)->sortByDesc('id')->first();
+        //         if(isset($complaint_status->created_at) && isset($query->created_at)){
+        //            return calculatedTAT($complaint_status->created_at,$query->created_at);
+        //         }
+        //         return "Not Completed Yet";
+        //     })
+        //    ->addColumn('open_duration', function ($query) {
+        //         $complaint_status = $query->complaint_time_line->where('status' , 0)->sortByDesc('id')->first();
+        //         if(isset($complaint_status->created_at) && isset($query->created_at)){
+        //            return calculatedTAT($complaint_status->created_at,$query->created_at);
+        //         }
+        //         return "Not Open Yet";
+        //     })
+        //     ->addColumn('closed_date', function ($query) {
+        //         $complaint_status = $query->complaint_time_line->where('status' , 4)->sortByDesc('id')->first();
+        //         if(isset($complaint_status->created_at)){
+        //             return getDateInIndFomate($complaint_status->created_at) ?? '';
+        //         }
+        //         return "Not Closed Yet";
+        //     })
             ->addColumn('complaint_date', function ($query) {
                 return date('d-m-Y', strtotime($query->complaint_date));
             })
@@ -508,10 +559,50 @@ class ComplaintController extends Controller
                                 ' . $btn . '
                             </div>';
             })
-            ->editColumn('company_sale_bill_date' , function($query){
-                 return getDateInIndFomate($query->company_sale_bill_date) ?? '';
-            })
-            ->rawColumns(['action', 'status','complaint_number' , 'service_bill_status' , 'service_bill_date'])
+            // ->editColumn('company_sale_bill_date' , function($query){
+            //      return getDateInIndFomate($query->company_sale_bill_date) ?? '';
+            // })
+
+            ->addColumn('customer_name', function ($row) {
+    return $row->customer->customer_name ?? '';
+})
+
+->addColumn('customer_number', function ($row) {
+    return $row->customer->customer_number ?? '';
+})
+
+->addColumn('complaint_type', function ($row) {
+    return $row->complaint_type_details->name ?? '';
+})
+
+->addColumn('voice_note', function ($row) {
+
+    if (!$row->voice_note_file) {
+        return '-';
+    }
+
+    return '<audio controls style="width:150px">
+                <source src="'.asset($row->voice_note_file).'" type="audio/mpeg">
+            </audio>';
+})
+
+->addColumn('attachment', function ($row) {
+
+    $media = $row->getFirstMedia('complaint_attach');
+
+    if (!$media) {
+        return '-';
+    }
+
+    return '<a href="'.$media->getUrl().'" target="_blank">
+                View Attachment
+            </a>';
+})
+
+->addColumn('distributor_name', function ($row) {
+    return $row->distributor->trade_name ?? '';
+})
+            ->rawColumns(['action', 'status','complaint_number' , 'service_bill_status' , 'service_bill_date','voice_note','attachment'])
             ->make(true);
     }
 
@@ -533,7 +624,12 @@ class ComplaintController extends Controller
 
         $end_users = EndUser::where('status' , 1)->select('id' , 'customer_name' , 'customer_number')->get();
 
-
+        $distributors = MasterDistributor::select(
+            'id',
+            'legal_name',
+            'trade_name',
+            'distributor_code'
+        )->get();
         $service_centers = Customers::where('customertype', '4')->select('id', 'name', 'customer_code')->get();
         $branchs = Branch::where('active', 'Y')->select('id', 'branch_name', 'branch_code')->get();
         $pincodes = Pincode::where('active', 'Y')->select('id', 'pincode')->get();
@@ -544,7 +640,7 @@ class ComplaintController extends Controller
             $this->complaint['serail_number'] = $request->serial_no;
         }
         $states = State::where('active', 'Y')->select('id', 'state_name')->get();
-        return view('complaint.create', compact('serial_number','assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types', 'newComplaintNumber', 'products', 'states' , 'end_users'))->with('complaints', $this->complaint);
+        return view('complaint.create', compact('serial_number','assign_users', 'service_centers', 'branchs', 'pincodes', 'divisions', 'complaint_types', 'newComplaintNumber', 'products', 'states' , 'end_users','distributors'))->with('complaints', $this->complaint);
     }
 
     /**
@@ -555,6 +651,8 @@ class ComplaintController extends Controller
      */
     public function store(Request $request)
     {
+
+        // dd($request->all());
         $rules = [
             'customer_number'    => 'required',
             'customer_state'          => 'required',
@@ -572,6 +670,7 @@ class ComplaintController extends Controller
             $end_user = EndUser::updateOrCreate(['customer_number' => $request->customer_number ?? ''], [
                 'customer_name' => $request->customer_name ?? '',
                 'customer_number' => $request->customer_number ?? '',
+                'whatsapp_number' => $request->whatsapp_number ?? '',
                 'customer_email' => $request->customer_email ?? '',
                 'customer_address' => $request->customer_address ?? '',
                 'customer_place' => $request->customer_place ?? '',
@@ -586,12 +685,56 @@ class ComplaintController extends Controller
             ]);
             $request->end_user_id = $end_user->id;
 
+            $voicePath = null;
+
+            if ($request->hasFile('voice_note_file')) {
+
+                $voiceFile = $request->file('voice_note_file');
+
+                $voiceName = time() . '_voice.' .
+                    $voiceFile->getClientOriginalExtension();
+
+                $voicePath = $voiceFile->storeAs(
+                    'complaint_voice_notes',
+                    $voiceName,
+                    'public'
+                );
+            }
+
+            $imagePath = null;
+
+            if ($request->hasFile('file')) {
+
+                $imageFile = $request->file('file');
+
+                $imageName = time() . '_image.' .
+                    $imageFile->getClientOriginalExtension();
+
+                $imagePath = $imageFile->storeAs(
+                    'complaint_attachments',
+                    $imageName,
+                    'public'
+                );
+            }
+
             $check_warranty = WarrantyActivation::with('customer', 'media')->where('product_serail_number', $request->product_serail_number)->first();
 
             $newComplaintNumber = $this->getComplaintNumber();
             $complaint = Complaint::create([
+                'part_number' => $request->part_no,
+                'batch_code' => $request->batch_no,
+                'distributor_id' => $request->distributor_id,
+                'same_as_contact' => $request->same_as_contact ? 1 : 0,
+                'whatsapp_number' => $request->whatsapp_number,
+
+                'voice_note_file' => $voicePath,
+                'attachment_file' => $imagePath,
+
                 'complaint_number' => $newComplaintNumber,
-                'complaint_date' => $request->complaint_date ? cretaDate($request->complaint_date)  : NULL,
+                // 'complaint_date' => $request->complaint_date ? cretaDate($request->complaint_date)  : NULL,
+                'complaint_date' => $request->complaint_date
+                    ? cretaDate($request->complaint_date)
+                    : now()->format('Y-m-d'),
                 'claim_amount' => $request->claim_amount ?? NULL,
                 'seller' => $request->seller ?? NULL,
                 'end_user_id' => $request->end_user_id ?? NULL,
@@ -631,20 +774,39 @@ class ComplaintController extends Controller
                 'created_by' => auth()->user()->id,
                 'complaint_recieve_via' => $request->complaint_recieve_via ?? Null,
             ]);
-            if ($request->file('files') && count($request->file('files')) > 0) {
-                foreach ($request->file('files') as $file) {
-                    $customname = time() . '.' . $file->getClientOriginalExtension();
-                    $complaint->addMedia($file)
-                        ->usingFileName($customname)
-                        ->toMediaCollection('complaint_attach');
-                }
+            // if ($request->file('files') && count($request->file('files')) > 0) {
+            //     foreach ($request->file('files') as $file) {
+            //         $customname = time() . '.' . $file->getClientOriginalExtension();
+            //         $complaint->addMedia($file)
+            //             ->usingFileName($customname)
+            //             ->toMediaCollection('complaint_attach');
+            //     }
             
+            // }
+
+            $imagePath = null;
+
+            if ($request->hasFile('file')) {
+
+                $file = $request->file('file');
+
+                $imageName = time() . '_image.' .
+                    $file->getClientOriginalExtension();
+
+                $imagePath = $file->storeAs(
+                    'complaint_attachments',
+                    $imageName,
+                    'public'
+                );
+
+                $complaint->attachment_file = $imagePath;
+                $complaint->save();
             }
             // $this->sendMsgToCustomer($complaint , $type=1);
             // if(isset($complaint->service_center)){
             //     $this->sendMsgToServiceCenter($complaint);
             // }
-
+            
             return Redirect::to('complaints')->with('message_success', 'Complaint Store Successfully and the complaint number is <span title="Copy" id="copyText">' . $newComplaintNumber . '</span>');
         }else {
             return redirect()->back()->withErrors($validator)->withInput();
@@ -675,6 +837,7 @@ class ComplaintController extends Controller
             'sale_bill_date' => $complaint->customer_bill_date
         ]));
         $response = $result->getData(true);
+        // dd($assign_users);
         return view('complaint.show', compact('complaint', 'timelines', 'assign_users', 'service_centers', 'work_done', 'service_bill', 'complete_complaint', 'close_complaint' , 'response'));
     }
 
@@ -1040,5 +1203,36 @@ class ComplaintController extends Controller
                
             }
         }
+    }
+
+    public function changeStatus(Request $request)
+    {
+
+    // dd($request);
+        $complaint = Complaint::findOrFail($request->id);
+
+            // if ($request->status == 4 && empty($request->remark)) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Close remark is required.'
+            //     ]);
+            // }
+
+        $complaint->update([
+            'complaint_status' => $request->status,
+            'status_remark' => $request->remark,
+        ]);
+
+        ComplaintTimeline::create([
+            'complaint_id' => $complaint->id,
+            'created_by'    => auth()->id(),
+            'status'        => $request->status,
+            'status_remark'      => $request->remark,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status updated successfully.'
+        ]);
     }
 }

@@ -76,6 +76,37 @@
     .hover-effect:hover {
       transform: scale(1.05); /* Slightly increase size on hover */
     }
+
+
+    .status-open {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.status-pending {
+    background-color: #ff9800;
+    color: #fff;
+}
+
+.status-workdone {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.status-completed {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.status-closed {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.status-canceled {
+    background-color: #dc3545;
+    color: #fff;
+}
   </style>
   <div class="row">
     <div class="col-md-12">
@@ -144,7 +175,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-sm">
+              <!-- <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
                   <div class="card-body " onclick="change_complaints_type(0)">
                     <h4 class="card-text text-center">Open</h4>
@@ -167,7 +198,7 @@
                     <h5 class="card-title" id="complaints_complete"></h5>
                   </div>
                 </div>
-              </div>
+              </div> -->
               <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
                   <div class="card-body" onclick="change_complaints_type(4)">
@@ -176,14 +207,14 @@
                   </div>
                 </div>
               </div>
-              <div class="col-sm">
+              <!-- <div class="col-sm">
                 <div class="card text-center m-1 hover-effect">
                   <div class="card-body " onclick="change_complaints_type(5)">
                     <h4 class="card-text text-center">Cancelled </h4>
                     <h5 class="card-title" id="complaints_cancelled"></h5>
                   </div>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -223,28 +254,7 @@
                     <th>
                         <!-- <button type="button" class="btn btn-secondary" id="resetFilters">Reset</button> -->
                     </th>
-                    <th><input type="text" class="form-control table-input " placeholder="Date..." name="complaint_date" id="complaint_date" autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="complaint_number" placeholder="Search..." autocomplete="off"></th>
-                    <!-- <th><input type="text" class="form-control table-input" name="service_center_name" placeholder="Search..." autocomplete="off"></th> -->
-                     <th>
-                        <select class="form-control table-input select2" name="service_center_name[]" id="service_center_name" multiple>
-                            @if(count($service_centers) > 0)
-                               @foreach($service_centers as $service_center)
-                                     <option value="{{$service_center->id}}">{{$service_center->name}}</option>
-                               @endforeach
-                            @endif
-                        </select>
-                    </th>
-                    <th>
-                        <select class="form-control table-input select2" name="assign_user[]" id="assign_user" multiple>
-                            @if(count($assign_users) > 0)
-                               @foreach($assign_users as $assign_user)
-                                     <option value="{{$assign_user->id}}">{{$assign_user->name}}</option>
-                               @endforeach
-                            @endif
-                        </select>
-                    </th>
-                    <th><input type="text" class="form-control table-input" name="service_center_code" placeholder="Search..." autocomplete="off"></th>
+                    <th><div style="width:150px"></div></th>
                     <th>
                         <select class="form-control table-input" name="status" id="status">
                             <option value="">Select</option>
@@ -256,27 +266,26 @@
                             <option value="5">Canceled</option>
                         </select>
                     </th>
-                    <th>
-                      <select class="form-control table-input select2" name="category_name_1" id="category_name_1">
-                          <option value="">Select Type</option>
-                          @if(count($categories) > 0)
-                             @foreach($categories as $categorie)
-                                   <option value="{{$categorie->category_name}}">{{$categorie->category_name}}</option>
-                             @endforeach
-                          @endif
-                      </select>
-                    </th>
-                    <th><input type="text" class="form-control table-input" name="seller"  placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="complaint_number" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="part_number" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input" name="batch_code" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="customer_name" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="customer_email" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="customer_number" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="customer_address" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="customer_place" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="pincode" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="customer_country" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="customer_state" placeholder="Search..." autocomplete="off"></th>
                     <th><input type="text" class="form-control table-input" name="customer_city" placeholder="Search..." autocomplete="off"></th>
-                     <th>
+                    <th>
+                        <select class="form-control table-input select2"
+                                name="distributor_id"
+                                id="distributor_id">
+                            <option value="">Select Distributor</option>
+
+                            @foreach($distributors as $distributor)
+                                <option value="{{ $distributor->id }}">
+                                    {{ $distributor->trade_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </th>
+                    <th>
                         <select class="form-control table-input select2" name="customer_complaint_type" id="customer_complaint_type">
                             <option value="">Select Type</option>
                             @if(count($complaint_types) > 0)
@@ -286,35 +295,80 @@
                             @endif
                         </select>
                     </th>
+                    <th><input type="text" class="form-control table-input" name="description" placeholder="Search..." autocomplete="off"></th>
+                    <th><input type="text" class="form-control table-input " placeholder="Date..." name="complaint_date" id="complaint_date" autocomplete="off"></th>
+                    <th><input type="text" name="createdbyname_name" class="form-control table-input" placeholder="Search..." autocomplete="off"></th>
+                    <!-- <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="created_at" id="created_at" autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="service_center_name" placeholder="Search..." autocomplete="off"></th> -->
+                     <!-- <th>
+                        <select class="form-control table-input select2" name="service_center_name[]" id="service_center_name" multiple>
+                            @if(count($service_centers) > 0)
+                               @foreach($service_centers as $service_center)
+                                     <option value="{{$service_center->id}}">{{$service_center->name}}</option>
+                               @endforeach
+                            @endif
+                        </select>
+                    </th> -->
+                    <!-- <th>
+                        <select class="form-control table-input select2" name="assign_user[]" id="assign_user" multiple>
+                            @if(count($assign_users) > 0)
+                               @foreach($assign_users as $assign_user)
+                                     <option value="{{$assign_user->id}}">{{$assign_user->name}}</option>
+                               @endforeach
+                            @endif
+                        </select>
+                    </th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="service_center_code" placeholder="Search..." autocomplete="off"></th> -->
+                    
+                    <!-- <th>
+                      <select class="form-control table-input select2" name="category_name_1" id="category_name_1">
+                          <option value="">Select Type</option>
+                          @if(count($categories) > 0)
+                             @foreach($categories as $categorie)
+                                   <option value="{{$categorie->category_name}}">{{$categorie->category_name}}</option>
+                             @endforeach
+                          @endif
+                      </select>
+                    </th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="seller"  placeholder="Search..." autocomplete="off"></th> -->
+                    
+                    <!-- <th><input type="text" class="form-control table-input" name="customer_email" placeholder="Search..." autocomplete="off"></th> -->
+                    
+                    <!-- <th><input type="text" class="form-control table-input" name="customer_address" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="customer_place" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="pincode" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="customer_country" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="customer_state" placeholder="Search..." autocomplete="off"></th> -->
+                    
                     <!-- <th><input type="text" class="form-control table-input" name="customer_complaint_type" placeholder="Search..." autocomplete="off"></th> -->
-                    <th><input type="text" class="form-control table-input" name="category_name" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="product_name" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="product_code" placeholder="Search..." autocomplete="off"></th>
+                    <!-- <th><input type="text" class="form-control table-input" name="category_name" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="product_name" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="product_code" placeholder="Search..." autocomplete="off"></th> -->
                   
-                    <th><input type="text" class="form-control table-input" name="product_serail_number" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="specification" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="product_no" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="phase" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="customer_bill_date" id="customer_bill_date" autocomplete="off"></th>
-                     <th>
+                    <!-- <th><input type="text" class="form-control table-input" name="product_serail_number" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="specification" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="product_no" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="phase" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="customer_bill_date" id="customer_bill_date" autocomplete="off"></th> -->
+                     <!-- <th>
                         <select class="form-control table-input" name="service_type">
                             <option value="">Select</option>
                             <option value="Paid">Paid</option>
                             <option value="Free">Free</option>
                         </select>
-                    </th>
+                    </th> -->
                     <!-- <th><input type="text" class="form-control table-input" name="service_type" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><div style="width:150px"></div></th> -->
+                    <!-- <th><div style="width:150px"></div></th> -->
+                    <!-- <th><div style="width:150px"></div></th> -->
+                    <!-- <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="last_update_date" id="last_update_date" autocomplete="off"></th> -->
+                    <!-- <th><div style="width:150px"></div></th>
                     <th><div style="width:150px"></div></th>
                     <th><div style="width:150px"></div></th>
                     <th><div style="width:150px"></div></th>
-                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="last_update_date" id="last_update_date" autocomplete="off"></th>
                     <th><div style="width:150px"></div></th>
-                    <th><div style="width:150px"></div></th>
-                    <th><div style="width:150px"></div></th>
-                    <th><div style="width:150px"></div></th>
-                    <th><div style="width:150px"></div></th>
-                    <th><div style="width:150px"></div></th>
-                    <th>
+                    <th><div style="width:150px"></div></th> -->
+                    <!-- <th>
                         <select class="form-control table-input" name="service_status">
                             <option value="">Select</option>
                             <option value="0">Draft</option>
@@ -323,91 +377,102 @@
                             <option value="3">Approved</option>
                             <option value="4">Cancelled</option>
                         </select>
-                    </th>
-                    <th><div style="width:150px"></div></th>
-                    <th><input type="text" class="form-control table-input" name="description" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="service_branch" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="purchased_party_name" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="warranty_bill" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="customer_bill_no" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="customer_bill_date_1" id="customer_bill_date_1" autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input" name="under_warranty" placeholder="Search..." autocomplete="off"></th>
+                    </th> -->
+                    <!-- <th><div style="width:150px"></div></th> -->
+                    
+                    <!-- <th><input type="text" class="form-control table-input" name="service_branch" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="purchased_party_name" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="warranty_bill" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="customer_bill_no" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="customer_bill_date_1" id="customer_bill_date_1" autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="under_warranty" placeholder="Search..." autocomplete="off"></th> -->
                      <!-- <th><input type="text" class="form-control table-input" name="service_type_1" placeholder="Search..." autocomplete="off"></th> -->
-                    <th><input type="text" class="form-control table-input" name="company_sale_bill_no" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="company_sale_bill_date" id="company_sale_bill_date" autocomplete="off"></th>
-                    <th><div style="width:150px"></div></th>
-                    <th><input type="text" class="form-control table-input" name="register_by" placeholder="Search..." autocomplete="off"></th>
-                    <th><div style="width:150px"></div></th>
-                    <th><div style="width:150px"></div></th>
-                    <th><div style="width:150px"></div></th>
-                    <th><input type="text" name="createdbyname_name" class="form-control table-input" placeholder="Search..." autocomplete="off"></th>
-                    <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="created_at" id="created_at" autocomplete="off"></th>
+                    <!-- <th><input type="text" class="form-control table-input" name="company_sale_bill_no" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><input type="text" class="form-control table-input datepicker" placeholder="Date..." name="company_sale_bill_date" id="company_sale_bill_date" autocomplete="off"></th> -->
+                    <!-- <th><div style="width:150px"></div></th> -->
+                    <!-- <th><input type="text" class="form-control table-input" name="register_by" placeholder="Search..." autocomplete="off"></th> -->
+                    <!-- <th><div style="width:150px"></div></th> -->
+                    <!-- <th><div style="width:150px"></div></th> -->
+                    <!-- <th><div style="width:150px"></div></th> -->
+                    
                     
                 </tr>
                 <tr>
                   <th>{!! trans('panel.global.no') !!}</th>
                   <!-- <th>{!! trans('panel.global.action') !!}</th> -->
-                  <th>Date</th>
-                  <th>Complaint Number</th>
-                  <th>Service Center</th>
-                  <th>Service Eng</th>
-                  <th>Service Center Code</th>
+                   <th>Action</th>
                   <th>Complaint Status</th>
-                  <th>Division</th> 
-                  <th>Seller Name</th>
+                  <th>Complaint Number</th>
+                  <th>Part No</th>
+                  <th>Batch Code</th>
                   <th>Customer Name</th>
-                  <th>Customer Email</th>
                   <th>Contact No</th>
-                  <th>Address</th>
-                  <th>Place</th>
-                  <th>Pincode</th>
-                  <th>Country</th>
-                  <th>State</th>
                   <th>City</th>
-                  <th>Customer Complaint Type</th>      
-                  <th>Division</th> 
-                  <th>Product Name</th>
-                  <th>Product Code</th> 
-                         
-                  <th>Product Serial No</th>  
-                  <th>HP</th> 
-                  <th>Stage</th>
-                  <th>Phase</th>
-                  <th>Warranty Customer Bill Date</th>
-                  <th>Service Paid/Free</th>
-                  <th>Work Done Time</th>
-                  <th>Action Done By ASC</th>
-                  <th>Service Center Remark</th>
-                  <!-- <th>Last Status</th> -->
-                  <th>Last Status Update Time</th>
-                  <th>Pending TAT</th>
-                  <th>Open TAT</th>
-                  <th>Cancelled TAT</th>
-                  <th>Work Done TAT</th>
-                  <th>Completed TAT</th>
-                  <th>Close TAT</th>
-                  <th>Serive Bill status</th>
-                  <th>Service Bill Approved Date</th>
+                  <th>Distributor</th>
+                  <th>Customer Complaint Type</th>   
                   <th>Description</th>
-                  <th>Service Branch</th>
-                  <th>Purchased Party Name</th>
-                  <th>Warrenty Bill</th>
-                  <th>Customer Bill No </th>
-                  <th>Customer Bill Date</th>
-                  <th>Under Warranty</th>
-                  <!-- <th>Service Type</th> -->
-                  <th>Company Sale Bill No.</th>
-                  <th>Company Sale Bill Date</th>
-                  <th>Service Centre Remarks</th>
-                  <th>Complaint Register By</th>
-                  <!-- <th>Division Name</th> -->
-                  <th>Work Completed Duration</th>
-                  <th>Open Duration</th>
-                  <th>Closed Date</th>
-                  <!-- <th>Complaint Feedback Type</th>
-                  <th>Feedback</th> -->
+                  <th>Date</th>
                   <th>Created By</th>
                   <th>Created At</th>
+
+                  
+                  <!-- <th>Service Center</th> -->
+                  <!-- <th>Service Eng</th> -->
+                  <!-- <th>Service Center Code</th> -->
+                  
+                  <!-- <th>Division</th>  -->
+                  <!-- <th>Seller Name</th> -->
+                  
+                  <!-- <th>Customer Email</th> -->
+                  
+                  <!-- <th>Address</th> -->
+                  <!-- <th>Place</th> -->
+                  <!-- <th>Pincode</th> -->
+                  <!-- <th>Country</th> -->
+                  <!-- <th>State</th> -->
+                     
+                  <!-- <th>Division</th>  -->
+                  <!-- <th>Product Name</th> -->
+                  <!-- <th>Product Code</th>  -->
+                         
+                  <!-- <th>Product Serial No</th>   -->
+                  <!-- <th>HP</th>  -->
+                  <!-- <th>Stage</th> -->
+                  <!-- <th>Phase</th> -->
+                  <!-- <th>Warranty Customer Bill Date</th> -->
+                  <!-- <th>Service Paid/Free</th> -->
+                  <!-- <th>Work Done Time</th> -->
+                  <!-- <th>Action Done By ASC</th> -->
+                  <!-- <th>Service Center Remark</th> -->
+                  <!-- <th>Last Status</th> -->
+                  <!-- <th>Last Status Update Time</th> -->
+                  <!-- <th>Pending TAT</th> -->
+                  <!-- <th>Open TAT</th> -->
+                  <!-- <th>Cancelled TAT</th> -->
+                  <!-- <th>Work Done TAT</th> -->
+                  <!-- <th>Completed TAT</th> -->
+                  <!-- <th>Close TAT</th> -->
+                  <!-- <th>Serive Bill status</th> -->
+                  <!-- <th>Service Bill Approved Date</th> -->
+                  
+                  <!-- <th>Service Branch</th> -->
+                  <!-- <th>Purchased Party Name</th> -->
+                  <!-- <th>Warrenty Bill</th> -->
+                  <!-- <th>Customer Bill No </th> -->
+                  <!-- <th>Customer Bill Date</th> -->
+                  <!-- <th>Under Warranty</th> -->
+                  <!-- <th>Service Type</th> -->
+                  <!-- <th>Company Sale Bill No.</th> -->
+                  <!-- <th>Company Sale Bill Date</th> -->
+                  <!-- <th>Service Centre Remarks</th> -->
+                  <!-- <th>Complaint Register By</th> -->
+                  <!-- <th>Division Name</th> -->
+                  <!-- <th>Work Completed Duration</th> -->
+                  <!-- <th>Open Duration</th> -->
+                  <!-- <th>Closed Date</th> -->
+                  <!-- <th>Complaint Feedback Type</th>
+                  <th>Feedback</th> -->
+                  
 
               </tr>
               </thead>
@@ -417,6 +482,22 @@
           </div>
         </div>
       </div>
+      <!-- <div class="modal fade" id="complaintModal">
+          <div class="modal-dialog modal-xl" style="max-width:95%;">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title">Complaint Details</h5>
+                      <button type="button" class="close" data-dismiss="modal">
+                          <span>&times;</span>
+                      </button>
+                  </div>
+
+                  <div class="modal-body" id="complaintModalBody">
+                      Loading...
+                  </div>
+              </div>
+          </div>
+      </div> -->
     </div>
   </div>
   <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
@@ -450,8 +531,11 @@
                 d._token = "{{ csrf_token() }}"; // CSRF Token
                 d.complaint_date = $('input[name="complaint_date"]').val();
                 d.complaint_number = $('input[name="complaint_number"]').val();
+                d.part_number = $('input[name="part_number"]').val();
+                d.batch_code = $('input[name="batch_code"]').val();
+                d.distributor_id = $('#distributor_id').val();
                 d.service_center_name = $('select[name="service_center_name[]"]').val() || [];
-                d.assign_user = $('select[name="assign_user[]"]').val() || [];
+                // d.assign_user = $('select[name="assign_user[]"]').val() || [];
                 d.service_center_code = $('input[name="service_center_code"]').val();
                 d.seller = $('input[name="seller"]').val();
                 d.customer_name = $('input[name="customer_name"]').val();
@@ -493,78 +577,98 @@
             }
           },
           columns: [
+            
               {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
-              {data: 'complaint_date', name: 'complaint_date', orderable: false, defaultContent: ''},
-              {data: 'complaint_number', name: 'complaint_number', orderable: false, defaultContent: ''},
-              {data: 'service_center_details.name', name: 'service_center_details.name', orderable: false, defaultContent: '', searchable: false},
-              {data: 'assign_users.name', name: 'assign_users.name', orderable: false, defaultContent: '', searchable: false},
-              {data: 'service_center_details.customer_code', name: 'service_center_details.customer_code', orderable: false, defaultContent: '', searchable: false},
-              {data: 'status', name: 'status', orderable: false, defaultContent: ''},
-              {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},  
-              {data: 'seller', name: 'seller', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer.customer_name', name: 'customer.customer_name', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer.customer_email', name: 'customer.customer_email', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer.customer_number', name: 'customer.customer_number', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer.customer_address', name: 'customer.customer_address', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer.customer_place', name: 'customer.customer_place', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer_pindcode', name: 'customer_pindcode', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer.customer_country', name: 'customer.customer_country', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer.customer_state', name: 'customer.customer_state', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer.customer_city', name: 'customer.customer_city', orderable: false, defaultContent: '', searchable: false},
-              {data: 'complaint_type_details.name', name: 'complaint_type_details.name', orderable: false, defaultContent: '', searchable: false},
-              {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},
-              {data: 'product_details.product_name', name: 'product_details.product_name', orderable: false, defaultContent: '', searchable: false},
-              {data: 'product_details.product_code', name: 'product_details.product_code', orderable: false, defaultContent: '', searchable: false},
               
-              {data: 'product_serail_number', name: 'product_serail_number', orderable: false, defaultContent: '', searchable: false},
-              {data: 'product_details.specification', name: 'product_details.specification', orderable: false, defaultContent: '', searchable: false},
-              {data: 'product_details.product_no', name: 'product_details.product_no', orderable: false, defaultContent: '', searchable: false},
-              {data: 'product_details.phase', name: 'product_details.phase', orderable: false, defaultContent: '', searchable: false},
-              {data: 'warranty_details.warranty_date', name: 'warranty_details.warranty_date', orderable: false, defaultContent: '', searchable: false},
-              {data: 'service_type', name: 'service_type', orderable: false, defaultContent: '', searchable: false},
-              {data: 'work_done_time', name: 'work_done_time', orderable: false, defaultContent: '', searchable: false},
-              {data: 'complaint_work_dones', name: 'complaint_work_dones', orderable: false, defaultContent: '', searchable: false},
-              {data: 'complaint_work_remark', name: 'complaint_work_remark', orderable: false, defaultContent: '', searchable: false},
-              {data: 'updated_at', name: 'updated_at', orderable: false, defaultContent: '', searchable: false},
-              {data: 'pending_tat', name: 'pending_tat', orderable: false, defaultContent: '', searchable: false},
-              {data: 'open_tat', name: 'open_tat', orderable: false, defaultContent: '', searchable: false},
-              {data: 'canceled_tat', name: 'canceled_tat', orderable: false, defaultContent: '', searchable: false},
-              {data: 'work_done_tat', name: 'work_done_tat', orderable: false, defaultContent: '', searchable: false},
-              {data: 'compleated_tat', name: 'compleated_tat', orderable: false, defaultContent: '', searchable: false},
-              {data: 'close_tat', name: 'close_tat', orderable: false, defaultContent: '', searchable: false},
-              {data: 'service_bill_status', name: 'service_bill_status', orderable: false, defaultContent: '', searchable: false},
-              {data: 'service_bill_date', name: 'service_bill_date', orderable: false, defaultContent: '', searchable: false},
-              {data: 'description', name: 'description', orderable: false, defaultContent: '', searchable: false},
-              {data: 'service_branch', name: 'service_branch', orderable: false, defaultContent: '', searchable: false},
               {
-                  data: null,
-                  orderable: false,
-                  render: function(data, type, full, meta) {
-                      return data.customer.customer_name + ' (' + data.customer.customer_number + ')';
-                  }
-              },
-              {data: 'warranty_bill', name: 'warranty_bill', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer_bill_no', name: 'customer_bill_no', orderable: false, defaultContent: '', searchable: false},
-              {data: 'customer_bill_date', name: 'customer_bill_date', orderable: false, defaultContent: '', searchable: false},
-              {data: 'under_warranty', name: 'under_warranty', orderable: false, defaultContent: '', searchable: false},
-              // {data: 'service_type', name: 'service_type', orderable: false, defaultContent: '', searchable: false},
-              {data: 'company_sale_bill_no', name: 'company_sale_bill_no', orderable: false, defaultContent: '', searchable: false},
-              {data: 'company_sale_bill_date', name: 'company_sale_bill_date', orderable: false, defaultContent: '', searchable: false},
-              {data: 'service_center_remark', name: 'service_center_remark', orderable: false, defaultContent: '', searchable: false},
-              {data: 'register_by', name: 'register_by', orderable: false, defaultContent: '', searchable: false},
-              // {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},
-              {data: 'work_complated_duration', name: 'work_complated_duration', orderable: false, defaultContent: '', searchable: false},
-              {data: 'open_duration', name: 'open_duration', orderable: false, defaultContent: '', searchable: false},
-              {data: 'closed_date', name: 'closed_date', orderable: false, defaultContent: '', searchable: false},
-              // {data: 'complaint_feedback', name: 'complaint_feedback', orderable: false, defaultContent: '', searchable: false},
-              // {data: 'feedback', name: 'feedback', orderable: false, defaultContent: '', searchable: false},
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false
+            },
+              {data: 'status', name: 'status', orderable: false, defaultContent: ''},
+              {data: 'complaint_number', name: 'complaint_number', orderable: false, defaultContent: ''},
+              {data: 'part_number', name: 'part_number', orderable: false, defaultContent: ''},
+              {data: 'batch_code', name: 'batch_code', orderable: false, defaultContent: ''},
+              {data: 'customer.customer_name', name: 'customer.customer_name', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer.customer_number', name: 'customer.customer_number', orderable: false, defaultContent: '', searchable: false},
+              {data: 'customer.customer_city', name: 'customer.customer_city', orderable: false, defaultContent: '', searchable: false},
+              {data: 'distributor_name', name: 'distributor_name', orderable: false, defaultContent: ''},
+              {data: 'complaint_type_details.name', name: 'complaint_type_details.name', orderable: false, defaultContent: '', searchable: false},
+              {data: 'description', name: 'description', orderable: false, defaultContent: '', searchable: false},
+              {data: 'complaint_date', name: 'complaint_date', orderable: false, defaultContent: ''},
               {data: 'createdbyname.name', name: 'createdbyname.name', orderable: false, defaultContent: '', searchable: false},
               {data: 'created_at', name: 'created_at', orderable: false, defaultContent: '', searchable: false},
+              
+              // {data: 'service_center_details.name', name: 'service_center_details.name', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'assign_users.name', name: 'assign_users.name', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'service_center_details.customer_code', name: 'service_center_details.customer_code', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},  
+              // {data: 'seller', name: 'seller', orderable: false, defaultContent: '', searchable: false},
+              
+              // {data: 'customer.customer_email', name: 'customer.customer_email', orderable: false, defaultContent: '', searchable: false},
+              
+              // {data: 'customer.customer_address', name: 'customer.customer_address', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'customer.customer_place', name: 'customer.customer_place', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'customer_pindcode', name: 'customer_pindcode', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'customer.customer_country', name: 'customer.customer_country', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'customer.customer_state', name: 'customer.customer_state', orderable: false, defaultContent: '', searchable: false},
+              
+              // {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'product_details.product_name', name: 'product_details.product_name', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'product_details.product_code', name: 'product_details.product_code', orderable: false, defaultContent: '', searchable: false},
+              
+              // {data: 'product_serail_number', name: 'product_serail_number', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'product_details.specification', name: 'product_details.specification', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'product_details.product_no', name: 'product_details.product_no', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'product_details.phase', name: 'product_details.phase', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'warranty_details.warranty_date', name: 'warranty_details.warranty_date', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'service_type', name: 'service_type', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'work_done_time', name: 'work_done_time', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'complaint_work_dones', name: 'complaint_work_dones', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'complaint_work_remark', name: 'complaint_work_remark', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'updated_at', name: 'updated_at', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'pending_tat', name: 'pending_tat', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'open_tat', name: 'open_tat', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'canceled_tat', name: 'canceled_tat', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'work_done_tat', name: 'work_done_tat', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'compleated_tat', name: 'compleated_tat', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'close_tat', name: 'close_tat', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'service_bill_status', name: 'service_bill_status', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'service_bill_date', name: 'service_bill_date', orderable: false, defaultContent: '', searchable: false},
+              
+              // {data: 'service_branch', name: 'service_branch', orderable: false, defaultContent: '', searchable: false},
+              // {
+              //     data: null,
+              //     orderable: false,
+              //     render: function(data, type, full, meta) {
+              //         return data.customer.customer_name + ' (' + data.customer.customer_number + ')';
+              //     }
+              // },
+              // {data: 'warranty_bill', name: 'warranty_bill', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'customer_bill_no', name: 'customer_bill_no', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'customer_bill_date', name: 'customer_bill_date', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'under_warranty', name: 'under_warranty', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'service_type', name: 'service_type', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'company_sale_bill_no', name: 'company_sale_bill_no', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'company_sale_bill_date', name: 'company_sale_bill_date', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'service_center_remark', name: 'service_center_remark', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'register_by', name: 'register_by', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'product_details.categories.category_name', name: 'product_details.categories.category_name', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'work_complated_duration', name: 'work_complated_duration', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'open_duration', name: 'open_duration', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'closed_date', name: 'closed_date', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'complaint_feedback', name: 'complaint_feedback', orderable: false, defaultContent: '', searchable: false},
+              // {data: 'feedback', name: 'feedback', orderable: false, defaultContent: '', searchable: false},
+              
 
           ]
       });
 
       $(document).ready(function () {
+
+
+      
           // Initialize datepickers
 
 
@@ -785,6 +889,30 @@
           title: "Complaint number copied to clipboard: " + textToCopy
         });
       });
+
+      $(document).on('change', '.change-status', function () {
+
+          console.log('changed');
+
+          let id = $(this).data('id');
+          let status = $(this).val();
+
+          $.ajax({
+              url: '/complaints/change-status',
+              type: 'POST',
+              data: {
+                  _token: $('meta[name="csrf-token"]').attr('content'),
+                  id: id,
+                  status: status
+              },
+              success: function (response) {
+                  console.log(response);
+              },
+              error: function(xhr){
+                  console.log(xhr.responseText);
+              }
+          });
+      });
     });
 
 
@@ -825,5 +953,31 @@
          }
        });
     }
+
+    $(document).on('change', '.change-status', function () {
+
+    let status = $(this).val();
+
+    $(this).removeClass(
+        'status-open status-pending status-workdone status-completed status-closed status-canceled'
+    );
+
+    if(status == 0) $(this).addClass('status-open');
+    if(status == 1) $(this).addClass('status-pending');
+    if(status == 2) $(this).addClass('status-workdone');
+    if(status == 3) $(this).addClass('status-completed');
+    if(status == 4) $(this).addClass('status-closed');
+    if(status == 5) $(this).addClass('status-canceled');
+});
+
+// $(document).on('click', '.viewComplaint', function () {
+
+//     let url = $(this).data('url');
+
+//     $('#complaintModal').modal('show');
+//     $('#complaintModalBody').html('Loading...');
+
+//     $('#complaintModalBody').load(url);
+// });
   </script>
 </x-app-layout>

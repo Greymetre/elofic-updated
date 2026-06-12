@@ -50,96 +50,386 @@ class LoginController extends Controller
         $this->path = 'users';
     }
 
+    // public function login(Request $request)
+    // {
+    //     try {
+    //         $validator = Validator::make($request->all(), [
+    //             'username' => 'required',
+    //             'password' => 'required',
+    //         ]);
+    //         if ($validator->fails()) {
+    //             return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->noContent);
+    //         }
+    //         $username = $request->input('username');
+    //         if (!$user = $this->users->with('roles')->where('mobile', $username)->orWhere('email', $username)->first()) {
+    //             return response()->json(['status' => 'error', 'message' => 'User not found'], $this->notFound);
+    //         }
+    //         $checkLastLogin = MobileUserLoginDetails::where('user_id', $user['id'])->first();
+    //         if ($checkLastLogin) {
+    //             if (!$user->hasRole('superadmin')) {
+    //                 if ($checkLastLogin->unique_id != NULL && $checkLastLogin->unique_id != $request['unique_id'] && $checkLastLogin->multi_login == '0') {
+    //                     return response()->json(['status' => 'error', 'message' =>  'Multiple device login is not allowed. For support, please contact FieldKonnect at 9713113280.'], $this->noContent);
+    //                 };
+    //             }
+
+    //             MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
+    //                 'app_version'   =>  $request['app_version'],
+    //                 'device_name'   =>  $request['device_name'],
+    //                 'device_type'   =>  $request['device_type'],
+    //                 'unique_id'   =>  $request['unique_id'],
+    //                 'last_login_date'   =>  Carbon::now(),
+    //                 'login_status'   =>  '1',
+    //                 'app'   =>  '2',
+    //             ]);
+    //         } else {
+    //             MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
+    //                 'app_version'   =>  $request['app_version'],
+    //                 'device_name'   =>  $request['device_name'],
+    //                 'device_type'   =>  $request['device_type'],
+    //                 'unique_id'   =>  $request['unique_id'],
+    //                 'first_login_date'   =>  Carbon::now(),
+    //                 'last_login_date'   =>  Carbon::now(),
+    //                 'login_status'   =>  '1',
+    //                 'app'   =>  '2',
+    //             ]);
+    //         }
+    //         if (!$user->hasRole('superadmin')) {
+    //             $user->tokens()->delete();
+    //         }
+
+    //         if ($user->active != 'Y') {
+    //             return response()->json(['status' => 'error', 'message' => 'Your account is deactivated don\'t hesitate to get in touch with admin.'], $this->notFound);
+    //         }
+    //         $password = $request->input('password');
+    //         if (Hash::check($password, $user['password'])) {
+    //             $token = $user->createToken('gSQ01LKOg1JV0O9eMsDiAN0TqkQlOpulK7vWemPF')->accessToken;
+    //             $user->update([
+    //                 'notification_id' => !empty($request['device_token']) ? $request['device_token'] : '',
+    //                 'device_type' => isset($request['device_type']) ? $request['device_type'] : ''
+    //             ]);
+    //             $todayDate = Carbon::today()->toDateString();
+    //             $todayBeatSchedule = BeatSchedule::where('user_id', $user['id'])->where('beat_date', $todayDate)->get();
+    //             $beatUser = BeatUser::where('user_id', $user['id'])->get();
+    //             $nestedData['id'] = isset($user['id']) ? $user['id'] : 0;
+    //             $nestedData['name'] = isset($user['name']) ? $user['name'] : '';
+    //             $nestedData['dividion_id'] = isset($user['division_id']) ? $user['division_id'] : '';
+    //             $nestedData['first_name'] = isset($user['first_name']) ? $user['first_name'] : '';
+    //             $nestedData['last_name'] = isset($user['last_name']) ? $user['last_name'] : '';
+    //             $nestedData['email'] = isset($user['email']) ? $user['email'] : '';
+    //             $nestedData['mobile'] = isset($user['mobile']) ? $user['mobile'] : '';
+    //             $nestedData['profile_image'] = isset($user['profile_image']) ? $user['profile_image'] : '';
+    //             $nestedData['gender'] = isset($user['gender']) ? $user['gender'] : '';
+    //             $nestedData['payroll_id'] = isset($user['payroll']) ? $user['payroll'] : '';
+    //             $nestedData['todayBeatSchedule'] = count($todayBeatSchedule) > 0 ? true : false;
+    //             $nestedData['beatUser'] = count($beatUser) > 0 ? true : false;
+    //             $nestedData['access_token'] = $token;
+    //             $nestedData['roles'] = $user->roles->pluck('id')->toArray();
+    //             $nestedData['user_type'] = $user->roles->pluck('name')->toArray();
+    //             $nestedData['leave_balance'] = $user->leave_balance;
+    //             if ($user->hasRole('Customer Dealer')) {
+    //                 $user['provider'] = 'retailers';
+    //             } else {
+    //                 $user['provider'] = 'users';
+    //             }
+    //             $user['entry_from'] = 'App';
+    //             $this->usersLogin->save_data($user);
+
+    //             return response()->json(['status' => 'success', 'userinfo' => $nestedData], $this->successStatus);
+    //         } else {
+    //             return response()->json(['status' => 'error', 'message' => 'Password not match'], $this->unauthorized);
+    //         }
+    //     } catch (\Exception $e) {
+    //         return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+    //     }
+    // }
+
     public function login(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
-                'username' => 'required',
+                'username' => 'required|string',
+                'password' => 'required|string',
+                'unique_id'    => 'nullable|string',       // device identifier
+                'device_type'  => 'nullable|string',
+                'device_name'  => 'nullable|string',
+                'app_version'  => 'nullable|string',
+                'fcm_token'    => 'nullable|string',       // for notifications
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => $validator->errors()
+                ], 402);
+            }
+
+            $username = trim($request->username);
+            $password = $request->password;
+
+            // ────────────────────────────────────────────────
+            // 1. Try FIELD USER (users table) first
+            // ────────────────────────────────────────────────
+            $user = User::with('roles')
+                ->where('mobile', $username)
+                ->orWhere('email', $username)
+                ->first();
+
+            if ($user) {
+                // Field user found → proceed with user logic
+                return $this->handleUserLogin($user, $password, $request);
+            }
+
+            // ────────────────────────────────────────────────
+            // 2. Try CUSTOMER (customers table)
+            // ────────────────────────────────────────────────
+            $customer = Customers::with([
+                'customerdetails',
+                'customeraddress.statename',
+                'customeraddress.districtname',
+                'customeraddress.cityname',
+                'getparentdetail'
+            ])->where('email', $username)
+            ->orWhere('mobile', $username)
+            ->orWhere('mobile', '91' . ltrim($username, '0+'))
+            ->first();
+
+            if ($customer) {
+                // Customer found → proceed with customer logic
+                return $this->handleCustomerLogin($customer, $password, $request);
+            }
+
+            // Neither found
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Invalid credentials or account not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Server error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function handleUserLogin(User $user, string $password, Request $request)
+    {
+        if ($user->active !== 'Y') {
+            return response()->json(['status' => 'error', 'message' => 'Account deactivated. Contact admin.'], 404);
+        }
+
+        if (!Hash::check($password, $user->password)) {
+            return response()->json(['status' => 'error', 'message' => 'Incorrect password'], 401);
+        }
+
+        // Multi-device check (your existing logic)
+        $checkLastLogin = MobileUserLoginDetails::where('user_id', $user->id)->first();
+        if ($checkLastLogin && !$user->hasRole('superadmin')) {
+            if ($checkLastLogin->unique_id && $checkLastLogin->unique_id !== $request->unique_id && $checkLastLogin->multi_login == '0') {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Multiple device login not allowed. Contact support: 9713113280.'
+                ], 402);
+            }
+        }
+
+        // Update login record
+        MobileUserLoginDetails::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'app_version'     => $request->app_version,
+                'device_name'     => $request->device_name,
+                'device_type'     => $request->device_type,
+                'unique_id'       => $request->unique_id,
+                'last_login_date' => now(),
+                'login_status'    => '1',
+                'app'             => '2', // field app
+            ]
+        );
+
+        // Revoke old tokens (your logic)
+        //if (!$user->hasRole('superadmin')) {
+        //    $user->tokens()->delete();
+        //}
+
+        $token = $user->createToken('mobile-app-token')->accessToken;
+
+        $user->update([
+            'notification_id' => $request->fcm_token ?? $user->notification_id,
+            'device_type'     => $request->device_type ?? $user->device_type,
+        ]);
+
+        // Prepare response (your existing structure)
+        $data = [
+            'id'                  => $user->id,
+            'name'                => $user->name,
+            'email'               => $user->email,
+            'mobile'              => $user->mobile,
+            'profile_image'       => $user->profile_image,
+            'access_token'        => $token,
+            'payroll'             => $user->payroll,
+            'roles'               => $user->roles->pluck('id')->toArray(),
+            'user_type'           => $user->roles->pluck('name')->toArray(),
+            'leave_balance'       => $user->leave_balance ?? 0,
+            // ... add other fields you need
+        ];
+
+        return response()->json([
+            'status'   => 'success',
+            'userinfo' => $data
+        ], 200);
+    }
+
+    private function handleCustomerLogin(Customers $customer, string $password, Request $request)
+    {
+        if ($customer->active !== 'Y') {
+            return response()->json(['status' => 'error', 'message' => 'Account deactivated. Contact admin.'], 404);
+        }
+
+        if (!Hash::check($password, $customer->password)) {
+            return response()->json(['status' => 'error', 'message' => 'Incorrect password'], 401);
+        }
+
+        $token = $customer->createToken('mobile-app-token')->accessToken;
+
+        // Update device/login info
+        CustomerDetails::updateOrCreate(
+            ['customer_id' => $customer->id],
+            ['fcm_token' => $request->fcm_token ?? null]
+        );
+
+        MobileUserLoginDetails::updateOrCreate(
+            ['customer_id' => $customer->id],
+            [
+                'app_version'     => $request->app_version,
+                'device_type'     => $request->device_type,
+                'device_name'     => $request->device_name,
+                'unique_id'       => $request->unique_id,
+                'last_login_date' => now(),
+                'login_status'    => '1',
+                'app'             => '1', // customer app
+            ]
+        );
+
+        // Prepare response (unified shape)
+        $data = [
+            'id'            => $customer->id,
+            'name'          => $customer->name,
+            'email'         => $customer->email,
+            'mobile'        => $customer->mobile,
+            'profile_image' => $customer->profile_image ?? $customer->shop_image,
+            'access_token'  => $token,
+            'payroll'       => $customer->payroll,
+            'user_type'     => ['Customer'],           // or fetch from customertype
+            'total_point'   => $customer->customer_transacation->sum('point') ?? 0,
+            'active_point'  => $customer->customer_transacation->where('status', 1)->sum('point') ?? 0,
+            'provision_point' => $customer->customer_transacation->where('status', 0)->sum('point') ?? 0,
+            // ... add address, parent, etc. if frontend needs them
+        ];
+
+        return response()->json([
+            'status'   => 'success',
+            'userinfo' => $data
+        ], 200);
+    }
+    /**
+    * Customer login using email + password
+     * Returns token immediately on success (similar to field user login)
+     */
+    public function customerEmailLogin(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'email'    => 'required|email',
                 'password' => 'required',
             ]);
+
             if ($validator->fails()) {
-                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->noContent);
-            }
-            $username = $request->input('username');
-            if (!$user = $this->users->with('roles')->where('mobile', $username)->orWhere('email', $username)->first()) {
-                return response()->json(['status' => 'error', 'message' => 'User not found'], $this->notFound);
-            }
-            $checkLastLogin = MobileUserLoginDetails::where('user_id', $user['id'])->first();
-            if ($checkLastLogin) {
-                if (!$user->hasRole('superadmin')) {
-                    if ($checkLastLogin->unique_id != NULL && $checkLastLogin->unique_id != $request['unique_id'] && $checkLastLogin->multi_login == '0') {
-                        return response()->json(['status' => 'error', 'message' =>  'Multiple device login is not allowed. For support, please contact FieldKonnect at 9713113280.'], $this->noContent);
-                    };
-                }
-
-                MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
-                    'app_version'   =>  $request['app_version'],
-                    'device_name'   =>  $request['device_name'],
-                    'device_type'   =>  $request['device_type'],
-                    'unique_id'   =>  $request['unique_id'],
-                    'last_login_date'   =>  Carbon::now(),
-                    'login_status'   =>  '1',
-                    'app'   =>  '2',
-                ]);
-            } else {
-                MobileUserLoginDetails::updateOrCreate(['user_id' => $user['id']], [
-                    'app_version'   =>  $request['app_version'],
-                    'device_name'   =>  $request['device_name'],
-                    'device_type'   =>  $request['device_type'],
-                    'unique_id'   =>  $request['unique_id'],
-                    'first_login_date'   =>  Carbon::now(),
-                    'last_login_date'   =>  Carbon::now(),
-                    'login_status'   =>  '1',
-                    'app'   =>  '2',
-                ]);
-            }
-            if (!$user->hasRole('superadmin')) {
-                $user->tokens()->delete();
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => $validator->errors()
+                ], $this->noContent);
             }
 
-            if ($user->active != 'Y') {
-                return response()->json(['status' => 'error', 'message' => 'Your account is deactivated don\'t hesitate to get in touch with admin.'], $this->notFound);
-            }
-            $password = $request->input('password');
-            if (Hash::check($password, $user['password'])) {
-                $token = $user->createToken('gSQ01LKOg1JV0O9eMsDiAN0TqkQlOpulK7vWemPF')->accessToken;
-                $user->update([
-                    'notification_id' => !empty($request['device_token']) ? $request['device_token'] : '',
-                    'device_type' => isset($request['device_type']) ? $request['device_type'] : ''
-                ]);
-                $todayDate = Carbon::today()->toDateString();
-                $todayBeatSchedule = BeatSchedule::where('user_id', $user['id'])->where('beat_date', $todayDate)->get();
-                $beatUser = BeatUser::where('user_id', $user['id'])->get();
-                $nestedData['id'] = isset($user['id']) ? $user['id'] : 0;
-                $nestedData['name'] = isset($user['name']) ? $user['name'] : '';
-                $nestedData['dividion_id'] = isset($user['division_id']) ? $user['division_id'] : '';
-                $nestedData['first_name'] = isset($user['first_name']) ? $user['first_name'] : '';
-                $nestedData['last_name'] = isset($user['last_name']) ? $user['last_name'] : '';
-                $nestedData['email'] = isset($user['email']) ? $user['email'] : '';
-                $nestedData['mobile'] = isset($user['mobile']) ? $user['mobile'] : '';
-                $nestedData['profile_image'] = isset($user['profile_image']) ? $user['profile_image'] : '';
-                $nestedData['gender'] = isset($user['gender']) ? $user['gender'] : '';
-                $nestedData['payroll_id'] = isset($user['payroll']) ? $user['payroll'] : '';
-                $nestedData['todayBeatSchedule'] = count($todayBeatSchedule) > 0 ? true : false;
-                $nestedData['beatUser'] = count($beatUser) > 0 ? true : false;
-                $nestedData['access_token'] = $token;
-                $nestedData['roles'] = $user->roles->pluck('id')->toArray();
-                $nestedData['user_type'] = $user->roles->pluck('name')->toArray();
-                $nestedData['leave_balance'] = $user->leave_balance;
-                if ($user->hasRole('Customer Dealer')) {
-                    $user['provider'] = 'retailers';
-                } else {
-                    $user['provider'] = 'users';
-                }
-                $user['entry_from'] = 'App';
-                $this->usersLogin->save_data($user);
+            $email = $request->input('email');
 
-                return response()->json(['status' => 'success', 'userinfo' => $nestedData], $this->successStatus);
-            } else {
-                return response()->json(['status' => 'error', 'message' => 'Password not match'], $this->unauthorized);
+            // Load customer with relations you usually need
+            if (!$customer = $this->customer->with([
+                'customerdetails',
+                'customeraddress',
+                'customeraddress.statename',
+                'customeraddress.districtname',
+                'customeraddress.cityname',
+                'getparentdetail'
+            ])->where('email', $email)->first()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'No account found with this email'
+                ], $this->notFound);
             }
+
+            if ($customer->active !== 'Y') {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Your account is deactivated. Please contact admin.'
+                ], $this->notFound);
+            }
+
+            if (!Hash::check($request->password, $customer->password)) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Incorrect password'
+                ], $this->unauthorized);
+            }
+
+            // ────────────────────────────────────────────────
+            // Login success → create token
+            // ────────────────────────────────────────────────
+            $token = $customer->createToken('gSQ01LKOg1JV0O9eMsDiAN0TqkQlOpulK7vWemPF')->accessToken;
+
+            // Update device/login info (same pattern as your other logins)
+            CustomerDetails::updateOrCreate(
+                ['customer_id' => $customer->id],
+                [
+                    'fcm_token' => $request->input('fcm_token', null),
+                ]
+            );
+
+            MobileUserLoginDetails::updateOrCreate(
+                ['customer_id' => $customer->id],
+                [
+                    'customer_id'     => $customer->id,
+                    'app_version'     => $request->input('app_version'),
+                    'device_type'     => $request->input('device_type'),
+                    'device_name'     => $request->input('device_name'),
+                    'unique_id'       => $request->input('unique_id'),     // optional
+                    'last_login_date' => Carbon::now(),
+                    'login_status'    => '1',
+                    'app'             => '1',   // customer app
+                ]
+            );
+
+            // Prepare same response structure as verifyOtp / service center
+            $profile_image = $customer->shop_image;
+            $customer->shop_image = $customer->profile_image;
+            $customer->profile_image = $profile_image;
+            $customer->token = $token;
+
+            // Points summary (same as your verifyOtp)
+            $customer->total_point     = $customer->customer_transacation->sum('point');
+            $customer->active_point    = $customer->customer_transacation->where('status', '1')->sum('point');
+            $customer->provision_point = $customer->customer_transacation->where('status', '0')->sum('point');
+
+            return response()->json([
+                'status'   => 'success',
+                'userinfo' => $customer
+            ], $this->successStatus);
+
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ], $this->internalError);
         }
     }
 
@@ -363,6 +653,151 @@ class LoginController extends Controller
             }
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+
+    /**
+     * Customer signup using email + password + basic info
+     * Creates account and returns auth token immediately
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function customerEmailSignup(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'email'       => 'required|email|unique:customers,email',
+                'password'    => 'required|min:6',
+                'name'        => 'required|string|min:2|max:100',
+                'shop_name'   => 'required|string|min:2|max:100',
+                'mobile'      => 'required|numeric|digits_between:10,13|unique:customers,mobile',
+                'address'     => 'nullable|string|min:5|max:255',
+                'customertype'=> 'nullable|exists:customer_types,id',
+                'pincode'     => 'nullable|digits:6|exists:pincodes,pincode',
+                'fcm_token'   => 'nullable|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => $validator->errors()
+                ], $this->noContent); // 402
+            }
+
+            // Normalize mobile number
+            $mobile = preg_replace('/\s+/', '', $request->mobile);
+            if (strlen($mobile) === 10) {
+                $mobile = '91' . $mobile;
+            }
+
+            // Optional: Check if mobile already exists (extra safety)
+            if (Customers::where('mobile', $mobile)->exists()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'This mobile number is already registered'
+                ], $this->badrequest);
+            }
+
+            // ────────────────────────────────────────────────
+            // Create Customer
+            // ────────────────────────────────────────────────
+            $customer = Customers::create([
+                'active'       => 'Y',
+                'name'         => ucwords(trim($request->shop_name)),
+                'first_name'   => ucwords(trim($request->name)),
+                'last_name'    => '', // can be split later if needed
+                'email'        => strtolower(trim($request->email)),
+                'mobile'       => $mobile,
+                'password'     => Hash::make($request->password),
+                'customertype' => $request->customertype ?? CustomerType::where('type_name', 'retailer')->value('id') ?? 2,
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
+
+            // ────────────────────────────────────────────────
+            // Address (using pincode if provided)
+            // ────────────────────────────────────────────────
+            $addressData = [
+                'active'      => 'Y',
+                'customer_id' => $customer->id,
+                'address1'    => $request->address ?? '',
+                'locality'    => $request->locality ?? $request->address ?? '',
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ];
+
+            if ($request->pincode) {
+                $pincodeData = Pincode::with('cityname.districtname')
+                    ->where('pincode', $request->pincode)
+                    ->first();
+
+                if ($pincodeData) {
+                    $addressData['pincode_id']   = $pincodeData->id;
+                    $addressData['city_id']      = $pincodeData->city_id;
+                    $addressData['district_id']  = $pincodeData->cityname->district_id ?? null;
+                    $addressData['state_id']     = $pincodeData->cityname->districtname->state_id ?? null;
+                    $addressData['country_id']   = State::find($addressData['state_id'])?->country_id ?? 1;
+                    $addressData['zipcode']      = $request->pincode;
+                }
+            }
+
+            Address::create($addressData);
+
+            // ────────────────────────────────────────────────
+            // Customer Details (FCM, etc.)
+            // ────────────────────────────────────────────────
+            CustomerDetails::create([
+                'customer_id' => $customer->id,
+                'active'      => 'Y',
+                'fcm_token'   => $request->fcm_token,
+            ]);
+
+            // ────────────────────────────────────────────────
+            // Login / Token
+            // ────────────────────────────────────────────────
+            $token = $customer->createToken('gSQ01LKOg1JV0O9eMsDiAN0TqkQlOpulK7vWemPF')->accessToken;
+
+            // Record login device info
+            MobileUserLoginDetails::updateOrCreate(
+                ['customer_id' => $customer->id],
+                [
+                    'customer_id'     => $customer->id,
+                    'app_version'     => $request->app_version ?? 'unknown',
+                    'device_type'     => $request->device_type ?? 'unknown',
+                    'device_name'     => $request->device_name ?? 'unknown',
+                    'unique_id'       => $request->unique_id ?? null,
+                    'first_login_date'=> now(),
+                    'last_login_date' => now(),
+                    'login_status'    => '1',
+                    'app'             => '1', // customer app
+                ]
+            );
+
+            // Prepare response (same shape as your verifyOtp / email login)
+            $customer->token = $token;
+            $customer->total_point     = 0;
+            $customer->active_point    = 0;
+            $customer->provision_point = 0;
+
+            // Optional: swap profile/shop image fields if your app expects it
+            $customer->profile_image = $customer->profile_image ?? null;
+            $customer->shop_image    = $customer->shop_image ?? null;
+
+            // Optional: send welcome notification / SMS here
+            // ...
+
+            return response()->json([
+                'status'   => 'success',
+                'message'  => 'Account created successfully',
+                'userinfo' => $customer
+            ], $this->created); // 201
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ], $this->internalError);
         }
     }
 

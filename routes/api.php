@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\DealerAppointmentController;
 use App\Http\Controllers\Api\ExpensesTypeController;
 use App\Http\Controllers\Api\GiftController;
 use App\Http\Controllers\Api\LeaveController;
+// use App\Http\Controllers\Api\LeaveControllerApi;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\MarketIntelligenceController;
 use App\Http\Controllers\Api\OrderController;
@@ -41,7 +42,12 @@ use App\Http\Controllers\Api\ExotelApiController;
 use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Api\ServiceBillCustController;
 use App\Http\Controllers\Api\UserLatLongController;
-
+use App\Http\Controllers\Api\SecondaryCustomerController; // We'll create this
+use App\Http\Controllers\Api\MasterDistributorApiController;
+use App\Http\Controllers\Api\TourProgrammeApiController;
+use App\Http\Controllers\Api\CustomerApiController;
+use App\Http\Controllers\Api\PromotionalActivitiesController;
+use App\Http\Controllers\Api\CustomerOutstandingController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -57,12 +63,16 @@ use App\Http\Controllers\Api\UserLatLongController;
 
 Route::post('login', [LoginController::class, 'login']);
 Route::post('customerLogin', [LoginController::class, 'customerLogin']);
+Route::post('customer/email-login', [LoginController::class, 'customerEmailLogin']);
+Route::post('customer/email-signup', [LoginController::class, 'customerEmailSignup']);
 Route::post('verifyotp', [LoginController::class, 'verifyotp']);
 Route::post('customerSignup', [LoginController::class, 'customerSignup']);
 Route::any('getCategoryList', [ProductController::class, 'getCategoryList']);
 Route::any('getSubCategoryList', [ProductController::class, 'getSubCategoryList']);
 Route::any('getProductList', [ProductController::class, 'getProductList']);
 Route::any('getProductDetails', [ProductController::class, 'getProductDetails']);
+Route::any('getOrderBuyers', [OrderController::class, 'getOrderBuyers']);
+Route::any('getOrderSellers', [OrderController::class, 'getOrderSellers']);
 Route::any('getGiftList', [ProductController::class, 'getGiftList']);
 Route::any('getCategoryData', [ProductController::class, 'getCategoryData']);
 Route::any('getSubCategoryData', [ProductController::class, 'getSubCategoryData']);
@@ -75,7 +85,6 @@ Route::any('getPincodeInfo', [AddressController::class, 'getPincodeInfo']);
 Route::any('getReportType', [CustomController::class, 'getReportType']);
 Route::any('getWorkType', [CustomController::class, 'getWorkType']);
 Route::any('getDevision', [CustomController::class, 'getDevision']);
-
 Route::any('mobileNumberExists', [CustomController::class, 'mobileNumberExists']);
 Route::any('gstNumberExists', [CustomController::class, 'gstNumberExists']);
 Route::any('getRetailerList', [CustomController::class, 'getRetailerList']);
@@ -84,12 +93,18 @@ Route::get('getsettings', [DashboardController::class, 'getsettings']);
 Route::get('get-field-connet-version', [DashboardController::class, 'getVersion']);
 Route::any('insert_sap_stock', [SapStockController::class, 'insertSapStock']);
 Route::any('insert_sap_sell', [SapStockController::class, 'insertSapSell']);
+Route::get('master-distributors/supervisors', [MasterDistributorApiController::class, 'getSupervisors']);
+Route::get('master-distributors/contact-personss', [MasterDistributorApiController::class, 'contactPersonList']);
+Route::get('/master-distributors/cities', [MasterDistributorApiController::class, 'distributorCities']);
 
 Route::any('emailExists', [CustomController::class, 'emailExists']);
 
 Route::post('/exotel/make-call', [ExotelApiController::class, 'makeCall']);
 Route::get('/exotel/call-details', [ExotelApiController::class, 'getCallDetails']);
 Route::get('/exotel/get-recording', [ExotelApiController::class, 'getRecording']);
+
+
+Route::post('/get-location-by-pincode', [CustomerApiController::class,'getLocationByPincode']);
 
 /*================= Customer Routes ============================*/
 Route::group(['middleware' => ['auth:customers']], function () {
@@ -145,7 +160,10 @@ Route::group(['middleware' => ['auth:customers']], function () {
     Route::post('customer/addComplaint', [ComplaintController::class, 'addComplaint']);
     Route::any('customer/getComplaintCounts', [ComplaintController::class, 'getComplaintCounts']);
 
-    // complaint API for service center
+    // // Additional helpers from your code
+    // Route::get('cities', [SecondaryCustomerController::class, 'getCities']); // Get cities by state_id
+    // Route::get('/secondary-customers/download', [SecondaryCustomerController::class, 'downloadExcel']); // Excel download (returns file)
+    // Route::get('/secondary-customers/template', [SecondaryCustomerController::class, 'downloadTemplate']); // Template download
    Route::prefix('customer')->group(function () {
         // Complaint API routes
         Route::apiResource('complaints', ComplaintAPICustomerController::class)->only(['index', 'show', 'update']);
@@ -154,7 +172,7 @@ Route::group(['middleware' => ['auth:customers']], function () {
         Route::get('complaint/complaint-type-count', [ComplaintAPICustomerController::class, 'complaint_type_count']);
         Route::get('complaint/filter-option', [ComplaintAPICustomerController::class, 'filter_option']);
         Route::get('complaint/{id}/get-notes', [ComplaintAPICustomerController::class, 'getNotes']);
-
+        
         // Service Bill API routes
         Route::get('service-bill-list', [ServiceBillCustController::class, 'index']);
         Route::get('complaint/{id}/service-bill', [ServiceBillCustController::class, 'create']);
@@ -169,7 +187,7 @@ Route::group(['middleware' => ['auth:customers']], function () {
     });
 });
 
-Route::group(['middleware' => ['auth:users']], function () {
+Route::group(['middleware' => ['auth:users,customers']], function () {
     // Dashboard
     Route::any('dashboard', [DashboardController::class, 'dashboard']);
     Route::any('getLeaveBalance', [DashboardController::class, 'getLeaveBalance']);
@@ -177,7 +195,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
     Route::any('getUserDashboardData', [DashboardController::class, 'getUserDashboardData']);
     Route::any('getSarthiPoints', [DashboardController::class, 'getSarthiPoints']);
-
+    Route::post('/reporting-users', [UserController::class, 'reportingUsers']);
     Route::any('getMarketIntelligencesField', [MarketIntelligenceController::class, 'getFields']);
     Route::any('MarketIntelligenceStore', [MarketIntelligenceController::class, 'MarketIntelligenceStore']);
 
@@ -185,6 +203,58 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::post('updateProfile', [LoginController::class, 'updateProfile']);
     Route::any('logout', [LoginController::class, 'logout']);
     Route::any('getOrderDiscountLimit', [LoginController::class, 'getOrderDiscountLimit']);
+
+    //complaint start
+    Route::post('complaints', [ComplaintController::class, 'createComplaint']);
+    Route::get('complaintList', [ComplaintController::class, 'complaintList']);
+    Route::get('complaint/{id}', [ComplaintController::class, 'complaintDetails']);
+    Route::any('getComplaintType', [ComplaintController::class, 'getComplaintType']);
+
+    // Route::get('/complaints', [ComplaintController::class, 'index']);
+
+    // Route::get('/complaints/{id}', [ComplaintController::class, 'show']);
+    
+    ///complain end
+    Route::get('secondary-customers', [SecondaryCustomerController::class, 'index']); // List with filters
+    Route::get('secondary-customers/{id}', [SecondaryCustomerController::class, 'show']); // Show one
+    Route::post('secondary-customers', [SecondaryCustomerController::class, 'store']); // Create
+    Route::post('secondary-customers/{id}', [SecondaryCustomerController::class, 'update']); // Update (using POST for file uploads simplicity; or use PUT/PATCH)
+    Route::get('/order/secondary-customers', [CustomerApiController::class, 'secondaryCustomers']);
+    
+    Route::delete('secondary-customers/{id}', [SecondaryCustomerController::class, 'destroy']); // Delete
+    Route::get('secondary-customer/cities', [SecondaryCustomerController::class, 'getUsedCities']);
+    Route::get('getMyHierarchyUsers', [SecondaryCustomerController::class, 'getMyHierarchyUsers']);
+    //master distributor routes
+    // Master Distributor API Routes (full CRUD + helpers)
+    Route::get('master-distributors', [MasterDistributorApiController::class, 'index']);          // List with filters & pagination
+    Route::get('master-distributors/{id}', [MasterDistributorApiController::class, 'show']);      // Show single distributor
+    Route::post('master-distributors', [MasterDistributorApiController::class, 'store']);         // Create new distributor
+    Route::post('master-distributors/{id}', [MasterDistributorApiController::class, 'update']);   // Update (POST used for file uploads)
+    Route::delete('master-distributors/{id}', [MasterDistributorApiController::class, 'destroy']); // Delete getDistributor
+    Route::get('getDistributorList', [MasterDistributorApiController::class, 'getDistributorList']);  // get distributorlist
+    // Additional helpers from your code
+    // Contact Person List
+    // Route::get('master-distributors/contact-persons', [MasterDistributorApiController::class, 'contactPersonList']);
+    
+    Route::get('/order/distributors', [CustomerApiController::class, 'distributors']);
+
+    // All Cities used in Distributors
+    Route::get('/master-distributors/cities', [MasterDistributorApiController::class, 'distributorCities']);
+    Route::get('cities', [SecondaryCustomerController::class, 'getCities']); // Get cities by state_id
+    Route::prefix('tour-plans')->group(function () {
+        Route::get('/',        [TourProgrammeApiController::class, 'index']);     // list
+        Route::post('/',       [TourProgrammeApiController::class, 'store']);    // create (one or many)
+        Route::get('/{id}',    [TourProgrammeApiController::class, 'show']);     // view one
+        Route::put('/{id}',    [TourProgrammeApiController::class, 'update']);   // or patch
+        Route::delete('/{id}', [TourProgrammeApiController::class, 'destroy']);  // delete
+    });
+    
+
+    Route::get('tour-plan/global', [TourProgrammeApiController::class, 'globalList']);
+    Route::post('tour-plan/changeStatus', [TourPlanController::class, 'changeStatus']);
+    Route::get('/branch-list', [TourPlanController::class, 'branch_list']);
+
+    
 
     // Customer
     Route::post('storeCustomer', [CustomerController::class, 'storeCustomer']);
@@ -198,6 +268,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     // Get Order List
     Route::post('insertOrder', [OrderController::class, 'insertOrder']);
     Route::any('getOrderList', [OrderController::class, 'getOrderList']);
+    Route::get('getHierarchyOrderStats', [OrderController::class, 'getHierarchyOrderStats']);
     Route::any('getClusterOrderList', [OrderController::class, 'getClusterOrderList']);
     Route::any('getSpecialOrderList', [OrderController::class, 'getSpecialOrderList']);
     Route::post('updateClusterOrder', [OrderController::class, 'updateClusterOrder']);
@@ -212,6 +283,8 @@ Route::group(['middleware' => ['auth:users']], function () {
     //Leave
     Route::any('addLeaves', [LeaveController::class, 'addLeaves']);
     Route::any('getLeaves', [LeaveController::class, 'getLeaves']);
+    Route::get('leaves/balance', [LeaveController::class, 'getMyBalances']);
+    // Route::any('leaves', [LeaveControllerApi::class, 'store']);
 
     Route::any('getBeatList', [BeatController::class, 'getBeatList']);
     Route::any('getBeatDropdownList', [BeatController::class, 'getBeatDropdownList']);
@@ -225,10 +298,12 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('showAttendance', [AttendanceController::class, 'showAttendance']);
     Route::any('lastPunchin', [AttendanceController::class, 'lastPunchin']);
     Route::post('submitCheckin', [CheckinController::class, 'submitCheckin']);
+    Route::get('getCurrentOpenCheckin', [CheckInController::class, 'getCurrentOpenCheckin']);
     Route::post('submitCheckout', [CheckinController::class, 'submitCheckout']);
     Route::any('getCheckin', [CheckinController::class, 'getCheckin']);
     Route::any('addCheckinDraft', [CheckinController::class, 'addCheckinDraft']);
     Route::any('getCheckinDraft', [CheckinController::class, 'getCheckinDraft']);
+    Route::get('getCheckinByEntity', [CheckinController::class, 'getCheckinByEntity']);
     Route::post('submitVisitReports', [VisitReportController::class, 'submitVisitReports']);
     Route::any('getVisitTypes', [VisitReportController::class, 'getVisitTypes']);
     Route::any('getVisitReports', [VisitReportController::class, 'getVisitReports']);
@@ -259,15 +334,23 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::any('getNotification', [UserController::class, 'getNotification']);
     Route::any('masterStateCity', [UserController::class, 'masterStateCity']);
     Route::any('getPunchinMasterData', [UserController::class, 'getPunchinMasterData']);
+    Route::any('userDistrictList', [UserController::class, 'userDistrictList']);
+    Route::any('userCitiesByDistrict', [UserController::class, 'userCitiesByDistrict']);
     //Reporting Activity
-    Route::get('reporting/users', [ReportingActivityController::class, 'allReportingUsers']);
-    Route::get('user/activity', [ReportingActivityController::class, 'userActivity']);
+    // Route::get('reporting/users', [ReportingActivityController::class, 'allReportingUsers']);
+    Route::post('reporting/users', [ReportingActivityController::class, 'allReportingUsers'])
+     ->middleware('auth:users');   // or 'auth:sanctum'
+    // Route::get('user/activity', [ReportingActivityController::class, 'userActivity']);
+    Route::post('user/activity', [ReportingActivityController::class, 'userActivity'])
+     ->middleware('auth:users');
     Route::get('customer/activity', [ReportingActivityController::class, 'customerActivity']);
     //Tour Plan
     Route::get('tour/userlist', [TourPlanController::class, 'user_list']);
     Route::get('tour/show', [TourPlanController::class, 'show']);
     Route::post('tour/add', [TourPlanController::class, 'add']);
     Route::post('tour/edit', [TourPlanController::class, 'edit']);
+    Route::get('tour-plan/global', [TourProgrammeApiController::class, 'globalList']);
+    Route::get('tour/global', [TourPlanController::class, 'global']);
     //Expenses Type
     Route::post('/getExpensesType', [ExpensesTypeController::class, 'getExpensesType']);
     Route::post('createExpense', [ExpensesTypeController::class, 'createExpense']);
@@ -352,4 +435,15 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('get-call-logs', [CallLogController::class, 'index']);
     Route::get('get-last-call', [CallLogController::class, 'last_call']);
     Route::post('update-call-remark', [CallLogController::class, 'update_remark']);
+    
+    Route::post(
+        'promotional-activities',
+        [PromotionalActivitiesController::class, 'store']
+    );
+    Route::put('/promotional-activities/{id}', [PromotionalActivitiesController::class, 'update']);
+    Route::get('/promotional-activities', [PromotionalActivitiesController::class, 'index']);
+    Route::get('/promotional-activities/{id}', [PromotionalActivitiesController::class, 'show']);
+    
+    Route::post('/customer-outstanding', [CustomerOutstandingController::class, 'store']);
 });
+

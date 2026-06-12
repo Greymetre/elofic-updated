@@ -16,6 +16,8 @@ use App\Models\BeatSchedule;
 use App\Models\CheckIn;
 use App\Models\Customers;
 use Carbon\Carbon;
+use App\Models\MasterDistributor;
+use App\Models\SecondaryCustomer;
 
 class BeatController extends Controller
 {
@@ -34,41 +36,152 @@ class BeatController extends Controller
         $this->internalError = 500;
     }
 
+    // public function getBeatList(Request $request)
+
+    
+    // {
+    //     try {
+    //         $user_id = $request->user()->id;
+    //         $pageSize = $request->input('pageSize');
+    //         $beatDate = !empty($request->input('beatDate')) ? getcurentDate() : '';
+    //         $query = BeatSchedule::with('beats', 'beatcheckininfo')->withCount(['beatcustomers as total_customers', 'beatcheckininfo as visited_customers', 'beatscheduleorders as order_count', 'beatschedulecustomer as new_customers'])
+    //             ->where(function ($query) use ($user_id, $request) {
+    //                 if (!empty($request['city_id'])) {
+    //                     $cityids = explode(',', preg_replace('/\s*,\s*/', ',', $request['city_id']));
+    //                     $query->whereHas('beats', function ($query) use ($cityids) {
+    //                         $query->whereIn('city_id', $cityids);
+    //                     });
+    //                 }
+    //                 $query->where('user_id', $user_id);
+    //                 $query->whereDate('beat_date', '>=', date('Y-m-d'));
+    //             });
+    //         $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
+    //         $data = collect([]);
+    //         if ($db_data->isNotEmpty()) {
+    //             $beats = $db_data->map(function ($item, $key) {
+    //                 $item['beat_name'] = isset($item['beats']['beat_name']) ? $item['beats']['beat_name'] : '';
+    //                 $item['beatscheduleid'] = isset($item['id']) ? $item['id'] : null;
+    //                 $item['description'] = isset($item['beats']['description']) ? $item['beats']['description'] : '';
+    //                 $item['visited_customers'] = $item['beatcheckininfo']->unique('customer_id', 'checkin_date')->count();
+    //                 $item['remaining_customers'] = $item['total_customers'] - $item['visited_customers'];
+    //                 $item['is_today'] = $item['beat_date'] == date('Y-m-d') ? true : false;
+    //                 unset($item["id"], $item["active"], $item['user_id'], $item['created_at'], $item['updated_at'], $item['beats']);
+    //                 return $item;
+    //             });
+    //             return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $beats], $this->successStatus);
+    //         }
+    //         return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+    //     }
+    // }
+
     public function getBeatList(Request $request)
     {
         try {
-            $user_id = $request->user()->id;
-            $pageSize = $request->input('pageSize');
-            $beatDate = !empty($request->input('beatDate')) ? getcurentDate() : '';
-            $query = BeatSchedule::with('beats', 'beatcheckininfo')->withCount(['beatcustomers as total_customers', 'beatcheckininfo as visited_customers', 'beatscheduleorders as order_count', 'beatschedulecustomer as new_customers'])
-                ->where(function ($query) use ($user_id, $request) {
-                    if (!empty($request['city_id'])) {
-                        $cityids = explode(',', preg_replace('/\s*,\s*/', ',', $request['city_id']));
-                        $query->whereHas('beats', function ($query) use ($cityids) {
-                            $query->whereIn('city_id', $cityids);
-                        });
-                    }
-                    $query->where('user_id', $user_id);
-                    $query->whereDate('beat_date', '>=', date('Y-m-d'));
-                });
-            $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
-            $data = collect([]);
-            if ($db_data->isNotEmpty()) {
-                $beats = $db_data->map(function ($item, $key) {
-                    $item['beat_name'] = isset($item['beats']['beat_name']) ? $item['beats']['beat_name'] : '';
-                    $item['beatscheduleid'] = isset($item['id']) ? $item['id'] : null;
-                    $item['description'] = isset($item['beats']['description']) ? $item['beats']['description'] : '';
-                    $item['visited_customers'] = $item['beatcheckininfo']->unique('customer_id', 'checkin_date')->count();
-                    $item['remaining_customers'] = $item['total_customers'] - $item['visited_customers'];
-                    $item['is_today'] = $item['beat_date'] == date('Y-m-d') ? true : false;
-                    unset($item["id"], $item["active"], $item['user_id'], $item['created_at'], $item['updated_at'], $item['beats']);
-                    return $item;
-                });
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $beats], $this->successStatus);
+            // ────────────────────────────────────────────────
+            // 1. Determine which user to query for
+            // ────────────────────────────────────────────────
+            $targetUserId = $request->input('user_id')
+                ? (int) $request->input('user_id')
+                : $request->user()->id;   // fallback to authenticated user
+
+            // ────────────────────────────────────────────────
+            // 2. Determine date filter
+            // ────────────────────────────────────────────────
+            $beatDate = $request->input('beat_date'); // format: YYYY-MM-DD
+            $isSpecificDate = !empty($beatDate) && Carbon::hasFormat($beatDate, 'Y-m-d');
+            
+            // ────────────────────────────────────────────────
+            // Build base query
+            // ────────────────────────────────────────────────
+            $query = BeatSchedule::with('beats', 'beatcheckininfo')
+                ->withCount([
+                    'beatcustomers as total_customers',
+                    'beatcheckininfo as visited_customers',
+                    'beatscheduleorders as order_count',
+                    'beatschedulecustomer as new_customers'
+                ])
+                ->where('user_id', $targetUserId);
+
+            // Date filtering logic
+            if ($isSpecificDate) {
+                $query->whereDate('beat_date', $beatDate);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
+
+            // Optional beat_id filter
+            $query->when($request->input('beat_id'), function ($q) use ($request) {
+                $q->where('beat_id', $request->input('beat_id'));
+            });
+
+            // Optional city_id filter (multiple cities)
+            $query->when($request->input('city_id'), function ($q) use ($request) {
+                $cityIds = array_filter(explode(',', preg_replace('/\s*,\s*/', ',', $request->city_id)));
+                if (!empty($cityIds)) {
+                    $q->whereHas('beats', function ($sub) use ($cityIds) {
+                        $sub->whereIn('city_id', $cityIds);
+                    });
+                }
+            });
+
+            // Pagination or get all
+            $pageSize = $request->input('pageSize', 15); // default to 15 if not sent
+            $db_data = $query->paginate($pageSize);
+
+            // ────────────────────────────────────────────────
+            // Format response
+            // ────────────────────────────────────────────────
+            $beats = $db_data->through(function ($item) use ($beatDate) {
+                $today = Carbon::today()->toDateString();
+
+                // get all beat customer ids for this beat
+                $beatCustomerIds = BeatCustomer::where('beat_id', $item->beat_id)
+                    ->pluck('distributor_id')
+                    ->filter()
+                    ->unique()
+                    ->toArray();
+            
+                // count today's visited customers using same logic as getBeatCustomers
+                $visitedCount = CheckIn::where('user_id', $item->user_id)
+                    ->where('entity_type', 'secondary_customer')
+                    ->whereDate('checkin_date', $today)
+                    ->whereIn('entity_id', $beatCustomerIds)
+                    ->distinct('entity_id')
+                    ->count('entity_id');
+
+                return [
+                    'beatscheduleid'    => $item->id,
+                    'beat_id'           => $item->beat_id,
+                    'beat_name'         => $item->beats->beat_name ?? '',
+                    'description'       => $item->beats->description ?? '',
+                    'beat_date'         => $item->beat_date,
+                    'total_customers'   => $item->total_customers,
+                    'visited_customers' => $visitedCount,
+                    'remaining_customers' => $item->total_customers - $visitedCount,
+                    'order_count'       => $item->order_count,
+                    'new_customers'     => $item->new_customers,
+                    'is_today'          => $item->beat_date === Carbon::today()->toDateString(),
+                ];
+            });
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => $db_data->isNotEmpty() ? 'Data retrieved successfully' : 'No Record Found',
+                'data'    => $beats,
+                'pagination' => [
+                    'current_page' => $db_data->currentPage(),
+                    'last_page'    => $db_data->lastPage(),
+                    'per_page'     => $db_data->perPage(),
+                    'total'        => $db_data->total(),
+                ]
+            ], 200);
+
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+                // 'trace'   => $e->getTraceAsString()   // ← only in development!
+            ], 500);
         }
     }
 
@@ -102,126 +215,200 @@ class BeatController extends Controller
     public function getBeatCustomers(Request $request)
     {
         try {
-            $user = $request->user();
-            // $user_id = $user->id;
-            $pageSize = $request->input('pageSize');
             $beat_id = $request->input('beat_id');
-            $latitude = $request->input('latitude');
-            $longitude = $request->input('longitude');
+            $user = $request->user();
+    
+            if (!$beat_id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'beat_id is required',
+                ], 400);
+            }
+    
+            $pageSize = (int) $request->input('pageSize', 10);
             $search = $request->input('search');
-            $checkedin = CheckIn::where('user_id', '=', $user->id)->whereDate('checkin_date', '=', date('Y-m-d'))->pluck('customer_id')->toArray();
-            $query = Customers::with('customeraddress:customer_id,address1,address2', 'customerdetails:customer_id,grade,visit_status', 'customertypes')
-                ->where(function ($query) use ($search, $beat_id) {
-                    if (!empty($search)) {
-                        $query->where('name', 'like', "%{$search}%")
-                            ->Orwhere('first_name', 'like', "%{$search}%")
-                            ->Orwhere('last_name', 'like', "%{$search}%")
-                            ->Orwhere('mobile', 'like', "%{$search}%");
-                    }
-                    $query->whereHas('beatdetails', function ($query) use ($beat_id) {
-                        $query->where('beat_id', '=', $beat_id);
+            $city_name = $request->input('city_name');
+            $status = $request->input('status');
+            $today = now()->startOfDay()->toDateString();
+    
+            // Today's checked-in customers (for isvisited flag)
+            $checkedin = CheckIn::where('user_id', $user->id)
+                ->whereDate('checkin_date', $today)
+                ->pluck('customer_id')
+                ->toArray();
+    
+            // Base query
+            $query = BeatCustomer::with([
+                'distributor',
+                'retailer',
+                'distributorFull',
+                'retailerFull',
+                'beats'
+            ])
+            ->where('beat_id', $beat_id);
+    
+            // Global Search on customer fields
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    // Search in Secondary Customer (retailer)
+                    $q->whereHas('retailerFull', function ($sub) use ($search) {
+                        $sub->where(function ($s) use ($search) {
+                            $s->where('owner_name', 'like', "%{$search}%")
+                              ->orWhere('shop_name', 'like', "%{$search}%")
+                              ->orWhere('mobile_number', 'like', "%{$search}%");
+                        });
+                    })
+                    // Search in Master Distributor
+                    ->orWhereHas('distributorFull', function ($sub) use ($search) {
+                        $sub->where(function ($s) use ($search) {
+                            $s->where('trade_name', 'like', "%{$search}%")
+                              ->orWhere('mobile', 'like', "%{$search}%");
+                        });
                     });
-                })
-                ->select('id', 'name', 'mobile', 'email', 'profile_image', 'latitude', 'longitude', 'customertype')
-                ->orderBy('name', 'asc');
-            //->latest();
-            $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
-            $leadcustomers = collect([]);
-            $collection = collect([]);
-            if ($db_data->isNotEmpty()) {
-                foreach ($db_data as $key => $value) {
-                    $collection->push([
-                        'customer_id' => isset($value['id']) ? $value['id'] : 0,
-                        'address' => isset($value['customeraddress']['address1']) ? $value['customeraddress']['address1'] . ' ' . $value['customeraddress']['address2'] : '',
-                        'name' => isset($value['name']) ? $value['name'] : '',
-                        'mobile' => isset($value['mobile']) ? $value['mobile'] : '',
-                        'email' => isset($value['email']) ? $value['email'] : '',
-                        'profile_image' => isset($value['profile_image']) ? $value['profile_image'] : '',
-                        'latitude' => isset($value['latitude']) ? $value['latitude'] : '',
-                        'longitude' => isset($value['longitude']) ? $value['longitude'] : '',
-                        'grade' => isset($value['customerdetails']['grade']) ? $value['customerdetails']['grade'] : '',
-                        'visit_status' => isset($value['customerdetails']['visit_status']) ? $value['customerdetails']['visit_status'] : '',
-                        'customer_type' => isset($value['customertypes']['customertype_name']) ? $value['customertypes']['customertype_name'] : '',
-                        'isvisited' => in_array($value['id'], $checkedin) ? true : false
-                    ]);
+                });
+            }
+            // Filter by City Name (only applicable for Secondary Customers)
+            if ($city_name) {
+                $query->whereHas('retailerFull.city', function ($q) use ($city_name) {
+                    $q->where('city_name', 'like', "%{$city_name}%");
+                });
+            }
+    
+            // Filter by Status (only applicable for Secondary Customers)
+            if ($status) {
+                $query->whereHas('retailerFull', function ($q) use ($status) {
+                    $q->where('status', $status);
+                });
+            }
+            // ── Add Last Check-in / Check-out Data using Subqueries ──
+            $query->addSelect([
+                // Check-in fields
+                'last_checkin_date' => \App\Models\CheckIn::select('checkin_date')
+                    ->whereColumn('entity_id', 'beat_customers.distributor_id')   // Adjust if your foreign key is different
+                    ->where('entity_type', 'secondary_customer')                         // Change if your entity_type is different
+                    ->where('user_id', $user->id)
+                    ->orderByDesc('checkin_date')
+                    ->orderByDesc('checkin_time')
+                    ->limit(1),
+    
+                'last_checkin_time' => \App\Models\CheckIn::select('checkin_time')
+                    ->whereColumn('entity_id', 'beat_customers.distributor_id')
+                    ->where('entity_type', 'secondary_customer')
+                    ->where('user_id', $user->id)
+                    ->orderByDesc('checkin_date')
+                    ->orderByDesc('checkin_time')
+                    ->limit(1),
+    
+                'has_checked_in_today' => \App\Models\CheckIn::selectRaw('IF(COUNT(*) > 0, 1, 0)')
+                    ->whereColumn('entity_id', 'beat_customers.distributor_id')
+                    ->where('entity_type', 'secondary_customer')
+                    ->where('user_id', $user->id)
+                    ->whereDate('checkin_date', $today),
+    
+                // Check-out fields
+                'last_checkout_date' => \App\Models\CheckIn::select('checkout_date')
+                    ->whereColumn('entity_id', 'beat_customers.distributor_id')
+                    ->where('entity_type', 'secondary_customer')
+                    ->where('user_id', $user->id)
+                    ->whereNotNull('checkout_date')
+                    ->orderByDesc('checkout_date')
+                    ->orderByDesc('checkout_time')
+                    ->limit(1),
+    
+                'last_checkout_time' => \App\Models\CheckIn::select('checkout_time')
+                    ->whereColumn('entity_id', 'beat_customers.distributor_id')
+                    ->where('entity_type', 'secondary_customer')
+                    ->where('user_id', $user->id)
+                    ->whereNotNull('checkout_date')
+                    ->orderByDesc('checkout_date')
+                    ->orderByDesc('checkout_time')
+                    ->limit(1),
+    
+                'has_checked_out_today' => \App\Models\CheckIn::selectRaw('IF(COUNT(*) > 0, 1, 0)')
+                    ->whereColumn('entity_id', 'beat_customers.distributor_id')
+                    ->where('entity_type', 'secondary_customer')
+                    ->where('user_id', $user->id)
+                    ->whereDate('checkout_date', $today),
+    
+                'current_visit_is_open' => \App\Models\CheckIn::selectRaw('IF(COUNT(*) > 0, 1, 0)')
+                    ->whereColumn('entity_id', 'beat_customers.distributor_id')
+                    ->where('entity_type', 'secondary_customer')
+                    ->where('user_id', $user->id)
+                    ->whereNull('checkout_date')
+                    ->whereDate('checkin_date', $today),
+    
+                'last_checkin_id' => \App\Models\CheckIn::select('id')
+                    ->whereColumn('entity_id', 'beat_customers.distributor_id')
+                    ->where('entity_type', 'secondary_customer')
+                    ->where('user_id', $user->id)
+                    ->orderByDesc('checkin_date')
+                    ->orderByDesc('checkin_time')
+                    ->limit(1),
+            ]);
+            
+            // Order by newest first
+            $query->orderBy('id', 'desc');   // or 'created_at' if you have the column
+                
+            // Pagination
+            $beatCustomers = $query->paginate($pageSize);
+            
+            // Transform data
+            $data = collect();
+    
+            foreach ($beatCustomers->items() as $item) {
+                $customer = $item->customer_full;
+    
+                if (!$customer) {
+                    continue;
                 }
+    
+                $data->push([
+                    'beat_customer_id'     => $item->id,
+                    'beat_id'              => $item->beat_id,
+                    'beat_name'            => optional($item->beats)->beat_name,
+                    'customer_type'        => $item->customer_type,
+                    'isvisited'            => in_array($customer->id, $checkedin),
+                    // 'customer_id'      => $item,
+                    // Last Visit / Check-in Data
+                    'customer' => [
+                    ...$customer->toArray(),
+        
+                    'isvisited' => $item->isvisited,
+                    'last_checkin_date' => $item->last_checkin_date,
+                    'last_checkin_time' => $item->last_checkin_time,
+                    'has_checked_in_today' => $item->has_checked_in_today,
+                    'last_checkout_date' => $item->last_checkout_date,
+                    'last_checkout_time' => $item->last_checkout_time,
+                    'has_checked_out_today' => $item->has_checked_out_today,
+                    'current_visit_is_open' => $item->current_visit_is_open,
+                    'last_checkin_id' => $item->last_checkin_id,
+                ],
+                ]);
             }
-            $data = $collection->sortBy('isvisited')->values();
-            // $query = BeatCustomer::with(['beats','beatschedules','customers' => function($query) use($latitude , $longitude) {
-            //                             $query->select('id', 'name','mobile','profile_image','latitude','longitude','email','first_name','last_name','customer_code','customertype',
-            // // "( 6371 * acos( cos( radians(" . $latitude . ") ) *
-            // // cos( radians(customers.latitude) ) *
-            // // cos( radians(customers.longitude) - radians(" . $longitude . ") ) + 
-            // // sin( radians(" . $latitude . ") ) *
-            // // sin( radians(customers.latitude) ) ) ) 
-            // // AS distance", 
-            //        DB::raw('(SELECT SUM(grand_total) FROM sales WHERE sales.buyer_id = customers.id) as totalamount'), 
-            //        DB::raw('(SELECT SUM(paid_amount) FROM sales WHERE sales.buyer_id = customers.id) as totalpaid'));
-            //                         }])
-            //                         ->whereHas('beatschedules', function ($query) use($user) {
-            //                             $query->where('user_id', '=', $user->id);
-            //                             // $query->whereDate('beat_date', '=', date('Y-m-d'));
-            //                          //$query->where('active', '=','Y');
-            //                         })
-            //                         ->where(function ($query) use($beat_id) {
-            //                             if(!empty($beat_id))
-            //                             {
-            //                                 $query->where('beat_id', '=', $beat_id);
-            //                             }
-            //                         })
-            //                         ->whereNotNull('customer_id')
-            //                         ->select('id','customer_id','beat_id')->latest();
-            // $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
-            // $data = collect([]);
-
-            // $leadcustomers = collect([]);
-
-            // if($db_data->isNotEmpty())
-            // {
-            //     foreach ($db_data as $key => $value) {
-            //         $data->push([
-            //             'beat_detail_id' => isset($value['id']) ? $value['id'] : 0,
-            //             'customer_id' => isset($value['customer_id']) ? $value['customer_id'] : 0,
-            //             'customer_name' => isset($value['customers']['name']) ? $value['customers']['name'] : '',
-            //             'customer_mobile' => isset($value['customers']['mobile']) ? $value['customers']['mobile'] : '',
-            //             'profile_image' => isset($value['customers']['profile_image']) ? $value['customers']['profile_image'] : '',
-            //             'latitude' => isset($value['customers']['latitude']) ? $value['customers']['latitude'] : '',
-            //             'longitude' => isset($value['customers']['longitude']) ? $value['customers']['longitude'] : '',
-            //             'address' => isset($value['customers']['customeraddress']['address1']) ? $value['customers']['customeraddress']['address1'].' '.$value['customers']['customeraddress']['address2'] : '',
-            //             'beat_name' => isset($value['beats']['beat_name']) ? $value['beats']['beat_name'] : '',
-            //             'beat_date' => isset($value['beatschedules']['beat_date']) ? $value['beatschedules']['beat_date'] : '',
-            //             'description' => isset($value['beats']['description']) ? $value['beats']['description'] : '',
-            //             'outstanding' => $value['customers']['totalamount']-$value['customers']['totalpaid'],
-            //             'name' => isset($value['customers']['name']) ? $value['customers']['name'] : '',
-            //             'first_name' => isset($value['customers']['first_name']) ? $value['customers']['first_name'] : '',
-            //             'last_name' => isset($value['customers']['last_name']) ? $value['customers']['last_name'] : '',
-            //             'mobile' => isset($value['customers']['mobile']) ? $value['customers']['mobile'] : '',
-            //             'email' => isset($value['customers']['email']) ? $value['customers']['email'] : '',
-            //             'profile_image' => isset($value['customers']['profile_image']) ? $value['customers']['profile_image'] : '',
-            //             'customer_code' => isset($value['customers']['customer_code']) ? $value['customers']['customer_code'] : '',
-            //             'totalamount' => isset($value['customers']['totalamount']) ? $value['customers']['totalamount'] : '',
-            //             'totalpaid' => isset($value['customers']['totalpaid']) ? $value['customers']['totalpaid'] : '',
-            //             'outstanding' => $value['totalamount']-$value['totalpaid'],
-            //             'address1' => isset($value['customers']['customeraddress']['address1']) ? $value['customers']['customeraddress']['address1'] : '',
-            //             'address2' => isset($value['customers']['customeraddress']['address2']) ? $value['customers']['customeraddress']['address2'] : '',
-            //             'latitude' => isset($value['customers']['latitude']) ? $value['customers']['latitude'] : '',
-            //             'longitude' => isset($value['customers']['longitude']) ? $value['customers']['longitude'] : '',
-            //             'shop_image' => isset($value['customers']['customerdetails']['shop_image']) ? $value['customers']['customerdetails']['shop_image'] : '',
-            //             'visiting_card' => isset($value['customers']['customerdetails']['visiting_card']) ? $value['customers']['customerdetails']['visiting_card'] : '',
-            //             'grade' => isset($value['customers']['customerdetails']['grade']) ? $value['customers']['customerdetails']['grade'] : '',
-            //             'visit_status' => isset($value['customers']['customerdetails']['visit_status']) ? $value['customers']['customerdetails']['visit_status'] : '',
-            //             'customer_type' => isset($value['customers']['customertypes']['customertype_name']) ? $value['customers']['customertypes']['customertype_name'] : '',
-            //             'distance' => isset($value['customers']['distance']) ? $value['customers']['distance'] : '',
-            //         ]);
-            //     }
-
-            // }
-            if ($data->isNotEmpty() || $leadcustomers->isNotEmpty()) {
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data, 'leads' => $leadcustomers], $this->successStatus);
-            }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data, 'leads' => $leadcustomers], 200);
+    
+            // Clean pagination response (same format as index())
+            $cleanData = [
+                'current_page' => $beatCustomers->currentPage(),
+                'data'         => $data,
+                'from'         => $beatCustomers->firstItem(),
+                'to'           => $beatCustomers->lastItem(),
+                'per_page'     => $beatCustomers->perPage(),
+                'total'        => $beatCustomers->total(),
+                'last_page'    => $beatCustomers->lastPage(),
+            ];
+    
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Data retrieved successfully',
+                'data'    => $cleanData
+            ], 200);
+    
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Failed to fetch beat customers',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 

@@ -43,7 +43,7 @@ class CutomerOutstantingImport implements ToCollection, WithValidation, WithHead
         foreach ($rows as $row) {
 
             foreach ($row as $k => $val) {
-                if($k == '0_30' || $k == '31_60' || $k == '61_90' || $k == '91_150' || $k == '150'){
+                if($k == '0_30' || $k == '31_60' || $k == '61_90' || $k == '91_150' || $k == '151_180' || $k == '181_210' || $k == '210'){
                     $k = str_replace('_','-',$k);
                     $salesTargetUsers = CustomerOutstanting::updateOrCreate(
                         [

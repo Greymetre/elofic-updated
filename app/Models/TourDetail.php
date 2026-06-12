@@ -11,7 +11,7 @@ class TourDetail extends Model
 
     protected $table = 'tour_details';
 
-    protected $fillable = [ 'tourid', 'city_id', 'visited_date', 'visited_cityid', 'last_visited', 'created_at', 'updated_at'];
+    protected $fillable = [ 'tourid', 'city_id', 'visited_date', 'visited_cityid', 'last_visited','punchin_city','base_city' ,'distance','created_at', 'updated_at'];
 
     public function tourinfo()
     {

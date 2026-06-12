@@ -30,6 +30,8 @@ use App\Models\OpeningStock;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
+use App\Models\MasterDistributor;
+use App\Models\SecondaryCustomer;
 
 if (! function_exists('sendmessage')) {
     function sendmessage($data, $mobile)
@@ -183,6 +185,43 @@ if (! function_exists('autoIncrementId')) {
     }
 }
 
+if (!function_exists('getHierarchyLevel')) {
+    function getHierarchyLevel($target_user_id, $auth_user_id = null)
+    {
+        if (empty($auth_user_id)) {
+            $auth_user_id = Auth::user()->id ?? null;
+        }
+
+        if (!$auth_user_id || $target_user_id == $auth_user_id) {
+            return 0;
+        }
+
+        $level = 0;
+        $current_id = $target_user_id;
+        $max_depth = 25;
+
+        while ($level < $max_depth) {
+            $user = User::select('reportingid')
+                        ->where('id', $current_id)
+                        ->where('active', 'Y')
+                        ->first();
+
+            if (!$user || empty($user->reportingid)) {
+                return -1;
+            }
+
+            if ($user->reportingid == $auth_user_id) {
+                return $level + 1;
+            }
+
+            $current_id = $user->reportingid;
+            $level++;
+        }
+
+        return -1;
+    }
+}
+
 if (! function_exists('numberFormat')) {
     function numberFormat($number, $point)
     {
@@ -252,17 +291,96 @@ if (! function_exists('teamusers')) {
         return $users->push($user)->unique();
     }
 }
+// if (! function_exists('distance')) {
+//     function distance($latitude, $longitude, $customer_id)
+//     {
+//         $data =  Customers::where('id', '=', $customer_id)
+//             ->whereNotNull('latitude')
+//             ->whereNotNull('longitude')
+//             ->select('latitude', 'longitude', DB::raw('( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) AS distance'))
+//             ->first();
+//         return isset($data['distance']) ? round($data['distance'], 2) : '';
+//     }
+// }
+
+
 if (! function_exists('distance')) {
-    function distance($latitude, $longitude, $customer_id)
+function distance($userLatitude, $userLongitude, $entityId, $entityType = 'customer')
     {
-        $data =  Customers::where('id', '=', $customer_id)
-            ->whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->select('latitude', 'longitude', DB::raw('( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( latitude ) ) ) ) AS distance'))
-            ->first();
-        return isset($data['distance']) ? round($data['distance'], 2) : '';
+        if (empty($userLatitude) || empty($userLongitude) || empty($entityId)) {
+            return '';
+        }
+
+        switch ($entityType) {
+            case 'distributor':
+                $query = MasterDistributor::where('id', $entityId)
+                    ->whereNotNull('gps_location');
+
+                $data = $query->select(
+                    DB::raw("
+                        SUBSTRING_INDEX(gps_location, ',', 1) AS latitude,
+                        SUBSTRING_INDEX(gps_location, ',', -1) AS longitude,
+                        (6371 * acos(
+                            cos(radians($userLatitude)) *
+                            cos(radians(SUBSTRING_INDEX(gps_location, ',', 1))) *
+                            cos(radians(SUBSTRING_INDEX(gps_location, ',', -1)) - radians($userLongitude)) +
+                            sin(radians($userLatitude)) *
+                            sin(radians(SUBSTRING_INDEX(gps_location, ',', 1)))
+                        )) AS distance
+                    ")
+                )->first();
+
+                break;
+
+            case 'secondary_customer':
+                // Handle gps_location field (assuming it's stored as "latitude,longitude" string)
+                $query = SecondaryCustomer::where('id', $entityId)
+                    ->whereNotNull('gps_location');
+
+                $data = $query->select(
+                    DB::raw("
+                        SUBSTRING_INDEX(gps_location, ',', 1) AS latitude,
+                        SUBSTRING_INDEX(gps_location, ',', -1) AS longitude,
+                        (6371 * acos(
+                            cos(radians($userLatitude)) *
+                            cos(radians(SUBSTRING_INDEX(gps_location, ',', 1))) *
+                            cos(radians(SUBSTRING_INDEX(gps_location, ',', -1)) - radians($userLongitude)) +
+                            sin(radians($userLatitude)) *
+                            sin(radians(SUBSTRING_INDEX(gps_location, ',', 1)))
+                        )) AS distance
+                    ")
+                )->first();
+
+                break;
+
+            case 'customer':
+            default:
+                $data = Customers::where('id', $entityId)
+                    ->whereNotNull('latitude')
+                    ->whereNotNull('longitude')
+                    ->select(
+                        'latitude',
+                        'longitude',
+                        DB::raw("
+                            (6371 * acos(
+                                cos(radians($userLatitude)) * 
+                                cos(radians(latitude)) * 
+                                cos(radians(longitude) - radians($userLongitude)) + 
+                                sin(radians($userLatitude)) * 
+                                sin(radians(latitude))
+                            )) AS distance
+                        ")
+                    )
+                    ->first();
+                break;
+        }
+
+        return isset($data->distance) ? round($data->distance, 2) : '';
     }
 }
+
+
+
 if (! function_exists('amountConversion')) {
     function amountConversion($amount)
     {
@@ -384,7 +502,7 @@ if (! function_exists('getLatLongToAddress')) {
             // 'access_key' => 'cb11435aa9960016039084830621463b',
             'access_key' => 'e727778f743ed01f73374ab767583009',
 
-            'query' => "$latitude,$longitude",
+            'query' => "$longitude,$latitude", // longitude first
             'output' => 'json',
             'limit' => 1,
         ]);
@@ -408,8 +526,8 @@ if (! function_exists('getLatLongToCity')) {
         $addressline = '';
         $queryString = http_build_query([
             //   'access_key' => 'd342b3255ee297b500728db66a690965',
-            'access_key' => 'cb11435aa9960016039084830621463b',
-
+            // 'access_key' => 'cb11435aa9960016039084830621463b',
+                'access_key' =>  'e727778f743ed01f73374ab767583009',
             'query' => "$latitude,$longitude",
             'output' => 'json',
             'limit' => 1,
@@ -426,6 +544,24 @@ if (! function_exists('getLatLongToCity')) {
         return $addressline;
     }
 }
+
+function logActivity($module, $moduleId, $action, $actionType = null, $old = null, $new = null, $type = null)
+{
+     \App\Models\ActivityLog::create([
+        'module' => $module,
+        'module_id' => $moduleId,
+        'action' => $action,
+        'action_type' => $actionType,
+        'old_values' => $old,
+        'new_values' => $new,
+        'performed_by' => \Auth::id(),
+        'customer_type' => $type,
+        'ip' => request()->ip(),
+        'user_agent' => request()->userAgent(),
+    ]);
+}
+
+
 if (! function_exists('getUsersReportingToAuth')) {
     function getUsersReportingToAuth($userid = '')
     {
@@ -448,7 +584,7 @@ if (! function_exists('getUsersReportingToAuth')) {
         //     $all_ids_array = User::pluck('id')->toArray();
         // }
 
-        if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('CRM') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers') && !$userinfo->hasRole('Sub billing') && !$userinfo->hasRole('Sales Admin') && !$userinfo->hasRole('Marketing_Admin') && !$userinfo->hasRole('MIS_ADMIN') && !$userinfo->hasRole('Marketing Team') && !$userinfo->hasRole('Data_Crm')) {
+        if (!$userinfo->hasRole('superadmin') && !$userinfo->hasRole('Admin') && !$userinfo->hasRole('subAdmin') && !$userinfo->hasRole('CRM') && !$userinfo->hasRole('HR_Admin') && !$userinfo->hasRole('HO_Account')  && !$userinfo->hasRole('Sub_Support') && !$userinfo->hasRole('Accounts Order') && !$userinfo->hasRole('Service Admin') && !$userinfo->hasRole('All Customers') && !$userinfo->hasRole('Sub billing') && !$userinfo->hasRole('Sales Admin') && !$userinfo->hasRole('Marketing_Admin') && !$userinfo->hasRole('MIS_ADMIN') && !$userinfo->hasRole('Marketing Team') && !$userinfo->hasRole('Data_Crm')) {
             $all_ids_array = array($userid);
             $test = getAllChild(array($userid), $all_users);
             while (count($test) > 0) {
@@ -1314,4 +1450,38 @@ if (!function_exists('numberToWords')) {
 
         return $negative . trim($result) . " Rupees" . $points . " Only";
     }
+}
+
+
+function getRoadDistance($lat1,$lng1,$lat2,$lng2)
+{
+    // $apiKey = "AIzaSyAVSDwHbKULnZa93kYpYINTqX4eaWy9q18";
+    $apiKey = "AIzaSyCPVGm19SZOcTwm-9kHGIlYoT_i29iruBI";
+    
+     
+
+    $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$lat1.",".$lng1."&destinations=".$lat2.",".$lng2."&key=".$apiKey;
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+
+    curl_close($ch);
+
+    $result = json_decode($response,true);
+
+
+    if(isset($result['rows'][0]['elements'][0]['distance']['value']))
+    {
+        $meters = $result['rows'][0]['elements'][0]['distance']['value'];
+
+        $km = $meters / 1000;
+
+        return round($km,2);
+    }
+
+    return '';
 }

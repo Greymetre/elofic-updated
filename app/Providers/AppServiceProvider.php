@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Providers;
-
+use App\Observers\MasterDistributorObserver;
+use App\Models\MasterDistributor;
 use Illuminate\Support\Facades\Blade;
+
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 
@@ -25,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        URL::forceScheme('https');
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
+        // URL::forceScheme('https');
+
+        MasterDistributor::observe(MasterDistributorObserver::class);
     }
 }

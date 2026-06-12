@@ -31,25 +31,43 @@
                       </select>
                     </div> --}}
                     <!-- Date filter -->
-                    <div class="p-2" style="width:200px;">
+                    <!-- <div class="p-2" style="width:200px;">
                       <input type="text" class="form-control datepicker" id="balance_date" name="balance_date" placeholder="Date" autocomplete="off">
                       <div class="ripple-container"></div>
+                    </div> -->
+
+                    <div class="p-2" style="width:200px;">
+                        <input type="text"
+                              class="form-control datepicker"
+                              id="start_date"
+                              name="start_date"
+                              placeholder="Start Date"
+                              autocomplete="off">
+                    </div>
+
+                    <div class="p-2" style="width:200px;">
+                        <input type="text"
+                              class="form-control datepicker"
+                              id="end_date"
+                              name="end_date"
+                              placeholder="End Date"
+                              autocomplete="off">
                     </div>
 
                     <!-- Customer filter -->
                     <div class="p-2" style="width:180px;">
                       <select class="select2" name="customer_id" id="customer_id" data-style="select-with-transition" title="panel.sales_users.branch">
-                        <option value="" disabled selected>Customer</option>
+                        <option value=""  selected>Select Customer</option>
                         @if(@isset($customers ))
                         @foreach($customers as $customer)
-                        <option value="{!! $customer->id !!}">{!! $customer->name !!}</option>
+                        <option value="{!! $customer->id !!}">{!! $customer->trade_name !!}</option>
                         @endforeach
                         @endif
                       </select>
                     </div>
 
                     <!-- branchs filter -->
-                    <div class="p-2" style="width:180px;">
+                    <!-- <div class="p-2" style="width:180px;">
                       <select class="select2" name="branch_id" id="branch_id" data-style="select-with-transition" title="panel.sales_users.branch">
                         <option value="" disabled selected>Branch</option>
                         @if(@isset($branchs ))
@@ -58,10 +76,10 @@
                         @endforeach
                         @endif
                       </select>
-                    </div>
+                    </div> -->
 
                      <!-- divisions filter -->
-                     <div class="p-2" style="width:180px;">
+                     <!-- <div class="p-2" style="width:180px;">
                       <select class="select2" name="division_id" id="division_id" data-style="select-with-transition" title="panel.sales_users.branch">
                         <option value="" disabled selected>Division</option>
                         @if(@isset($divisions ))
@@ -70,7 +88,7 @@
                         @endforeach
                         @endif
                       </select>
-                    </div>
+                    </div> -->
 
                     @if(auth()->user()->can(['customer_outstanting_download']))
                     <div class="p-2" style="width:200px;">
@@ -149,19 +167,26 @@
 
           <div class="table-responsive">
             <table id="getprimarysales" class="table table-striped table-bordered table-hover table-checkable no-wrap">
-              <thead class=" text-primary">
-                <th>Branch</th>
-                <th>Balance Confirmations</th>
-                <th>Customer Name</th>
-                <th>Year</th>
-                <th>Quarter</th>
-                <th>0-30</th>
-                <th>31-60</th>
-                <th>61-90</th>
-                <th>91-150</th>
-                <th>>150</th>
-                <th>Total Outstanding</th>
-              </thead>
+              <thead class="text-primary">
+                <tr>
+                    <th>#</th>
+                    <th>Posting Date</th>
+                    <th>Customer Code</th>
+                    <th>Customer ID</th>
+                    <th>Reference</th>
+                    <th>Customer Name</th>
+                    <th>Due Date</th>
+                    <th>Total Amount</th>
+                    <th>0-30</th>
+                    <th>31-60</th>
+                    <th>61-90</th>
+                    <th>91-120</th>
+                    <th>121-150</th>
+                    <th>151-180</th>
+                    <th>181-210</th>
+                    <th>210+</th>
+                </tr>
+            </thead>
               <tbody>
               </tbody>
             </table>
@@ -181,11 +206,11 @@
       var table = $('#getprimarysales').DataTable({
         processing: true,
         serverSide: true,
-        columnDefs: [{
-          className: 'control',
-          orderable: false,
-          targets: -1
-        }],
+        // columnDefs: [{
+        //   className: 'control',
+        //   orderable: false,
+        //   targets: -1
+        // }],
         "order": [
           [0, 'desc']
         ],
@@ -197,82 +222,79 @@
             d.search = $('input[type="search"]').val(),
             d.branch_id = $('#branch_id').val(),
             d.division_id = $('#division_id').val()
+            d.start_date = $('#start_date').val();
+            d.end_date = $('#end_date').val();
+
+            // console.log(d);
           }
         },
-        columns: [{
-            data: 'branch.branch_name',
-            name: 'branch.branch_name',
+        columns: [
+        {
+            data: 'DT_RowIndex',
+            name: 'DT_RowIndex',
             orderable: false,
-            searchable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'balance_confirmations',
-            name: 'balance_confirmations',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'customer.name',
-            name: 'customer.name',
-            orderable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'year',
-            name: 'year',
-            orderable: false,
-            searchable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'quarter',
-            name: 'quarter',
-            orderable: false,
-            searchable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'first_slot',
-            name: 'first_slot',
-            orderable: false,
-            searchable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'second_slot',
-            name: 'second_slot',
-            orderable: false,
-            searchable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'thired_slot',
-            name: 'thired_slot',
-            orderable: false,
-            searchable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'fourth_slot',
-            name: 'fourth_slot',
-            orderable: false,
-            searchable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'fifth_slot',
-            name: 'fifth_slot',
-            orderable: false,
-            searchable: false,
-            "defaultContent": ''
-          },
-          {
-            data: 'total_amounts',
-            name: 'total_amounts',
-            searchable: false,
-            "defaultContent": ''
-          }
+            searchable: false
+        },
+        {
+            data: 'posting_date',
+            name: 'posting_date'
+        },
+        {
+            data: 'customer_code',
+            name: 'customer_code'
+        },
+        {
+            data: 'customer_id',
+            name: 'customer_id'
+        },
+        {
+            data: 'reference',
+            name: 'reference'
+        },
+        {
+            data: 'customer_name',
+            name: 'customer_name'
+        },
+        {
+            data: 'due_date',
+            name: 'due_date'
+        },
+        {
+            data: 'total_amount',
+            name: 'total_amount'
+        },
+        {
+            data: 'slot_0_30',
+            name: 'slot_0_30'
+        },
+        {
+            data: 'slot_31_60',
+            name: 'slot_31_60'
+        },
+        {
+            data: 'slot_61_90',
+            name: 'slot_61_90'
+        },
+        {
+            data: 'slot_91_120',
+            name: 'slot_91_120'
+        },
+        {
+            data: 'slot_121_150',
+            name: 'slot_121_150'
+        },
+        {
+            data: 'slot_151_180',
+            name: 'slot_151_180'
+        },
+        {
+            data: 'slot_181_210',
+            name: 'slot_181_210'
+        },
+        {
+            data: 'slot_210_plus',
+            name: 'slot_210_plus'
+        }
         ]
       });
       $('#customer_id').change(function() {
@@ -283,6 +305,13 @@
       });
       $('#division_id').change(function() {
         table.draw();
+      });
+      $('#start_date').change(function() {
+          table.draw();
+      });
+
+      $('#end_date').change(function() {
+          table.draw();
       });
     });
 

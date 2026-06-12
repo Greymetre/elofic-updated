@@ -21,7 +21,9 @@ class ProductTemplate implements FromCollection,WithHeadings,ShouldAutoSize
     public function headings(): array
     {
 
-        return ['product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id','detail_title', 'detail_description', 'product_id', 'detail_image','mrp', 'price', 'discount', 'max_discount', 'selling_price', 'gst', 'isprimary', 'hsn_code', 'ean_code', 'hp', 'kw', 'product_stage', 'model_no','suc_del'];
+        return ['Product id','Plant No','Material No','Part No','Material Group','Application','Material description','WM packing standad','Old Material','Material Type','Segment','Material Grp','Makers','Type','Model','Nishtha','Saathi','Pack Size','MRP','price','Remarks','Subcategory id','Category id','Category','Brand id','Product Image','status'];
+
+        // return ['product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id','detail_title', 'detail_description', 'product_id', 'detail_image','mrp', 'price', 'discount', 'max_discount', 'selling_price', 'gst', 'isprimary', 'hsn_code', 'ean_code', 'hp', 'kw', 'product_stage', 'model_no','suc_del'];
 
         // return ['product_name', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id','detail_title', 'detail_description', 'product_id', 'detail_image','SUC x DEL','mrp', 'price', 'discount', 'max_discount', 'selling_price', 'gst', 'isprimary', 'hsn_code', 'ean_code', 'HP', 'kW', 'Product Stage', 'model_no','suc_del'];
     }

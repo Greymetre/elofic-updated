@@ -14,14 +14,15 @@ class OrderRequest extends FormRequest
         return true;
     }
 
+
     public function rules()
     {
         $rules = [];
         switch($this) {
             case !empty($this->id) :
                 $rules = [
-                    'buyer_id'      => 'nullable|numeric|exists:customers,id',
-                    'seller_id'     => 'nullable|numeric|exists:customers,id',
+                    // 'buyer_id'      => 'nullable|numeric|exists:customers,id',
+                    // 'seller_id'     => 'nullable|numeric|exists:customers,id',
                     'total_qty'     => 'nullable|numeric',
                     'shipped_qty'   => 'nullable|numeric',
                     'orderno'       => 'nullable|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',
@@ -39,8 +40,8 @@ class OrderRequest extends FormRequest
                 break;
             default :
                 $rules = [
-                    'buyer_id'      => 'nullable|numeric|exists:customers,id',
-                    'seller_id'     => 'nullable|numeric|exists:customers,id',
+                    // 'buyer_id'      => 'nullable|numeric|exists:customers,id',
+                    // 'seller_id'     => 'nullable|numeric|exists:customers,id',
                     'total_qty'     => 'nullable|numeric',
                     'shipped_qty'   => 'nullable|numeric',
                     'orderno'       => 'nullable|min:2|max:100|string|regex:/[a-zA-Z0-9\s]+/',

@@ -1,5 +1,8 @@
 <x-app-layout>
   <style>
+    .square-card h3 {
+  color: #000 !important;
+}
     a.custom-btn.create {
       background-color: #00aadb !important;
       font-size: 12px;
@@ -26,7 +29,7 @@
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['attendance_download']))
-                <!-- <form method="GET" action="{{ URL::to('attendance-download') }}">
+                <form method="GET" action="{{ URL::to('leaves-export') }}">
                   <div class="d-flex flex-row">
 
                     <div class="p-2" style="width: 250px;">
@@ -63,9 +66,18 @@
                       </button>
                     </div>
                   </div>
-                </form> -->
+                </form>
                 @endif
                 <div class="next-btn">
+   <!-- <div class="p-2">
+    <a href="{{ route('leaves.export') }}?executive_id={{ old('executive_id') }}&start_date={{ old('start_date') }}&end_date={{ old('end_date') }}"
+       class="btn btn-just-icon btn-theme" title="Download Leaves Report">
+        <i class="material-icons">cloud_download</i> Leaves Excel
+    </a>
+</div> -->
+
+  
+
                   @if(auth()->user()->can(['leave_create']))
                   <a data-toggle="modal" data-target="#submitLeave" class="custom-btn create" title="Punch In">
                     Add Leave
@@ -124,11 +136,13 @@
             <span class="message"></span>
           </div>
           <div class="table-responsive">
-            <table id="getattendance" class="table table-striped- table-bordered table-hover table-checkable responsive no-wrap">
+            <table id="getattendance" class="table table-striped table-bordered table-hover w-100">
               <thead class=" text-primary">
                 <th>No</th>
+                
                 <th>User ID</th>
                 <th>Status</th>
+                <th>Employee Code</th>
                 <th>User Name</th>
                 <th>From Date</th>
                 <th>To Address</th>
@@ -160,6 +174,57 @@
             </span>
           </h4>
         </div>
+        <div class="col-md-12 mt-3">
+  <h6 class="text-muted mb-2">Available Leave Balances</h6>
+  <div class="row g-2">
+
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm border-0 text-center square-card">
+        <div class="card-body py-2 px-2">
+          <i class="material-icons text-primary mb-1">beach_access</i>
+          <h6 class="text-primary fw-bold mb-1">Earned Leave</h6>
+          <h3 class="fw-bold mb-0" id="earned_leave_balance_l">-</h3>
+          <small class="text-muted">days</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm border-0 text-center square-card">
+        <div class="card-body py-2 px-2">
+          <i class="material-icons text-success mb-1">park</i>
+          <h6 class="text-success fw-bold mb-1">Casual Leave</h6>
+          <h3 class="fw-bold mb-0" id="casual_leave_balance_l">-</h3>
+          <small class="text-muted">days</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm border-0 text-center square-card">
+        <div class="card-body py-2 px-2">
+          <i class="material-icons text-info mb-1">local_hospital</i>
+          <h6 class="text-info fw-bold mb-1">Sick Leave</h6>
+          <h3 class="fw-bold mb-0" id="sick_leave_balance_l">-</h3>
+          <small class="text-muted">days</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm border-0 text-center square-card">
+        <div class="card-body py-2 px-2">
+          <i class="material-icons text-warning mb-1">history_edu</i>
+          <h6 class="text-warning fw-bold mb-1">Comp-off</h6>
+          <h3 class="fw-bold mb-0" id="compb_off_l">-</h3>
+          <small class="text-muted">days</small>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
         <div class="modal-body">
           <form method="POST" action="{{ route('leaves.store') }}" enctype="multipart/form-data" id="createleadstagesForm"> @csrf
             <div class="row">
@@ -176,19 +241,55 @@
                   </select>
                 </div>
               </div>
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Leave Balance</label>
                   <div>
                     <input type="number" readonly name="leave_balance" id="leave_balance" class="form-control" value="">
                   </div>
                 </div>
-              </div>
-              <div class="col-md-6">
+              </div> -->
+              <!-- <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Comp off Balance</label>
                   <div>
-                    <input type="number" readonly name="comp_off_balance" id="comp_off_balance" class="form-control" value="">
+                    <input type="number" readonly name="compb_off" id="compb_off" class="form-control" value="">
+                  </div>
+                </div>
+              </div>
+                            <div class="col-md-6">
+  <div class="input_section">
+    <label class="col-form-label">Earned Leave Balance</label>
+    <input type="number" readonly id="earned_leave_balance" class="form-control">
+  </div>
+</div>
+
+<div class="col-md-6">
+  <div class="input_section">
+    <label class="col-form-label">Casual Leave Balance</label>
+    <input type="number" readonly id="casual_leave_balance" class="form-control">
+  </div>
+</div>
+
+<div class="col-md-6">
+  <div class="input_section">
+    <label class="col-form-label">Sick Leave Balance</label>
+    <input type="number" readonly id="sick_leave_balance" class="form-control">
+  </div>
+</div> -->
+
+              <div class="col-md-6">
+                <div class="input_section">
+                  <label class="col-form-label">Leave Type</label>
+                  <div>
+                    <select class=" form-control" name="bal_type" id="bal_type" style="width: 100%;" required>
+                      <option value="">Select Type</option>
+                      <!-- <option value="Leave Balance" data-is-city="false">Leave Balance</option> -->
+                      <option value="Earned Leave" data-is-city="false">Earned Leave</option>
+                      <option value="Casual Leave" data-is-city="false">Casual Leave</option>
+                      <option value="Sick Leave" data-is-city="false">Sick Leave</option>
+                      <option value="Compoff Balance" data-is-city="false">Comp-off Balance</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -208,21 +309,10 @@
                   </div>
                 </div>
               </div>
+
               <div class="col-md-6">
                 <div class="input_section">
-                  <label class="col-form-label">Balance Type</label>
-                  <div>
-                    <select class=" form-control" name="bal_type" id="bal_type" style="width: 100%;" required>
-                      <option value="">Select Type</option>
-                      <option value="Leave Balance" data-is-city="false">Leave Balance</option>
-                      <option value="Comp-off Balance" data-is-city="false">Comp-off Balance</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="input_section">
-                  <label class="col-form-label">Type</label>
+                  <label class="col-form-label">Duration</label>
                   <div>
                     <select class=" form-control" name="type" id="type" style="width: 100%;" required>
                       <option value="">Select Type</option>
@@ -282,7 +372,7 @@
                   </select>
                 </div>
               </div>
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Leave Balance</label>
                   <div>
@@ -291,13 +381,34 @@
                 </div>
               </div>
               <div class="col-md-6">
+  <div class="input_section">
+    <label class="col-form-label">Earned Leave Balance</label>
+    <input type="number" readonly id="earned_leave_balance_c" class="form-control">
+  </div>
+</div>
+
+<div class="col-md-6">
+  <div class="input_section">
+    <label class="col-form-label">Casual Leave Balance</label>
+    <input type="number" readonly id="casual_leave_balance_c" class="form-control">
+  </div>
+</div>
+
+<div class="col-md-6">
+  <div class="input_section">
+    <label class="col-form-label">Sick Leave Balance</label>
+    <input type="number" readonly id="sick_leave_balance_c" class="form-control">
+  </div>
+</div> -->
+              <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Comp off Balance</label>
                   <div>
-                    <input type="number" readonly name="comp_off_balance" id="comp_off_balance_c" class="form-control" value="">
+                    <input type="number" readonly name="compb_off" id="compb_off_c" class="form-control" value="">
                   </div>
                 </div>
               </div>
+
 
               <div class="col-md-6">
                 <div class="input_section">
@@ -390,6 +501,7 @@
             orderable: false,
             searchable: false
           },
+      
           {
             data: 'user_id',
             name: 'user_id',
@@ -402,6 +514,11 @@
             orderable: false,
             searchable: false
           },
+              { 
+        data: 'users.employee_codes',     // ← important: adjust according to your relation
+        name: 'users.employee_codes',
+        defaultContent: '-'
+    },
           {
             data: 'users.name',
             name: 'users.name',
@@ -596,16 +713,41 @@
           user_id: user_id
         },
         success: function(res) {
-          if (res.status == 'success') {
-            if (res.comp_off_balance != '' && res.comp_off_balance > 0) {
-              $('#bal_type option[value="Comp-off Balance"]').prop('disabled', false);
-            } else {
-              $('#bal_type option[value="Comp-off Balance"]').prop('disabled', true);
-            }
-            $("#leave_balance").val(res.leave_balance);
-            $("#comp_off_balance").val(res.comp_off_balance);
-          }
-        }
+  if (res.status == 'success') {
+
+    // Enable / disable comp-off option
+    if (res.compb_off > 0) {
+      $('#bal_type option[value="Comp-off Balance"]').prop('disabled', false);
+    } else {
+      $('#bal_type option[value="Comp-off Balance"]').prop('disabled', true);
+    }
+
+    if (res.earned_leave_balance > 0) {
+      $('#bal_type option[value="Earned Leave"]').prop('disabled', false);
+    } else {
+      $('#bal_type option[value="Earned Leave"]').prop('disabled', true);
+    }
+
+    if (res.casual_leave_balance > 0) {
+      $('#bal_type option[value="Casual Leave"]').prop('disabled', false);
+    } else {
+      $('#bal_type option[value="Casual Leave"]').prop('disabled', true);
+    }
+
+    if (res.sick_leave_balance > 0) {
+      $('#bal_type option[value="Sick Leave"]').prop('disabled', false);
+    } else {
+      $('#bal_type option[value="Sick Leave"]').prop('disabled', true);
+    }
+
+    // 🔥 Update CARDS instead of inputs
+    $("#earned_leave_balance_l").text(res.earned_leave_balance ?? 0);
+    $("#casual_leave_balance_l").text(res.casual_leave_balance ?? 0);
+    $("#sick_leave_balance_l").text(res.sick_leave_balance ?? 0);
+    $("#compb_off_l").text(res.compb_off ?? 0);
+  }
+}
+
       })
       if (selectedDate && selectedDate != null && selectedDate != '') {
         var formatedValue = moment(selectedDate).format('YYYY-MM-DD');
@@ -637,13 +779,16 @@
         },
         success: function(res) {
           if (res.status == 'success') {
-            if (res.comp_off_balance != '' && res.comp_off_balance > 0) {
+            if (res.compb_off != '' && res.compb_off > 0) {
               $('#bal_type option[value="Comp-off Balance"]').prop('disabled', false);
             } else {
               $('#bal_type option[value="Comp-off Balance"]').prop('disabled', true);
             }
             $("#leave_balance_c").val(res.leave_balance);
-            $("#comp_off_balance_c").val(res.comp_off_balance);
+            $("#compb_off_c").val(res.compb_off);
+            $("#earned_leave_balance_c").val(res.earned_leave_balance);
+            $("#casual_leave_balance_c").val(res.casual_leave_balance);
+            $("#sick_leave_balance_c").val(res.sick_leave_balance);
           }
         }
       })

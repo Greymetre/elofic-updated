@@ -11,7 +11,7 @@ class Order extends Model
 
     protected $table = 'orders';
 
-    protected $fillable = [ 'active','buyer_id','seller_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','schme_val','ebd_amount','ebd_discount',	'special_discount','special_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount', 'agri_standard_discount', 'agri_standard_discount_amount','gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid',];
+    protected $fillable = [ 'active','buyer_id','seller_id','retailer_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','schme_val','ebd_amount','ebd_discount',	'special_discount','special_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount', 'agri_standard_discount', 'agri_standard_discount_amount','gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid','order_type','customer_type'];
 
     public function message()
     {
@@ -27,20 +27,18 @@ class Order extends Model
     public function insertrules()
     {
         return [
-            'buyer_id' => 'required|exists:customers,id',
-            'seller_id' => 'required|exists:customers,id',
-        ];
-    }
-    public function updaterules($id ='')
-    {
-        return [
-            'buyer_id' => 'required|exists:customers,id',
-            'seller_id' => 'required|exists:customers,id',
+            'seller_id' => 'required',
+            'buyer_id' => 'nullable',
         ];
     }
 
+
+
+
     public function save_data($request)
     {
+
+    
         try
         {
             
@@ -52,7 +50,8 @@ class Order extends Model
 
                 'buyer_id' => isset($request['buyer_id'])? $request['buyer_id']:null,
                 'seller_id' => isset($request['seller_id'])? $request['seller_id']:null,
-
+                'retailer_id' => isset($request['retailer_id']) ? $request['retailer_id'] : null,
+                
                 // 'buyer_id' => isset($request['seller_id'])? $request['seller_id']:null,
                 // 'seller_id' => $buyer,
                  'total_qty' => 0,
@@ -66,7 +65,12 @@ class Order extends Model
                 'grand_total' => isset($request['grand_total'])?  $request['grand_total']:0.00,
                 'order_taking' => isset($request['order_taking'])?  $request['order_taking']:'MobileApp',
                 'suc_del' => isset($request['suc_del'])?  $request['suc_del']:'',  
-                'beatscheduleid' => isset($request['beatscheduleid']) ? $request['beatscheduleid'] :null,   
+                'beatscheduleid' => isset($request['beatscheduleid']) ? $request['beatscheduleid'] :null,  
+                
+                'order_type' => isset($request['order_type']) ? $request['order_type'] : null,
+                'customer_type' => isset($request['customer_type']) ? $request['customer_type'] : null,
+
+
                 'gst_amount' => isset($request['gst_amount']) ? $request['gst_amount'] :null,   
                 'schme_val' => isset($request['schme_val']) ? $request['schme_val'] :null,   
                 'schme_amount' => isset($request['schme_amount']) ? $request['schme_amount'] :null,   
@@ -107,15 +111,19 @@ class Order extends Model
                 'created_by' => isset($request['created_by']) ? $request['created_by'] :null,     
                 'order_remark' => isset($request['order_remark']) ? $request['order_remark'] :null,     
                 'created_at' => $created_at ,
-                'updated_at' => $created_at
+                'updated_at' => $created_at,
+                
             ]) )
-            {
+            {   
                 return $response = array('status' => 'success', 'message' => 'Sales Insert Successfully','order_id' => $order_id);
             }
+            
             return $response = array('status' => 'error', 'message' => 'Error in Sales Store');
         }
         catch(\Exception $e)
         {
+
+            dd($e);
             return $response = array('status' => 'error', 'message' => $e->getMessage());
         }
     }
@@ -128,13 +136,38 @@ class Order extends Model
         return $this->belongsTo('App\Models\User', 'updated_by', 'id')->select('id','name','profile_image');
     }
 
-    public function sellers()
+    public function masterDistributor()
     {
-        return $this->belongsTo('App\Models\Customers', 'seller_id', 'id')->select('id','name', 'first_name', 'last_name','mobile','email','sap_code');
+        return $this->belongsTo(\App\Models\MasterDistributor::class, 'buyer_id');
     }
+
+    public function secondaryCustomer()
+    {
+        return $this->belongsTo(\App\Models\SecondaryCustomer::class, 'seller_id');
+    }
+
+     // Buyer = SecondaryCustomer
     public function buyers()
     {
-        return $this->belongsTo('App\Models\Customers', 'buyer_id', 'id')->select('id','name', 'first_name', 'last_name','mobile','email','customertype','executive_id');
+        return $this->belongsTo(\App\Models\SecondaryCustomer::class,'buyer_id');
+    }
+    
+        // Seller = MasterDistributor
+    public function sellers()
+    {
+        return $this->belongsTo(\App\Models\MasterDistributor::class,'seller_id' );
+    }
+
+          // Buyer = SecondaryCustomer
+    public function buyer()
+    {
+        return $this->belongsTo(\App\Models\SecondaryCustomer::class, 'buyer_id');
+    }
+    
+        // Seller = MasterDistributor
+    public function seller()
+    {
+        return $this->belongsTo(\App\Models\MasterDistributor::class,'seller_id' );
     }
 
     public function customeraddress()
@@ -176,4 +209,17 @@ class Order extends Model
     {
         return $this->hasOne('App\Models\Sales', 'order_id', 'id')->select('invoice_no','invoice_date');
     }
+    public function executive()
+{
+    return $this->belongsTo(\App\Models\User::class, 'executive_id', 'id');
+}
+
+public function retailers()
+{
+    return $this->belongsTo(
+        \App\Models\SecondaryCustomer::class,
+        'retailer_id',
+        'id'
+    );
+}
 }

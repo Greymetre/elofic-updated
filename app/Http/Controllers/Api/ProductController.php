@@ -144,9 +144,10 @@ class ProductController extends Controller
                     $product_ebd_amount = 0;
                     $ebd_discount = 0;
 
-
-                    $discount = $value['productpriceinfo']['discount'] ?? 0;
-                    $mrp = $value['productpriceinfo']['mrp'] ?? 0;
+                    $discount = $value->productpriceinfo->discount ?? 0;
+                    $mrp = $value->productpriceinfo->mrp ?? 0;
+                    // $discount = $value['productpriceinfo']['discount'] ?? 0;
+                    // $mrp = $value['productpriceinfo']['mrp'] ?? 0;
 
                     $discount_amount = $mrp * $discount / 100;
                     $total_amount = $mrp - $discount_amount;
@@ -187,23 +188,23 @@ class ProductController extends Controller
                     if ($repetition_type == '2') {
                         $currentDate = Carbon::now();
                         $weekOfMonth = ceil($currentDate->day / 7);
-                        $week_repeat = $value['getSchemeDetail']['orderscheme']['week_repeat'] ?? '';
+                        $week_repeat = $query['getSchemeDetail']['orderscheme']['week_repeat'] ?? '';
                         if ((int)$week_repeat == (int)$weekOfMonth) {
                             $is_active = true;
                         }
                     }
                     if ($repetition_type == '1') {
-                        $day_repeat = explode(',', $value['getSchemeDetail']['orderscheme']['day_repeat']) ?? [];
+                        $day_repeat = explode(',', $query['getSchemeDetail']['orderscheme']['day_repeat']) ?? [];
                         $todayDayOfWeek = Carbon::today()->format('D');
                         if (in_array($todayDayOfWeek, $day_repeat)) {
                             $is_active = true;
                         }
                     }
                     if ($is_active === true) {
-                        $scheme_value_type = $value['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+                        $scheme_value_type = $query['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
 
-                        $minimum = $value['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
-                        $maximum = $value['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
+                        $minimum = $query['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
+                        $maximum = $query['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
 
                         if ($scheme_value_type == 'percentage') {
                             $ebd_amount = $total_amount * $ebd_discount / 100;
@@ -252,7 +253,8 @@ class ProductController extends Controller
                         'model_no' => isset($value['model_no']) ? $value['model_no'] : '',
                         'hp' => isset($value['specification']) ? $value['specification'] : '',
                         'discount' => $value['productpriceinfo']?$value['productpriceinfo']['discount'] : 0,
-                        'amount_diff' => $value['productpriceinfo']['mrp'] - $product_ebd_amount,
+                        // 'amount_diff' => $value['productpriceinfo']['mrp'] - $product_ebd_amount,
+                        'amount_diff' => ($value['productpriceinfo']->mrp ?? 0) - $product_ebd_amount,
                         'ebd_amount' => (string)$ebd_amount,
                         'product_ebd_amount' => (string)$product_ebd_amount,
 
@@ -553,7 +555,8 @@ class ProductController extends Controller
                     ]);
                 }
                 //$primary = $query['productdetails']->where('isprimary',1)->first();
-                $primary = $query['productpriceinfo'];
+                // $primary = $query['productpriceinfo'];
+                $primary = $query->productpriceinfo;
 
 
                 $discount_amount = 0;
@@ -563,21 +566,36 @@ class ProductController extends Controller
                 $ebd_discount = 0;
 
 
-                $discount = $query['productpriceinfo']['discount'] ?? 0;
-                $mrp = $query['productpriceinfo']['mrp'] ?? 0;
+                // $discount = $query['productpriceinfo']['discount'] ?? 0;
+                // $mrp = $query['productpriceinfo']['mrp'] ?? 0;
+                $discount = $primary->discount ?? 0;
+                $mrp = $primary->mrp ?? 0;
 
                 $discount_amount = $mrp * $discount / 100;
                 $total_amount = $mrp - $discount_amount;
                 $total_amount = number_format($total_amount, 2, ".", "");
 
 
-                $ebd_discount = $value['getSchemeDetail']['points'] ?? 0;
-                $scheme_type = $value['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
-                $repetition_type = $value['getSchemeDetail']['orderscheme']['repetition'] ?? '';
+                // $ebd_discount = $value['getSchemeDetail']['points'] ?? 0;
+                // $scheme_type = $value['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
+                // $repetition_type = $value['getSchemeDetail']['orderscheme']['repetition'] ?? '';
+
+                // $ebd_discount = $query['getSchemeDetail']['points'] ?? 0;
+                // $ebd_discount = $query->getSchemeDetail->points ?? 0;
+                // $scheme_type = $query['getSchemeDetail']['orderscheme']['scheme_type'] ?? '';
+                // $repetition_type = $query['getSchemeDetail']['orderscheme']['repetition'] ?? '';
+                $scheme = $query->getSchemeDetail;
+                $orderScheme = $scheme->orderscheme ?? null;
+
+                $ebd_discount = $scheme->points ?? 0;
+                $scheme_type = $orderScheme->scheme_type ?? '';
+                $repetition_type = $orderScheme->repetition ?? '';
                 $is_active = false;
                 if ($repetition_type == '3' || $repetition_type == '4') {
-                    $start_date = $value['getSchemeDetail']['orderscheme']['start_date'] ?? '';
-                    $end_date = $value['getSchemeDetail']['orderscheme']['end_date'] ?? '';
+                    // $start_date = $query['getSchemeDetail']['orderscheme']['start_date'] ?? '';
+                    // $end_date = $query['getSchemeDetail']['orderscheme']['end_date'] ?? '';
+                    $start_date = $orderScheme->start_date ?? '';
+                    $end_date = $orderScheme->end_date ?? '';
 
                     if ($repetition_type == '3') {
                         $startCarbon = Carbon::parse($start_date);
@@ -605,23 +623,28 @@ class ProductController extends Controller
                 if ($repetition_type == '2') {
                     $currentDate = Carbon::now();
                     $weekOfMonth = ceil($currentDate->day / 7);
-                    $week_repeat = $value['getSchemeDetail']['orderscheme']['week_repeat'] ?? '';
+                    // $week_repeat = $query['getSchemeDetail']['orderscheme']['week_repeat'] ?? '';
+                    $week_repeat = $orderScheme->week_repeat ?? '';
                     if ((int)$week_repeat == (int)$weekOfMonth) {
                         $is_active = true;
                     }
                 }
                 if ($repetition_type == '1') {
-                    $day_repeat = explode(',', $value['getSchemeDetail']['orderscheme']['day_repeat']) ?? [];
+                    // $day_repeat = explode(',', $value['getSchemeDetail']['orderscheme']['day_repeat']) ?? [];
+                    $day_repeat = explode(',', $orderScheme->day_repeat ?? '');
                     $todayDayOfWeek = Carbon::today()->format('D');
                     if (in_array($todayDayOfWeek, $day_repeat)) {
                         $is_active = true;
                     }
                 }
                 if ($is_active === true) {
-                    $scheme_value_type = $value['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+                    // $scheme_value_type = $value['getSchemeDetail']['orderscheme']['scheme_basedon'] ?? '';
+                    $scheme_value_type = $orderScheme->scheme_basedon ?? '';
 
-                    $minimum = $value['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
-                    $maximum = $value['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
+                    // $minimum = $value['getSchemeDetail']['orderscheme']['minimum'] ?? 0;
+                    // $maximum = $value['getSchemeDetail']['orderscheme']['maximum'] ?? 0;
+                    $minimum = $orderScheme->minimum ?? 0;
+                    $maximum = $orderScheme->maximum ?? 0;
 
                     if ($scheme_value_type == 'percentage') {
                         $ebd_amount = $total_amount * $ebd_discount / 100;
@@ -649,15 +672,21 @@ class ProductController extends Controller
                     'description' => isset($query['description']) ? $query['description'] : '',
                     'product_image' => (isset($query['product_image']) && !empty($query['product_image'])) ? url('/public/uploads').'/'.$query['product_image'] : url('/public/assets/img/placeholder.jpg'),
                     'subcategory_id' => isset($query['subcategory_id']) ? $query['subcategory_id'] : 0,
-                    'subcategory_name' => isset($query['subcategories']['subcategory_name']) ? $query['subcategories']['subcategory_name'] : '',
+                    // 'subcategory_name' => isset($query['subcategories']['subcategory_name']) ? $query['subcategories']['subcategory_name'] : '',
+                    'subcategory_name' => $query->subcategories->subcategory_name ?? '',
                     'category_id' => isset($query['category_id']) ? $query['category_id'] : 0,
-                    'category_name' => isset($query['categories']['category_name']) ? $query['categories']['category_name'] : '',
+                    // 'category_name' => isset($query['categories']['category_name']) ? $query['categories']['category_name'] : '',
+                    'category_name' => $query->categories->category_name ?? '',
+                    'brand_name' => $query->brands->brand_name ?? '',
+                    'unit_code' => $query->unitmeasures->unit_code ?? '',
                     'brand_id' => isset($query['brand_id']) ? $query['brand_id'] : 0,
-                    'brand_name' => isset($query['brands']['brand_name']) ? $query['brands']['brand_name'] : '',
+                    // 'brand_name' => isset($query['brands']['brand_name']) ? $query['brands']['brand_name'] : '',
                     'unit_id' => isset($query['unit_id']) ? $query['unit_id'] : 0,
-                    'unit_code' => isset($query['unitmeasures']['unit_code']) ? $query['unitmeasures']['unit_code'] : '',
-                    'detail_id' => isset($primary['id']) ? $primary['id'] : 0,
-                    'mrp' => isset($primary['mrp']) ? $primary['mrp'] : 0.00,
+                    // 'unit_code' => isset($query['unitmeasures']['unit_code']) ? $query['unitmeasures']['unit_code'] : '',
+                    // 'detail_id' => isset($primary['id']) ? $primary['id'] : 0,
+                    // 'mrp' => isset($primary['mrp']) ? $primary['mrp'] : 0.00,
+                    'detail_id' => $primary->id ?? 0,
+                    'mrp' => $primary->mrp ?? 0,
                     'price' => isset($primary['price']) ? $primary['price'] : 0.00,
                     'min_price' => isset($primary['price']) ? $primary['price'] - 10 : 0.00,
                     'max_price' => isset($primary['price']) ? $primary['price'] + 10 : 0.00,
@@ -676,7 +705,8 @@ class ProductController extends Controller
                     'phase' => isset($query['phase']) ? $query['phase'] : '',
                     'ebd_amount' => (string)$ebd_amount,
                     'scheme_amount' => (string)$ebd_amount,
-                    'amount_diff' => $primary['mrp'] - $product_ebd_amount,
+                    // 'amount_diff' => $primary['mrp'] - $product_ebd_amount,
+                    'amount_diff' => ($primary->mrp ?? 0) - $product_ebd_amount,
                     'product_ebd_amount' => (string)$product_ebd_amount,
                     'details' => $detail
                 ]);

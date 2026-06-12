@@ -35,13 +35,13 @@ class ExpensesDataTable extends DataTable
                 }
                 return '<input type="checkbox" class="row-checkbox" value="' . $query->id . '">';
             })
-            ->addColumn('users.name', function ($query) {
-                $name = '(' . $query->users->employee_codes . ')' . $query->users->name;
-                return $name;
-            })
-            ->addColumn('users.getdesignation.designation_name', function ($query) {
-                return $query->users->getdesignation->designation_name ?? '';
-            })
+->addColumn('users.name', function ($query) {
+    $user = $query->users;
+    return $user ? '(' . $user->employee_codes . ')' . $user->name : '-';
+})
+           ->addColumn('users.getdesignation.designation_name', function ($query) {
+    return optional(optional($query->users)->getdesignation)->designation_name ?? '-';
+})
             ->addColumn('expense_type.name', function ($query) {
                 return $query->expense_type->name ?? '';
             })
@@ -76,7 +76,7 @@ class ExpensesDataTable extends DataTable
             })
 
             ->addColumn('users.getbranch.branch_name', function ($query) {
-                return $query->users->getbranch->branch_name ?? '';
+                return optional(optional($query->users)->getbranch)->branch_name ?? '-';
             })
 
             ->addColumn('date_create', function ($query) {
@@ -159,7 +159,8 @@ class ExpensesDataTable extends DataTable
         } else {
             $userids = User::pluck('id')->toArray();
         }
-        $data = $model->with('expense_type', 'users');
+        $data = $model->with('expense_type','users.getbranch',
+    'users.getdesignation', 'users');
         if (!empty($request['payroll'])) {
 
             $payrollid = $request['payroll'];

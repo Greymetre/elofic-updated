@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Carbon\Carbon;
-
+use App\Models\SecondaryCustomer;
+use App\Models\MasterDistributor;
 use Validator;
 use Gate;
 use App\Models\Order;
@@ -24,6 +25,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Sales;
 use App\Models\Status;
+use App\Models\CheckIn;
 use Excel;
 use Illuminate\Support\Facades\Mail;
 use stdClass;
@@ -48,6 +50,21 @@ class OrderController extends Controller
         $this->internalError = 500;
     }
 
+    public function buyer()
+    {
+        return $this->belongsTo(SecondaryCustomer::class, 'buyer_id');
+    }
+
+    public function seller()
+    {
+        return $this->belongsTo(MasterDistributor::class, 'seller_id');
+    }
+
+    public function scopeWithParties($query)
+    {
+        return $query->with(['buyer', 'seller']);
+    }
+
     public function getOrderList(Request $request)
     {
         try {
@@ -55,8 +72,9 @@ class OrderController extends Controller
             $user_id = $user->id;
             $customer_id = $request->customer_id ?? '';
             $user_ids = getUsersReportingToAuth($user->id);
-            $pageSize = $request->input('pageSize');
-            $query = $this->orders->latest();
+            $pageSize = $request->input('pageSqueryize');
+            $query = $this->orders->latest()
+    ->with(['buyer', 'seller', 'orderdetails.products']);
             $start_date = $request->startdate ?? '';
             $end_date   = $request->enddate ?? '';
             $selecteduser_id = $request->user_id ?? '';
@@ -89,6 +107,8 @@ class OrderController extends Controller
                     $query->where('status_id', $selectedstatus_id);
                 }
             }
+
+
             // dd($query->toSql(), $selecteduser_id, $customer_id);
             // dd($request->all());
             $db_data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
@@ -99,22 +119,53 @@ class OrderController extends Controller
             $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Dispatched'], ['id' => '2', 'name' => 'Partially Dispatched'], ['id' => '3', 'name' => 'Full Dispatch'], ['id' => '4', 'name' => 'Cancel']];
             if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
+                    
+
+                    $order_details = [];
+
+                    $grand_total = 0;
+
+            if ($value->orderdetails) {
+                foreach ($value->orderdetails as $detail) {
+        
+                    $line_total = $detail->line_total ?? 0;
+        
+                    $order_details[] = [
+                        'order_detail_id' => $detail->id,
+                        'product_id' => $detail->product_id,
+                        'product_name' => $detail->products->product_name ?? '',
+                        'quantity' => $detail->quantity ?? 0,
+                        'price' => $detail->price ?? 0,
+                        'line_total' => $line_total,
+                    ];
+        
+                    // 👇 add all line_total
+                    $grand_total += $line_total;
+                }
+            }
+
                     $data->push([
                         'order_id' => isset($value['id']) ? $value['id'] : 0,
-                        'seller_id' => isset($value['seller_id']) ? $value['seller_id'] : 0,
-                        'seller_name' => isset($value['sellers']['name']) ? $value['sellers']['name'] : '',
-                        'buyer_id' => isset($value['buyer_id']) ? $value['buyer_id'] : 0,
-                        'buyer_name' => isset($value['buyers']['name']) ? $value['buyers']['name'] : '',
+                        'seller_id'    => $value->seller_id ?? null,
+                        'seller_name'  => $value->seller?->trade_name 
+                                    ?? $value->seller?->legal_name 
+                                    ?? '',
+                        'buyer_id'     => $value->buyer_id ?? null,
+                        'buyer_name'   => $value->buyer?->shop_name 
+                                    ?? $value->buyer?->owner_name 
+                                    ?? '',
                         // 'total_qty' => isset($value['total_qty']) ? $value['total_qty'] : 0,
                         'total_qty' => $value->orderdetails->sum('quantity') ?? 0,
                         'shipped_qty' => isset($value['shipped_qty']) ? $value['shipped_qty'] : 0,
                         'orderno' => isset($value['orderno']) ? $value['orderno'] : '',
                         'order_date' => isset($value['order_date']) ? $value['order_date'] : '',
+                        'order_remark' => isset($value['order_remark']) ? $value['order_remark'] : '',
                         'completed_date' => isset($value['completed_date']) ? $value['completed_date'] : '',
-                        'grand_total' => isset($value['grand_total']) ? $value['grand_total'] : 0.00,
+                        'grand_total' => $grand_total,
                         'sub_total' => isset($value['sub_total']) ? $value['sub_total'] : 0.00,
                         'order_status' => isset($value['statusname']) ? $value['statusname']['status_name'] : 'Pending',
                         'order_status_id' => (isset($value['status_id']) && $value['status_id'] != NULL) ? $value['status_id'] : '0',
+                        'order_details' => $order_details,
                         'creatd_by'    => isset($value['createdbyname']) ? $value['createdbyname']['name'] : '',
                     ]);
                 }
@@ -138,8 +189,14 @@ class OrderController extends Controller
             $user = $request->user();
             $user_id = $user->id;
             $order_id = $request->input('order_id');
-            $data = $this->orders->with('orderdetails', 'orderdetails.products', 'statusname', 'orderdetails.productdetails', 'createdbyname', 'getsalesdetail')->where('id', $order_id)->first();
+            $data = $this->orders->with('orderdetails', 'orderdetails.products', 'statusname', 'orderdetails.productdetails', 'createdbyname', 'getsalesdetail', 'seller', 'buyer',)->where('id', $order_id)->first();
             $salesdetails = Sales::where('order_id', $order_id)->first() ?? [];
+            // Later when preparing response:
+            $data['seller_name']    = $data->seller?->trade_name ?? $data->seller?->legal_name ?? '';
+            $data['seller_address'] = $data->seller?->billing_address ?? '';
+
+            $data['buyer_name']     = $data->buyer?->shop_name ?? $data->buyer?->owner_name ?? '';
+            $data['buyer_address']  = $data->buyer?->address_line ?? '';
 
             $data['schme_amount'] = (string)$data['schme_amount'];
             $data['schme_val'] = (string)$data['schme_val'];
@@ -221,10 +278,10 @@ class OrderController extends Controller
                     ]);
                 }
                 unset($data['orderdetails']);
-                $data['seller_name'] = isset($data['sellers']['name']) ? $data['sellers']['name'] : '';
-                $data['seller_address'] = isset($data['sellers']['customeraddress']) ? $data['sellers']['customeraddress'] : '';
-                $data['buyer_name'] = isset($data['buyers']['name']) ? $data['buyers']['name'] : '';
-                $data['buyer_address'] = isset($data['buyers']['customeraddress']) ? $data['buyers']['customeraddress'] : '';
+                // $data['seller_name'] = isset($data['sellers']['name']) ? $data['sellers']['name'] : '';
+                // $data['seller_address'] = isset($data['sellers']['customeraddress']) ? $data['sellers']['customeraddress'] : '';
+                // $data['buyer_name'] = isset($data['buyers']['name']) ? $data['buyers']['name'] : '';
+                // $data['buyer_address'] = isset($data['buyers']['customeraddress']) ? $data['buyers']['customeraddress'] : '';
                 $data['buyer_type'] = isset($data['buyers']['customertypes']) ? $data['buyers']['customertypes']['customertype_name'] : '';
                 $data['orderdetails'] = $orderdetails;
                 return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
@@ -235,136 +292,383 @@ class OrderController extends Controller
         }
     }
 
+    // public function insertOrder(Request $request)
+    // {
+    //     try {
+    //         $user = $request->user();
+    //         $request['created_by'] = $user->id;
+    //         // $validator = Validator::make($request->all(), $this->orders->insertrules(), $this->orders->message());
+    //         // if ($validator->fails()) {
+    //         //     return response()->json(['status' => 'error', 'message' => $validator->messages()->all()], $this->badrequest);
+    //         // }
+    //         $request['order_remark'] = $request['remark'] ?? '';
+    //         $request['customer_type'] = $request->customer_type ?? '';
+    //         $request['total_qty'] = $request->total_qty ?? 0;
+    //         $request['grand_total'] = $request->grand_total ?? 0;
+    //         $fprodu = Product::find($request->orderdetail[0]['product_id']);
+    //         $request['product_cat_id'] = $fprodu->category_id;
+    //         $response =  $this->orders->save_data($request);
+    //         if ($response['status'] == 'success') {
+    //             $orderdetail = collect([]);
+                
+    //             // ---------------------------
+    //             $order = null;
+
+    //             if (!empty($response['order_id'])) {
+    //                 $order = Order::find($response['order_id']);
+    //             }
+                
+                
+    //             // ---------------------------
+    //             foreach ($request->orderdetail as $key => $rows) {
+
+    //                 $product = Product::with('productpriceinfo')->find($rows['product_id']);
+    //                 // if ($product) {
+    //                 //     $rows['discount'] = $product->productpriceinfo->discount ?? 0.00;
+    //                 //     if ($product->productpriceinfo->gst == '5') {
+    //                 //         $gst = 5;
+    //                 //         $gst_amount = (($rows['quantity'] * $rows['price']) * 5) / 100;
+    //                 //     } elseif ($product->productpriceinfo->gst == '12') {
+    //                 //         $gst = 12;
+    //                 //         $gst_amount = (($rows['quantity'] * $rows['price']) * 12) / 100;
+    //                 //     } elseif ($product->productpriceinfo->gst == '18') {
+    //                 //         $gst = 18;
+    //                 //         $gst_amount = (($rows['quantity'] * $rows['price']) * 18) / 100;
+    //                 //     } elseif ($product->productpriceinfo->gst == '28') {
+    //                 //         $gst = 28;
+    //                 //         $gst_amount = (($rows['quantity'] * $rows['price']) * 28) / 100;
+    //                 //     } else {
+    //                 //         $gst = 0;
+    //                 //         $gst_amount = 0;
+    //                 //     }
+    //                 // }
+
+
+    //                 // calculate lime total for retailer/ please remove this code after adding app live
+    //                 // if(isset($rows['line_total']) && isset($rows['quantity']) && isset($rows['price'])){
+    //                 //     if($rows['quantity'] > 1){
+    //                 //         $rows['line_total'] =   $rows['line_total'] == $rows['ebd_amount'] ? $rows['quantity']*$rows['ebd_amount'] :  $rows['line_total'];
+    //                 //     }
+    //                 // }
+
+
+    //                 $orderdetail->push([
+    //                     'active' => 'Y',
+    //                     'order_id' => isset($response['order_id']) ? $response['order_id'] : null,
+    //                     'product_id' => isset($rows['product_id']) ? $rows['product_id'] : null,
+    //                     'product_detail_id' => isset($rows['product_detail_id']) ? $rows['product_detail_id'] : null,
+    //                     'quantity' => isset($rows['quantity']) ? $rows['quantity'] : 0,
+    //                     'discount' => isset($rows['discount']) ? $rows['discount'] : 0.00,
+    //                     'discount_amount' => isset($rows['discount_amount']) ? $rows['discount_amount'] : 0.00,
+    //                     'shipped_qty' => isset($rows['shipped_qty']) ? $rows['shipped_qty'] : 0,
+    //                     'price' => isset($rows['price']) ? $rows['price'] : 0.00,
+    //                     'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] : 0.00,
+    //                     'line_total' => isset($rows['line_total']) ? $rows['line_total'] : 0.00,
+    //                     'created_at' => getcurentDateTime(),
+    //                     'ebd_amount' => isset($rows['ebd_amount']) ? $rows['ebd_amount'] : 0.00,
+    //                     // 'agri_standard_dis' => isset($rows['agri_standard_dis']) ? $rows['agri_standard_dis'] : 0.00,
+    //                     // 'agri_standard_dis_amounts' => isset($rows['agri_standard_dis_amounts']) ? $rows['agri_standard_dis_amounts'] : 0.00,
+    //                     // 'ebd_amount' => isset($rows['ebd_amount']) ? $rows['ebd_amount'] :0.00,
+    //                     // 'cluster_discount' => isset($rows['cluster_discount']) ? $rows['cluster_discount'] :0.00,
+    //                     // 'cluster_amount' => isset($rows['cluster_amount']) ? $rows['cluster_amount'] :0.00,
+    //                     // 'distributor_discount' => isset($rows['distributor_discount']) ? $rows['distributor_discount'] :0.00,
+    //                     // 'distributor_amount' => isset($rows['distributor_amount']) ? $rows['distributor_amount'] :0.00,
+    //                     // 'deal_discount' => isset($rows['deal_discount']) ? $rows['deal_discount'] :0.00,
+    //                     // 'deal_amount' => isset($rows['deal_amount']) ? $rows['deal_amount'] :0.00,
+    //                     // 'frieght_discount' => isset($rows['frieght_discount']) ? $rows['frieght_discount'] :0.00,
+    //                     // 'frieght_amount' => isset($rows['frieght_amount']) ? $rows['frieght_amount'] :0.00,
+    //                     'gst' => $gst ?? 0,
+    //                     'gst_amount' => $gst_amount ?? 0,
+
+
+    //                 ]);
+    //             }
+
+    //             if ($orderdetail->isNotEmpty()) {
+    //                 OrderDetails::insert($orderdetail->toArray());
+    //                 $exportData = new Request();
+    //                 $exportData->merge([
+    //                     'order_id' => $response['order_id'],
+    //                 ]);
+
+    //                 Excel::store(new OrderEmailExport($exportData), '/assets/orderDetails.xlsx', 'local');
+
+    //                 if ($user->userinfo->order_mails  && $user->userinfo->order_mails != null && $user->userinfo->order_mails != '') {
+    //                     $mail_id_array = explode(',', $user->userinfo->order_mails);
+    //                     $buyer  = SecondaryCustomer::find($request->buyer_id);
+    //                     $seller = MasterDistributor::find($request->seller_id);
+    //                     $attachmentPath = base_path('storage/app/assets/orderDetails.xlsx');
+
+    //                     // foreach ($mail_id_array as $k => $val) {
+    //                     //  Mail::to($val)->send(new OrderMailWithAttachment($attachmentPath, $orderdetail, Order::find($response['order_id'])));
+    //                     // }
+    //                 }
+    //             }
+    //             // $useractivity = array(
+    //             //     'userid' => $user->id, 
+    //             //     'latitude' => $request['latitude'], 
+    //             //     'longitude' => $request['longitude'], 
+    //             //     'type' => 'Order',
+    //             //     'description' => $user->name.' Order to Submited',
+    //             // );
+    //             // submitUserActivity($useractivity);
+    //             $buyerName = SecondaryCustomer::where('id', $request->buyer_id)
+    //                 ->value('shop_name') ?? SecondaryCustomer::where('id', $request->buyer_id)
+    //                 ->value('owner_name') ?? 'Unknown Buyer';
+
+    //             $sellerName = MasterDistributor::where('id', $request->seller_id)
+    //                 ->value('trade_name') ?? MasterDistributor::where('id', $request->seller_id)
+    //                 ->value('legal_name') ?? 'Unknown Seller';
+
+    //             $locationName = $buyerName !== 'Unknown Buyer' ? $buyerName : $sellerName;
+    //             // $customername = Customers::where('id', '=', $request['buyer_id'])->pluck('name')->first();
+
+    //             $adminnotify = collect([
+    //                 'title' => 'Order collected',
+    //                 'body' =>  $user->name . ' has collected order at ' . $locationName
+    //             ]);
+    //             sendNotification(39, $adminnotify);
+
+    //             $zsmnotify = collect([
+    //                 'title' => 'Order collected',
+    //                 'body' =>  $user->name . ' has collected order at ' . $locationName
+    //             ]);
+    //             sendNotification($user->reportingid, $zsmnotify);
+    //             $asmnotify = collect([
+    //                 'title' => 'Order successfully placed',
+    //                 'body' =>  'Your order is successfully placed at ' . $locationName
+    //             ]);
+    //             sendNotification($user->id, $asmnotify);
+    //             return response()->json($response, $this->successStatus);
+    //         }
+    //         // ----------------------
+    //         if ($order) {
+
+    //             $newData = [
+    //                 'order_no'   => $order->orderno ?? null,
+    //                 'order_type' => $order->order_type ?? null,
+    //                 'seller_id'  => $order->seller_id ?? null,
+    //                 'buyer_id'   => $order->buyer_id ?? null,
+    //                 'total'      => $order->grand_total ?? null,
+    //                 'items'      => count($request->orderdetail ?? []),
+    //                 'source'     => 'mobile_app'
+    //             ];
+            
+    //             logActivity(
+    //                 'order',
+    //                 $order->id,
+    //                 'created',
+    //                 'api', // 👈 mobile/api source
+    //                 null,
+    //                 $newData,
+    //                 $order->order_type ?? null
+    //             );
+    //         }
+            
+            
+            
+    //         // ----------------------------
+    //         return response()->json($response, $this->badrequest);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+    //     }
+    // }
+    
     public function insertOrder(Request $request)
     {
+        DB::beginTransaction();
+    
         try {
             $user = $request->user();
             $request['created_by'] = $user->id;
-            $validator = Validator::make($request->all(), $this->orders->insertrules(), $this->orders->message());
-            if ($validator->fails()) {
-                return response()->json(['status' => 'error', 'message' => $validator->messages()->all()], $this->badrequest);
-            }
             $request['order_remark'] = $request['remark'] ?? '';
-            $fprodu = Product::find($request->orderdetail[0]['product_id']);
-            $request['product_cat_id'] = $fprodu->category_id;
-            $response =  $this->orders->save_data($request);
-            if ($response['status'] == 'success') {
-                $orderdetail = collect([]);
-                foreach ($request->orderdetail as $key => $rows) {
-
-                    $product = Product::with('productpriceinfo')->find($rows['product_id']);
-                    if ($product) {
-                        $rows['discount'] = $product->productpriceinfo->discount;
-                        if ($product->productpriceinfo->gst == '5') {
-                            $gst = 5;
-                            $gst_amount = (($rows['quantity'] * $rows['price']) * 5) / 100;
-                        } elseif ($product->productpriceinfo->gst == '12') {
-                            $gst = 12;
-                            $gst_amount = (($rows['quantity'] * $rows['price']) * 12) / 100;
-                        } elseif ($product->productpriceinfo->gst == '18') {
-                            $gst = 18;
-                            $gst_amount = (($rows['quantity'] * $rows['price']) * 18) / 100;
-                        } elseif ($product->productpriceinfo->gst == '28') {
-                            $gst = 28;
-                            $gst_amount = (($rows['quantity'] * $rows['price']) * 28) / 100;
-                        } else {
-                            $gst = 0;
-                            $gst_amount = 0;
-                        }
-                    }
-
-
-                    // calculate lime total for retailer/ please remove this code after adding app live
-                    // if(isset($rows['line_total']) && isset($rows['quantity']) && isset($rows['price'])){
-                    //     if($rows['quantity'] > 1){
-                    //         $rows['line_total'] =   $rows['line_total'] == $rows['ebd_amount'] ? $rows['quantity']*$rows['ebd_amount'] :  $rows['line_total'];
-                    //     }
-                    // }
-
-
-                    $orderdetail->push([
-                        'active' => 'Y',
-                        'order_id' => isset($response['order_id']) ? $response['order_id'] : null,
-                        'product_id' => isset($rows['product_id']) ? $rows['product_id'] : null,
-                        'product_detail_id' => isset($rows['product_detail_id']) ? $rows['product_detail_id'] : null,
-                        'quantity' => isset($rows['quantity']) ? $rows['quantity'] : 0,
-                        'discount' => isset($rows['discount']) ? $rows['discount'] : 0.00,
-                        'discount_amount' => isset($rows['discount_amount']) ? $rows['discount_amount'] : 0.00,
-                        'shipped_qty' => isset($rows['shipped_qty']) ? $rows['shipped_qty'] : 0,
-                        'price' => isset($rows['price']) ? $rows['price'] : 0.00,
-                        'tax_amount' => isset($rows['tax_amount']) ? $rows['tax_amount'] : 0.00,
-                        'line_total' => isset($rows['line_total']) ? $rows['line_total'] : 0.00,
-                        'created_at' => getcurentDateTime(),
-                        'ebd_amount' => isset($rows['ebd_amount']) ? $rows['ebd_amount'] : 0.00,
-                        // 'agri_standard_dis' => isset($rows['agri_standard_dis']) ? $rows['agri_standard_dis'] : 0.00,
-                        // 'agri_standard_dis_amounts' => isset($rows['agri_standard_dis_amounts']) ? $rows['agri_standard_dis_amounts'] : 0.00,
-                        // 'ebd_amount' => isset($rows['ebd_amount']) ? $rows['ebd_amount'] :0.00,
-                        // 'cluster_discount' => isset($rows['cluster_discount']) ? $rows['cluster_discount'] :0.00,
-                        // 'cluster_amount' => isset($rows['cluster_amount']) ? $rows['cluster_amount'] :0.00,
-                        // 'distributor_discount' => isset($rows['distributor_discount']) ? $rows['distributor_discount'] :0.00,
-                        // 'distributor_amount' => isset($rows['distributor_amount']) ? $rows['distributor_amount'] :0.00,
-                        // 'deal_discount' => isset($rows['deal_discount']) ? $rows['deal_discount'] :0.00,
-                        // 'deal_amount' => isset($rows['deal_amount']) ? $rows['deal_amount'] :0.00,
-                        // 'frieght_discount' => isset($rows['frieght_discount']) ? $rows['frieght_discount'] :0.00,
-                        // 'frieght_amount' => isset($rows['frieght_amount']) ? $rows['frieght_amount'] :0.00,
-                        'gst' => $gst ?? 0,
-                        'gst_amount' => $gst_amount ?? 0,
-
-
-                    ]);
-                }
-
-                if ($orderdetail->isNotEmpty()) {
-                    OrderDetails::insert($orderdetail->toArray());
-                    $exportData = new Request();
-                    $exportData->merge([
-                        'order_id' => $response['order_id'],
-                    ]);
-
-                    Excel::store(new OrderEmailExport($exportData), '/assets/orderDetails.xlsx', 'local');
-
-                    if ($user->userinfo->order_mails  && $user->userinfo->order_mails != null && $user->userinfo->order_mails != '') {
-                        $mail_id_array = explode(',', $user->userinfo->order_mails);
-                        $buyer = Customers::find($request['buyer_id']);
-                        $seller = Customers::find($request['seller_id']);
-                        $attachmentPath = base_path('storage/app/assets/orderDetails.xlsx');
-
-                        // foreach ($mail_id_array as $k => $val) {
-                        //  Mail::to($val)->send(new OrderMailWithAttachment($attachmentPath, $orderdetail, Order::find($response['order_id'])));
-                        // }
-                    }
-                }
-                // $useractivity = array(
-                //     'userid' => $user->id, 
-                //     'latitude' => $request['latitude'], 
-                //     'longitude' => $request['longitude'], 
-                //     'type' => 'Order',
-                //     'description' => $user->name.' Order to Submited',
-                // );
-                // submitUserActivity($useractivity);
-                $customername = Customers::where('id', '=', $request['buyer_id'])->pluck('name')->first();
-
-                $adminnotify = collect([
-                    'title' => 'Order collected',
-                    'body' =>  $user->name . ' has collected order at ' . $customername
-                ]);
-                sendNotification(39, $adminnotify);
-
-                $zsmnotify = collect([
-                    'title' => 'Order collected',
-                    'body' =>  $user->name . ' has collected order at ' . $customername
-                ]);
-                sendNotification($user->reportingid, $zsmnotify);
-                $asmnotify = collect([
-                    'title' => 'Order successfully placed',
-                    'body' =>  'Your order is successfully placed at ' . $customername
-                ]);
-                sendNotification($user->id, $asmnotify);
-                return response()->json($response, $this->successStatus);
+    
+            // Set product category from first product
+            if (!empty($request->orderdetail[0]['product_id'])) {
+                $fprodu = Product::find($request->orderdetail[0]['product_id']);
+                $request['product_cat_id'] = $fprodu ? $fprodu->category_id : null;
             }
-            return response()->json($response, $this->badrequest);
+    
+            // ========================
+            // Order Type & Defaults
+            // ========================
+            $request['order_type']   = 'SECONDARY_CUSTOMER';
+            $request['active']       = 'Y';
+            $request['total_qty']    = $request['total_qty'] ?? 0;
+            $request['shipped_qty']  = 0;
+            $request['order_taking'] = 'MobileApp';
+            $request['executive_id'] = $user->id;
+            $request['order_date']   = now()->toDateString();
+    
+            // ========================
+            // Create Order First (without orderno)
+            // ========================
+            $order = Order::create([
+                'active'         => 'Y',
+                'buyer_id'       => $request->buyer_id ?? null,
+                'seller_id'      => $request->seller_id ?? null,
+                'executive_id'   => $user->id,
+                'retailer_id'    => $request['retailer_id'],
+                'total_qty'      => 0,
+                'shipped_qty'    => 0,
+                'order_date'     => $request['order_date'],
+                'order_taking'   => 'MobileApp',
+                'order_type'     => $request['order_type'],
+                'product_cat_id' => $request['product_cat_id'] ?? null,
+                'order_remark'   => $request['order_remark'],
+                'created_by'     => $user->id,
+                // Totals will be calculated and updated later
+                'sub_total'      => 0,
+                'total_gst'      => 0,
+                'grand_total'    => $request['grand_total'],
+                'customer_type'  => $request['customer_type']
+            ]);
+    
+            // ========================
+            // Generate Proper Order No
+            // ========================
+            $order->orderno = date('Y') 
+                . '-' . ($order->seller_id ?? 0) 
+                . '-' . ($order->buyer_id ?? 0) 
+                . '-' . $order->id;
+    
+            $order->save();
+    
+            // ========================
+            // Insert Order Details + Calculate Totals
+            // ========================
+            $orderDetailsData = [];
+            $sub_total = 0;
+            $total_gst = 0;
+    
+            foreach ($request->orderdetail as $rows) {
+                $product = Product::with('productpriceinfo')->find($rows['product_id']);
+    
+                $gst_percent = 0;
+                $gst_amount  = 0;
+    
+                if ($product && $product->productpriceinfo) {
+                    $gst_percent = (int)$product->productpriceinfo->gst ?? 0;
+                    $base_amount = $rows['quantity'] * ($rows['price'] ?? 0);
+                    $gst_amount  = ($base_amount * $gst_percent) / 100;
+                }
+    
+                // Use line_total from payload, fallback to calculation
+                $line_total = $rows['line_total'] ?? 
+                             ($rows['quantity'] * ($rows['price'] ?? 0));
+    
+                // Grand total per line = line_total + gst_amount
+                $line_grand_total = $line_total + $gst_amount;
+    
+                $orderDetailsData[] = [
+                    'active'            => 'Y',
+                    'order_id'          => $order->id,
+                    'product_id'        => $rows['product_id'] ?? null,
+                    'product_detail_id' => $rows['product_detail_id'] ?? null,
+                    'quantity'          => $rows['quantity'] ?? 0,
+                    'shipped_qty'       => $rows['shipped_qty'] ?? 0,
+                    'price'             => $rows['price'] ?? 0.00,
+                    'tax_amount'        => $rows['tax_amount'] ?? $gst_amount,
+                    'line_total'        => $line_total,
+                    'gst'               => $gst_percent,
+                    'gst_amount'        => $gst_amount,
+                    'discount'          => $rows['discount'] ?? 0.00,
+                    'ebd_amount'        => $rows['ebd_amount'] ?? 0.00,
+                    'created_at'        => getcurentDateTime(),
+                    // 'category_id'       => $product->category_id ?? null,
+                    // 'subcategory_id'    => $product->subcategory_id ?? null,
+                ];
+    
+                $sub_total += $line_total;
+                $total_gst += $gst_amount;
+            }
+    
+            // Insert all order details
+            if (!empty($orderDetailsData)) {
+                OrderDetails::insert($orderDetailsData);
+            }
+    
+            // ========================
+            // Calculate & Update Grand Total in Order
+            // ========================
+            $grand_total = $sub_total + $total_gst;
+    
+            $order->update([
+                'sub_total'   => round($sub_total, 2),
+                'total_gst'   => round($total_gst, 2),
+                'grand_total' => round($grand_total, 2),
+                'total_qty'   => array_sum(array_column($request->orderdetail, 'quantity')) ?? 0,
+            ]);
+    
+            DB::commit();
+            
+            
+            logActivity(
+                'order',
+                $request['order_type'] === 'SECONDARY_CUSTOMER'? $order->buyer_id : $order->seller_id,
+                'created',
+                'api',
+                null,
+                [
+                    'orderno'         => $order->orderno,
+                    'buyer_id'        => $order->buyer_id,
+                    'seller_id'       => $order->seller_id,
+                    'retailer_id'     => $order->retailer_id,
+                    'executive_id'    => $user->id,
+                    'order_type'      => $order->order_type,
+                    'customer_type'   => $order->customer_type,
+                    'sub_total'       => round($sub_total, 2),
+                    'total_gst'       => round($total_gst, 2),
+                    'grand_total'     => round($grand_total, 2),
+                    'total_qty'       => $order->total_qty,
+                    'order_remark'    => $order->order_remark,
+                    'order_date'      => $order->order_date,
+                    'products'        => $orderDetailsData
+                ],
+                $request['customer_type'] ?? 'SECONDARY_CUSTOMER'
+            );
+    
+            // ========================
+            // Excel Export (Optional)
+            // ========================
+            $exportData = new Request();
+            $exportData->merge(['order_id' => $order->id]);
+            Excel::store(new OrderEmailExport($exportData), '/assets/orderDetails.xlsx', 'local');
+    
+            // ========================
+            // Notifications
+            // ========================
+            $buyerName = SecondaryCustomer::where('id', $request->buyer_id)
+                            ->value('shop_name') ?? 'Unknown Buyer';
+    
+            $adminnotify = collect([
+                'title' => 'Order collected',
+                'body'  => $user->name . ' has collected order at ' . $buyerName
+            ]);
+            sendNotification(39, $adminnotify);
+    
+            $zsmnotify = collect([
+                'title' => 'Order collected',
+                'body'  => $user->name . ' has collected order at ' . $buyerName
+            ]);
+            sendNotification($user->reportingid ?? 0, $zsmnotify);
+    
+            return response()->json([
+                'status'     => 'success',
+                'message'    => 'Order created successfully',
+                'order_id'   => $order->id,
+                'orderno'    => $order->orderno,
+                'grand_total'=> round($grand_total, 2)
+            ], 200);
+    
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+            DB::rollBack();
+            \Log::error('API Order Insert Error: ' . $e->getMessage());
+            
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -372,9 +676,7 @@ class OrderController extends Controller
     {
         try {
             $user = $request->user();
-            $validator = Validator::make($request->all(), [
-                'product_detail_id' => 'required|exists:product_details,id',
-            ]);
+            $validator = Validator::make($request->all(), []);
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
@@ -382,7 +684,8 @@ class OrderController extends Controller
             $data =  Cart::create([
                 'customer_id' => isset($request->customer_id) ? $request->customer_id : null,
                 'product_id' => isset($request->product_id) ? $request->product_id : null,
-                'product_detail_id' => isset($request->product_detail_id) ? $request->product_detail_id : null,
+                'product_detail_id' => $request->product_detail_id ?? null,
+                // 'product_detail_id' => isset($request->product_detail_id) ? $request->product_detail_id : null,
                 'quantity' => isset($request->quantity) ? $request->quantity : 1,
                 'price' => isset($request->price) ? $request->price : 0.00,
                 'discount' => isset($request->discount) ? $request->discount : 0.00,
@@ -778,6 +1081,253 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+        }
+    }
+    
+    /**
+     * Get list of buyers that have at least one order
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getOrderBuyers(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $user_ids = getUsersReportingToAuth($user->id);
+    
+            $buyers = Order::query()
+                ->whereIn('created_by', $user_ids)
+                ->whereNotNull('buyer_id')
+                ->join('secondary_customers', 'orders.buyer_id', '=', 'secondary_customers.id')
+                ->select(
+                    'secondary_customers.id as buyer_id',
+                    DB::raw("COALESCE(secondary_customers.shop_name, secondary_customers.owner_name, 'Unknown') as name"),
+                    'secondary_customers.mobile_no',
+                    'secondary_customers.city'
+                )
+                ->distinct()
+                ->orderBy('name', 'asc')
+                ->get();
+    
+            return response()->json([
+                'status'  => 'success',
+                'message' => $buyers->isNotEmpty() ? 'Buyers retrieved' : 'No buyers found',
+                'data'    => $buyers
+            ], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Get list of sellers (master distributors) that have at least one order
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getOrderSellers(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $user_ids = getUsersReportingToAuth($user->id);
+    
+            $sellers = Order::query()
+                ->whereIn('created_by', $user_ids)
+                ->whereNotNull('seller_id')
+                ->join('master_distributors', 'orders.seller_id', '=', 'master_distributors.id')
+                ->select(
+                    'master_distributors.id as seller_id',
+                    DB::raw("COALESCE(master_distributors.trade_name, master_distributors.legal_name, 'Unknown') as name"),
+                    'master_distributors.mobile_no',
+                    'master_distributors.city'
+                )
+                ->distinct()
+                ->orderBy('name', 'asc')
+                ->get();
+    
+            return response()->json([
+                'status'  => 'success',
+                'message' => $sellers->isNotEmpty() ? 'Sellers retrieved' : 'No sellers found',
+                'data'    => $sellers
+            ], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    
+    
+    public function getHierarchyOrderStats(Request $request)
+    {
+        try {
+            $authUser = $request->user();
+            if (!$authUser) {
+                return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
+            }
+    
+            $targetUserId = $request->query('user_id'); // optional
+    
+            // ── Determine visible user IDs ─────────────────────────────
+            if ($targetUserId) {
+                $visibleIds = getUsersReportingToAuth($authUser->id);
+                $visibleIds[] = $authUser->id;
+                $visibleIds = array_unique($visibleIds);
+    
+                if (!in_array($targetUserId, $visibleIds)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'You do not have permission to view this user\'s stats'
+                    ], 403);
+                }
+    
+                $userIds = [$targetUserId];
+                $isSingleUser = true;
+            } else {
+                $userIds = getUsersReportingToAuth($authUser->id);
+                $userIds[] = $authUser->id;
+                $userIds = array_unique($userIds);
+                $isSingleUser = false;
+            }
+    
+            // Check if target user is End User (Role ID 29)
+            $isEndUser = false;
+            if ($isSingleUser) {
+                $isEndUser = User::where('id', $targetUserId)
+                    ->whereHas('roles', fn($q) => $q->where('id', 29))
+                    ->exists();
+            }
+    
+            // ── Date Filter ────────────────────────────────────────────
+            $start_date = $request->startdate;
+            $end_date = $request->enddate;
+    
+            $dateFilter = [];
+            if ($start_date && $end_date) {
+                $start = date('Y-m-d', strtotime($start_date));
+                $end = date('Y-m-d', strtotime($end_date));
+                $dateFilter = [$start, $end];
+            }
+    
+            // ── 1. Orders Stats (Existing) ─────────────────────────────
+            $orderQuery = $this->orders->query()
+                ->with(['buyer', 'seller', 'orderdetails', 'createdbyname']);
+    
+            if ($isSingleUser) {
+                if ($isEndUser) {
+                    $orderQuery->where('created_by', $targetUserId);
+                } else {
+                    $orderQuery->whereIn('created_by', $userIds);
+                }
+            } else {
+                $orderQuery->whereIn('created_by', $userIds);
+            }
+    
+            if (!empty($dateFilter)) {
+                $orderQuery->whereDate('order_date', '>=', $dateFilter[0])
+                           ->whereDate('order_date', '<=', $dateFilter[1]);
+            }
+    
+            $orders = $orderQuery->get();
+    
+            $total_orders = $orders->count();
+            $total_order_value = $orders->sum(fn($order) => 
+                $order->orderdetails ? $order->orderdetails->sum('line_total') : 0
+            );
+            $total_quantity = $orders->sum(fn($order) => 
+                $order->orderdetails ? $order->orderdetails->sum('quantity') : 0
+            );
+    
+            $buyers = $orders->pluck('buyer_id')->filter()->unique();
+            $sellers = $orders->pluck('seller_id')->filter()->unique();
+            $total_customers = $buyers->merge($sellers)->unique()->count();
+    
+            // ── 2. Check-ins Stats ─────────────────────────────────────
+            $checkInQuery = CheckIn::whereIn('user_id', $userIds);
+    
+            if ($isSingleUser && $isEndUser) {
+                $checkInQuery->where('user_id', $targetUserId);
+            }
+    
+            if (!empty($dateFilter)) {
+                $checkInQuery->whereBetween('checkin_date', $dateFilter);
+            }
+    
+            $total_checkins = $checkInQuery->count();
+    
+            // ── 3. Secondary Customer Creations ────────────────────────
+            $secondaryCustomerQuery = SecondaryCustomer::whereIn('created_by', $userIds);
+    
+            if ($isSingleUser && $isEndUser) {
+                $secondaryCustomerQuery->where('created_by', $targetUserId);
+            }
+    
+            if (!empty($dateFilter)) {
+                $secondaryCustomerQuery->whereDate('created_at', '>=', $dateFilter[0])
+                                       ->whereDate('created_at', '<=', $dateFilter[1]);
+            }
+    
+            $total_secondary_customers = $secondaryCustomerQuery->count();
+    
+            // ── 4. Master Distributor Creations ────────────────────────
+            $masterDistributorQuery = MasterDistributor::whereIn('created_by', $userIds);
+    
+            if ($isSingleUser && $isEndUser) {
+                $masterDistributorQuery->where('created_by', $targetUserId);
+            }
+    
+            if (!empty($dateFilter)) {
+                $masterDistributorQuery->whereDate('created_at', '>=', $dateFilter[0])
+                                       ->whereDate('created_at', '<=', $dateFilter[1]);
+            }
+    
+            $total_master_distributors = $masterDistributorQuery->count();
+    
+            // ── Per User Breakdown (Optional - can be extended later) ──
+            $perUser = $orders->groupBy('created_by')->map(function ($group) {
+                return [
+                    'user_id' => $group->first()->created_by,
+                    'user_name' => $group->first()->createdbyname->name ?? 'Unknown',
+                    'orders' => $group->count(),
+                    'value' => $group->sum(fn($o) => $o->orderdetails ? $o->orderdetails->sum('line_total') : 0),
+                    'quantity' => $group->sum(fn($o) => $o->orderdetails ? $o->orderdetails->sum('quantity') : 0),
+                ];
+            })->values();
+    
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Hierarchy stats retrieved successfully',
+                'data' => [
+                    'is_single_user' => $isSingleUser,
+                    'is_end_user' => $isEndUser,
+                    'target_user_id' => $targetUserId ?: null,
+    
+                    // Main Stats
+                    'total_customers' => $total_customers,           // From Orders
+                    'total_orders' => $total_orders,
+                    'total_order_value' => $total_order_value,
+                    'total_quantity' => $total_quantity,
+    
+                    // NEW STATS
+                    'total_checkins' => $total_checkins,
+                    'total_secondary_customers' => $total_secondary_customers,
+                    'total_master_distributors' => $total_master_distributors,
+    
+                    'per_user_breakdown' => $perUser,
+                ]
+            ], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 }

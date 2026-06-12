@@ -11,7 +11,7 @@ class ComplaintTimeline extends Model
 
     protected $table = 'complaint_timelines';
 
-    protected $fillable = [ 'complaint_id', 'created_by', 'status', 'remark', 'created_at', 'updated_at'];
+    protected $fillable = [ 'complaint_id', 'created_by', 'status','status_remark', 'remark', 'created_at', 'updated_at'];
     public $timestamps = true;
 
 

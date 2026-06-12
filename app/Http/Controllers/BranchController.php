@@ -168,4 +168,35 @@ class BranchController extends Controller
             return Excel::download(new BranchExport($request), 'branch.xlsx');
         }
     }
+
+    public function getAllBranches()
+{
+    try {
+
+        $branches = Branch::select(
+                'id',
+                'branch_name',
+                'branch_code',
+                'warehouse_id',
+                'active',
+                'created_at'
+            )
+            ->with('getuser')
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Branches fetched successfully',
+            'data' => $branches
+        ], 200);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
 }

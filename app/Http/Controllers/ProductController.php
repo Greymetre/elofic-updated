@@ -80,6 +80,7 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
+        // dd($request);
         try
         { 
             abort_if(Gate::denies('product_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -107,15 +108,15 @@ class ProductController extends Controller
                 'product_code'  => !empty($request['product_code']) ? $request['product_code'] :'',
                 'new_group'  => !empty($request['new_group']) ? $request['new_group'] :'',
                 'sub_group'  => !empty($request['sub_group']) ? $request['sub_group'] :'',
-                'expiry_interval'  => !empty($request['expiry_interval']) ? $request['expiry_interval'] :'',
-                'expiry_interval_preiod'  => !empty($request['expiry_interval_preiod']) ? $request['expiry_interval_preiod'] :0,
+                // 'expiry_interval'  => !empty($request['expiry_interval']) ? $request['expiry_interval'] :'',
+                // 'expiry_interval_preiod'  => !empty($request['expiry_interval_preiod']) ? $request['expiry_interval_preiod'] :0,
                 //'display_name'  => !empty($request['display_name']) ? $request['display_name'] :'',
                 'description'   => !empty($request['description']) ? $request['description'] :'',
                 'subcategory_id'=> !empty($request['subcategory_id']) ? $request['subcategory_id'] :null,
-                'category_id'   => !empty($request['category_id']) ? $request['category_id'] :null,
+                // 'category_id'   => !empty($request['category_id']) ? $request['category_id'] :null,
                 'brand_id'      => !empty($request['brand_id']) ? $request['brand_id'] :null,
                 'product_image' => !empty($request['product_image']) ? $request['product_image'] :'',
-                'unit_id'       => !empty($request['unit_id']) ? $request['unit_id'] :null,
+                // 'unit_id'       => !empty($request['unit_id']) ? $request['unit_id'] :null,
                 'created_by'    => Auth::user()->id,
                 'created_at'    => getcurentDateTime(),
                 'specification' => !empty($request['specification']) ? $request['specification'] :'',
@@ -126,19 +127,33 @@ class ProductController extends Controller
                 'model_no'      => !empty($request['model_no']) ? $request['model_no'] :'',
                 'hsn_sac'      => isset($row['hsn_sac']) ? $row['hsn_sac'] :null,
                 'hsn_sac_no'      => isset($row['hsn_sac_no']) ? $row['hsn_sac_no'] :null,
+                'suc_del'  => !empty($request['suc_del']) ? $request['suc_del'] :'',
             ]))
             {
                 if(!empty($request['detail']))
                 {
                     $details = collect([]);
                     foreach ($request['detail'] as $key => $rows) {
-                        if(!empty($rows['mrp'])){
-                            $price = $rows['mrp'];
+                        // $price = 0;
+
+                        $rows['mrp'] = $rows['price'] ?? 0;
+
+                        if(!empty($rows['price'])){
+
+                            $price = $rows['price'];
+
                             if(!empty($request['gst']) && $request['gst'] > 0){
-                                $price = ($rows['mrp']+(($rows['mrp']*$request['gst'])/100));
+                                $price = (
+                                    $rows['price'] +
+                                    (($rows['price'] * $request['gst']) / 100)
+                                );
                             }
+
                             if(!empty($request['discount']) && $request['discount'] > 0){
-                                $price = ($price-(($rows['mrp']*$request['discount'])/100));
+                                $price = (
+                                    $price -
+                                    (($rows['price'] * $request['discount']) / 100)
+                                );
                             }
                         }
                         $details->push([
@@ -147,8 +162,9 @@ class ProductController extends Controller
                             'detail_title'  => !empty($rows['detail_title']) ? $rows['detail_title'] :'',
                             'detail_description' => !empty($rows['detail_description']) ? $rows['detail_description'] :'',
                             'detail_image'  => !empty($rows['detail_image']) ? $rows['detail_image'] :'',
-                            'mrp'       => !empty($rows['mrp']) ? $rows['mrp'] :0.00,
-                            'price'     => !empty($rows['mrp']) ? $rows['mrp'] :$rows['mrp'],
+                            'mrp' => !empty($rows['price']) ? $rows['price'] : 0.00,
+
+                            'price' => !empty($rows['price']) ? $rows['price'] : 0.00,
                             //'price'     => $price,
                             'selling_price' => !empty($rows['selling_price']) ? $rows['selling_price'] :$rows['mrp'],
                             'discount' => !empty($request['discount']) ? $request['discount'] :0.00,
@@ -204,12 +220,13 @@ class ProductController extends Controller
     {
         abort_if(Gate::denies('product_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
-        $products = Product::find($id);
+        $products = Product::with('productdetails')->find($id);
         $categories = Category::where('active','=','Y')->select('id', 'category_name')->get();
         $subcategories = Subcategory::where('active','=','Y')->select('id', 'subcategory_name')->get();
         $brands = Brand::where('active','=','Y')->select('id', 'brand_name')->get();
         $units = UnitMeasure::where('active','=','Y')->select('id', 'unit_name')->get();
         $branches = Branch::where('active','=','Y')->select('id', 'branch_name')->get();
+        // dd($products);
         return view('products.create',compact('categories','subcategories','brands','units', 'branches') )->with('products',$products);
     }
 
@@ -222,6 +239,8 @@ class ProductController extends Controller
      */
     public function update(ProductRequest $request, $id)
     {
+
+    // dd($request);
         try
         { 
 
@@ -241,14 +260,14 @@ class ProductController extends Controller
             $product->product_code = !empty($request['product_code'])? $request['product_code'] :'';
             $product->new_group = !empty($request['new_group'])? $request['new_group'] :'';
             $product->sub_group = !empty($request['sub_group'])? $request['sub_group'] :'';
-            $product->expiry_interval = !empty($request['expiry_interval'])? $request['expiry_interval'] :'';
-            $product->expiry_interval_preiod = !empty($request['expiry_interval_preiod'])? $request['expiry_interval_preiod'] :0;
+            // $product->expiry_interval = !empty($request['expiry_interval'])? $request['expiry_interval'] :'';
+            // $product->expiry_interval_preiod = !empty($request['expiry_interval_preiod'])? $request['expiry_interval_preiod'] :0;
             //$product->display_name = !empty($request['display_name']) ? $request['display_name'] :'';
             $product->description = !empty($request['description']) ? $request['description'] :'';
             $product->subcategory_id = !empty($request['subcategory_id']) ? $request['subcategory_id'] :null;
-            $product->category_id = !empty($request['category_id']) ? $request['category_id'] :null;
+            // $product->category_id = !empty($request['category_id']) ? $request['category_id'] :null;
             $product->brand_id = !empty($request['brand_id']) ? $request['brand_id'] :null;
-            $product->unit_id = !empty($request['unit_id']) ? $request['unit_id'] :null;
+            // $product->unit_id = !empty($request['unit_id']) ? $request['unit_id'] :null;
             $product->specification = !empty($request['specification']) ? $request['specification'] :'';
             $product->phase = !empty($request['phase']) ? $request['phase'] :'';
             $product->sap_code = !empty($request['sap_code']) ? $request['sap_code'] :'';
@@ -274,14 +293,18 @@ class ProductController extends Controller
                     // ProductDetails::whereNotIn('id',$detailsids)->delete();
                     foreach ($request['detail'] as $key => $rows) {
                         // $price = $rows['mrp'];
-                        if(!empty($rows['mrp'])){
-                            $price = $rows['mrp'];
+                        // if(!empty($rows['mrp'])){
+                        //     $price = $rows['mrp'];
                             // if(!empty($request['gst']) && $request['gst'] > 0){
                             //     $price = ($rows['mrp']+(($rows['mrp']*$request['gst'])/100));
                             // }
                             // if(!empty($request['discount']) && $request['discount'] > 0){
                             //     $price = ($price-(($rows['mrp']*$request['discount'])/100));
                             // }
+                        // }
+
+                        if(!empty($rows['price'])){
+                            $price = $rows['price'];
                         }
                         // dd($rows, $request->all());
                         if(empty($rows['detail_id']))
@@ -314,9 +337,11 @@ class ProductController extends Controller
                                 'detail_title'  => isset($rows['detail_title']) ? $rows['detail_title'] :'',
                                 'detail_description' => isset($rows['detail_description']) ? $rows['detail_description'] :'',
                                 'detail_image'  => isset($rows['detail_image']) ? $rows['detail_image'] :'',
-                                'mrp'       => isset($rows['mrp']) ? $rows['mrp'] :0.00,
+                                'mrp' => $rows['price'] ?? 0.00,
+
+                                'price' => $rows['price'] ?? 0.00,
                                 // 'price'     => isset($rows['price']) ? $rows['price'] :0.00,
-                                'price'     => isset($rows['mrp']) ? $rows['mrp'] :0.00,
+                                // 'price'     => isset($rows['mrp']) ? $rows['mrp'] :0.00,
                                 'selling_price' => isset($rows['selling_price']) ? $rows['selling_price'] :0.00,
                                 'discount' => isset($request['discount']) ? $request['discount'] :0.00,
                                 'max_discount' => isset($request['max_discount']) ? $request['max_discount'] :0.00,
@@ -527,4 +552,42 @@ class ProductController extends Controller
 
         return view('products.dealer_product_list', compact('products', 'category_id', 'categories'));
     }
+     public function getProductsBySubcategory(Request $request)
+{
+    $products = Product::with('productdetails')
+    ->where('subcategory_id', $request->subcategory_id)
+    ->select(
+        'id',
+        'product_name',
+        'product_image',
+        'display_name',
+        'product_code',
+        'subcategory_id',
+        'hsn_sac'
+    )
+    ->get()
+    ->map(function ($product) {
+
+        $detail = $product->productdetails->first();
+
+        return [
+            'id' => $product->id,
+            'product_name' => $product->product_name,
+            'product_image' => $product->product_image,
+            'display_name' => $product->display_name,
+            'product_code' => $product->product_code,
+            'subcategory_id' => $product->subcategory_id,
+            'hsn_sac' => $product->hsn_sac,
+
+            'price' => $detail->price ?? 0,
+            'mrp' => $detail->mrp ?? 0,
+            'gst' => $detail->gst ?? 0,
+            'selling_price' => $detail->selling_price ?? 0,
+        ];
+    });
+
+return response()->json([
+    'products' => $products
+]);
+}
 }

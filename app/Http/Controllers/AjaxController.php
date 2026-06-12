@@ -20,6 +20,8 @@ use LDAP\Result;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\MarketingActivity;
+use App\Models\SecondaryCustomer;        
+use App\Models\MasterDistributor;
 
 
 class AjaxController extends Controller
@@ -248,7 +250,7 @@ class AjaxController extends Controller
                 }
                 $query->where('active', '=', 'Y');
             })
-                ->select('id', 'product_name', 'product_image', 'display_name', 'product_code')
+                ->select('id', 'product_name', 'product_image', 'display_name', 'product_code','subcategory_id','hsn_sac')
                 ->orderBy('product_name', 'asc')
                 ->get();
             return response()->json($data);
@@ -436,50 +438,133 @@ class AjaxController extends Controller
         }
     }
 
-    public function getRetailerlist(Request $request)
-    {
-        try {
-            $state = $request->input('state_id');
-            $district = $request->input('district_id');
-            $city = $request->input('city_id');
-            $users = $request->input('user_id');
-            $data = Customers::where(function ($query) use ($users) {
-                // if (isset($users)) {
-                //     $query->whereIn('executive_id', $users);
-                // }
-                $query->where('active', '=', 'Y');
-            })
-                ->whereHas('customeraddress', function ($query) use ($state, $district, $city) {
-                    if (isset($state)) {
-                        $query->where('state_id', '=', $state);
-                    }
-                    if (is_array($district)) {
-                        if (count($district) > 0) {
-                            $query->whereIn('district_id', $district);
-                        }
-                    } else {
-                        if (isset($district)) {
-                            $query->where('district_id', '=', $district);
-                        }
-                    }
-                    if (is_array($city)) {
-                        if (count($city) > 0) {
-                            $query->whereIn('city_id', $city);
-                        }
-                    } else {
-                        if (isset($city)) {
-                            $query->where('city_id', '=', $city);
-                        }
-                    }
-                })
-                ->select('id', 'name', 'mobile', 'first_name', 'last_name')
-                ->orderBy('name', 'asc')
-                ->get();
-            return response()->json($data);
-        } catch (\Exception $e) {
-            return $e;
+
+public function getRetailerlist(Request $request)
+{
+    try {
+
+        $state    = $request->input('state_id');
+        $district = $request->input('district_id');
+        $city     = $request->input('city_id');
+
+        $districtIds  = is_array($district) ? $district : ($district ? [$district] : []);
+        $cityIds      = is_array($city) ? $city : ($city ? [$city] : []);
+
+        /* ---------- Retailers ---------- */
+
+        $retailers = SecondaryCustomer::query()
+            ->select([
+                'id',
+                'shop_name as name',
+                'mobile_number as mobile',
+                'state_id',
+                'district_id',
+                'city_id'
+            ])
+            ->selectRaw("'retailer' as type");
+
+        if ($state) {
+            $retailers->where('state_id', $state);
         }
+
+        if (!empty($districtIds)) {
+            $retailers->whereIn('district_id', $districtIds);
+        }
+
+        if (!empty($cityIds)) {
+            $retailers->whereIn('city_id', $cityIds);
+        }
+
+        /* ---------- Distributors ---------- */
+
+        $distributors = MasterDistributor::query()
+            ->select([
+                'id',
+                'trade_name as name',
+                'mobile',
+                'billing_state as state_id',
+                'billing_district as district_id',
+                'billing_city as city_id'
+            ])
+            ->selectRaw("'distributor' as type");
+
+        if ($state) {
+            $distributors->where('billing_state', $state);
+        }
+
+        if (!empty($districtIds)) {
+            $distributors->whereIn('billing_district', $districtIds);
+        }
+
+        if (!empty($cityIds)) {
+            $distributors->whereIn('billing_city', $cityIds);
+        }
+
+        /* ---------- Merge Both ---------- */
+
+        $data = $retailers
+            ->unionAll($distributors)
+            ->orderBy('name','asc')
+            ->get();
+
+        return response()->json($data);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'error' => $e->getMessage(),
+            'file'  => $e->getFile(),
+            'line'  => $e->getLine()
+        ], 500);
     }
+}
+
+
+
+    // public function getRetailerlist(Request $request)
+    // {
+    //     try {
+    //         $state = $request->input('state_id');
+    //         $district = $request->input('district_id');
+    //         $city = $request->input('city_id');
+    //         $users = $request->input('user_id');
+    //         $data = Customers::where(function ($query) use ($users) {
+    //             // if (isset($users)) {
+    //             //     $query->whereIn('executive_id', $users);
+    //             // }
+    //             $query->where('active', '=', 'Y');
+    //         })
+    //             ->whereHas('customeraddress', function ($query) use ($state, $district, $city) {
+    //                 if (isset($state)) {
+    //                     $query->where('state_id', '=', $state);
+    //                 }
+    //                 if (is_array($district)) {
+    //                     if (count($district) > 0) {
+    //                         $query->whereIn('district_id', $district);
+    //                     }
+    //                 } else {
+    //                     if (isset($district)) {
+    //                         $query->where('district_id', '=', $district);
+    //                     }
+    //                 }
+    //                 if (is_array($city)) {
+    //                     if (count($city) > 0) {
+    //                         $query->whereIn('city_id', $city);
+    //                     }
+    //                 } else {
+    //                     if (isset($city)) {
+    //                         $query->where('city_id', '=', $city);
+    //                     }
+    //                 }
+    //             })
+    //             ->select('id', 'name', 'mobile', 'first_name', 'last_name')
+    //             ->orderBy('name', 'asc')
+    //             ->get();
+    //         return response()->json($data);
+    //     } catch (\Exception $e) {
+    //         return $e;
+    //     }
+    // }
 
     public function getProductInfo(Request $request)
     {
@@ -522,7 +607,8 @@ class AjaxController extends Controller
                 'minimum' => $data['getSchemeDetail']['orderscheme']['minimum'] ?? 0,
                 'maximum' => $data['getSchemeDetail']['orderscheme']['maximum'] ?? 0,
                 'start_date' => $data['getSchemeDetail']['orderscheme']['start_date'] ?? 0,
-                'hsn_sac' => $data['hsn_sac'] ?? NULL,
+                'hsn_sac' => $data['productdetails'][0]['mrp'] ?? null,  
+                'subcategory_id' => $data['subcategory_id'] ?? null,
                 'hsn_sac_no' => $data['hsn_sac_no'] ?? NULL,
 
 
@@ -919,29 +1005,171 @@ class AjaxController extends Controller
         }
     }
 
-    public function getCustomerDataSelect(Request $request)
-    {
-        if ($request->ajax()) {
-
-            $term = trim($request->term);
-
-            $coins = Customers::select("id as id", "name as text")->whereIN('customertype', ['1', '2', '3'])->where('name', 'LIKE',  '%' . $term . '%')->orderBy('id', 'asc')->simplePaginate(10);
-
-
-            $morePages = true;
-            $pagination_obj = json_encode($coins);
-            if (empty($coins->nextPageUrl())) {
-                $morePages = false;
-            }
-            $results = array(
-                "results" => $coins->items(),
-                "pagination" => array(
-                    "more" => $morePages
-                )
-            );
-            return response()->json($results);
-        }
+public function getCustomerDataSelect(Request $request)
+{
+    if (!$request->ajax()) {
+        return response()->json(['error' => 'Invalid request'], 400);
     }
+
+    $term = trim($request->get('term', ''));
+    $type = $request->get('type');
+
+    $results = collect();
+
+    // ────────────────────────────────────────────────
+    // DISTRIBUTORS (MasterDistributor)
+    // ────────────────────────────────────────────────
+    if (!$type || $type === 'DISTRIBUTOR') {
+        $masterDistributors = MasterDistributor::query()
+            ->when($term, function ($q) use ($term) {
+                $q->where('trade_name', 'LIKE', "%{$term}%")
+                  ->orWhere('distributor_code', 'LIKE', "%{$term}%")
+                  ->orWhere('sap_code', 'LIKE', "%{$term}%"); // if you have sap_code column
+            })
+            ->get()
+            ->map(function ($distributor) {
+                // Build full address using existing fields (no relations needed)
+                $addressParts = array_filter([
+                    $distributor->billing_address ?? '',
+                    $distributor->billing_city ?? '',
+                    $distributor->billing_district ?? '',
+                    $distributor->billing_state ?? '',
+                    $distributor->billing_country ?? '',
+                    $distributor->billing_pincode ?? ''
+                ]);
+
+                $full_address = trim(implode(', ', $addressParts));
+
+                return [
+                    'id'           => $distributor->id,
+                    'text'         => trim($distributor->trade_name . ($distributor->sap_code ? ' - ' . $distributor->sap_code : '')),
+                    'model_type'   => 'master',
+                    'full_address' => $full_address,
+                    'data-type'    => 'DISTRIBUTOR',
+                    'customeraddress' => [
+                        'id'           => $distributor->id,
+                        'address1'     => $distributor->billing_address ?? '',
+                        'address2'     => '',
+                        'landmark'     => '',
+                        'locality'     => '',
+                        'customer_id'  => $distributor->id,
+                        'country_id'   => $distributor->country_id,           // uses your accessor
+                        'state_id'     => $distributor->state_id,
+                        'district_id'  => $distributor->district_id,
+                        'city_id'      => $distributor->city_id,
+                        'pincode_id'   => $distributor->pincode_id,
+                        'full_address' => $full_address,
+                        'cityname'     => $distributor->billing_city ?? '',
+                        'districtname' => $distributor->billing_district ?? '',
+                        'statename'    => $distributor->billing_state ?? '',
+                        'pincodename'  => $distributor->billing_pincode ?? '',
+                        'countryname'  => $distributor->billing_country ?? '',
+                    ]
+                ];
+            });
+
+        $results = $results->merge($masterDistributors);
+    }
+
+    // ────────────────────────────────────────────────
+    // SECONDARY CUSTOMERS (only when specific type is requested)
+    // ────────────────────────────────────────────────
+    if ($type && $type !== 'DISTRIBUTOR') {
+       $secondaryCustomers = \App\Models\SecondaryCustomer::with([
+    'city',
+    'district',
+    'state',
+    'country',
+    'pincode'
+])
+->where('type', $type)
+->when($term, function ($q) use ($term) {
+    $q->where('shop_name', 'LIKE', "%{$term}%");
+})
+->get()
+            ->map(function ($customer) use ($type) {
+                
+$addressParts = array_filter([
+    $customer->address_line ?? '',
+    $customer->city->city_name ?? '',
+    $customer->district->district_name ?? '',
+    $customer->state->state_name ?? '',
+    $customer->country->country_name ?? '',
+    $customer->pincode->pincode ?? '',
+]);
+
+                $full_address = trim(implode(', ', $addressParts));
+
+                return [
+                    'id'           => $customer->id,
+                    'text'         => trim($customer->shop_name . ($customer->belt_area_market_name ? ' - ' . $customer->belt_area_market_name : '')),
+                    'model_type'   => 'secondary',
+                    'full_address' => $full_address,
+                    'data-type'    => $type,
+                    'customeraddress' => [
+                        'id'           => $customer->id,
+                        'address1'     => $customer->address_line ?? '',
+                        'address2'     => $customer->belt_area_market_name ?? '',
+                        'landmark'     => '',
+                        'locality'     => '',
+                        'customer_id'  => $customer->id,
+                        'country_id'   => $customer->country_id,
+                        'state_id'     => $customer->state_id,
+                        'district_id'  => $customer->district_id,
+                        'city_id'      => $customer->city_id,
+                        'pincode_id'   => $customer->pincode_id,
+                        'full_address' => $full_address,
+'cityname'     => $customer->city->city_name ?? '',
+'districtname' => $customer->district->district_name ?? '',
+'statename'    => $customer->state->state_name ?? '',
+'pincodename'  => $customer->pincode->pincode ?? '',
+'countryname'  => $customer->country->country_name ?? '',
+                    ]
+                ];
+            });
+
+ 
+        
+        $results = $results->merge($secondaryCustomers);
+    }
+
+    // Pagination
+    $page    = max(1, (int) ($request->page ?? 1));
+    $perPage = 10;
+
+    $paginated = $results->forPage($page, $perPage);
+
+    return response()->json([
+        'results'    => $paginated->values()->all(),
+        'pagination' => [
+            'more' => $results->count() > ($page * $perPage)
+        ]
+    ]);
+}
+
+    // public function getCustomerDataSelect(Request $request)
+    // {
+    //     if ($request->ajax()) {
+
+    //         $term = trim($request->term);
+
+    //         $coins = Customers::select("id as id", "name as text")->whereIN('customertype', ['1', '2', '3'])->where('name', 'LIKE',  '%' . $term . '%')->orderBy('id', 'asc')->simplePaginate(10);
+
+
+    //         $morePages = true;
+    //         $pagination_obj = json_encode($coins);
+    //         if (empty($coins->nextPageUrl())) {
+    //             $morePages = false;
+    //         }
+    //         $results = array(
+    //             "results" => $coins->items(),
+    //             "pagination" => array(
+    //                 "more" => $morePages
+    //             )
+    //         );
+    //         return response()->json($results);
+    //     }
+    // }
 
     public function getProductDataSelect(Request $request)
     {
@@ -1093,10 +1321,10 @@ class AjaxController extends Controller
                 if ($status == 1) {
                     $msg = "Verified Successfully !!";
                     $title = 'KYC Approval';
-                    $pmsg = 'KYC is Approved ✅';
+                    $pmsg = 'KYC is Approved ';
                 } elseif ($status == 2) {
                     $msg = "Rejected Successfully !!";
-                    $title = 'KYC Rejection 🚫';
+                    $title = 'KYC Rejection ';
                     $pmsg = 'KYC is Rejected';
                 } else {
                     $msg = "";
@@ -1159,6 +1387,10 @@ class AjaxController extends Controller
                     "more" => $morePages
                 )
             );
+
+            
+
+            
             return response()->json($results);
         }
     }
@@ -1239,43 +1471,82 @@ class AjaxController extends Controller
         }
     }
 
+    // public function getTourPlanByUserAndDate(Request $request)
+    // {
+    //     try {
+    //         $data = TourProgramme::where('date', $request->date)->where('userid', $request->user_id)->first();
+    //         if ($data && $data != NULL && !empty($data)) {
+    //             $response = ['status' => true, 'data' => $data];
+                
+    //             return response()->json($response);
+    //         } else {
+    //             $response = ['status' => false, 'data' => $data];
+    //             return response()->json($response);
+    //         }
+    //     } catch (\Exception $e) {
+    //         return $e;
+    //     }
+    // }
     public function getTourPlanByUserAndDate(Request $request)
-    {
-        try {
-            $data = TourProgramme::where('date', $request->date)->where('userid', $request->user_id)->first();
-            if ($data && $data != NULL && !empty($data)) {
-                $response = ['status' => true, 'data' => $data];
-                return response()->json($response);
-            } else {
-                $response = ['status' => false, 'data' => $data];
-                return response()->json($response);
-            }
-        } catch (\Exception $e) {
-            return $e;
-        }
-    }
-    public function userCityList(Request $request)
-    {
-        try {
-            $cityname = $request->input('cityname');
-            $user_id = $request->user()->id;
-            $cityids = UserCityAssign::where('userid', '=', $user_id)->pluck('city_id')->toArray();
-            //$data = City::whereIn('id',$cityids)->select('id','city_name', 'grade')->orderBy('city_name','asc')->get();
+{
+    try {
+        $data = TourProgramme::with('cityRelation')
+            ->where('date', $request->date)
+            ->where('userid', $request->user_id)
+            ->first();
 
-            $data = City::whereIn('id', $cityids)->select('id', 'city_name', 'grade');
-            if ($cityname) {
-                $data->where('city_name', 'LIKE', trim($cityname) . '%');
-            }
-            $data = $data->orderBy('city_name', 'asc')->get();
-
-            if ($data->isNotEmpty()) {
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
-            }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], 200);
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        if ($data) {
+            return response()->json([
+                'status' => true,
+                'data' => $data
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'data' => null
+            ]);
         }
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage()
+        ]);
     }
+}
+public function userCityList(Request $request)
+{
+    try {
+        $cityname = $request->input('cityname');
+        $user_id = $request->input('user_id'); // 👈 payload wala id
+
+        $cityids = UserCityAssign::where('userid', $user_id)
+                    ->pluck('city_id')
+                    ->toArray();
+
+        $data = City::whereIn('id', $cityids)
+                    ->select('id', 'city_name', 'district_id', 'grade');
+
+        if ($cityname) {
+            $data->where('city_name', 'LIKE', trim($cityname) . '%');
+        }
+
+        $data = $data->orderBy('city_name', 'asc')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data retrieved successfully.',
+            'user_id_used' => $user_id, // 👈 confirmation ke liye
+            'data' => $data
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
 
     public function getProductInfoBySerialNo(Request $request)
     {
@@ -1685,8 +1956,11 @@ class AjaxController extends Controller
         $comp_off_balance = CompOffLeave::where('comp_off_date', '>=', $last60Days)->where('is_used', false)
             ->where('user_id', $request->user_id)
             ->sum('balance');
-        return response()->json(['status' => 'success', 'leave_balance' => $data->leave_balance, 'comp_off_balance' => $comp_off_balance]);
+        return response()->json(['status' => 'success', 'leave_balance' => $data->leave_balance,'compb_off' => $data->compb_off, 'comp_off_balance' => $comp_off_balance,    'earned_leave_balance' => $data->earned_leave_balance,
+    'casual_leave_balance' => $data->casual_leave_balance,
+    'sick_leave_balance'   => $data->sick_leave_balance,]);
     }
+
 
 
     // getproduct inteval time
@@ -2528,4 +2802,67 @@ class AjaxController extends Controller
             return response()->json(['status' => false]);
         }
     }
+
+public function dropdown(Request $request)
+{
+    $search = $request->search;
+    $dropdownType = $request->type;
+    $customerType = $request->customer_type;
+
+    $query = SecondaryCustomer::query();
+
+    if (!empty($customerType)) {
+        $query->where('type', $customerType);
+    }
+
+    if (!empty($search)) {
+
+        switch ($dropdownType) {
+
+            case 'owner':
+                $query->where('owner_name', 'LIKE', "%{$search}%");
+                break;
+
+            case 'shop':
+                $query->where('shop_name', 'LIKE', "%{$search}%");
+                break;
+
+            case 'mobile':
+                $query->where('mobile_number', 'LIKE', "%{$search}%");
+                break;
+        }
+    }
+
+    $results = $query->limit(1000)->get();
+
+    $data = [];
+
+    foreach ($results as $row) {
+
+        if ($dropdownType === 'owner') {
+            $data[] = [
+                'id' => $row->id,
+                'text' => $row->owner_name
+            ];
+        }
+
+        if ($dropdownType === 'shop') {
+            $data[] = [
+                'id' => $row->id,
+                'text' => $row->shop_name
+            ];
+        }
+
+        if ($dropdownType === 'mobile') {
+            $data[] = [
+                'id' => $row->id,
+                'text' => $row->mobile_number
+            ];
+        }
+    }
+
+    return response()->json([
+        'results' => collect($data)->unique('text')->values()
+    ]);
+}
 }

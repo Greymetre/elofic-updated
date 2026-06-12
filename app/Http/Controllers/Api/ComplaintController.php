@@ -243,4 +243,406 @@ class ComplaintController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
+    
+    public function createComplaint(Request $request)
+    {
+        $request->validate([
+            'part_number' => 'required',
+            'batch_code' => 'nullable',
+            'distributor_id' => 'required|exists:master_distributors,id',
+    
+            'contact_number' => 'required',
+            'whatsapp_number' => 'nullable',
+            'full_name' => 'required',
+            'email_address' => 'nullable|email',
+    
+            'state_id' => 'nullable|exists:states,id',
+            'district_id' => 'nullable|exists:districts,id',
+            'city_id' => 'nullable|exists:cities,id',
+            'pincode_id' => 'nullable|exists:pincodes,id',
+    
+            'address' => 'nullable',
+            'place' => 'nullable',
+    
+            'complaint_type_id' => 'required|exists:complaint_types,id',
+            'description' => 'required',
+    
+            'attachment_file' => 'nullable|file|max:10240',
+            'voice_note_file' => 'nullable|file|max:10240',
+        ]);
+    
+        DB::beginTransaction();
+    
+        try {
+            
+            $exists = EndUser::where(
+                'customer_number',
+                $request->contact_number
+            )->exists();
+            
+            if ($exists) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Customer already exists with this mobile number.'
+                ], 422);
+            }
+            
+            
+            
+    
+            /*
+            |--------------------------------------------------------------------------
+            | Create End User
+            |--------------------------------------------------------------------------
+            */
+    
+            $endUser = EndUser::create([
+                'customer_name'      => $request->full_name,
+                'customer_number'    => $request->contact_number,
+                'whatsapp_number'    => $request->whatsapp_number,
+                'customer_email'     => $request->email_address,
+                'customer_address'   => $request->address,
+                'customer_place'     => $request->place,
+                'state_id'           => $request->state_id,
+                'district_id'        => $request->district_id,
+                'city_id'            => $request->city_id,
+                'customer_pindcode'  => $request->pincode_id,
+            ]);
+    
+            /*
+            |--------------------------------------------------------------------------
+            | Complaint Number
+            |--------------------------------------------------------------------------
+            */
+    
+            $complaintNumber = 'CMP' . date('Ymd') . rand(1000,9999);
+    
+            /*
+            |--------------------------------------------------------------------------
+            | Create Complaint
+            |--------------------------------------------------------------------------
+            */
+            
+            $voicePath = null;
+
+            if ($request->hasFile('voice_note_file')) {
+            
+                $voiceFile = $request->file('voice_note_file');
+            
+                $voiceName = time().'_voice.'.
+                    $voiceFile->getClientOriginalExtension();
+            
+                $voicePath = $voiceFile->storeAs(
+                    'complaint_voice_notes',
+                    $voiceName,
+                    'public'
+                );
+            }
+            
+            $imagePath = null;
+            
+            if ($request->hasFile('attachment_file')) {
+            
+                $imageFile = $request->file('attachment_file');
+            
+                $imageName = time().'_image.'.
+                    $imageFile->getClientOriginalExtension();
+            
+                $imagePath = $imageFile->storeAs(
+                    'complaint_attachments',
+                    $imageName,
+                    'public'
+                );
+            }
+    
+            $complaint = Complaint::create([
+                'complaint_number'      => $complaintNumber,
+                'complaint_date'        => now(),
+    
+                'part_number'           => $request->part_number,
+                'batch_code'            => $request->batch_code,
+                'distributor_id'        => $request->distributor_id,
+    
+                'end_user_id'           => $endUser->id,
+    
+                'complaint_type'        => $request->complaint_type_id,
+                'description'           => $request->description,
+    
+                'whatsapp_number'       => $request->whatsapp_number,
+    
+                'complaint_status'      => 'Pending',
+                'voice_note_file'       => $voicePath,
+                'attachment_file'       => $imagePath,
+                'complaint_status'      => 1,
+    
+                'created_by'            => auth()->id(),
+            ]);
+    
+            
+            
+            /*
+            |--------------------------------------------------------------------------
+            | Attachment Upload
+            |--------------------------------------------------------------------------
+            */
+    
+            // if ($request->hasFile('attachment_file')) {
+
+            //     $file = $request->file('attachment_file');
+            
+            //     $media = $complaint->addMedia($file)
+            //         ->usingFileName(
+            //             time().'_'.$file->getClientOriginalName()
+            //         )
+            //         ->toMediaCollection('complaint_attach');
+            
+            //     $complaint->update([
+            //         'attachment_file' => $media->getUrl()
+            //     ]);
+            // }
+    
+            /*
+            |--------------------------------------------------------------------------
+            | Voice Note Upload
+            |--------------------------------------------------------------------------
+            */
+    
+            // if ($request->hasFile('voice_note_file')) {
+    
+            //     $complaint
+            //         ->addMediaFromRequest('voice_note_file')
+            //         ->toMediaCollection('complaint_attach');
+            // }
+    
+            DB::commit();
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Complaint created successfully',
+                'data' => [
+                    'complaint_id' => $complaint->id,
+                    'complaint_number' => $complaint->complaint_number,
+                ]
+            ]);
+    
+        } catch (\Exception $e) {
+    
+            DB::rollBack();
+    
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    public function complaintList(Request $request)
+    {
+        try {
+    
+            $query = Complaint::with([
+                'customer',
+                'complaint_type_details',
+                'distributor'
+            ]);
+    
+            // Search
+            if ($request->filled('search')) {
+    
+                $search = $request->search;
+    
+                $query->where(function ($q) use ($search) {
+    
+                    $q->where('complaint_number', 'like', "%{$search}%")
+                      ->orWhereHas('customer', function ($customer) use ($search) {
+                          $customer->where('customer_name', 'like', "%{$search}%")
+                                   ->orWhere('customer_number', 'like', "%{$search}%");
+                      });
+                });
+            }
+            
+            // Date Filter
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+            
+                $query->whereBetween(
+                    \DB::raw('DATE(created_at)'),
+                    [$request->start_date, $request->end_date]
+                );
+            
+            } elseif ($request->filled('start_date')) {
+            
+                $query->whereDate('created_at', '>=', $request->start_date);
+            
+            } elseif ($request->filled('end_date')) {
+            
+                $query->whereDate('created_at', '<=', $request->end_date);
+            }
+    
+            // Status
+            if ($request->filled('status')) {
+    
+                $statusMap = [
+                    'pending'  => 1,
+                    'closed'   => 4,
+                    'rejected' => 5,
+                ];
+    
+                $status = strtolower($request->status);
+    
+                if (isset($statusMap[$status])) {
+                    $query->where('complaint_status', $statusMap[$status]);
+                }
+            }
+    
+            $query->orderBy('created_at', 'desc');
+    
+            $perPage = $request->query('per_page', 10);
+    
+            $complaints = $query
+                ->select([
+                    'id',
+                    'part_number',
+                    'batch_code',
+                    'distributor_id',
+                    'whatsapp_number',
+                    'complaint_number',
+                    'complaint_date',
+                    'complaint_status',
+                    'end_user_id',
+                    'complaint_type',
+                    'description',
+                    'created_by',
+                    'created_at',
+                    'updated_at',
+                    'voice_note_file',
+                    'attachment_file',
+                    'status_remark'
+                ])
+                ->with([
+                    'customer:id,customer_name,whatsapp_number,customer_number,customer_email,customer_address,customer_place,customer_pindcode,state_id,district_id,city_id,status,created_at,updated_at',
+                    'complaint_type_details:id,name',
+                    'distributor:id,legal_name,trade_name,distributor_code'
+                ])
+                ->latest()
+                ->paginate($perPage);
+                
+            // Global counts (from complete database)
+            $complaintCounts = [
+                'all'      => Complaint::count(),
+                'pending'  => Complaint::where('complaint_status', 1)->count(),
+                'closed'   => Complaint::where('complaint_status', 4)->count(),
+                'rejected' => Complaint::where('complaint_status', 5)->count(),
+            ];
+    
+            $cleanData = [
+                'current_page' => $complaints->currentPage(),
+                'data'         => $complaints->items(),
+                'from'         => $complaints->firstItem(),
+                'to'           => $complaints->lastItem(),
+                'per_page'     => $complaints->perPage(),
+                'total'        => $complaints->total(),
+                'last_page'    => $complaints->lastPage(),
+            ];
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Complaint list fetched successfully',
+                'data' => [
+                    'counts' => $complaintCounts,
+                    'current_page' => $complaints->currentPage(),
+                    'from' => $complaints->firstItem(),
+                    'to' => $complaints->lastItem(),
+                    'per_page' => $complaints->perPage(),
+                    'total' => $complaints->total(),
+                    'last_page' => $complaints->lastPage(),
+            
+                    'data' => collect($complaints->items())->map(function ($complaint) {
+            
+                        return [
+                            'id' => $complaint->id,
+                            'part_number' => $complaint->part_number,
+                            'batch_code' => $complaint->batch_code,
+                            'distributor_id' => $complaint->distributor_id,
+                            'whatsapp_number' => $complaint->whatsapp_number,
+                            'complaint_number' => $complaint->complaint_number,
+                            'complaint_date' => $complaint->complaint_date,
+                            'complaint_status' => $complaint->complaint_status,
+                            'end_user_id' => $complaint->end_user_id,
+                            'complaint_type' => $complaint->complaint_type,
+                            'description' => $complaint->description,
+                            'created_by' => $complaint->created_by,
+                            'created_at' => $complaint->created_at,
+                            'updated_at' => $complaint->updated_at,
+                            'voice_note_file' => $complaint->voice_note_file,
+                            'attachment_file' => $complaint->attachment_file,
+                            'status_remark' => $complaint->status_remark,
+            
+                            'customer' => $complaint->customer,
+            
+                            'complaint_type_details' => [
+                                'id' => $complaint->complaint_type_details?->id,
+                                'name' => $complaint->complaint_type_details?->name,
+                            ],
+            
+                            'distributor' => [
+                                'id' => $complaint->distributor?->id,
+                                'legal_name' => $complaint->distributor?->legal_name,
+                                'trade_name' => $complaint->distributor?->trade_name,
+                                'distributor_code' => $complaint->distributor?->distributor_code,
+                            ],
+                        ];
+                    }),
+                ]
+            ]);
+    
+        } catch (\Exception $e) {
+    
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    public function complaintDetails($id)
+    {
+        try {
+    
+            $complaint = Complaint::with([
+                'customer',
+                'complaint_type_details',
+                'distributor'
+            ])->find($id);
+    
+            if (!$complaint) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Complaint not found'
+                ], 404);
+            }
+    
+            $data = $complaint->toArray();
+    
+            $data['attachment_url'] = $complaint->attachment_file
+                ? asset('storage/' . $complaint->attachment_file)
+                : null;
+    
+            $data['voice_note_url'] = $complaint->voice_note_file
+                ? asset('storage/' . $complaint->voice_note_file)
+                : null;
+    
+            return response()->json([
+                'status' => true,
+                'message' => 'Complaint details fetched successfully',
+                'data' => $data
+            ]);
+    
+        } catch (\Exception $e) {
+    
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

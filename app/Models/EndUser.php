@@ -9,7 +9,7 @@ class EndUser extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['customer_name','customer_number', 'customer_email', 'customer_address', 'customer_place', 'state_id', 'district_id', 'city_id', 'customer_pindcode', 'customer_country','customer_state','customer_district','customer_city','status','created_at', 'updated_at'];
+    protected $fillable = ['customer_name','customer_number','whatsapp_number', 'customer_email', 'customer_address', 'customer_place', 'state_id', 'district_id', 'city_id', 'customer_pindcode', 'customer_country','customer_state','customer_district','customer_city','status','created_at', 'updated_at'];
 
     public $timestamps = true;
 

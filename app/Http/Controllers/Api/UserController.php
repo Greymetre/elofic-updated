@@ -185,6 +185,81 @@ class UserController extends Controller
             return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
         }        
     }
+    
+    public function reportingUsers(Request $request)
+    {
+        $userId = $request->user_id;
+    
+        $users = $this->getReportingHierarchy($userId);
+    
+        return response()->json([
+            'success' => true,
+            'data' => $users
+        ]);
+    }
+    
+    private function getReportingHierarchy($userId)
+    {
+        $visited = [];
+        $resultIds = [];
+    
+        $user = User::find($userId);
+    
+        if (!$user) {
+            return [];
+        }
+    
+        // Self
+        $resultIds[] = $user->id;
+        $visited[] = $user->id;
+    
+        // Level 1 Reporting Users
+        $level1Ids = [];
+    
+        if (!empty($user->reportingid)) {
+    
+            $reportingIds = array_filter(
+                array_map('trim', explode(',', $user->reportingid))
+            );
+    
+            foreach ($reportingIds as $id) {
+    
+                if (!in_array($id, $visited)) {
+    
+                    $visited[] = $id;
+                    $resultIds[] = (int)$id;
+                    $level1Ids[] = (int)$id;
+                }
+            }
+        }
+    
+        // Level 2 Reporting Users
+        foreach ($level1Ids as $managerId) {
+    
+            $manager = User::find($managerId);
+    
+            if (!$manager || empty($manager->reportingid)) {
+                continue;
+            }
+    
+            $upperIds = array_filter(
+                array_map('trim', explode(',', $manager->reportingid))
+            );
+    
+            foreach ($upperIds as $id) {
+    
+                if (!in_array($id, $visited)) {
+    
+                    $visited[] = $id;
+                    $resultIds[] = (int)$id;
+                }
+            }
+        }
+    
+        return User::whereIn('id', $resultIds)
+            ->select('id', 'name', 'reportingid')
+            ->get();
+    }
      public function addTourProgramme(Request $request)
     {
         try
@@ -437,6 +512,135 @@ class UserController extends Controller
         catch(\Exception $e)
         {
             return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
+        }
+    }
+
+    public function userDistrictList(Request $request)
+    {
+        try
+        { 
+            $districtname = $request->input('districtname');
+            
+            // Get target user_id: prefer query param, fallback to authenticated user
+            $targetUserId = $request->query('user_id') 
+                ? $request->query('user_id') 
+                : $request->user()->id;
+
+            // Optional: Add permission check (very recommended!)
+            // Example: only allow if current user is admin or viewing own data
+            if ($targetUserId != $request->user()->id && !Gate::allows('view-other-users-data')) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Unauthorized to view other user\'s data'
+                ], 403);
+            }
+
+            // Get assigned cities for the target user
+            $cityIds = UserCityAssign::where('userid', $targetUserId)
+                ->pluck('city_id')
+                ->toArray();
+
+            // Get unique districts from those cities
+            $districtIds = City::whereIn('id', $cityIds)
+                ->pluck('district_id')
+                ->unique()
+                ->filter() // remove nulls if any
+                ->toArray();
+
+            $query = District::whereIn('id', $districtIds)
+                ->select('id', 'district_name', 'state_id');
+
+            if ($districtname) {
+                $query->where('district_name', 'LIKE', trim($districtname) . '%');
+            }
+
+            $data = $query->orderBy('district_name', 'asc')->get();
+
+            if ($data->isNotEmpty()) {
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'Data retrieved successfully.',
+                    'data'    => $data
+                ], $this->successStatus);
+            }
+
+            return response([
+                'status'  => 'error',
+                'message' => 'No Record Found.',
+                'data'    => $data
+            ], 200);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ], $this->internalError);
+        }
+    }
+    public function userCitiesByDistrict(Request $request)
+    {
+        try
+        { 
+            $districtId = $request->query('district_id');
+            $cityname   = $request->input('cityname'); // optional search
+
+            if (!$districtId) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'district_id is required'
+                ], $this->badrequest);
+            }
+
+            // Determine target user
+            $targetUserId = $request->query('user_id') 
+                ? $request->query('user_id') 
+                : $request->user()->id;
+
+            // Optional: permission check (recommended)
+            if ($targetUserId != $request->user()->id && !Gate::allows('view-other-users-data')) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Unauthorized to view other user\'s data'
+                ], 403);
+            }
+
+            // Get assigned city IDs for the target user
+            $assignedCityIds = UserCityAssign::where('userid', $targetUserId)
+                ->pluck('city_id')
+                ->toArray();
+
+            // Build query: cities in the given district + assigned to user
+            $query = City::where('district_id', $districtId)
+                ->whereIn('id', $assignedCityIds)
+                ->select('id', 'city_name', 'grade');
+
+            if ($cityname) {
+                $query->where('city_name', 'LIKE', trim($cityname) . '%');
+            }
+
+            $data = $query->orderBy('city_name', 'asc')->get();
+
+            if ($data->isNotEmpty()) {
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'Cities retrieved successfully.',
+                    'data'    => $data
+                ], $this->successStatus);
+            }
+
+            return response([
+                'status'  => 'error',
+                'message' => 'No cities found in this district for the user.',
+                'data'    => $data
+            ], 200);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ], $this->internalError);
         }
     }
 }

@@ -35,51 +35,92 @@ class ProductExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
 
     public function headings(): array
     {
-        return ['product_id','product_name','product_code','new_group','sub_group','expiry_interval','expiry_interval_preiod','display_name', 'description', 'subcategory_id','subcategory','category_id','category','brand_id','brand','product_image','unit_id','unit_name','mrp','price','selling_price','gst','discount','max_discount', 'hp', 'kw', 'product_stage', 'model_no','suc_del','Phase','status','Sap Code' , 'budget_for_month' , 'top_sku' , 'branch_id', 'rmc', 'hsn_sac', 'hsn_sac_no'];
+            return ['Product id','Plant No','Material No','Part No','Material Group','Application','Material description','WM packing standad','Old Material','Material Type','Segment','Material Grp','Makers','Type','Model','Nishtha','Saathi','Pack Size','MRP','price','Remarks','Subcategory id','Category id','Category','Brand id','Product Image','status'];
+   
+    // return ['product_id','product_name','product_code','new_group','sub_group','expiry_interval','expiry_interval_preiod','display_name', 'description', 'subcategory_id','subcategory','category_id','category','brand_id','brand','product_image','unit_id','unit_name','mrp','price','selling_price','gst','discount','max_discount', 'hp', 'kw', 'product_stage', 'model_no','suc_del','Phase','status','Sap Code' , 'budget_for_month' , 'top_sku' , 'branch_id', 'rmc', 'hsn_sac', 'hsn_sac_no'];
     }
 
-    public function map($data): array
-    {
-        return [
-            $data['id'],
-            $data['product_name'],
-            $data['product_code'],
-            $data['new_group'],
-            $data['sub_group'],
-            $data['expiry_interval'],
-            $data['expiry_interval_preiod'],
-            $data['display_name'],
-            $data['description'],
-            $data['subcategory_id'],
-            $data['subcategories']['subcategory_name'],
-            $data['category_id'],
-            $data['categories']['category_name'],
-            $data['brand_id'],
-            $data['brands']?$data['brands']['brand_name']:'',
-            $data['product_image'],
-            $data['unit_id'],
-            $data['unitmeasures']?$data['unitmeasures']['unit_name']:'',
-            isset($data['productpriceinfo']['mrp']) ? $data['productpriceinfo']['mrp'] :'',
-            isset($data['productpriceinfo']['price']) ? $data['productpriceinfo']['price'] :'',
-            isset($data['productpriceinfo']['selling_price']) ? $data['productpriceinfo']['selling_price'] :'',
-            isset($data['productpriceinfo']['gst']) ? $data['productpriceinfo']['gst'] : '',
-            isset($data['productpriceinfo']['discount']) ? $data['productpriceinfo']['discount'] : '',
-            isset($data['productpriceinfo']['max_discount']) ? $data['productpriceinfo']['max_discount'] :'' ,
-            isset($data['specification']) ? $data['specification'] :'',
-            isset($data['part_no']) ? $data['part_no'] :'',
-            isset($data['product_no']) ? $data['product_no'] :'',            
-            isset($data['model_no']) ? $data['model_no'] :'',
-            $data['suc_del'],
-            $data['phase'],
-            $data['active'],
-            $data['sap_code'],
-            isset($data['productpriceinfo']['budget_for_month']) ? $data['productpriceinfo']['budget_for_month'] :'',
-            isset($data['productpriceinfo']['top_sku']) ? $data['productpriceinfo']['top_sku'] :'',
-            $data['branch_id'] ?? '',
-            isset($data['productpriceinfo']['rmc']) ? $data['productpriceinfo']['rmc'] :'',
-            isset($data['hsn_sac']) ? $data['hsn_sac'] :'',
-            isset($data['hsn_sac_no']) ? $data['hsn_sac_no'] :'',
-        ];
-    }
+   public function map($data): array
+{
+    return [
+        $data['id'] ?? '-',
+        $data['branch_id'] ?? '-',
+        $data['product_code'] ?? '-',
+       
+        $data['part_no'] ?? '-',
+        $data['specification'] ?? '-',
+        $data['phase'] ?? '-',
+        $data['product_name'] ?? '-',
+        $data['productpriceinfo']['rmc'] ?? '-',
+        $data['product_no'] ?? '-',
+         $data['sap_code'] ?? '-',
+        
+        $data['subcategories']['subcategory_name'] ?? '-',
+        $data['description'] ?? '-',
+        $data['brands']['brand_name'] ?? '-',
+        
+        $data['sub_group'] ?? '-',
+        $data['model_no'] ?? '-',
+        $data['productpriceinfo']['budget_for_month'] ?? '-',
+        $data['suc_del'] ?? '-',
+        
+        $data['hsn_sac_no'] ?? '-',
+        $data['productpriceinfo']['mrp'] ?? '-',
+        $data['productpriceinfo']['price'] ?? '-',
+        $data['productpriceinfo']['top_sku'] ?? '-',
+
+        $data['subcategory_id'] ?? '-',
+        $data['category_id'] ?? '-',
+        $data['categories']['category_name'] ?? '-',
+        $data['brand_id'] ?? '-',
+        $data['product_image'] ?? '-',
+        $data['active'] ?? '-',
+
+        // $data['new_group'] ?? '',
+        
+        // $data['expiry_interval'] ?? '',
+        // $data['expiry_interval_preiod'] ?? '',
+        // $data['display_name'] ?? '',
+        
+
+        
+
+        
+
+        
+        
+
+        
+
+        // $data['unit_id'] ?? '',
+        // $data['unitmeasures']['unit_name'] ?? '',
+
+        
+        // $data['productpriceinfo']['selling_price'] ?? '',
+        // $data['productpriceinfo']['gst'] ?? '',
+        // $data['productpriceinfo']['discount'] ?? '',
+        // $data['productpriceinfo']['max_discount'] ?? '',
+
+        
+        
+        
+        
+
+        
+       
+       
+        
+
+        
+        
+
+        // $data['branch_id'] ?? '',
+
+        
+
+        // $data['hsn_sac'] ?? '',
+        
+    ];
+}
 
 }

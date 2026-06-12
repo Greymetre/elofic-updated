@@ -47,4 +47,22 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    public function render($request, Throwable $e)
+    {
+        // This forces JSON for ALL exceptions in API routes
+        if ($request->expectsJson() || $request->is('api/*') || str_starts_with($request->path(), 'api/')) {
+            // Optional: make it nicer with status code
+            $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'Server error: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                // 'trace'   => $e->getTraceAsString(),   // ← uncomment only in dev!
+            ], $status);
+        }
+
+        return parent::render($request, $e);
+    }
 }

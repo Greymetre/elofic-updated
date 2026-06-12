@@ -17,6 +17,8 @@ class OrderDataTable extends DataTable
 
     public function dataTable($query)
     {
+
+    
         return datatables()
             ->eloquent($query)
             ->addIndexColumn()
@@ -93,11 +95,11 @@ class OrderDataTable extends DataTable
                     ->orWhereIn('created_by', $userids);
             });
         }
-        $query->whereHas('buyers', function ($query) {
-            if (request()->has('customer_type_id') && request()->get('customer_type_id') != '') {
-                $query->where('customertype', request()->get('customer_type_id'));
-            }
-        });
+        // $query->whereHas('buyers', function ($query) {
+        //     if (request()->has('customer_type_id') && request()->get('customer_type_id') != '') {
+        //         $query->where('customertype', request()->get('customer_type_id'));
+        //     }
+        // });
 
 
         if (request()->get('pending_status') != '' && request()->get('pending_status') != NULL) {
@@ -139,7 +141,14 @@ class OrderDataTable extends DataTable
             $query->where('buyer_id', request()->get('retailers_id'));
         }
 
-        return $query->latest();
+         return $model->newQuery()
+        ->with([
+            'executive.getbranch',
+            'buyers',
+            'sellers',
+            'statusname',
+            'createdbyname'
+        ]);
     }
 
 

@@ -38,6 +38,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('send:all-users-target')->timezone('Asia/Kolkata')->dailyAt('02:15');
         // $schedule->command('send:all-branch-goly')->timezone('Asia/Kolkata')->dailyAt('02:30');
         $schedule->command('tasks:send-pending-today')->everyMinute();
+        $schedule->command('sync:products')->everyMinute();
     }
 
     /**
@@ -51,4 +52,5 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+
 }

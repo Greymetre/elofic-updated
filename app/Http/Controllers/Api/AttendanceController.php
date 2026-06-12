@@ -79,6 +79,42 @@ class AttendanceController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }
     }
+    
+    /**
+     * Format tour details using comma separated tour IDs
+     */
+    private function getFormattedTourDetails($tourIdString)
+    {
+        if (empty($tourIdString)) {
+            return [];
+        }
+    
+        $tourIds = array_filter(explode(',', $tourIdString));
+    
+        $tourDetails = \App\Models\TourProgramme::whereIn('id', $tourIds)->get();
+    
+        if ($tourDetails->isEmpty()) {
+            return [];
+        }
+    
+        $townIds = $tourDetails->pluck('town')->unique()->filter();
+        $districtIds = $tourDetails->pluck('district')->unique()->filter();
+    
+        $cities = \App\Models\City::whereIn('id', $townIds)
+            ->pluck('city_name', 'id');
+    
+        $districts = \App\Models\District::whereIn('id', $districtIds)
+            ->pluck('district_name', 'id');
+    
+        return $tourDetails->map(function ($item) use ($cities, $districts) {
+            return [
+                'id' => $item->id,
+                'town_name' => $cities[$item->town] ?? '',
+                'district_name' => $districts[$item->district] ?? '',
+                'objective'     => $item->objectives ?? '',
+            ];
+        })->values()->toArray();
+    }
 
     public function userPunchin(Request $request)
     {
@@ -88,6 +124,35 @@ class AttendanceController extends Controller
                 'punchin_latitude' => 'required',
                 'punchin_longitude' => 'required',
             ]);
+            
+            $baseCity = '';
+
+            if (!empty($user->latitude) && !empty($user->longitude)) {
+            
+                $baseCity = getLatLongToCity(
+                    $user->latitude,
+                    $user->longitude
+                );
+            }
+            
+            $distance ;
+
+            if (
+                !empty($user->latitude) &&
+                !empty($user->longitude) &&
+                !empty($request['punchin_latitude']) &&
+                !empty($request['punchin_longitude'])
+            ) {
+            
+                $distance = getRoadDistance(
+                    $user->latitude,
+                    $user->longitude,
+                    $request['punchin_longitude'],
+                    $request['punchin_latitude']
+                   
+                );
+            }
+
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
@@ -121,6 +186,7 @@ class AttendanceController extends Controller
                     'user_id' => $user->id,
                     'comp_off_date' => $punchinDate,
                     'expiry_date' => $expiryDate,
+                    
                     'is_used' => false,
                 ]);
             }
@@ -137,8 +203,10 @@ class AttendanceController extends Controller
                 'user_id' => $user->id,
                 'punchin_date' => $punchin_date,
                 'punchin_time' => getcurentTime(),
+                'tourid' => !empty($request['tourid']) ? $request['tourid'] : null,
                 // 'punchin_longitude' => !empty($request['punchin_longitude']) ? $request['punchin_longitude'] :'',
                 // 'punchin_latitude' => !empty($request['punchin_latitude']) ? $request['punchin_latitude'] :'',
+                'city' => !empty($request['city']) ? trim($request['city']) : null,
                 'punchin_longitude' => !empty($request['punchin_latitude']) ? $request['punchin_latitude'] : '',
                 'punchin_latitude' => !empty($request['punchin_longitude']) ? $request['punchin_longitude'] : '',
                 'punchin_address' => !empty($request['punchin_address']) ? $request['punchin_address'] : '',
@@ -175,7 +243,8 @@ class AttendanceController extends Controller
                     }
                 }
                 if (!empty($request['tourid'])) {
-                    TourProgramme::where('id', '=', $request['tourid'])->update([
+                    $tourIds = explode(',', $request['tourid']); // convert to ar
+                    TourProgramme::whereIn('id', $tourIds)->update([
                         'type' => !empty($request['type']) ? $request['type'] : ''
                     ]);
 
@@ -186,6 +255,11 @@ class AttendanceController extends Controller
                         ->orderBy('city_id', 'asc')
                         ->pluck('city_id');
                     $cityids = $cityids->unique();
+                    
+                    $punchinCity = getLatLongToCity(
+                        $request['punchin_latitude'],
+                        $request['punchin_longitude']
+                    );
 
 
                     /*  foreach ($cityids as $key => $city) {
@@ -220,6 +294,9 @@ class AttendanceController extends Controller
                                 $updatecity->update([
                                     'visited_cityid' => $city,
                                     'visited_date' => date('Y-m-d'),
+                                    'punchin_city' => $punchinCity,
+                                    'base_city' => $baseCity,
+                                    'distance' => $distance,
                                 ]);
                             } else {
                                 TourDetail::create([
@@ -228,6 +305,9 @@ class AttendanceController extends Controller
                                     'visited_cityid' => $city,
                                     'visited_date' => date('Y-m-d'),
                                     'last_visited' => date('Y-m-d'),
+                                    'punchin_city' => $punchinCity,
+                                    'base_city' => $baseCity,
+                                    'distance' => $distance,
                                 ]);
                             }
                         }
@@ -251,7 +331,7 @@ class AttendanceController extends Controller
                 //     'body' =>  'You have successfully Punched in'
                 // ]);
                 // sendNotification($user->id,$asmnotify);
-                return response()->json(['status' => 'success', 'message' => 'Punch In successfully', 'punchin_id' => $punchin->id, 'punchin' => $punchindata], $this->successStatus);
+                return response()->json(['status' => 'success', 'message' => 'Punch In successfully', 'punchin_id' => $punchin->id, 'punchin' => $punchindata,'distance' => $distance], $this->successStatus);
             }
             return response()->json(['status' => 'error', 'message' => 'Error in Check In'], $this->badrequest);
         } catch (\Exception $e) {
@@ -283,7 +363,7 @@ class AttendanceController extends Controller
             } else {
                 $punchout_time = getcurentTime();
             }
-            $request['punchout_address'] = getLatLongToAddress($request['punchout_latitude'], $request['punchout_longitude']);
+            $request['punchout_address'] = getLatLongToAddress($request['punchout_longitude'], $request['punchout_latitude']);
             $punchout = Attendance::where('id', $request->punchin_id)->where('user_id', $user->id)->first();
             $punchout->punchout_date = getcurentDate();
             $punchout->punchout_time = $punchout_time;
@@ -330,85 +410,156 @@ class AttendanceController extends Controller
             $search_branches = $request->input('search_branches');
             $start_date = $request->input('start_date');
             $end_date = $request->input('end_date');
+            $filterType = $request->input('type'); // new parameter: normal | leave | (empty = all)
+
             $validator = Validator::make($request->all(), [
                 'end_date' => 'required_with:start_date',
             ]);
             if ($validator->fails()) {
-                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], 400);
+                return response()->json(['status' => 'error', 'message' => $validator->errors()], 400);
             }
+
             if ($search_name && $search_name != '') {
                 $all_reporting_user_ids[] = $search_name;
             } else {
                 $all_reporting_user_ids = getUsersReportingToAuth($user_id);
             }
 
-            $all_user_branches = User::with('getbranch')->whereIn('id', getUsersReportingToAuth($user_id))->orderBy('branch_id')->get();
-            $branches = array();
-            $all_branch = array();
+            // Branch logic (unchanged)
+            $all_user_branches = User::with('getbranch')
+                ->whereIn('id', getUsersReportingToAuth($user_id))
+                ->orderBy('branch_id')
+                ->get();
+
+            $branches = [];
+            $all_branch = [];
             $bkey = 0;
             foreach ($all_user_branches as $k => $val) {
-                if ($val->getbranch) {
-                    if (!in_array($val->getbranch->id, $all_branch)) {
-                        array_push($all_branch, $val->getbranch->id);
-                        $branches[$bkey]['id'] = $val->getbranch->id;
-                        $branches[$bkey]['name'] = $val->getbranch->branch_name;
-                        $bkey++;
-                    }
+                if ($val->getbranch && !in_array($val->getbranch->id, $all_branch)) {
+                    $all_branch[] = $val->getbranch->id;
+                    $branches[$bkey]['id'] = $val->getbranch->id;
+                    $branches[$bkey]['name'] = $val->getbranch->branch_name;
+                    $bkey++;
                 }
             }
 
             if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
-                $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
+                $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)
+                    ->whereIn('branch_id', $search_branches)
+                    ->pluck('id')
+                    ->toArray();
+            }
+            
+            $hierarchyLevels = [];
+            foreach ($all_reporting_user_ids as $uid) {
+                $hierarchyLevels[$uid] = getHierarchyLevel($uid, $user_id);
             }
 
-
+            // Main query
             $all_punch_in_out = Attendance::with('users')
                 ->whereIn('user_id', $all_reporting_user_ids);
+
+            // Date filter
             if ($start_date && $start_date != '' && $start_date != null) {
                 $start_date = date('Y-m-d', strtotime($start_date));
                 $end_date = date('Y-m-d', strtotime($end_date));
                 $all_punch_in_out->whereBetween('punchin_date', [$start_date, $end_date]);
             }
+
+            // New: Leave / Normal filter
+            $leaveTypes = ['Full Day Leave', 'First Half Leave', 'Second Half Leave'];
+
+            if ($filterType === 'leave') {
+                $all_punch_in_out->whereIn('working_type', $leaveTypes);
+            } elseif ($filterType === 'normal') {
+                $all_punch_in_out->where(function ($q) use ($leaveTypes) {
+                    $q->whereNotIn('working_type', $leaveTypes)
+                    ->orWhereNull('working_type');
+                });
+            }
+            // else → no filter → show all (leave + normal)
+
             $all_punch_in_out->orderBy('punchin_date', 'desc');
 
-            if ($request->status != NULL) {
+            if ($request->status != null) {
                 $all_punch_in_out->where('attendance_status', $request->status);
             }
 
-
             $all_punch_in_out = (!empty($pageSize)) ? $all_punch_in_out->paginate($pageSize) : $all_punch_in_out->paginate(100);
 
-            $all_user_details = User::with('getbranch')->whereDoesntHave('roles', function ($query) {
-                $query->where('id', 29);
-            })->whereIn('id', $all_reporting_user_ids)->orderBy('name', 'asc')->get();
-            $all_users = array();
+            // Users list (unchanged)
+            $all_user_details = User::with('getbranch')
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->where('id', 29);
+                })
+                ->whereIn('id', $all_reporting_user_ids)
+                ->orderBy('name', 'asc')
+                ->get();
+
+            $all_users = [];
             foreach ($all_user_details as $k => $val) {
                 $all_users[$k]['id'] = $val->id;
                 $all_users[$k]['name'] = $val->name;
             }
 
-            $data = array();
-            if (count($all_punch_in_out) > 0) {
+            $data = [];
+            if ($all_punch_in_out->count() > 0) {
                 foreach ($all_punch_in_out as $key => $checkIn) {
-                    $data[$key]['attendance_id'] = $checkIn->id;
-                    $data[$key]['name'] = $checkIn->users->name;
-                    $data[$key]['date'] = date('d/m/Y', strtotime($checkIn->punchin_date));
-                    $data[$key]['punch_in'] = $checkIn->punchin_time;
-                    $data[$key]['punch_out'] = $checkIn->punchout_time != null ? $checkIn->punchout_time : '';
-                    $data[$key]['status'] = ($checkIn->attendance_status == 1) ? 'Approve' : (($checkIn->attendance_status == 2) ? 'Rejected' : 'Pending');
-                    if ($checkIn->users->id == $user_id) {
-                        $data[$key]['self'] = true;
-                    } else {
-                        $data[$key]['self'] = false;
-                    }
+                    $attendanceUser = $checkIn->users;           // Get the related user
+                    $userId         = $attendanceUser ? $attendanceUser->id : null;
+        
+                    $hierarchyLevel = $userId ? ($hierarchyLevels[$userId] ?? -1) : -1;
+        
+                    $data[$key] = [
+                        'attendance_id'    => $checkIn->id,
+                        'name'             => $attendanceUser ? $attendanceUser->name : 'N/A',
+                        'date'             => date('d/m/Y', strtotime($checkIn->punchin_date)),
+                        'punch_in'         => $checkIn->punchin_time ?? '',
+                        'punch_out'        => $checkIn->punchout_time ?? '',
+                        'working_type'     => $checkIn->working_type ?? '',
+                        'status'           => match($checkIn->attendance_status) {
+                            1 => 'Approve',
+                            2 => 'Rejected',
+                            default => 'Pending'
+                        },
+                        'self'             => ($userId == $user_id),
+                        'hierarchy_level'  => $hierarchyLevel,
+                        'hierarchy_label'  => match($hierarchyLevel) {
+                            0   => 'Self',
+                            -1  => 'Not in Hierarchy',
+                            default => 'Level ' . $hierarchyLevel
+                        }
+                    ];
                 }
-                $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Rejected']];
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'users' => $all_users, 'branches' => $branches, 'page_count' => $all_punch_in_out->lastPage(), 'all_status' => $all_status, 'data' => $data], $this->successStatus);
-            } else {
-                return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $data], $this->badrequest);
+
+                $all_status = [
+                    ['id' => '0', 'name' => 'Pending'],
+                    ['id' => '1', 'name' => 'Approved'],
+                    ['id' => '2', 'name' => 'Rejected']
+                ];
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Data retrieved successfully.',
+                    'users' => $all_users,
+                    'branches' => $branches,
+                    'page_count' => $all_punch_in_out->lastPage(),
+                    'all_status' => $all_status,
+                    'data' => $data
+                ], $this->successStatus);
             }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No Record Found.',
+                'data' => $data
+            ], $this->badrequest);
+
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], $this->internalError);
         }
     }
 
@@ -466,9 +617,42 @@ class AttendanceController extends Controller
         $attendance = Attendance::with('users')->find($attendance_id);
 
         if ($attendance) {
-            return response()->json(['status' => 'success', 'message' => 'Status changed successfully.', 'data' => $attendance], $this->successStatus);
+
+            $tourDetails = $this->getFormattedTourDetails($attendance->tourid);
+            // ✅ STEP 1: Convert comma string to array
+            $cityIds = [];
+            if (!empty($attendance->city)) {
+                $cityIds = explode(',', $attendance->city);
+            }
+    
+            // ✅ STEP 2: Fetch cities from DB
+            $cities = \App\Models\City::whereIn('id', $cityIds)
+                ->pluck('city_name', 'id'); // [id => name]
+    
+            // ✅ STEP 3: Maintain order + build array
+            $cityNamesArray = [];
+            foreach ($cityIds as $id) {
+                if (isset($cities[$id])) {
+                    $cityNamesArray[] = $cities[$id];
+                }
+            }
+    
+            // ✅ STEP 4: Convert to comma separated string
+            $cityNamesString = implode(', ', $cityNamesArray);
+            // response
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data retrieved successfully.',
+                'data' => $attendance,
+                'tour_details' => $tourDetails,
+                'city_names_string' => $cityNamesString // comma separated
+            ], $this->successStatus);
+    
         } else {
-            return response(['status' => 'error', 'message' => 'No Record Found.'], $this->badrequest);
+            return response([
+                'status' => 'error',
+                'message' => 'No Record Found.'
+            ], $this->badrequest);
         }
     }
 }

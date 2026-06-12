@@ -109,6 +109,10 @@ use App\Models\DealerPortalSettings;
 use App\Models\PowerBiSetting;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use App\Http\Controllers\MasterDistributorController;
+use App\Http\Controllers\SecondaryCustomerController;
+use App\Http\Controllers\RolesAndPermissionsController;
+use App\Http\Controllers\PromotionalActivitysController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -119,6 +123,20 @@ use Illuminate\Support\Facades\Gate;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+
+
+// ========================
+
+
+// use App\Http\Controllers\RolesAndPermissionsController;
+
+Route::post('roles/save-permissions', [RolesController::class, 'savePermissions'])
+    ->name('roles.savePermissions');
+
+
+
+// ========================
 
 Route::get('/', function () {
     return view('auth.login');
@@ -352,6 +370,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('state-template', [StateController::class, 'template'])->name('state.template');
     Route::post('state-upload', [StateController::class, 'upload'])->name('state.upload');
     Route::post('state-active', [StateController::class, 'active'])->name('state.active');
+    Route::get('/get-states/{country_id}', [App\Http\Controllers\CommonController::class, 'getStates'])
+     ->name('get.states');
 
     //District
     Route::resource('district', DistrictController::class);
@@ -359,18 +379,32 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('district-template', [DistrictController::class, 'template'])->name('district.template');
     Route::post('district-upload', [DistrictController::class, 'upload'])->name('district.upload');
     Route::post('district-active', [DistrictController::class, 'active'])->name('district.active');
+    Route::get('/get-districts/{state_id}', [App\Http\Controllers\CommonController::class, 'getDistricts'])
+     ->name('get.districts');
+
     //City
     Route::resource('city', CityController::class);
     Route::any('city-download', [CityController::class, 'download'])->name('city.download');
     Route::any('city-template', [CityController::class, 'template'])->name('city.template');
     Route::post('city-upload', [CityController::class, 'upload'])->name('city.upload');
     Route::post('city-active', [CityController::class, 'active'])->name('city.active');
+    Route::get('/get-cities/{district_id}', [App\Http\Controllers\CommonController::class, 'getCities'])
+     ->name('get.cities');
+    // City AJAX Search for Select2 (Add this line)
+    Route::get('cities/search', [CityController::class, 'search'])
+     ->name('cities.search');
+    Route::post('get-expense-by-city', [ExpensesController::class, 'getExpenseByCity'])->name('getExpenseByCity');
+
+
     //Pincode
     Route::resource('pincode', PincodeController::class);
     Route::any('pincode-download', [PincodeController::class, 'download'])->name('pincode.download');
     Route::any('pincode-template', [PincodeController::class, 'template'])->name('pincode.template');
     Route::post('pincode-upload', [PincodeController::class, 'upload'])->name('pincode.upload');
     Route::post('pincode-active', [PincodeController::class, 'active'])->name('pincode.active');
+    Route::get('/get-pincodes/{city_id}', [App\Http\Controllers\CommonController::class, 'getPincodes'])
+     ->name('get.pincodes');
+
     // Roles
     Route::delete('roles/destroy', [RolesController::class, 'massDestroy'])->name('roles.massDestroy');
     Route::resource('roles', RolesController::class);
@@ -379,6 +413,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('roles-upload', [RolesController::class, 'upload'])->name('roles.upload');
     //braches
     Route::resource('branches', BranchController::class);
+    Route::get('/branches-list', [BranchController::class, 'getAllBranches']);
     Route::any('branch_report/download', [BranchController::class, 'branch_report_download'])->name('branch_report.download');
     //Division
     Route::resource('division', DivisionController::class);
@@ -433,6 +468,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('permissions-download', [PermissionsController::class, 'download'])->name('permissions.download');
     Route::any('permissions-template', [PermissionsController::class, 'template'])->name('permissions.template');
     Route::post('permissions-upload', [PermissionsController::class, 'upload'])->name('permissions.upload');
+    
     //Category Route
     Route::resource('categories', CategoryController::class);
     Route::any('categories-download', [CategoryController::class, 'download'])->name('categories.download');
@@ -445,7 +481,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('subcategories-template', [SubCategoryController::class, 'template'])->name('subcategories.template');
     Route::post('subcategories-upload', [SubCategoryController::class, 'upload'])->name('subcategories.upload');
     Route::post('subcategories-active', [SubCategoryController::class, 'active'])->name('subcategories.active');
-
+    Route::get('/get-products-by-subcategory', [ProductController::class, 'getProductsBySubcategory'])->name('getProductsBySubcategory');
+    
     // Sales Target Users
     Route::get('sales_users/target_users', [SalesTargetUsersController::class, 'sales_target_users'])->name('sales_users.target_users');
     Route::post('sales_users/target_users_upload/upload', [SalesTargetUsersController::class, 'target_users_upload'])->name('sales_users.target_users_upload.upload');
@@ -491,7 +528,9 @@ Route::group(['middleware' => ['auth']], function () {
     //Brand
     Route::resource('brands', BrandController::class);
     Route::any('brands-download', [BrandController::class, 'download'])->name('brands.download');
-    Route::any('brands-template', [BrandController::class, 'template'])->name('brands.template');
+    // Route::any('brands-template', [BrandController::class, 'template'])->name('brands.template');
+    Route::get('brands-template', [BrandController::class, 'downloadTemplate'])
+    ->name('brands.template.download');
     Route::post('brands-upload', [BrandController::class, 'upload'])->name('brands.upload');
     Route::post('brands-active', [BrandController::class, 'active'])->name('brands.active');
     //UnitMeasure
@@ -616,6 +655,14 @@ Route::group(['middleware' => ['auth']], function () {
     Route::delete('beatcustomer-delete/{id}', [BeatController::class, 'beatCustomerDelete']);
     Route::delete('beat-user-delete/{id}', [BeatController::class, 'beatUserDelete']);
     Route::any('beats-schedule/{id}', [BeatController::class, 'beatsSchedule']);
+    Route::delete('/beats/{id}', [BeatController::class, 'destroy'])
+        ->name('beats.destroy');
+    Route::post('beats/save-individual-schedule', 
+    [BeatController::class, 'saveIndividualSchedule']
+)->name('beats.saveIndividualSchedule');
+
+Route::get('beats-global-schedule-form', [BeatController::class, 'globalScheduleForm'])
+    ->name('beats.globalScheduleForm');
     //Current Location
     Route::any('livelocation', [BeatController::class, 'livelocation']);
     //Attendance
@@ -631,7 +678,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('rejectAttendance', [AttendanceController::class, 'rejectAttendance'])->name('rejectAttendance');
 
     Route::any('attendancesummary-download', [AttendanceController::class, 'attendanceSummaryDownload'])->name('attendancesummary.download');
-
+    Route::post('get-tour-and-beat-plan', [AttendanceController::class, 'getTourAndBeatByUserAndDate'])
+    ->name('get.tour.and.beat');
 
 
     //Checkin
@@ -668,7 +716,150 @@ Route::group(['middleware' => ['auth']], function () {
     Route::delete('/media/{media}', [TasksController::class, 'deleteMedia'])->name('media.delete');
     Route::get('/tasks/{token}/show', [TasksController::class, 'show'])->name('tasks.show');
 
+    // **MASTER DISWTRIBUTOR ROUTS****
+    // Route::resource('master-distributors', MasterDistributorController::class);
+    Route::get('/filter-cities/{state}', [MasterDistributorController::class, 'getCitiesForState'])->name('filter.cities');
+    // Route::get('/master-distributors/template', [MasterDistributorController::class, 'template'])
+    // ->name('master-distributors.template');
 
+    Route::get('/master-distributors/template', [MasterDistributorController::class, 'template'])
+    ->name('master-distributors.template')
+    ->middleware('auth');
+    Route::get(
+        'master-distributors/cities-for-state/{state_id}',
+        [MasterDistributorController::class, 'citiesForState']
+    )->name('master-distributors.cities-for-state');
+    Route::get('master-distributors-export', [MasterDistributorController::class, 'export'])
+     ->name('master-distributors.export')
+     ->middleware(['auth']); 
+
+    Route::post('master-distributors/import', [MasterDistributorController::class, 'import'])
+    ->name('master-distributors.import');
+//     Route::get('/master-distributors/filter/states', [MasterDistributorController::class, 'getStates'])
+//      ->name('master-distributors.filter.states');
+
+// Route::get('/master-distributors/filter/cities/{stateId}', [MasterDistributorController::class, 'getCities'])
+//      ->name('master-distributors.filter.cities');
+// Route::get('master-distributors/filter/states', [MasterDistributorController::class, 'getAllStates'])->name('master-distributors.filter.states');
+// Route::get('master-distributors/filter/cities/{state}', [MasterDistributorController::class, 'getCitiesByState'])->name('master-distributors.filter.cities');
+    
+Route::get('/master-distributors/states/{country_id}', [MasterDistributorController::class, 'getStates'])
+    ->name('master-distributors.get-states');
+
+// Route::get('/master-distributors/cities-for-state/{state_id}', [MasterDistributorController::class, 'getCitiesForState'])
+//     ->name('master-distributors.cities-for-state');
+Route::prefix('master-distributors')->group(function () {
+    Route::get('get-states/{country_id}', [MasterDistributorController::class, 'getStates'])->name('get.states');
+    Route::get('get-districts/{state_id}', [MasterDistributorController::class, 'getDistricts'])->name('get.districts');
+    Route::get('get-cities/{district_id}', [MasterDistributorController::class, 'getCities'])->name('get.cities');
+    Route::get('get-pincodes/{city_id}', [MasterDistributorController::class, 'getPincodes'])->name('get.pincodes');
+});
+
+
+     Route::post('/master-distributors/toggle-status', [MasterDistributorController::class, 'toggleStatus'])
+     ->name('master-distributors.toggle-status')
+     ->middleware('auth');
+
+    // Existing
+Route::resource('master-distributors', MasterDistributorController::class);
+// Export (filtered data download)
+// Route::get('master-distributors/export', [MasterDistributorController::class, 'export'])
+//      ->name('master-distributors.export');
+
+// Template download
+
+
+// NEW: Type-specific routes (same controller use karenge)
+
+Route::get('/secondary-customers/get-cities', [SecondaryCustomerController::class, 'getCities'])
+    ->name('secondary-customers.get-cities');
+    Route::get('/retailers/download', [SecondaryCustomerController::class, 'downloadExcel'])->name('retailers.download');
+Route::get('/mechanics/download', [SecondaryCustomerController::class, 'downloadExcel'])->name('mechanics.download');
+Route::get('/workshops/download', [SecondaryCustomerController::class, 'downloadExcel'])->name('workshops.download');
+Route::get('/garages/download', [SecondaryCustomerController::class, 'downloadExcel'])->name('garages.download');
+Route::get('/secondary-customers/filter-options', [SecondaryCustomerController::class, 'filterOptions'])->name('secondary-customers.filter-options');
+Route::get(
+    '/retailers/search-shop',
+    [SecondaryCustomerController::class, 'searchShop']
+)->name('retailers.search-shop');
+
+Route::get(
+    '/retailers/search-owner',
+    [SecondaryCustomerController::class, 'searchOwner']
+)->name('retailers.search-owner');
+
+Route::get(
+    '/retailers/search-mobile',
+    [SecondaryCustomerController::class, 'searchMobile']
+)->name('retailers.search-mobile');
+
+Route::get('/secondary-customers/dropdown', [AjaxController::class, 'dropdown']);
+    Route::get('/mechanics/template', [SecondaryCustomerController::class, 'downloadTemplate'])->name('mechanics.template');
+Route::get('/retailers/template', [SecondaryCustomerController::class, 'downloadTemplate'])->name('retailers.template');
+Route::get('/workshops/template', [SecondaryCustomerController::class, 'downloadTemplate'])->name('workshops.template');
+Route::get('/garages/template', [SecondaryCustomerController::class, 'downloadTemplate'])->name('garages.template');
+
+
+    Route::name('mechanics.')->prefix('mechanics')->group(function () {
+    Route::get('/index', [SecondaryCustomerController::class, 'index'])->name('index');
+    Route::get('/create', [SecondaryCustomerController::class, 'create'])->name('create');
+    Route::post('/', [SecondaryCustomerController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [SecondaryCustomerController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [SecondaryCustomerController::class, 'update'])->name('update');
+    Route::get('/{id}', [SecondaryCustomerController::class, 'show'])->name('show');
+    Route::delete('/{id}', [SecondaryCustomerController::class, 'destroy'])->name('destroy');
+});
+
+Route::name('garages.')->prefix('garages')->group(function () {
+    Route::get('/index', [SecondaryCustomerController::class, 'index'])->name('index');
+    Route::get('/create', [SecondaryCustomerController::class, 'create'])->name('create');
+    Route::post('/', [SecondaryCustomerController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [SecondaryCustomerController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [SecondaryCustomerController::class, 'update'])->name('update');
+    Route::get('/{id}', [SecondaryCustomerController::class, 'show'])->name('show');
+    Route::delete('/{id}', [SecondaryCustomerController::class, 'destroy'])->name('destroy');
+});
+
+Route::name('retailers.')->prefix('retailers')->group(function () {
+    Route::get('/index', [SecondaryCustomerController::class, 'index'])->name('index');
+    Route::get('/create', [SecondaryCustomerController::class, 'create'])->name('create');
+    Route::post('/', [SecondaryCustomerController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [SecondaryCustomerController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [SecondaryCustomerController::class, 'update'])->name('update');
+    Route::get('/{id}', [SecondaryCustomerController::class, 'show'])->name('show');
+    Route::delete('/{id}', [SecondaryCustomerController::class, 'destroy'])->name('destroy');
+});
+
+Route::name('workshops.')->prefix('workshops')->group(function () {
+    Route::get('/index', [SecondaryCustomerController::class, 'index'])->name('index');
+    Route::get('/create', [SecondaryCustomerController::class, 'create'])->name('create');
+    Route::post('/', [SecondaryCustomerController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [SecondaryCustomerController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [SecondaryCustomerController::class, 'update'])->name('update');
+    Route::get('/{id}', [SecondaryCustomerController::class, 'show'])->name('show');
+    Route::delete('/{id}', [SecondaryCustomerController::class, 'destroy'])->name('destroy');
+});
+
+Route::post('/mechanics/import', [SecondaryCustomerController::class, 'import'])->name('mechanics.import');
+
+Route::post('/retailers/import', [SecondaryCustomerController::class, 'import'])->name('retailers.import');
+
+Route::post('/garages/import', [SecondaryCustomerController::class, 'import'])->name('garages.import');
+
+Route::post('/workshops/import', [SecondaryCustomerController::class, 'import'])->name('workshops.import');
+Route::post('secondary-customers/import', [SecondaryCustomerController::class,'import'])
+    ->name('secondary-customers.import');
+    // In routes/web.php
+Route::post('secondary-customers/toggle-active', [SecondaryCustomerController::class, 'toggleActive'])
+     ->name('secondary-customers.toggle-active');
+
+// OLD route DELETE kar do ya comment out
+// Route::resource('secondary-customers', SecondaryCustomerController::class);
+
+    // Route::get('master-distributors', [MasterDistributorController::class, 'index'])
+    // ->name('master-distributors.index');
+    // Route::get('master-distributors/data', [MasterDistributorController::class, 'data'])
+    //     ->name('master-distributors.data');
     // Tasks Departments
     Route::resource('task-departments', TaskDepartmentController::class);
     // Tasks Projects
@@ -730,6 +921,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('leaveapproval', [LeaveController::class, 'leaveApproval'])->name('leaves.approval');
     Route::any('leaverejected', [LeaveController::class, 'leaveRejected'])->name('leaves.rejected');
     Route::post('combo-off-leave', [LeaveController::class, 'comboOffLeave'])->name('comboOffLeave');
+    Route::any('leaves-export', [LeaveController::class, 'export'])->name('leaves.export');
     /*============= Team ====================*/
     Route::resource('teams', TeamController::class);
     /*============= Holiday ====================*/
@@ -753,10 +945,36 @@ Route::group(['middleware' => ['auth']], function () {
     /*============= Event ====================*/
 
     //Fields
-    Route::resource('market_intelligences', MarketIntelligencesFieldController::class);
-    Route::any('market_intelligences_download', [MarketIntelligencesFieldController::class, 'download'])->name('market_intelligences.download');
-    Route::any('market_intelligences_show/{id}', [MarketIntelligencesFieldController::class, 'show'])->name('market-intelligences.show');
-    Route::any('reports/marketIntelligence', [MarketIntelligencesFieldController::class, 'marketIntelligence'])->name('reports.marketIntelligence');
+    // Route::resource('market_intelligences', MarketIntelligencesFieldController::class);
+    // Route::any('market_intelligences_download', [MarketIntelligencesFieldController::class, 'download'])->name('market_intelligences.download');
+    // Route::any('market_intelligences_show/{id}', [MarketIntelligencesFieldController::class, 'show'])->name('market-intelligences.show');
+    // Route::any('reports/marketIntelligence', [MarketIntelligencesFieldController::class, 'marketIntelligence'])->name('reports.marketIntelligence');
+
+
+    //PromotionalActivityController
+
+    Route::get(
+        'promotional_activities',
+        [PromotionalActivitysController::class, 'index']
+    )->name('promotional_activity.index');
+
+    Route::resource('promotional_activity', PromotionalActivitysController::class);
+
+    Route::get(
+        'promotional_activities/export',
+        [PromotionalActivitysController::class, 'export']
+    )->name('promotional_activities.export');
+
+    Route::get(
+        'activity-attendees/exportAttendees',
+        [PromotionalActivitysController::class, 'exportAttendees']
+    )->name('activity-attendees.exportAttendees');
+
+    Route::any(
+        'promotional_activity_show/{id}',
+        [PromotionalActivitysController::class, 'show']
+    )->name('promotional_activity.show');
+
 
     //Fields
     Route::resource('fields', FieldController::class);
@@ -833,7 +1051,19 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('tours-template', [TourController::class, 'template'])->name('tourss.template');
     Route::post('tours-upload', [TourController::class, 'upload'])->name('tours.upload');
     Route::post('tours-changeStatus', [TourController::class, 'changeStatus'])->name('tours.changesttus');
+    // Route::post('get-user-territory', [TourController::class, 'getUserTerritory'])->name('get.user.territory');
+// Route::post('get-cities-by-district-and-user', [TourController::class, 'getCitiesByDistrictAndUser']);
+// Route::post('ajax/user-cities', [TourController::class, 'ajaxUserCities'])->name('ajax.user.cities');
+    Route::get('tours/ajax-user-cities', [TourController::class, 'ajaxUserCities'])
+    ->name('tours.ajaxUserCities');
 
+    
+
+// In routes/web.php
+Route::post('ajax/user-districts', [TourController::class, 'ajaxUserDistricts'])->name('tours.ajaxUserDistricts');
+Route::post('ajax/user-cities-by-district', [TourController::class, 'ajaxUserCitiesByDistrict'])->name('tours.ajaxUserCitiesByDistrict');
+    
+    
     // /Expenses Type
     Route::resource('expenses_type', ExpensesTypeController::class);
     Route::post('expenses-type-active', [ExpensesTypeController::class, 'changeStatus']);
@@ -990,7 +1220,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('complaint-assign-user', [ComplaintController::class, 'assign_user'])->name('complaint_assign_user');
     Route::any('complaint-assign-service-center', [ComplaintController::class, 'assign_service_center'])->name('complaint_assign_service_center');
     Route::post('complaint-add-note', [ComplaintController::class, 'complaint_add_notes'])->name('complaint_add_notes');
-
+    Route::post('/complaints/change-status', [ComplaintController::class, 'changeStatus'])
+    ->name('complaints.changeStatus');
     // Leaves Route
     Route::resource('leaves', LeaveController::class);
     Route::any('approveLeave', [LeaveController::class, 'approveLeave'])->name('approveLeave');

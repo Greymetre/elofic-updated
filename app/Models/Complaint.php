@@ -12,7 +12,7 @@ class Complaint extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $fillable = ['complaint_number', 'complaint_date', 'claim_amount', 'complaint_status', 'seller', 'end_user_id', 'party_name', 'product_laying', 'service_center', 'assign_user', 'product_id', 'product_serail_number', 'product_code', 'product_name', 'category', 'specification', 'product_no', 'phase', 'seller_branch', 'purchased_branch', 'product_group', 'company_sale_bill_no', 'company_sale_bill_date', 'customer_bill_date', 'customer_bill_no', 'company_bill_date_month', 'under_warranty', 'service_type', 'customer_bill_date_month', 'warranty_bill', 'fault_type', 'service_centre_remark', 'remark', 'division', 'register_by', 'complaint_type', 'description', 'created_by_device', 'created_by', 'created_at', 'updated_at' , 'complaint_recieve_via'];
+    protected $fillable = ['part_number','batch_code','distributor_id','same_as_contact','status_remark','whatsapp_number','voice_note_file','attachment_file','complaint_number', 'complaint_date', 'claim_amount', 'complaint_status', 'seller', 'end_user_id', 'party_name', 'product_laying', 'service_center', 'assign_user', 'product_id', 'product_serail_number', 'product_code', 'product_name', 'category', 'specification', 'product_no', 'phase', 'seller_branch', 'purchased_branch', 'product_group', 'company_sale_bill_no', 'company_sale_bill_date', 'customer_bill_date', 'customer_bill_no', 'company_bill_date_month', 'under_warranty', 'service_type', 'customer_bill_date_month', 'warranty_bill', 'fault_type', 'service_centre_remark', 'remark', 'division', 'register_by', 'complaint_type', 'description', 'created_by_device', 'created_by', 'created_at', 'updated_at' , 'complaint_recieve_via'];
 
     public $timestamps = true;
 
@@ -119,4 +119,9 @@ class Complaint extends Model implements HasMedia
             return ''; // Return null if parsing fails
         }
     }
+
+    public function distributor()
+{
+    return $this->belongsTo(MasterDistributor::class, 'distributor_id', 'id');
+}
 }

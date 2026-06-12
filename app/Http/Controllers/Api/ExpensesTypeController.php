@@ -38,38 +38,60 @@ class ExpensesTypeController extends Controller
 
     public function getExpensesType(Request $request)
     {
-        // $expenses_type = ExpensesType::all();
-        // return response()->json(['status'=>'success', 'data'=>$expenses_type], 200); 
-
         try {
-
             $validator = Validator::make($request->all(), [
-                'payroll_id'  => "required",
+                'payroll_id' => 'required',
+                'grade'      => 'required',        // Added grade validation
             ]);
+    
             if ($validator->fails()) {
-                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+                return response()->json([
+                    'status' => 'error', 
+                    'message' => $validator->errors()
+                ], $this->badrequest);
             }
-
+    
             $payroll_id = $request->payroll_id;
-            $expense_types = ExpensesType::where('payroll_id', $payroll_id)->get();
-            if (!empty($expense_types)) {
-
-                $datas = array();
+            $grade      = $request->grade;
+    
+            // Fetch expense types based on both payroll_id and grade
+            $expense_types = ExpensesType::where('payroll_id', $payroll_id)
+                                         ->where('class', $grade)   // Added grade filter
+                                         ->get();
+    
+            if ($expense_types->isNotEmpty()) {
+                $datas = [];
+    
                 foreach ($expense_types as $expense_type) {
-                    $datas[] = array(
-                        'id' => $expense_type->id ?? "",
-                        'name' => $expense_type->name ?? "",
-                        'rate' => $expense_type->rate ?? "",
+                    $datas[] = [
+                        'id'                => $expense_type->id ?? "",
+                        'name'              => $expense_type->name ?? "",
+                        'rate'              => $expense_type->rate ?? "",
                         'allowance_type_id' => $expense_type->allowance_type_id ?? "",
-                        'payroll_id' => $expense_type->payroll_id ?? "",
-                    );
+                        'payroll_id'        => $expense_type->payroll_id ?? "",
+                        'grade'             => $expense_type->class ?? "",   // Optional: return grade too
+                    ];
                 }
-
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $datas], $this->successStatus);
+    
+                return response()->json([
+                    'status'  => 'success', 
+                    'message' => 'Data retrieved successfully.',
+                    'data'    => $datas
+                ], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'No Record Found.', 'data' => $expense], 200);
+    
+            // No records found
+            return response()->json([
+                'status'  => 'error', 
+                'message' => 'No Record Found.',
+                'data'    => []
+            ], 200);
+    
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+            return response()->json([
+                'status'  => 'error', 
+                'message' => $e->getMessage()
+            ], $this->internalError);
         }
     }
 
@@ -79,68 +101,79 @@ class ExpensesTypeController extends Controller
     {
         try {
             ini_set('memory_limit', '-1');
-
             $dates = Carbon::now();
             $current_date_time = $dates->setTimezone('Asia/Kolkata');
-
             $userid = $request->user()->id;
+    
             $validator = Validator::make(
                 $request->all(),
                 [
-                    // 'customer_id'   => 'nullable|exists:customers,id',
-                    'expenses_type'  => "required",
-                    'claim_amount'  => "required",
-                    'date'  => "required",
+                    'expenses_type' => "required",
+                    'claim_amount' => "required",
+                    'date' => "required",
+                    'city_id' => "nullable|exists:cities,id",   // Added city_id validation
                     'expense_file.*' => 'mimes:jpeg,jpg,png,pdf,doc,webp',
                 ]
             );
-
-
+    
             if ($validator->fails()) {
-                return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
+                return response()->json(['status' => 'error', 'message' => $validator->errors()], $this->badrequest);
             }
-
-
+    
             if ($expenses = Expenses::create([
-                'user_id' => $userid,
-                'expenses_type' => isset($request->expenses_type) ? $request->expenses_type : null,
-                'date' => isset($request->date) ? $request->date : null,
-                'claim_amount' => isset($request->claim_amount) ? $request->claim_amount : null,
-                'start_km' => isset($request->start_km) ? $request->start_km : null,
-                'stop_km' => isset($request->stop_km) ? $request->stop_km : null,
-                'total_km' => isset($request->total_km) ? $request->total_km : null,
-                'note' => isset($request->note) ? $request->note : null,
-                'created_by' => $userid,
-                'created_at' => $current_date_time
+                'user_id'        => $userid,
+                'expenses_type'  => $request->expenses_type,
+                'date'           => $request->date,
+                'claim_amount'   => $request->claim_amount,
+                'city_id'        => $request->city_id,           // Added city_id
+                'start_km'       => $request->start_km ?? null,
+                'stop_km'        => $request->stop_km ?? null,
+                'total_km'       => $request->total_km ?? null,
+                'note'           => $request->note ?? null,
+                'created_by'     => $userid,
+                'created_at'     => $current_date_time
             ])) {
-
-                $logdata = array(
-                    'log_date' => date('Y-m-d'),
-                    'expense_id' => $expenses->id,
-                    'created_by' => $userid,
-                    'status_type' => 'generated',
-                    'created_at' => $current_date_time
-                );
-
+    
+                // Create Expense Log
+                $logdata = [
+                    'log_date'     => date('Y-m-d'),
+                    'expense_id'   => $expenses->id,
+                    'created_by'   => $userid,
+                    'status_type'  => 'generated',
+                    'created_at'   => $current_date_time
+                ];
                 ExpenseLog::create($logdata);
+    
+                // Handle Multiple File Upload
                 if ($request->hasFile('expense_file')) {
                     $files = $request->file('expense_file');
                     foreach ($files as $file) {
-                        $customname = time() . '.' . $file->getClientOriginalExtension();
+                        $customname = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                         $expenses->addMedia($file)
                             ->usingFileName($customname)
                             ->toMediaCollection('expense_file');
                     }
                 }
-
-                return response()->json(['status' => 'success', 'message' => 'Data inserted successfully.', 'data' => $expenses], $this->successStatus);
+    
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'Expense created successfully.',
+                    'data'    => $expenses
+                ], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'Error in No Record Found.'], 200);
+    
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Failed to create expense.'
+            ], 200);
+    
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ], $this->internalError);
         }
     }
-
 
     public function expenseListing(Request $request)
     {
@@ -303,7 +336,10 @@ class ExpensesTypeController extends Controller
                 $datas['status'] = $exp_status;
                 $datas['reason'] = $expense->reason ?? "";
 
-                $plan = TourProgramme::where('userid', $expense->user_id)->where('date', $expense->date)->first();
+                $plan = TourProgramme::with('city')
+                    ->where('userid', $expense->user_id)
+                    ->where('date', $expense->date)
+                    ->first();
                 $total_visit = count(CheckIn::where('user_id', $expense->user_id)->where('checkin_date', $expense->date)->groupBy('customer_id')->get());
 
                 $checkins = CheckIn::where('user_id', $expense->user_id)
@@ -408,7 +444,7 @@ class ExpensesTypeController extends Controller
             if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
                 $userids = User::whereIn('id', $userids)->whereIn('branch_id', $search_branches)->pluck('id')->toArray();
             }
-            $pageSize = $request->input('pageSize');
+            $pageSize = $request->input('pageSize', 10);
             $query = Expenses::with('media', 'expense_type', 'users')->orderBy('id', 'desc');
             // $query = Expenses::with('media','expense_type')->where(['user_id'=>Auth::Id()])->orderBy('id','desc');
             //$expenses = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
@@ -424,7 +460,7 @@ class ExpensesTypeController extends Controller
                 $query->whereIn('user_id', $userids);
             }
             // dd($query->toSql());
-            $expenses = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->paginate(100);
+            $expenses = $query->paginate($pageSize);
 
             $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Approved'], ['id' => '2', 'name' => 'Rejected'], ['id' => '3', 'name' => 'Checked'] ,['id' => '4', 'name' => 'Checked By Reporting']];
             $datas = array();
@@ -508,7 +544,24 @@ class ExpensesTypeController extends Controller
 
                
 
-                return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'users' => $all_users, 'branches' => $branches,'all_status'=> $all_status ,'data' => $datas], $this->successStatus);
+                return response()->json([
+                    'status'     => 'success',
+                    'message'    => 'Data retrieved successfully.',
+                    'users'      => $all_users,
+                    'branches'   => $branches,
+                    'all_status' => $all_status,
+                    'data'       => $datas,
+                    // Important: Return pagination metadata
+                    'pagination' => [
+                        'total'        => $expenses->total(),
+                        'per_page'     => $expenses->perPage(),
+                        'current_page' => $expenses->currentPage(),
+                        'last_page'    => $expenses->lastPage(),
+                        'from'         => $expenses->firstItem(),
+                        'to'           => $expenses->lastItem(),
+                        'has_more'     => $expenses->hasMorePages(),
+                    ]
+                ], $this->successStatus);
             }
             return response(['status' => 'error', 'message' => 'No Record Found.',  'users' => $all_users, 'branches' => $branches,'all_status'=> $all_status ,'data' => $datas , 'dummy' =>$request['status']], 200);
         } catch (\Exception $e) {

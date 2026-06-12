@@ -30,17 +30,26 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
     public function collection()
     {
         DB::statement("SET SESSION group_concat_max_len = 100000000");
-        $data = CustomerOutstanting::with('branch', 'customer')->select(
+        $data = CustomerOutstanting::select(
+            'posting_date',
+            'customer_code',
             'customer_id',
-            'branch_id',
-            'user_id',
-            'division_id',
-            'year',
-            'quarter',
-            DB::raw('SUM(amount) as total_amounts'),
-            DB::raw('GROUP_CONCAT(amount) as amounts'),
-            DB::raw('GROUP_CONCAT(days) as days'),
-            DB::raw('JSON_OBJECTAGG(days, amount) as day_amount_pairs'),
+            'reference',
+            'customer_name',
+            'due_date',
+            'payment_term',
+            
+
+            DB::raw('SUM(amount) as total_amount'),
+
+            DB::raw("SUM(CASE WHEN days='0-30' THEN amount ELSE 0 END) as slot_0_30"),
+            DB::raw("SUM(CASE WHEN days='31-60' THEN amount ELSE 0 END) as slot_31_60"),
+            DB::raw("SUM(CASE WHEN days='61-90' THEN amount ELSE 0 END) as slot_61_90"),
+            DB::raw("SUM(CASE WHEN days='91-120' THEN amount ELSE 0 END) as slot_91_120"),
+            DB::raw("SUM(CASE WHEN days='121-150' THEN amount ELSE 0 END) as slot_121_150"),
+            DB::raw("SUM(CASE WHEN days='151-180' THEN amount ELSE 0 END) as slot_151_180"),
+            DB::raw("SUM(CASE WHEN days='181-210' THEN amount ELSE 0 END) as slot_181_210"),
+            DB::raw("SUM(CASE WHEN days IN ('210','210+') THEN amount ELSE 0 END) as slot_210_plus")
         );
         
         if($this->request->customer_id && !empty($this->request->customer_id)){
@@ -52,29 +61,44 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
         if($this->request->division_id && !empty($this->request->division_id)){
             $data->where('division_id', $this->request->division_id);                
         }
+        if ($this->request->balance_date) {
+            $data->whereDate('posting_date', $this->request->balance_date);
+        }
         
-        $data = $data->groupBy('customer_id', 'branch_id', 'year', 'quarter')->get();
+        $data = $data->groupBy(
+            'posting_date',
+            'customer_code',
+            'customer_id',
+            'reference',
+            'customer_name',
+            'due_date',
+            'payment_term'
+        )->get();
 
         return $data;
     }
 
     public function headings(): array
     {
-
         return [
-            'Branch',
-            'Customer ID',
-            'User ID',
-            'Division ID',
-            'Dealer Name',
-            'Year',
-            'Quarter',
+            'Posting Date',
+            'Customer Code',
+            // 'Customer ID',
+            'Reference',
+            'Customer Name',
+            'Ageing Days',
+            'Due Date',
+            
             '0-30',
             '31-60',
             '61-90',
-            '91-150',
-            '>150',
-            'Total Outstanding',
+            '91-120',
+            '121-150',
+            '151-180',
+            '181-210',
+            '210+',
+            'Total Amount',
+            'Payment Term'
         ];
     }
 
@@ -83,22 +107,37 @@ class CutomerOutstantingExport implements FromCollection, WithHeadings, ShouldAu
 
     public function map($data): array
     {
-        $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-        
+
+        $ageingDays = '-';
+
+        if (!empty($data->due_date)) {
+            $ageingDays = Carbon::today()->diffInDays(
+                Carbon::parse($data->due_date),
+                false
+            ) * -1;
+        }
         return [
-            $data->branch ? $data->branch->branch_name : '-',
-            $data->customer_id ? $data->customer_id : '-',
-            $data->user_id ? $data->user_id : '-',
-            $data->division_id ? $data->division_id : '-',
-            $data->customer ? $data->customer->name : '-',
-            $data->year ? $data->year : '-',
-            $data->quarter ? $data->quarter : '-',
-            $day_wise_amount_array['0-30'] ?? '0',
-            $day_wise_amount_array['31-60'] ?? '0',
-            $day_wise_amount_array['61-90'] ?? '0',
-            $day_wise_amount_array['91-150'] ?? '0',
-            $day_wise_amount_array['150'] ?? '0',
-            $data->total_amounts ?? '0',
+            $data->posting_date ?? '-',
+            $data->customer_code ?? '-',
+            // $data->customer_id ?? '-',
+            $data->reference ?? '-',
+            $data->customer_name ?? '-',
+            $ageingDays,
+            $data->due_date ?? '-',
+            
+
+            
+
+            $data->slot_0_30 ?? 0,
+            $data->slot_31_60 ?? 0,
+            $data->slot_61_90 ?? 0,
+            $data->slot_91_120 ?? 0,
+            $data->slot_121_150 ?? 0,
+            $data->slot_151_180 ?? 0,
+            $data->slot_181_210 ?? 0,
+            $data->slot_210_plus ?? 0,
+            $data->total_amount ?? 0,
+            $data->payment_term ?? 0,
         ];
     }
 

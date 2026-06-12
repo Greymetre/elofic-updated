@@ -34,6 +34,7 @@ use App\Models\UserCityAssign;
 use App\Models\SalesDetails;
 use App\Models\SalesTarget;
 use App\Models\TourDetail;
+use App\Models\MasterDistributor;
 use App\Exports\FieldActivityExport;
 use App\Exports\TourProgrammeReportExport;
 use App\Exports\MovementReportExport;
@@ -293,32 +294,93 @@ class ReportController extends Controller
     {
         $userids = getUsersReportingToAuth();
         if ($request->ajax()) {
-            $data = CheckIn::with('users:id,name', 'customers:id,name,mobile', 'customers.customeraddress', 'beatschedules.beats', 'visitreports', 'orders_sum')
-                ->whereHas('users', function ($query) use ($userids, $request) {
-                    if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
-                        $query->whereIn('id', $userids);
-                    }
-                    if ($request->user_id && $request->user_id != null && $request->user_id != '') {
-                        $query->where('user_id', $request->user_id);
-                    }
-                    if ($request->division_id && $request->division_id != null && $request->division_id != '') {
-                        $query->where('division_id', $request->division_id);
-                    }
-                    if ($request->branch_id && $request->branch_id != null && $request->branch_id != '') {
-                        $query->where('branch_id', $request->branch_id);
-                    }
-                    if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
-                        $startDate = date('Y-m-d', strtotime($request->start_date));
-                        $endDate = date('Y-m-d', strtotime($request->end_date));
-                        $query->whereDate('checkin_date', '>=', $startDate)
-                            ->whereDate('checkin_date', '<=', $endDate);
-                    }
-                })
-                ->select('id', 'checkin_date', 'checkin_time', 'user_id', 'customer_id', 'checkout_time', 'beatscheduleid')
-                ->latest();
+            // $data = CheckIn::with('users:id,name', 'customers:id,name,mobile', 'customers.customeraddress', 'beatschedules.beats', 'visitreports', 'orders_sum')
+            //     ->whereHas('users', function ($query) use ($userids, $request) {
+            //         if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            //             $query->whereIn('id', $userids);
+            //         }
+            //         if ($request->user_id && $request->user_id != null && $request->user_id != '') {
+            //             $query->where('user_id', $request->user_id);
+            //         }
+            //         if ($request->division_id && $request->division_id != null && $request->division_id != '') {
+            //             $query->where('division_id', $request->division_id);
+            //         }
+            //         if ($request->branch_id && $request->branch_id != null && $request->branch_id != '') {
+            //             $query->where('branch_id', $request->branch_id);
+            //         }
+            //         if ($request->start_date && $request->start_date != null && $request->start_date != '' && $request->end_date && $request->end_date != null && $request->end_date != '') {
+            //             $startDate = date('Y-m-d', strtotime($request->start_date));
+            //             $endDate = date('Y-m-d', strtotime($request->end_date));
+            //             $query->whereDate('checkin_date', '>=', $startDate)
+            //                 ->whereDate('checkin_date', '<=', $endDate);
+            //         }
+            //     })
+            //     ->select('id', 'checkin_date', 'checkin_time', 'user_id', 'customer_id', 'checkout_time', 'beatscheduleid')
+            //     ->latest();
+
+
+
+            $data = CheckIn::with(
+        'user:id,name',
+        // 'customer:id,name,mobile',
+        // 'customer.customeraddress',
+        'beatschedule.beats',
+        'visitreport',
+        'orders',
+        'distributor',
+        'distributor.beat',
+        'secondaryCustomer',
+        'secondaryCustomer.district',
+        'secondaryCustomer.city',
+        'secondaryCustomer.state',
+        'secondaryCustomer.pincode',
+        'secondaryCustomer.beat',
+    )
+    ->whereHas('user', function ($query) use ($userids, $request) {
+
+        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
+            $query->whereIn('id', $userids);
+        }
+
+        if ($request->user_id) {
+            $query->where('id', $request->user_id);
+        }
+        
+
+        if ($request->division_id) {
+            $query->where('division_id', $request->division_id);
+        }
+
+        if ($request->branch_id) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        if ($request->start_date && $request->end_date) {
+            $startDate = date('Y-m-d', strtotime($request->start_date));
+            $endDate = date('Y-m-d', strtotime($request->end_date));
+
+            $query->whereDate('checkin_date', '>=', $startDate)
+                  ->whereDate('checkin_date', '<=', $endDate);
+        }
+            })
+        ->select(
+            'id',
+            'checkin_date',
+            'checkin_time',
+            'user_id',
+            'customer_id',
+            'entity_type',
+            'entity_id',
+            'checkout_time',
+            'beatscheduleid'
+        )->orderBy('updated_at', 'desc');
+
+    
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('visit_time', function ($query) {
+
+           
                     if (!empty($query->checkout_time) && !empty($query->checkin_time)) {
                         $parsedTime1 = Carbon::createFromFormat('H:i:s', $query->checkout_time);
                         $parsedTime2 = Carbon::createFromFormat('H:i:s', $query->checkin_time);
@@ -330,50 +392,244 @@ class ReportController extends Controller
                         return '-';
                     }
                 })
+
                 ->addColumn('beat_name', function ($query) {
-                    return isset($query['beatschedules']['beats']['beat_name']) ? $query['beatschedules']['beats']['beat_name'] : '';
+
+                    $entity = $query->entity;
+
+                    if (!$entity) {
+                        return '-';
+                    }
+
+                    return match ($query->entity_type) {
+
+                        'distributor' =>
+                            optional($entity->beat)->beat_name ?? '',
+
+                        'secondary_customer' =>
+                            optional($entity->beat)->beat_name ?? '',
+
+                        default => '',
+                    };
                 })
+                // ->addColumn('beat_name', function ($query) {
+                //     return optional($query->beatschedule?->beats)->beat_name ?? '';
+                //     // return isset($query['beatschedules']['beats']['beat_name']) ? $query['beatschedules']['beats']['beat_name'] : '';
+
+                //     })
+                // ->addColumn('entity_name', function ($query) {
+
+                //     return $query->entity_name;
+                // })
+                ->addColumn('entity_name', function ($query) {
+
+                    if ($query->entity_type === 'distributor') {
+
+                        return $query->distributor?->trade_name
+                            ?? $query->distributor?->legal_name
+                            ?? '-';
+                    }
+
+                    if ($query->entity_type === 'secondary_customer') {
+
+                        return $query->secondary_customer?->shop_name
+                            ?? '-';
+                    }
+
+                    return '-';
+                })
+
+                ->addColumn('mobile', function ($query) {
+
+                    $entity = $query->entity;
+
+                    if (!$entity) {
+                        return '-';
+                    }
+
+                    return match ($query->entity_type) {
+
+                        'distributor' =>
+                            $entity->mobile ?? '',
+
+                        'secondary_customer' =>
+                            $entity->mobile_number ?? '',
+
+                        'customer' =>
+                            $entity->mobile ?? '',
+
+                        default => '',
+                    };
+                })
+
+                ->addColumn('state_name', function ($query) {
+
+                    $entity = $query->entity;
+
+                    if (!$entity) {
+                        return '-';
+                    }
+
+                    return match ($query->entity_type) {
+
+                        'distributor' =>
+                            optional($entity->state)->state_name ?? '',
+
+                        'secondary_customer' =>
+                            optional($entity->state)->state_name ?? '',
+
+                        'customer' =>
+                            optional($query->customer?->customeraddress?->statename)->state_name ?? '',
+
+                        default => '',
+                    };
+                })
+
+                // ->addColumn('entity_type', function ($query) {
+                //     return $query->entity_type_display;
+                // })
+                
+                // ->addColumn('district_name', function ($query) {
+                //     return isset($query['customers']['customeraddress']['districtname']['district_name']) ? $query['customers']['customeraddress']['districtname']['district_name'] : '';
+                // })
+
                 ->addColumn('district_name', function ($query) {
-                    return isset($query['customers']['customeraddress']['districtname']['district_name']) ? $query['customers']['customeraddress']['districtname']['district_name'] : '';
+
+                    $entity = $query->entity;
+
+                    if (!$entity) {
+                        return '-';
+                    }
+
+                    return match ($query->entity_type) {
+
+                        'distributor' =>
+                            $entity->billing_district_export_name ?? '',
+
+                        'secondary_customer' =>
+                            optional($entity->district)->district_name ?? '',
+
+                        'customer' =>
+                            optional($query->customer?->customeraddress?->districtname)->district_name ?? '',
+
+                        default => '',
+                    };
                 })
+                // ->addColumn('city_name', function ($query) {
+                //     return  isset($query['customers']['customeraddress']['cityname']['city_name']) ? $query['customers']['customeraddress']['cityname']['city_name'] : '';
+                // })
+
                 ->addColumn('city_name', function ($query) {
-                    return  isset($query['customers']['customeraddress']['cityname']['city_name']) ? $query['customers']['customeraddress']['cityname']['city_name'] : '';
+
+                    $entity = $query->entity;
+
+                    if (!$entity) {
+                        return '-';
+                    }
+
+                    return match ($query->entity_type) {
+
+                        'distributor' =>
+                            $entity->billing_city__export_name ?? '',
+
+                        'secondary_customer' =>
+                            optional($entity->city)->city_name ?? '',
+
+                        'customer' =>
+                            optional($query->customer?->customeraddress?->cityname)->city_name ?? '',
+
+                        default => '',
+                    };
                 })
+
+                // ->addColumn('pincode', function ($query) {
+                //     return isset($query['customers']['customeraddress']['zipcode']) ? $query['customers']['customeraddress']['zipcode'] : '';
+                // })
+
                 ->addColumn('pincode', function ($query) {
-                    return isset($query['customers']['customeraddress']['zipcode']) ? $query['customers']['customeraddress']['zipcode'] : '';
+
+                    $entity = $query->entity;
+
+                    if (!$entity) {
+                        return '-';
+                    }
+
+                    return match ($query->entity_type) {
+
+                        'distributor' =>
+                            $entity->billing_pincode_export_name ?? '',
+
+                        'secondary_customer' =>
+                            optional($entity->pincode)->pincode ?? '',
+
+                        'customer' =>
+                            $query->customer?->customeraddress?->zipcode ?? '',
+
+                        default => '',
+                    };
                 })
+
+
+                // ->addColumn('address', function ($query) {
+                //     return isset($query['customers']['customeraddress']['address1']) ? $query['customers']['customeraddress']['address1'] : '';
+                // })
+
                 ->addColumn('address', function ($query) {
-                    return isset($query['customers']['customeraddress']['address1']) ? $query['customers']['customeraddress']['address1'] : '';
+
+                    $entity = $query->entity;
+
+                    if (!$entity) {
+                        return '-';
+                    }
+
+                    return match ($query->entity_type) {
+
+                        'distributor' =>
+                            $entity->billing_address ?? '',
+
+                        'secondary_customer' =>
+                            $entity->address_line ?? '',
+
+                        'customer' =>
+                            $query->customer?->customeraddress?->address1 ?? '',
+
+                        default => '',
+                    };
                 })
                 ->addColumn('ordersum', function ($query) {
-                    //return $query['orders']->sum('grand_total');
-                    $sum_qty = 0;
-                    if (!empty($query->orders_sum)) {
-                        foreach ($query->orders_sum as $key_new => $datas) {
-                            $order_id = $datas->id;
-                            $sum_qty += OrderDetails::where('order_id', $order_id)->sum('quantity') ?? 0;
-                        }
+
+                    $orders = $query->placedOrders()->pluck('id');
+
+                    if ($orders->isEmpty()) {
+                        return 0;
                     }
-                    return $sum_qty;
+
+                    return OrderDetails::whereIn('order_id', $orders)
+                        ->sum('quantity');
                 })
                 ->addColumn('uniquesku', function ($query) {
-                    //return $query['orders']->sum('total_qty');
-                    return $query->orders_sum->sum('grand_total') ?? 0;
+
+                    return $query->placedOrders()
+                        ->sum('grand_total');
                 })
                 ->addColumn('uniqueorder', function ($query) {
-                    return $query['orders']->count();
+
+                    return $query->placedOrders()->count();
                 })
                 ->addColumn('remarks', function ($query) {
-                    return isset($query['visitreports']['description']) ? $query['visitreports']['description'] : '';
+                    return optional($query->visitreport)->description ?? '';
+                    // return isset($query['visitreports']['description']) ? $query['visitreports']['description'] : '';
                 })
                 ->rawColumns(['visit_time', 'beat_name', 'district_name', 'city_name', 'pincode', 'address', 'ordersum', 'uniquesku', 'uniqueorder', 'remarks'])
                 ->make(true);
         }
+        
         $users = user::whereDoesntHave('roles', function ($query) {
             $query->whereIn('id', config('constants.customer_roles'));
         })->whereIn('id', $userids)->select('id', 'name')->orderBy('name', 'asc')->get();
         $divisions = Division::where('active', 'Y')->get();
         $branches = Branch::where('active', 'Y')->get();
+        
         return view('reports.customervisit', compact('users', 'divisions', 'branches'));
     }
 
@@ -410,6 +666,7 @@ class ReportController extends Controller
         foreach ($all_user_details as $k => $val) {
             $users[$k]['id'] = $val->id;
             $users[$k]['name'] = $val->name;
+            $users[$k]['employee_codes'] = $val->employee_codes;
         }
         if ($search_branches && count($search_branches) > 0 && $search_branches[0] != null) {
             if ($request->ajax()) {
@@ -418,7 +675,7 @@ class ReportController extends Controller
             }
         }
         if ($request->ajax()) {
-            $data = Attendance::with('users:id,name')
+            $data = Attendance::with('users:id,name,employee_codes')
                 ->where(function ($query) use ($request, $all_reporting_user_ids) {
                     if (!empty($request['executive_id'])) {
                         $query->where('user_id', $request['executive_id']);
@@ -467,6 +724,10 @@ class ReportController extends Controller
                 })
                 ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'punchout_image', 'worked_time', 'punchin_summary', 'punchout_summary', 'working_type', 'attendance_status', 'remark_status', 'punchin_from')
                 ->latest();
+
+                
+                
+                
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('checkbox', function ($data) {
@@ -486,16 +747,21 @@ class ReportController extends Controller
                 })
 
                 ->addColumn('current_status', function ($query) {
-                    $status = '';
-                    if ($query->attendance_status == '0') {
-                        $status = 'pending';
-                    } elseif ($query->attendance_status == '1') {
-                        $status = 'approved';
-                    } else {
-                        $status = 'rejected';
-                    }
-                    return $status;
-                })
+    $status = '';
+    if ($query->attendance_status == '0') {
+        $status = 'Pending';
+    } elseif ($query->attendance_status == '1') {
+        // Check if it was auto-approved
+        if (str_contains($query->remark_status, 'Auto-approved')) {
+            $status = '<span class="badge badge-success">Auto-Approved (8+ hrs)</span>';
+        } else {
+            $status = '<span class="badge badge-success">Approved</span>';
+        }
+    } else {
+        $status = '<span class="badge badge-danger">Rejected</span>';
+    }
+    return $status;
+})
 
                 ->addColumn('punchout', function ($query) {
                     $punchout_image = !empty($query->punchout_image) ? env('IMAGE_UPLOADS') . $query->punchout_image : asset('assets/img/placeholder.jpg');
@@ -569,6 +835,8 @@ class ReportController extends Controller
                 ->rawColumns(['punchin', 'punchout', 'action', 'action_status', 'current_status', 'punchin_from', 'checkbox'])
                 ->make(true);
         }
+
+        
         $divisions = Division::latest()->get();
         return view('reports.attendancereport', compact('users', 'branches', 'divisions'));
     }
@@ -671,23 +939,31 @@ class ReportController extends Controller
                 })
                 ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'punchout_image', 'worked_time', 'punchin_summary', 'punchout_summary', 'working_type', 'attendance_status', 'remark_status')
                 ->latest();
+
+                dd($data->get()->groupBy('users.name')->map->pluck('punchin_time', 'punchin_date'));
+                
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->editColumn('punchin_date', function ($data) {
                     return isset($data->punchin_date) ? stringtodate($data->punchin_date) : '';
                 })
 
-                ->addColumn('current_status', function ($query) {
-                    $status = '';
-                    if ($query->attendance_status == '0') {
-                        $status = 'pending';
-                    } elseif ($query->attendance_status == '1') {
-                        $status = 'approved';
-                    } else {
-                        $status = 'rejected';
-                    }
-                    return $status;
-                })
+->addColumn('current_status', function ($query) {
+    $status = '';
+    if ($query->attendance_status == '0') {
+        $status = 'Pending';
+    } elseif ($query->attendance_status == '1') {
+        // Check if it was auto-approved
+        if (str_contains($query->remark_status, 'Auto-approved')) {
+            $status = '<span class="badge badge-success">Auto-Approved (8+ hrs)</span>';
+        } else {
+            $status = '<span class="badge badge-success">Approved</span>';
+        }
+    } else {
+        $status = '<span class="badge badge-danger">Rejected</span>';
+    }
+    return $status;
+})
 
 
                 // ->editColumn('punchout_date', function($data)
@@ -4071,75 +4347,109 @@ class ReportController extends Controller
     public function customer_outstanting(Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $customers = Customers::whereIn('id', CustomerOutstanting::pluck('customer_id')->unique())->select('id', 'name')->get();
-        $dealers = Customers::where('customertype', ['1', '3'])->get();
+        $customers = MasterDistributor::whereIn('id', CustomerOutstanting::pluck('customer_id')->unique())->select('id', 'trade_name')->get();
+        // $dealers = MasterDistributor::where('customertype', ['1', '3'])->get();
         $branchs = Branch::where('active', 'Y')->select('id', 'branch_name')->get();
         $divisions = Division::where('active', 'Y')->select('id', 'division_name')->get();
 
         if ($request->ajax()) {
-            $data = CustomerOutstanting::with('branch', 'customer.customerdocuments')->select(
+            $data = CustomerOutstanting::select(
+                'posting_date',
+                'customer_code',
                 'customer_id',
-                'branch_id',
-                'year',
-                'quarter',
-                DB::raw('ROUND(SUM(amount), 2) as total_amounts'),
-                DB::raw('GROUP_CONCAT(amount) as amounts'),
-                DB::raw('GROUP_CONCAT(days) as days'),
-                DB::raw('JSON_OBJECTAGG(days, amount) as day_amount_pairs'),
+                'reference',
+                'customer_name',
+                'due_date',
+
+                DB::raw('SUM(amount) as total_amount'),
+
+                DB::raw("SUM(CASE WHEN days='0-30' THEN amount ELSE 0 END) as slot_0_30"),
+                DB::raw("SUM(CASE WHEN days='31-60' THEN amount ELSE 0 END) as slot_31_60"),
+                DB::raw("SUM(CASE WHEN days='61-90' THEN amount ELSE 0 END) as slot_61_90"),
+                DB::raw("SUM(CASE WHEN days='91-120' THEN amount ELSE 0 END) as slot_91_120"),
+                DB::raw("SUM(CASE WHEN days='121-150' THEN amount ELSE 0 END) as slot_121_150"),
+                DB::raw("SUM(CASE WHEN days='151-180' THEN amount ELSE 0 END) as slot_151_180"),
+                DB::raw("SUM(CASE WHEN days='181-210' THEN amount ELSE 0 END) as slot_181_210"),
+                DB::raw("SUM(CASE WHEN days='210' THEN amount ELSE 0 END) as slot_210_plus")
             );
 
-            if ($request->customer_id && !empty($request->customer_id)) {
+            $data->groupBy(
+                'customer_id',
+                'customer_name',
+                'customer_code',
+                'reference',
+                'posting_date',
+                'due_date'
+            );
+
+            if ($request->customer_id) {
                 $data->where('customer_id', $request->customer_id);
             }
+
             if (auth()->user()->hasRole('Customer Dealer')) {
-                $customer_idss = ParentDetail::where('parent_id', auth()->user()->customerid)->pluck('customer_id')->toArray();
+                $customer_idss = ParentDetail::where('parent_id', auth()->user()->customerid)
+                    ->pluck('customer_id')
+                    ->toArray();
+
                 $customer_idss[] = auth()->user()->customerid;
+
                 $data->whereIn('customer_id', $customer_idss);
             }
-            if ($request->branch_id && !empty($request->branch_id)) {
+            
+            if ($request->filled('balance_date')) {
+                $data->whereDate('posting_date', $request->balance_date);
+            }
+
+            if ($request->branch_id) {
                 $data->where('branch_id', $request->branch_id);
             }
-            if ($request->division_id && !empty($request->division_id)) {
+
+            if ($request->division_id) {
                 $data->where('division_id', $request->division_id);
             }
-
-            $data = $data->groupBy('customer_id', 'branch_id', 'year', 'quarter');
-
+                        
             return Datatables::of($data)
-                ->addIndexColumn()
-                ->addColumn('first_slot', function ($data) {
-                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['0-30'] ?? '0';
-                })
-                ->addColumn('second_slot', function ($data) {
-                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['31-60'] ?? '0';
-                })
-                ->addColumn('thired_slot', function ($data) {
-                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['61-90'] ?? '0';
-                })
-                ->addColumn('fourth_slot', function ($data) {
-                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['91-150'] ?? '0';
-                })
-                ->addColumn('fifth_slot', function ($data) {
-                    $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
-                    return $day_wise_amount_array['150'] ?? '0';
-                })
-                ->addColumn('balance_confirmations', function ($data) {
-                    if ($data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()) {
-                        return '<a href="' . $data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()->file_path . '" target="_blank" title="Balance Confirmations" ><i class="material-icons" style="color: #0a77b1 !important; font-size: 25px;" >picture_as_pdf</i></a>';
-                    } else {
-                        return '-';
-                    }
-                })
+            ->addIndexColumn()
+            ->make(true);
 
-                ->rawColumns(['first_slot', 'second_slot', 'thired_slot', 'fourth_slot', 'fifth_slot', 'balance_confirmations'])
-                ->make(true);
+            // $data = $data->groupBy('customer_id', 'branch_id', 'year', 'quarter');
+
+            // return Datatables::of($data)
+            //     ->addIndexColumn()
+            //     ->addColumn('first_slot', function ($data) {
+            //         $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+            //         return $day_wise_amount_array['0-30'] ?? '0';
+            //     })
+            //     ->addColumn('second_slot', function ($data) {
+            //         $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+            //         return $day_wise_amount_array['31-60'] ?? '0';
+            //     })
+            //     ->addColumn('thired_slot', function ($data) {
+            //         $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+            //         return $day_wise_amount_array['61-90'] ?? '0';
+            //     })
+            //     ->addColumn('fourth_slot', function ($data) {
+            //         $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+            //         return $day_wise_amount_array['91-150'] ?? '0';
+            //     })
+            //     ->addColumn('fifth_slot', function ($data) {
+            //         $day_wise_amount_array = json_decode($data->day_amount_pairs, true);
+            //         return $day_wise_amount_array['150'] ?? '0';
+            //     })
+            //     // ->addColumn('balance_confirmations', function ($data) {
+            //     //     if ($data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()) {
+            //     //         return '<a href="' . $data->customer->customerdocuments->where('document_name', 'balance_confirmations')->first()->file_path . '" target="_blank" title="Balance Confirmations" ><i class="material-icons" style="color: #0a77b1 !important; font-size: 25px;" >picture_as_pdf</i></a>';
+            //     //     } else {
+            //     //         return '-';
+            //     //     }
+            //     // })
+
+            //     ->rawColumns(['first_slot', 'second_slot', 'thired_slot', 'fourth_slot', 'fifth_slot', 'balance_confirmations'])
+            //     ->make(true);
+            
         }
-
-        return view('reports.customer_outstanting', compact('customers', 'dealers', 'branchs', 'divisions'));
+                // dd($customers);        
+        return view('reports.customer_outstanting', compact('customers', 'branchs', 'divisions'));
     }
 
     public function customer_outstanting_upload(Request $request)
