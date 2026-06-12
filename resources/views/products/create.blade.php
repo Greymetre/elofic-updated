@@ -52,7 +52,7 @@
                 </div>
               </div> -->
 
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Plant</label>
                   <div class="form-group has-default bmd-form-group">
@@ -64,6 +64,42 @@
                     @endif
                   </div>
                 </div>
+              </div> -->
+
+              @php
+                  $selectedWarehouses = !empty($products->branch_id)
+                      ? explode(',', $products->branch_id)
+                      : [];
+              @endphp
+
+              <div class="col-md-6">
+                  <div class="input_section">
+                      <label class="col-form-label">Plant</label>
+
+                      <div class="form-group has-default bmd-form-group">
+                          <select
+                              name="branch_id[]"
+                              class="form-control select2"
+                              multiple
+                              style="width:100%;"
+                          >
+                              @foreach($warehouses as $warehouse)
+                                  <option
+                                      value="{{ $warehouse->id }}"
+                                      {{ in_array($warehouse->warehouse_name, $selectedWarehouses) ? 'selected' : '' }}
+                                  >
+                                      {{ $warehouse->warehouse_name }}
+                                  </option>
+                              @endforeach
+                          </select>
+
+                          @if ($errors->has('branch_id'))
+                              <div class="error col-lg-12">
+                                  <p class="text-danger">{{ $errors->first('branch_id') }}</p>
+                              </div>
+                          @endif
+                      </div>
+                  </div>
               </div>
 
               <!-- <div class="col-md-6">
@@ -236,14 +272,16 @@
                 </div>
               </div> -->
 
+              
+
               <div class="col-md-6">
                 <div class="input_section">
-                  <label class="col-form-label">WM packing standad<span class="text-danger"> *</span></label>
+                  <label class="col-form-label">WM packing standad</label>
                   <div class="form-group has-default bmd-form-group">
-                    <input type="text" name="suc_del" class="form-control" value="{!! old( 'suc_del', $products['suc_del']) !!}" maxlength="200" required>
-                    @if ($errors->has('suc_del'))
+                    <input name="rmc" id="rmc" class="form-control" value="{!! old( 'rmc', !empty($products['productpriceinfo']['rmc']) ? $products['productpriceinfo']['rmc'] :'' ) !!}" step="0.01" min="0">
+                    @if ($errors->has('rmc'))
                     <div class="error col-lg-12">
-                      <p class="text-danger">{{ $errors->first('suc_del') }}</p>
+                      <p class="text-danger">{{ $errors->first('rmc') }}</p>
                     </div>
                     @endif
                   </div>
@@ -496,6 +534,7 @@
                 </div>
               </div> -->
 
+
               <div class="col-md-6">
                 <div class="input_section">
                   <label class="col-form-label">Nishtha</label>
@@ -509,6 +548,9 @@
                   </div>
                 </div>
               </div>
+
+             
+               
 
               <!-- <div class="col-md-6">
                 <div class="input_section">
@@ -526,17 +568,19 @@
 
               <div class="col-md-6">
                 <div class="input_section">
-                  <label class="col-form-label">Saathi</label>
+                  <label class="col-form-label">Saathi<span class="text-danger"> *</span></label>
                   <div class="form-group has-default bmd-form-group">
-                    <input type="number" name="rmc" id="rmc" class="form-control" value="{!! old( 'rmc', !empty($products['productpriceinfo']['rmc']) ? $products['productpriceinfo']['rmc'] :'' ) !!}" step="0.01" min="0">
-                    @if ($errors->has('rmc'))
+                    <input type="text" name="suc_del" class="form-control" value="{!! old( 'suc_del', $products['suc_del']) !!}" maxlength="200" required>
+                    @if ($errors->has('suc_del'))
                     <div class="error col-lg-12">
-                      <p class="text-danger">{{ $errors->first('rmc') }}</p>
+                      <p class="text-danger">{{ $errors->first('suc_del') }}</p>
                     </div>
                     @endif
                   </div>
                 </div>
               </div>
+
+              
 
 
               
@@ -978,6 +1022,13 @@
     <script src="{{ url('/').'/'.asset('assets/js/jquery.custom.js') }}"></script>
     <script src="{{ url('/').'/'.asset('assets/js/validation_products.js') }}"></script>
     <script type="text/javascript">
+
+      $(document).ready(function () {
+          $('.select2').select2({
+              placeholder: 'Select Plant',
+              allowClear: true
+          });
+      });
       $(document).ready(function() {
         var $table = $('table.kvcodes-dynamic-rows-example'),
           counter = $('#tab_logic tr:last').attr('value');

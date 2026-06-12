@@ -30,85 +30,169 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
             //
         ]);
     }
+    // public function collection(Collection $rows)
+    // {
+    //     $productdetails = collect([]);
+    //     foreach ($rows as $row) {
+    //         if( $product = Product::updateOrCreate(['id' => $row['product_id'] ],
+    //         [
+    //             'branch_id'  =>  $row['Plant No'] ?? '',
+    //             'product_code' => isset($row['product_code'])? $row['product_code']:'',
+    //             'active' => isset($row['status'])? ucfirst($row['status']):'Y',
+    //             'product_name' => isset($row['product_name'])? ucfirst($row['product_name']):'',
+                
+    //             'new_group' => isset($row['new_group'])? $row['new_group']:'',
+    //             'sub_group' => isset($row['sub_group'])? ucfirst($row['sub_group']):'',
+    //             'expiry_interval' => isset($row['expiry_interval'])? ucfirst($row['expiry_interval']):'',
+    //             'expiry_interval_preiod' => isset($row['expiry_interval_preiod'])? ucfirst($row['expiry_interval_preiod']):0,
+    //             'display_name' => isset($row['display_name'])? ucfirst($row['display_name']):'',
+    //             'description' => isset($row['description'])? ucfirst($row['description']):'',
+    //             'subcategory_id' => isset($row['subcategory_id'])? $row['subcategory_id']:null,
+    //             'category_id' => isset($row['category_id'])? $row['category_id']:null,
+    //             'brand_id' => isset($row['brand_id'])? $row['brand_id']:null,
+    //             'product_image' => isset($row['product_image'])? $row['product_image']:'',
+    //             'unit_id' => isset($row['unit_id'])? $row['unit_id']:null,
+    //             'suc_del' => isset($row['suc_del'])? $row['suc_del']:null,
+    //             'sap_code' => isset($row['sap_code'])? $row['sap_code']:null,
+    //             'created_by' => Auth::user()->id,
+    //             'created_at' => getcurentDateTime(),
+    //             'updated_at' => getcurentDateTime(),
+    //             // 'specification' => isset($row['specification']) ? $row['specification'] :null,
+    //             // 'part_no'       => isset($row['part_no']) ? $row['part_no'] :null,
+    //             // 'product_no'    => isset($row['product_no']) ? $row['product_no'] :null,
+    //             // 'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
+    //             'specification' => isset($row['hp']) ? $row['hp'] :null,
+    //             'part_no'       => isset($row['kw']) ? $row['kw'] :null,
+    //             'product_no'    => isset($row['product_stage']) ? $row['product_stage'] :null,
+    //             'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
+    //             'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
+    //             'phase'      => isset($row['phase']) ? $row['phase'] :null,
+    //             'hsn_sac'      => isset($row['hsn_sac']) ? $row['hsn_sac'] :null,
+    //             'hsn_sac_no'      => isset($row['hsn_sac_no']) ? $row['hsn_sac_no'] :null,
+                
+
+    //         ]
+    //         ) )
+    //         {
+    //            ProductDetails::updateOrCreate(['product_id' => $product['id'] ],[
+    //                 'active' => isset($row['status'])? ucfirst($row['status']):'Y',
+    //                 'product_id' => $product['id'],
+    //                 'detail_title' => isset($row['detail_title'])? ucfirst($row['detail_title']):$row['product_name'],
+    //                 'detail_description' => isset($row['detail_description'])? ucfirst($row['detail_description']):'',
+    //                 'detail_image' => isset($row['detail_image'])? $row['detail_image']:'',
+    //                 'mrp' => isset($row['mrp'])? $row['mrp']:0.00,
+    //                 'price' => isset($row['price'])? $row['price']:$row['mrp'],
+    //                 'discount' => isset($row['discount'])? $row['discount']:0.00,
+    //                 'max_discount' => isset($row['max_discount'])? $row['max_discount']:0.00,
+    //                 'rmc' => isset($row['rmc'])? $row['rmc']:0.00,
+    //                 'selling_price' => isset($row['selling_price'])? $row['selling_price']:0.00,
+    //                 'gst' => isset($row['gst'])? $row['gst']:0.00,
+    //                 'isprimary' => isset($row['isprimary'])? $row['isprimary']:1,
+    //                 'hsn_code' => isset($row['hsn_code'])? $row['hsn_code']:null,
+    //                 'ean_code' => isset($row['ean_code'])? $row['ean_code']:null,
+    //                 'top_sku'          => !empty($rows['top_sku']) ? $rows['top_sku'] :null,
+    //                 'budget_for_month' => !empty($rows['budget_for_month']) ? $rows['budget_for_month'] :null,
+    //                 'created_at' => getcurentDateTime() ,
+    //                 'updated_at' => getcurentDateTime()
+    //             ]);
+    //         }
+    //     }
+    // }
+
     public function collection(Collection $rows)
     {
-        $productdetails = collect([]);
         foreach ($rows as $row) {
-            if( $product = Product::updateOrCreate(['id' => $row['product_id'] ],[
-                'active' => isset($row['status'])? ucfirst($row['status']):'Y',
-                'product_name' => isset($row['product_name'])? ucfirst($row['product_name']):'',
-                'product_code' => isset($row['product_code'])? $row['product_code']:'',
-                'new_group' => isset($row['new_group'])? $row['new_group']:'',
-                'sub_group' => isset($row['sub_group'])? ucfirst($row['sub_group']):'',
-                'expiry_interval' => isset($row['expiry_interval'])? ucfirst($row['expiry_interval']):'',
-                'expiry_interval_preiod' => isset($row['expiry_interval_preiod'])? ucfirst($row['expiry_interval_preiod']):0,
-                'display_name' => isset($row['display_name'])? ucfirst($row['display_name']):'',
-                'description' => isset($row['description'])? ucfirst($row['description']):'',
-                'subcategory_id' => isset($row['subcategory_id'])? $row['subcategory_id']:null,
-                'category_id' => isset($row['category_id'])? $row['category_id']:null,
-                'brand_id' => isset($row['brand_id'])? $row['brand_id']:null,
-                'product_image' => isset($row['product_image'])? $row['product_image']:'',
-                'unit_id' => isset($row['unit_id'])? $row['unit_id']:null,
-                'suc_del' => isset($row['suc_del'])? $row['suc_del']:null,
-                'sap_code' => isset($row['sap_code'])? $row['sap_code']:null,
-                'created_by' => Auth::user()->id,
-                'created_at' => getcurentDateTime(),
-                'updated_at' => getcurentDateTime(),
-                // 'specification' => isset($row['specification']) ? $row['specification'] :null,
-                // 'part_no'       => isset($row['part_no']) ? $row['part_no'] :null,
-                // 'product_no'    => isset($row['product_no']) ? $row['product_no'] :null,
-                // 'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
-                'specification' => isset($row['hp']) ? $row['hp'] :null,
-                'part_no'       => isset($row['kw']) ? $row['kw'] :null,
-                'product_no'    => isset($row['product_stage']) ? $row['product_stage'] :null,
-                'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
-                'model_no'      => isset($row['model_no']) ? $row['model_no'] :null,
-                'phase'      => isset($row['phase']) ? $row['phase'] :null,
-                'hsn_sac'      => isset($row['hsn_sac']) ? $row['hsn_sac'] :null,
-                'hsn_sac_no'      => isset($row['hsn_sac_no']) ? $row['hsn_sac_no'] :null,
-                'branch_id'  =>  $row['branch_id'] ?? ''
 
-            ]) )
-            {
-               ProductDetails::updateOrCreate(['product_id' => $product['id'] ],[
-                    'active' => isset($row['status'])? ucfirst($row['status']):'Y',
-                    'product_id' => $product['id'],
-                    'detail_title' => isset($row['detail_title'])? ucfirst($row['detail_title']):$row['product_name'],
-                    'detail_description' => isset($row['detail_description'])? ucfirst($row['detail_description']):'',
-                    'detail_image' => isset($row['detail_image'])? $row['detail_image']:'',
-                    'mrp' => isset($row['mrp'])? $row['mrp']:0.00,
-                    'price' => isset($row['price'])? $row['price']:$row['mrp'],
-                    'discount' => isset($row['discount'])? $row['discount']:0.00,
-                    'max_discount' => isset($row['max_discount'])? $row['max_discount']:0.00,
-                    'rmc' => isset($row['rmc'])? $row['rmc']:0.00,
-                    'selling_price' => isset($row['selling_price'])? $row['selling_price']:0.00,
-                    'gst' => isset($row['gst'])? $row['gst']:0.00,
-                    'isprimary' => isset($row['isprimary'])? $row['isprimary']:1,
-                    'hsn_code' => isset($row['hsn_code'])? $row['hsn_code']:null,
-                    'ean_code' => isset($row['ean_code'])? $row['ean_code']:null,
-                    'top_sku'          => !empty($rows['top_sku']) ? $rows['top_sku'] :null,
-                    'budget_for_month' => !empty($rows['budget_for_month']) ? $rows['budget_for_month'] :null,
-                    'created_at' => getcurentDateTime() ,
-                    'updated_at' => getcurentDateTime()
-                ]);
+            $productData = [
+                'branch_id'      => $row['plant_no'] ?? null,
+                'product_code'   => $row['material_no'] ?? null,
+                'part_no'        => $row['part_no'] ?? null,
+                'specification'  => $row['material_group'] ?? null,
+                'phase'          => $row['application'] ?? null,
+                'product_name'   => $row['material_description'] ?? null,
+
+                'product_no'     => $row['old_material'] ?? null,
+                'sap_code'       => $row['material_type'] ?? null,
+                'description'       => $row['material_grp'] ?? null,
+                'subcategory_id' => $row['subcategory_id'] ?? null,
+                'category_id'    => $row['category_id'] ?? null,
+                'brand_id'       => $row['brand_id'] ?? null,
+
+                'sub_group'      => $row['type'] ?? null,
+                'model_no'       => $row['model'] ?? null,
+
+                'suc_del'        => $row['saathi'] ?? null,
+
+                'hsn_sac_no'     => $row['pack_size'] ?? null,
+
+                'product_image'  => $row['product_image'] ?? null,
+
+                'active'         => $row['status'] ?? 'Y',
+
+                'created_by'     => Auth::id(),
+                'updated_at'     => now(),
+            ];
+
+            // UPDATE
+            if (!empty($row['product_id'])) {
+
+                $product = Product::find($row['product_id']);
+
+                if (!$product) {
+                    continue; // Skip invalid IDs
+                }
+
+                $product->update($productData);
+
+            } 
+            // CREATE
+            else {
+
+                $productData['created_at'] = now();
+
+                $product = Product::create($productData);
             }
+
+            ProductDetails::updateOrCreate(
+                [
+                    'product_id' => $product->id
+                ],
+                [
+                    'active'           => $row['status'] ?? 'Y',
+                    'product_id'       => $product->id,
+
+                    'detail_title'     => $row['material_description'] ?? '',
+                    'detail_description' => '',
+
+                    'mrp'              => $row['mrp'] ?? 0,
+                    'price'            => $row['price'] ?? 0,
+
+                    'rmc'              => $row['wm_packing_standad'] ?? null,
+
+                    'top_sku'          => $row['remarks'] ?? null,
+
+                    'budget_for_month' => $row['nishtha'] ?? null,
+
+                    'updated_at'       => now(),
+                ]
+            );
         }
     }
     public function rules(): array
     {
         return [
-            'product_name' => 'required|string|regex:/[a-zA-Z0-9\s]+/',
-            'hsn_sac' => 'nullable|in:HSN,SAC',
+            // 'product_name' => 'required|string|regex:/[a-zA-Z0-9\s]+/',
+            // 'hsn_sac' => 'nullable|in:HSN,SAC',
         ];
     }
 
     public function customValidationMessages()
     {
         return [
-            'product_name.required' => 'Product name is required.',
-            'product_name.string' => 'Product name must be a string.',
-            'product_name.regex' => 'Product name format is invalid.',
-            'hsn_sac.in' => 'it should be only from HSN or SAC.',
+            // 'product_name.required' => 'Product name is required.',
+            // 'product_name.string' => 'Product name must be a string.',
+            // 'product_name.regex' => 'Product name format is invalid.',
+            // 'hsn_sac.in' => 'it should be only from HSN or SAC.',
         ];
     }
 

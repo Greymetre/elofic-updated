@@ -71,6 +71,7 @@ class SyncProducts extends Command
 
                     $productDetail->fill([
                         'detail_title' => $item['mat_description'] ?? '',
+                        'budget_for_month' => $item['znpoint'] ?? null,
                         'mrp' => $item['kbetr'] ?? 0,
                         'price' => $item['kbetr'] ?? 0,
                         // 'selling_price' => $item['selling_price'] ?? 0,

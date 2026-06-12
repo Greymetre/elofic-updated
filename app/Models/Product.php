@@ -61,4 +61,13 @@ class Product extends Model
       return $this->hasOne('App\Models\OrderSchemeDetail', 'product_id', 'id');
     }
 
+    public function warehouses()
+    {
+        return $this->belongsToMany(
+            \App\Models\WareHouse::class,
+            null,
+            null,
+            null
+        );
+    }
 }

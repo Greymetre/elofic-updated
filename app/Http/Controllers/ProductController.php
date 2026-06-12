@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\UnitMeasure;
 use App\Models\ProductDetails;
+use App\Models\WareHouse;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Auth;
@@ -61,16 +62,31 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        abort_if(Gate::denies('product_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
-        $categories = Category::where('active','=','Y')->select('id', 'category_name')->get();
-        $subcategories = Subcategory::where('active','=','Y')->select('id', 'subcategory_name')->get();
-        $brands = Brand::where('active','=','Y')->select('id', 'brand_name')->get();
-        $units = UnitMeasure::where('active','=','Y')->select('id', 'unit_name')->get();
-        $branches = Branch::where('active','=','Y')->select('id', 'branch_name')->get();
-        return view('products.create',compact('categories','subcategories','brands','units', 'branches') )->with('products',$this->products);
-    }
+
+
+public function create()
+{
+    abort_if(Gate::denies('product_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+    $categories = Category::where('active','Y')->select('id', 'category_name')->get();
+    $subcategories = Subcategory::where('active','Y')->select('id', 'subcategory_name')->get();
+    $brands = Brand::where('active','Y')->select('id', 'brand_name')->get();
+    $units = UnitMeasure::where('active','Y')->select('id', 'unit_name')->get();
+    $branches = Branch::where('active','Y')->select('id', 'branch_name')->get();
+
+   $warehouses = WareHouse::orderBy('warehouse_name')->get();
+
+    // dd($warehouses);
+
+    return view('products.create', compact(
+        'categories',
+        'subcategories',
+        'brands',
+        'units',
+        'branches',
+        'warehouses'
+    ))->with('products', $this->products);
+}
 
     /**
      * Store a newly created resource in storage.
@@ -80,7 +96,7 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        // dd($request);
+        dd($request);
         try
         { 
             abort_if(Gate::denies('product_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -100,12 +116,20 @@ class ProductController extends Controller
                 unset($request['image']);
                 $request['product_image'] = fileupload($image, $this->path, $filename);
             }
+            $warehouseNames = '';
+
+            if (!empty($request->branch_id)) {
+                $warehouseNames = WareHouse::whereIn('id', $request->branch_id)
+                    ->pluck('warehouse_name')
+                    ->implode(',');
+            }
             $request['active'] = 'Y';
             $request['created_by'] = Auth::user()->id;
             if($product_id = Product::insertGetId([
                 'active'        => 'Y', 
                 'product_name'  => !empty($request['product_name']) ? $request['product_name'] :'',
                 'product_code'  => !empty($request['product_code']) ? $request['product_code'] :'',
+                'branch_id' => $warehouseNames,
                 'new_group'  => !empty($request['new_group']) ? $request['new_group'] :'',
                 'sub_group'  => !empty($request['sub_group']) ? $request['sub_group'] :'',
                 // 'expiry_interval'  => !empty($request['expiry_interval']) ? $request['expiry_interval'] :'',
@@ -113,7 +137,7 @@ class ProductController extends Controller
                 //'display_name'  => !empty($request['display_name']) ? $request['display_name'] :'',
                 'description'   => !empty($request['description']) ? $request['description'] :'',
                 'subcategory_id'=> !empty($request['subcategory_id']) ? $request['subcategory_id'] :null,
-                // 'category_id'   => !empty($request['category_id']) ? $request['category_id'] :null,
+                'category_id'   => !empty($request['category_id']) ? $request['category_id'] :null,
                 'brand_id'      => !empty($request['brand_id']) ? $request['brand_id'] :null,
                 'product_image' => !empty($request['product_image']) ? $request['product_image'] :'',
                 // 'unit_id'       => !empty($request['unit_id']) ? $request['unit_id'] :null,
@@ -128,6 +152,7 @@ class ProductController extends Controller
                 'hsn_sac'      => isset($row['hsn_sac']) ? $row['hsn_sac'] :null,
                 'hsn_sac_no'      => isset($row['hsn_sac_no']) ? $row['hsn_sac_no'] :null,
                 'suc_del'  => !empty($request['suc_del']) ? $request['suc_del'] :'',
+                
             ]))
             {
                 if(!empty($request['detail']))
@@ -226,8 +251,9 @@ class ProductController extends Controller
         $brands = Brand::where('active','=','Y')->select('id', 'brand_name')->get();
         $units = UnitMeasure::where('active','=','Y')->select('id', 'unit_name')->get();
         $branches = Branch::where('active','=','Y')->select('id', 'branch_name')->get();
+        $warehouses = WareHouse::orderBy('warehouse_name')->get();
         // dd($products);
-        return view('products.create',compact('categories','subcategories','brands','units', 'branches') )->with('products',$products);
+        return view('products.create',compact('categories','subcategories','brands','units', 'branches','warehouses') )->with('products',$products);
     }
 
     /**
@@ -243,7 +269,13 @@ class ProductController extends Controller
     // dd($request);
         try
         { 
+            $warehouseNames = '';
 
+            if (!empty($request->branch_id)) {
+                $warehouseNames = WareHouse::whereIn('id', $request->branch_id)
+                    ->pluck('warehouse_name')
+                    ->implode(',');
+            }
             abort_if(Gate::denies('product_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $validator = Validator::make($request->all(), [
                 'product_code' => 'unique:products,product_code,'.decrypt($id),
@@ -254,10 +286,13 @@ class ProductController extends Controller
                             ->withErrors($validator)
                             ->withInput();
             }
+
+            // dd($warehouseNames);
             $id = decrypt($id);
             $product = Product::find($id);
             $product->product_name = !empty($request['product_name'])? $request['product_name'] :'';
             $product->product_code = !empty($request['product_code'])? $request['product_code'] :'';
+            $product->branch_id = $warehouseNames;
             $product->new_group = !empty($request['new_group'])? $request['new_group'] :'';
             $product->sub_group = !empty($request['sub_group'])? $request['sub_group'] :'';
             // $product->expiry_interval = !empty($request['expiry_interval'])? $request['expiry_interval'] :'';
