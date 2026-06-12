@@ -64,7 +64,7 @@
         --toggle-color: #DDD;
         --text-color: #707070;
 
-        /* ====== Transition ====== */
+        /* ====== Transition ====== */ƒ
         /*  --tran-03: all 0.2s ease;
       --tran-03: all 0.3s ease;
       --tran-04: all 0.3s ease;
@@ -781,20 +781,20 @@
                   <span class="name"> {!! Auth::user()->name !!}</span>
                </div>
             </div>--}}
-                <i class='bx bx-chevron-right toggle'></i>
+                <!-- <i class='bx bx-chevron-right toggle'></i> -->
             </header>
             <div class="menu-bar">
                 <div class="menu">
                     <ul class="menu-links">
                         @if(auth()->user()->can(['dashboard_access']))
-                        {{--<li class="nav-link hide_icon {{ request()->is('dealer_dashboard') ? 'active' : '' }}">
+                        <li class="nav-link hide_icon {{ request()->is('dealer_dashboard') ? 'active' : '' }}">
                         <a class="collapsed hoveradd" href="{{ url('dashboard') }}">
                             <i class="material-icons icon">dashboard</i>
                             <span>{!! trans('panel.sidemenu.dashboard') !!}</span>
                             <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.dashboard') !!}</div>
                         </a>
-                        </li>--}}
-
+                        </li>
+<!-- 
                         <li
                             class="nav-link {{ request()->is('sales_summary_dashboard*') || request()->is('dealer_dashboard') ? 'active' : '' }}">
                             <a class="collapsed hoveradd" data-toggle="collapse" href="#dashMenu" aria-expanded="false">
@@ -836,7 +836,7 @@
                                     @endif
                                 </ul>
                             </div>
-                        </li>
+                        </li> -->   
                         @endif
                         @if(auth()->user()->can(['lead_management_access']))
                         <li
@@ -2727,7 +2727,7 @@
             <div class="container-fluid" style="background: transparent; !important">
                 <div class="new_demo">
                     <!-- <img class="rounded ml-2 iconimg" alt="Blueneba" src="{!! asset('assets/img/bnt_logo.png') !!}?" width="120"> -->
-                    <img class="rounded ml-2  iconimg" src="{!! asset('assets/img/elofic.png') !!}" width="100">
+                    <img class="rounded ml-2  iconimg" src="{!! asset('assets/img/elofic.png') !!}" width="133">
                 </div>
                 <!-- <img src="{!! asset('assets/img/logo.png') !!}" width="50"> -->
                 <div class="navbar-wrapper">

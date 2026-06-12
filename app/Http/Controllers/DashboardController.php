@@ -28,7 +28,11 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         abort_if(Gate::denies('dashboard_access'), Response::HTTP_FORBIDDEN, 'Forbidden,' . PHP_EOL . 'You don\'t have the right permissions. Please contact to the admin.');
-        return view('dashboard.index');
+        $dashboardZones = Branch::where('active', 'Y')
+            ->orderBy('branch_name')
+            ->get(['id', 'branch_name']);
+
+        return view('dashboard.index', compact('dashboardZones'));
         $users_ids = getUsersReportingToAuth();
         // $users= User::where('active','=','Y')->whereIn('reportingid', $users_ids)->select('id','name')->get();
         $branches = Branch::latest()->get();
@@ -1384,6 +1388,689 @@ class DashboardController extends Controller
         $data['total_order'] = $totalOrders;
 
         return response()->json($data);
+    }
+
+    public function eloficSecondarySalesDashboard(Request $request)
+    {
+        [$fromdate, $todate, $periodLabel] = $this->eloficDashboardPeriod($request);
+        $zoneId = $this->eloficDashboardZoneId($request);
+        $activeFrom = Carbon::parse($todate)->subMonths(12)->toDateString();
+
+        // Secondary sales source: order_details.line_total joined to orders by order_id.
+        // This follows the existing secondary dashboard total_order_value() calculation.
+        $achievement = (float) $this->eloficOrderDetailsBase($fromdate, $todate, $zoneId)->sum('od.line_total');
+        $target = $this->eloficTargetTotal($fromdate, $todate, $zoneId);
+
+        $registrations = DB::table('secondary_customers as sc');
+        if ($zoneId && \Schema::hasColumn('secondary_customers', 'created_by')) {
+            $registrations->join('users as scu', 'scu.id', '=', 'sc.created_by')
+                ->where('scu.branch_id', $zoneId);
+        }
+        $totalRegistrations = (int) (clone $registrations)->count();
+        $breakdown = (clone $registrations)
+            ->selectRaw("UPPER(sc.type) as type, COUNT(*) as total")
+            ->groupBy(DB::raw('UPPER(sc.type)'))
+            ->get()
+            ->keyBy('type');
+
+        $activeBreakdown = DB::table('secondary_customers as sc')
+            ->join('orders as o', 'o.buyer_id', '=', 'sc.id')
+            ->whereBetween('o.order_date', [$activeFrom, $todate])
+            ->whereNull('o.deleted_at');
+
+        if ($zoneId) {
+            $activeBreakdown->join('users as zu', 'zu.id', '=', 'o.created_by')
+                ->where('zu.branch_id', $zoneId);
+        }
+
+        $activeBreakdown = $activeBreakdown
+            ->selectRaw("UPPER(sc.type) as type, COUNT(DISTINCT sc.id) as active")
+            ->groupBy(DB::raw('UPPER(sc.type)'))
+            ->pluck('active', 'type');
+
+        $types = [
+            'RETAILER' => 'Retailers',
+            'MECHANIC' => 'Mechanics',
+            'GARAGE' => 'Garages',
+            'WORKSHOP' => 'Workshops',
+        ];
+        $customerBreakdown = collect($types)->map(function ($label, $key) use ($breakdown, $activeBreakdown) {
+            $total = (int) optional($breakdown->get($key))->total;
+            $active = (int) ($activeBreakdown[$key] ?? 0);
+            return [
+                'type' => $label,
+                'total' => $total,
+                'active' => $active,
+                'inactive' => max($total - $active, 0),
+                'activePercent' => $total > 0 ? round(($active / $total) * 100) : 0,
+            ];
+        })->values();
+        $activeCustomers = (int) $customerBreakdown->sum('active');
+
+        $topCustomers = $this->eloficOrderDetailsBase($fromdate, $todate, $zoneId)
+            ->leftJoin('secondary_customers as sc', 'sc.id', '=', 'o.buyer_id')
+            ->selectRaw("COALESCE(NULLIF(sc.shop_name, ''), NULLIF(sc.owner_name, ''), CONCAT('Customer #', o.buyer_id)) as label, SUM(od.line_total) as value")
+            ->groupBy('o.buyer_id', 'sc.shop_name', 'sc.owner_name')
+            ->orderByDesc('value')
+            ->limit(10)
+            ->get();
+
+        $monthlySales = $this->eloficMonthlyBuckets($fromdate, $todate)->map(function ($bucket) use ($zoneId) {
+            return [
+                'label' => $bucket['label'],
+                'achievement' => (float) $this->eloficOrderDetailsBase($bucket['from'], $bucket['to'], $zoneId)->sum('od.line_total'),
+                'target' => $this->eloficTargetTotal($bucket['from'], $bucket['to'], $zoneId),
+            ];
+        });
+
+        $salesTrend = $monthlySales->map(fn ($item) => [
+            'label' => $item['label'],
+            'value' => $item['achievement'],
+        ]);
+
+        $yoyGrowth = collect([2, 1, 0])->map(function ($yearsBack) use ($todate, $zoneId) {
+            $fyStartYear = Carbon::parse($todate)->month >= 4 ? Carbon::parse($todate)->year : Carbon::parse($todate)->year - 1;
+            $fyStartYear -= $yearsBack;
+            $from = Carbon::create($fyStartYear, 4, 1)->toDateString();
+            $to = Carbon::create($fyStartYear + 1, 3, 31)->toDateString();
+            return [
+                'label' => 'FY' . substr((string) ($fyStartYear + 1), -2),
+                'data' => $this->eloficMonthlyBuckets($from, $to)->map(fn ($bucket) => [
+                    'label' => $bucket['label'],
+                    'value' => (float) $this->eloficOrderDetailsBase($bucket['from'], $bucket['to'], $zoneId)->sum('od.line_total'),
+                ])->values(),
+            ];
+        })->values();
+
+        $zoneSales = $this->eloficOrderDetailsBase($fromdate, $todate, $zoneId)
+            ->leftJoin('users as u', 'u.id', '=', 'o.created_by')
+            ->leftJoin('branches as b', 'b.id', '=', 'u.branch_id')
+            ->selectRaw("b.id as branch_id, COALESCE(NULLIF(b.branch_name, ''), 'Unassigned') as label, SUM(od.line_total) as achievement")
+            ->groupBy('b.id', 'label')
+            ->get()
+            ->keyBy('branch_id');
+
+        $zoneBranches = DB::table('branches')
+            ->where('active', 'Y')
+            ->when($zoneId, fn ($query) => $query->where('id', $zoneId))
+            ->orderBy('branch_name')
+            ->get(['id', 'branch_name']);
+
+        $zoneWiseSales = $zoneBranches->map(function ($branch) use ($fromdate, $todate, $zoneSales) {
+                $sales = $zoneSales->get($branch->id);
+                return [
+                    'label' => $branch->branch_name,
+                    'achievement' => (float) optional($sales)->achievement,
+                    'target' => $this->eloficTargetTotal($fromdate, $todate, (int) $branch->id),
+                ];
+            })
+            ->values();
+
+        $zoneWiseTarget = $zoneWiseSales;
+
+        return response()->json([
+            'periodLabel' => $periodLabel,
+            'source' => 'orders + order_details.line_total',
+            'filter' => compact('fromdate', 'todate', 'zoneId'),
+            'kpis' => [
+                'totalRegistrations' => $totalRegistrations,
+                'activeCustomers' => $activeCustomers,
+                'secondarySalesAchievement' => $achievement,
+                'secondarySalesTarget' => $target,
+                'overallAchievementPercent' => $target > 0 ? round(($achievement / $target) * 100, 2) : 0,
+            ],
+            'customerBreakdown' => $customerBreakdown,
+            'charts' => [
+                'topCustomers' => $topCustomers,
+                'salesVsTarget' => $zoneWiseTarget,
+                'salesTrend' => $salesTrend,
+                'yoyGrowth' => $yoyGrowth,
+                'regionWiseSales' => $zoneWiseSales,
+            ],
+        ]);
+    }
+
+    public function eloficProductDashboard(Request $request)
+    {
+        [$fromdate, $todate, $periodLabel] = $this->eloficDashboardPeriod($request);
+        $zoneId = $this->eloficDashboardZoneId($request);
+        $base = $this->eloficOrderDetailsBase($fromdate, $todate, $zoneId)
+            ->join('products as p', 'p.id', '=', 'od.product_id');
+
+        $topProducts = (clone $base)
+            ->selectRaw("COALESCE(NULLIF(p.product_name, ''), CONCAT('Product #', od.product_id)) as label, SUM(od.line_total) as value")
+            ->groupBy('od.product_id', 'p.product_name')
+            ->orderByDesc('value')
+            ->limit(23)
+            ->get();
+
+        $slowMoving = (clone $base)
+            ->selectRaw("COALESCE(NULLIF(p.product_name, ''), CONCAT('Product #', od.product_id)) as label, SUM(od.line_total) as value")
+            ->groupBy('od.product_id', 'p.product_name')
+            ->havingRaw('SUM(od.line_total) > 0')
+            ->orderBy('value')
+            ->limit(10)
+            ->get();
+
+        $segmentWise = (clone $base)
+            ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
+            ->selectRaw("COALESCE(NULLIF(c.category_name, ''), NULLIF(p.new_group, ''), 'Unassigned') as label, SUM(od.line_total) as value")
+            ->groupBy('label')
+            ->orderByDesc('value')
+            ->get();
+
+        $topSkuIds = $topProducts->take(10)->pluck('label')->values();
+        $topSkuProducts = (clone $base)
+            ->selectRaw('od.product_id, p.product_name')
+            ->groupBy('od.product_id', 'p.product_name')
+            ->orderByRaw('SUM(od.line_total) DESC')
+            ->limit(10)
+            ->get();
+        $buckets = $this->eloficMonthlyBuckets($fromdate, $todate);
+        $topSkuTrend = $topSkuProducts->map(function ($product) use ($buckets, $zoneId) {
+            return [
+                'label' => $product->product_name ?: ('Product #' . $product->product_id),
+                'data' => $buckets->map(fn ($bucket) => [
+                    'label' => $bucket['label'],
+                    'value' => (float) $this->eloficOrderDetailsBase($bucket['from'], $bucket['to'], $zoneId)
+                        ->where('od.product_id', $product->product_id)
+                        ->sum('od.line_total'),
+                ])->values(),
+            ];
+        })->values();
+
+        return response()->json([
+            'periodLabel' => $periodLabel,
+            'source' => 'orders + order_details.line_total + products',
+            'filter' => compact('fromdate', 'todate', 'zoneId'),
+            'charts' => [
+                'topProducts' => $topProducts,
+                'slowMovingProducts' => $slowMoving,
+                'segmentWiseSales' => $segmentWise,
+                'topSkuTrend' => $topSkuTrend,
+                'topSkuLabels' => $topSkuIds,
+            ],
+        ]);
+    }
+
+    public function eloficPrimarySalesDashboard(Request $request)
+    {
+        [$fromdate, $todate, $periodLabel] = $this->eloficDashboardPeriod($request);
+        $zoneId = $this->eloficDashboardZoneId($request);
+        $zoneName = $this->eloficDashboardZoneName($zoneId);
+        $achievement = (float) $this->eloficPrimarySalesBase($fromdate, $todate, $zoneName)->sum('net_amount');
+        $target = $this->eloficPrimaryTargetTotal($fromdate, $todate, $zoneName);
+        $totalQty = (float) $this->eloficPrimarySalesBase($fromdate, $todate, $zoneName)->sum('quantity');
+        $totalInvoices = (int) $this->eloficPrimarySalesBase($fromdate, $todate, $zoneName)->distinct('invoiceno')->count('invoiceno');
+
+        $salesVsTarget = $this->eloficMonthlyBuckets($fromdate, $todate)->map(function ($bucket) use ($zoneName) {
+            return [
+                'label' => $bucket['label'],
+                'achievement' => (float) $this->eloficPrimarySalesBase($bucket['from'], $bucket['to'], $zoneName)->sum('net_amount'),
+                'target' => $this->eloficPrimaryTargetTotal($bucket['from'], $bucket['to'], $zoneName),
+            ];
+        });
+
+        $salesTrend = $salesVsTarget->map(fn ($item) => [
+            'label' => $item['label'],
+            'value' => $item['achievement'],
+        ]);
+
+        $yoyGrowth = collect([2, 1, 0])->map(function ($yearsBack) use ($todate, $zoneName) {
+            $fyStartYear = Carbon::parse($todate)->month >= 4 ? Carbon::parse($todate)->year : Carbon::parse($todate)->year - 1;
+            $fyStartYear -= $yearsBack;
+            $from = Carbon::create($fyStartYear, 4, 1)->toDateString();
+            $to = Carbon::create($fyStartYear + 1, 3, 31)->toDateString();
+            return [
+                'label' => 'FY' . substr((string) ($fyStartYear + 1), -2),
+                'data' => $this->eloficMonthlyBuckets($from, $to)->map(fn ($bucket) => [
+                    'label' => $bucket['label'],
+                    'value' => (float) $this->eloficPrimarySalesBase($bucket['from'], $bucket['to'], $zoneName)->sum('net_amount'),
+                ])->values(),
+            ];
+        })->values();
+
+        $regionWise = $this->eloficPrimarySalesBase($fromdate, $todate, $zoneName)
+            ->selectRaw("COALESCE(NULLIF(final_branch, ''), NULLIF(branch, ''), 'Unassigned') as label, SUM(net_amount) as achievement")
+            ->groupBy('label')
+            ->orderByDesc('achievement')
+            ->limit(8)
+            ->get()
+            ->map(function ($row) use ($fromdate, $todate) {
+                return [
+                    'label' => $row->label,
+                    'achievement' => (float) $row->achievement,
+                    'target' => $this->eloficPrimaryTargetTotal($fromdate, $todate, $row->label),
+                ];
+            });
+
+        $topDealers = $this->eloficPrimarySalesBase($fromdate, $todate, $zoneName)
+            ->selectRaw("COALESCE(NULLIF(dealer, ''), 'Unassigned') as label, SUM(net_amount) as value")
+            ->groupBy('label')
+            ->orderByDesc('value')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'periodLabel' => $periodLabel,
+            'source' => 'primary_sales.net_amount',
+            'filter' => compact('fromdate', 'todate', 'zoneId'),
+            'kpis' => [
+                'primarySalesAchievement' => $achievement,
+                'primarySalesTarget' => $target,
+                'overallAchievementPercent' => $target > 0 ? round(($achievement / $target) * 100, 2) : 0,
+                'totalQuantity' => $totalQty,
+                'totalInvoices' => $totalInvoices,
+            ],
+            'charts' => [
+                'topDealers' => $topDealers,
+                'salesVsTarget' => $salesVsTarget,
+                'salesTrend' => $salesTrend,
+                'yoyGrowth' => $yoyGrowth,
+                'regionWiseSales' => $regionWise,
+            ],
+        ]);
+    }
+
+    public function eloficEmployeesDashboard(Request $request)
+    {
+        [$fromdate, $todate, $periodLabel] = $this->eloficDashboardPeriod($request);
+        $zoneId = $this->eloficDashboardZoneId($request);
+        $zoneName = $this->eloficDashboardZoneName($zoneId);
+        $today = Carbon::today()->toDateString();
+        $users = DB::table('users')
+            ->where('active', 'Y')
+            ->when($zoneId, fn ($query) => $query->where('branch_id', $zoneId))
+            ->select('id', 'name', 'employee_codes')
+            ->get();
+        $userIds = $users->pluck('id');
+
+        $todayAttendance = DB::table('attendances')
+            ->whereDate('punchin_date', $today)
+            ->whereIn('user_id', $userIds);
+        $todayOnMarket = (int) (clone $todayAttendance)
+            ->whereNotNull('punchin_time')
+            ->where(function ($query) {
+                $query->whereNull('working_type')
+                    ->orWhere('working_type', 'not like', '%leave%');
+            })
+            ->distinct('user_id')
+            ->count('user_id');
+        $leaveQuery = (clone $todayAttendance)
+            ->whereNotNull('punchin_time')
+            ->where('working_type', 'like', '%leave%');
+        $todayOnLeave = (int) $leaveQuery->distinct('user_id')->count('user_id');
+
+        $punchedInUserIds = (clone $todayAttendance)
+            ->whereNotNull('punchin_time')
+            ->distinct()
+            ->pluck('user_id');
+        $misPunch = $userIds->diff($punchedInUserIds)->count();
+
+        $secondaryOrders = DB::table('orders as o')
+            ->leftJoin('order_details as od', 'od.order_id', '=', 'o.id')
+            ->whereBetween('o.order_date', [$fromdate, $todate])
+            ->whereNull('o.deleted_at')
+            ->whereIn('o.created_by', $userIds);
+
+        $totalOrderQty = (float) (clone $secondaryOrders)->sum('od.quantity');
+        $totalOrderValue = (float) (clone $secondaryOrders)->sum('od.line_total');
+        $uniqueActiveCustomers = (int) (clone $secondaryOrders)->distinct('o.buyer_id')->count('o.buyer_id');
+
+        $primaryValue = (float) $this->eloficPrimarySalesBase($fromdate, $todate, $zoneName)->sum('net_amount');
+
+        $employeeTargets = $users->map(function ($user) use ($fromdate, $todate) {
+            $secondaryAchievement = (float) DB::table('orders as o')
+                ->leftJoin('order_details as od', 'od.order_id', '=', 'o.id')
+                ->whereBetween('o.order_date', [$fromdate, $todate])
+                ->whereNull('o.deleted_at')
+                ->where('o.created_by', $user->id)
+                ->sum('od.line_total');
+            $primaryAchievement = $this->eloficPrimaryEmployeeAchievement($fromdate, $todate, $user);
+            $target = $this->eloficEmployeeTargetTotal($fromdate, $todate, $user->id);
+            $achievement = $secondaryAchievement + $primaryAchievement;
+            $employeeCode = trim((string) ($user->employee_codes ?? ''));
+            return [
+                'label' => $employeeCode !== '' ? $employeeCode : ('User #' . $user->id),
+                'name' => $user->name ?: ('User #' . $user->id),
+                'achievement' => $achievement,
+                'target' => $target,
+                'achievementPercent' => $target > 0 ? round(($achievement / $target) * 100, 2) : 0,
+            ];
+        })
+            ->filter(fn ($row) => $row['achievement'] > 0 || $row['target'] > 0)
+            ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
+            ->take(60);
+
+        return response()->json([
+            'periodLabel' => $periodLabel,
+            'source' => 'users + attendances + orders/order_details + primary_sales',
+            'filter' => compact('fromdate', 'todate', 'zoneId'),
+            'kpis' => [
+                'totalEmployees' => $users->count(),
+                'todayOnMarket' => $todayOnMarket,
+                'todayOnLeave' => $todayOnLeave,
+                'misPunch' => $misPunch,
+            ],
+            'summary' => [
+                'totalOrderQty' => $totalOrderQty,
+                'totalOrderValue' => $totalOrderValue + $primaryValue,
+                'uniqueActiveCustomers' => $uniqueActiveCustomers,
+            ],
+            'charts' => [
+                'employeeTargetVsAchievement' => $employeeTargets,
+            ],
+        ]);
+    }
+
+    private function eloficDashboardPeriod(Request $request): array
+    {
+        $type = strtoupper($request->input('filterType', 'MTD'));
+        $today = Carbon::today();
+
+        if ($type === 'YTD') {
+            $fyStartYear = $today->month >= 4 ? $today->year : $today->year - 1;
+            $from = Carbon::create($fyStartYear, 4, 1);
+            $to = $today;
+            return [$from->toDateString(), $to->toDateString(), 'YTD Apr ' . $fyStartYear . ' - ' . $to->format('M Y')];
+        }
+
+        if ($type === 'CUSTOM' && $request->filled('fromDate') && $request->filled('toDate')) {
+            $from = Carbon::parse($request->input('fromDate'));
+            $to = Carbon::parse($request->input('toDate'));
+            if ($from->gt($to)) {
+                [$from, $to] = [$to, $from];
+            }
+            return [$from->toDateString(), $to->toDateString(), $from->format('d M Y') . ' - ' . $to->format('d M Y')];
+        }
+
+        return [$today->copy()->startOfMonth()->toDateString(), $today->toDateString(), 'MTD ' . $today->format('M Y')];
+    }
+
+    private function eloficDashboardZoneId(Request $request): ?int
+    {
+        $zoneId = $request->input('zoneId');
+        return is_numeric($zoneId) && (int) $zoneId > 0 ? (int) $zoneId : null;
+    }
+
+    private function eloficDashboardZoneName(?int $zoneId): ?string
+    {
+        if (!$zoneId) {
+            return null;
+        }
+
+        return DB::table('branches')
+            ->where('id', $zoneId)
+            ->value('branch_name');
+    }
+
+    private function eloficOrderDetailsBase(string $fromdate, string $todate, ?int $zoneId = null)
+    {
+        $query = DB::table('order_details as od')
+            ->join('orders as o', 'o.id', '=', 'od.order_id')
+            ->whereBetween('o.order_date', [$fromdate, $todate])
+            ->whereNull('o.deleted_at');
+
+        if ($zoneId) {
+            $query->join('users as zu', 'zu.id', '=', 'o.created_by')
+                ->where('zu.branch_id', $zoneId);
+        }
+
+        return $query;
+    }
+
+    private function eloficPrimarySalesBase(string $fromdate, string $todate, ?string $branchName = null)
+    {
+        $query = DB::table('primary_sales')
+            ->whereBetween('invoice_date', [$fromdate, $todate]);
+
+        if ($branchName) {
+            $query->where(function ($subQuery) use ($branchName) {
+                $subQuery->where('final_branch', $branchName)
+                    ->orWhere('branch', $branchName);
+            });
+        }
+
+        return $query;
+    }
+
+    private function eloficPrimaryEmployeeAchievement(string $fromdate, string $todate, object $user): float
+    {
+        $query = $this->eloficPrimarySalesBase($fromdate, $todate);
+        if (\Schema::hasColumn('primary_sales', 'emp_code') && !empty($user->employee_codes)) {
+            return (float) $query->where('emp_code', $user->employee_codes)->sum('net_amount');
+        }
+        if (\Schema::hasColumn('primary_sales', 'sales_person') && !empty($user->name)) {
+            return (float) $query->where('sales_person', $user->name)->sum('net_amount');
+        }
+        return 0;
+    }
+
+    private function eloficTargetLakhToRupees(float $target): float
+    {
+        return $target * 100000;
+    }
+
+    private function eloficTargetBase(string $fromdate, string $todate, ?int $zoneId = null)
+    {
+        $query = DB::table('sales_targets')
+            ->whereDate('sales_targets.startdate', '<=', $todate)
+            ->where(function ($dateQuery) use ($fromdate) {
+                $dateQuery->whereNull('sales_targets.enddate')
+                    ->orWhereDate('sales_targets.enddate', '>=', $fromdate);
+            });
+
+        if ($zoneId) {
+            $query->join('users as tu', 'tu.id', '=', 'sales_targets.userid')
+                ->where('tu.branch_id', $zoneId);
+        }
+
+        return $query;
+    }
+
+    private function eloficTargetTotal(string $fromdate, string $todate, ?int $zoneId = null): float
+    {
+        $target = $this->eloficTargetLakhToRupees((float) $this->eloficTargetBase($fromdate, $todate, $zoneId)->sum('amount'));
+        if ($target <= 0 && \Schema::hasTable('salestargetusers')) {
+            $target = (float) $this->eloficLegacyTargetTotal($fromdate, $todate, $zoneId);
+        }
+        if ($target <= 0 && \Schema::hasTable('branchwise_targets')) {
+            $target = (float) $this->eloficBranchwiseTargetTotal($fromdate, $todate, $zoneId, 'secondary');
+        }
+        return $target;
+    }
+
+    private function eloficLegacyTargetTotal(string $fromdate, string $todate, ?int $zoneId = null): float
+    {
+        $query = DB::table('salestargetusers');
+        if (\Schema::hasColumn('salestargetusers', 'type')) {
+            $query->where(function ($typeQuery) {
+                $typeQuery->where('type', 'secondary')
+                    ->orWhereNull('type')
+                    ->orWhere('type', '');
+            });
+        }
+        if ($zoneId) {
+            if (\Schema::hasColumn('salestargetusers', 'branch_id')) {
+                $query->where('branch_id', $zoneId);
+            } elseif (\Schema::hasColumn('salestargetusers', 'userid')) {
+                $query->join('users as tu', 'tu.id', '=', 'salestargetusers.userid')
+                    ->where('tu.branch_id', $zoneId);
+            } elseif (\Schema::hasColumn('salestargetusers', 'user_id')) {
+                $query->join('users as tu', 'tu.id', '=', 'salestargetusers.user_id')
+                    ->where('tu.branch_id', $zoneId);
+            }
+        }
+        if (\Schema::hasColumn('salestargetusers', 'month')) {
+            $query->whereIn('month', $this->eloficTargetMonthValues($fromdate, $todate));
+        }
+        if (\Schema::hasColumn('salestargetusers', 'year')) {
+            $query->whereIn(DB::raw('YEAR(year)'), $this->eloficTargetYears($fromdate, $todate));
+        }
+        return $this->eloficTargetLakhToRupees((float) $query->sum('target'));
+    }
+
+    private function eloficBranchwiseTargetTotal(string $fromdate, string $todate, ?int $zoneId = null, ?string $type = null): float
+    {
+        $query = DB::table('branchwise_targets');
+        if ($type && \Schema::hasColumn('branchwise_targets', 'type')) {
+            $query->where(function ($typeQuery) use ($type) {
+                $typeQuery->where('type', $type)
+                    ->orWhereNull('type')
+                    ->orWhere('type', '');
+            });
+        }
+        if ($zoneId && \Schema::hasColumn('branchwise_targets', 'branch_id')) {
+            $query->where('branch_id', $zoneId);
+        }
+        if (\Schema::hasColumn('branchwise_targets', 'month')) {
+            $query->whereIn('month', $this->eloficTargetMonthValues($fromdate, $todate));
+        }
+        if (\Schema::hasColumn('branchwise_targets', 'year')) {
+            $query->whereIn(DB::raw('YEAR(year)'), $this->eloficTargetYears($fromdate, $todate));
+        }
+
+        $target = \Schema::hasColumn('branchwise_targets', 'target') ? (float) (clone $query)->sum('target') : 0;
+        if ($target <= 0 && \Schema::hasColumn('branchwise_targets', 'amount')) {
+            $target = (float) $query->sum('amount');
+        }
+
+        return $this->eloficTargetLakhToRupees($target);
+    }
+
+    private function eloficPrimaryTargetTotal(string $fromdate, string $todate, ?string $branchName = null): float
+    {
+        $monthNames = $this->eloficMonthlyBuckets($fromdate, $todate)->pluck('label')->map(function ($label) {
+            return Carbon::createFromFormat('M y', $label)->format('M');
+        })->values();
+
+        $target = 0;
+        if (\Schema::hasTable('salestargetusers')) {
+            $query = DB::table('salestargetusers');
+            if (\Schema::hasColumn('salestargetusers', 'type')) {
+                $query->where('type', 'primary');
+            }
+            if (\Schema::hasColumn('salestargetusers', 'month')) {
+                $query->whereIn('month', $this->eloficTargetMonthValues($fromdate, $todate));
+            }
+            if (\Schema::hasColumn('salestargetusers', 'year')) {
+                $query->whereIn(DB::raw('YEAR(year)'), $this->eloficTargetYears($fromdate, $todate));
+            }
+            if ($branchName && \Schema::hasColumn('salestargetusers', 'branch_id')) {
+                $branchIds = DB::table('branches')->where('branch_name', $branchName)->pluck('id');
+                if ($branchIds->isNotEmpty()) {
+                    $query->whereIn('branch_id', $branchIds);
+                }
+            }
+            $target += $this->eloficTargetLakhToRupees((float) $query->sum('target'));
+        }
+
+        if ($target <= 0 && \Schema::hasTable('branchwise_targets')) {
+            $query = DB::table('branchwise_targets');
+            if (\Schema::hasColumn('branchwise_targets', 'type')) {
+                $query->where('type', 'primary');
+            }
+            if (\Schema::hasColumn('branchwise_targets', 'month')) {
+                $query->whereIn('month', $this->eloficTargetMonthValues($fromdate, $todate));
+            }
+            if (\Schema::hasColumn('branchwise_targets', 'year')) {
+                $query->whereIn(DB::raw('YEAR(year)'), $this->eloficTargetYears($fromdate, $todate));
+            }
+            if ($branchName) {
+                $query->where('branch_name', $branchName);
+            }
+            $target += $this->eloficTargetLakhToRupees((float) $query->sum('target'));
+        }
+
+        return $target;
+    }
+
+    private function eloficEmployeeTargetTotal(string $fromdate, string $todate, int $userId): float
+    {
+        $target = $this->eloficTargetLakhToRupees((float) DB::table('sales_targets')
+            ->where('userid', $userId)
+            ->whereBetween(DB::raw('DATE(startdate)'), [$fromdate, $todate])
+            ->sum('amount'));
+
+        $monthNames = $this->eloficMonthlyBuckets($fromdate, $todate)->pluck('label')->map(function ($label) {
+            return Carbon::createFromFormat('M y', $label)->format('M');
+        })->values();
+
+        if (\Schema::hasTable('salestargetusers')) {
+            $query = DB::table('salestargetusers');
+            if (\Schema::hasColumn('salestargetusers', 'user_id')) {
+                $query->where('user_id', $userId);
+            } elseif (\Schema::hasColumn('salestargetusers', 'userid')) {
+                $query->where('userid', $userId);
+            }
+            if (\Schema::hasColumn('salestargetusers', 'month')) {
+                $query->whereIn('month', $this->eloficTargetMonthValues($fromdate, $todate));
+            }
+            if (\Schema::hasColumn('salestargetusers', 'year')) {
+                $query->whereIn(DB::raw('YEAR(year)'), $this->eloficTargetYears($fromdate, $todate));
+            }
+            $target += $this->eloficTargetLakhToRupees((float) $query->sum('target'));
+        }
+
+        if (\Schema::hasTable('branchwise_targets')) {
+            $query = DB::table('branchwise_targets')->where('user_id', $userId);
+            if (\Schema::hasColumn('branchwise_targets', 'month')) {
+                $query->whereIn('month', $this->eloficTargetMonthValues($fromdate, $todate));
+            }
+            if (\Schema::hasColumn('branchwise_targets', 'year')) {
+                $query->whereIn(DB::raw('YEAR(year)'), $this->eloficTargetYears($fromdate, $todate));
+            }
+            $target += $this->eloficTargetLakhToRupees((float) $query->sum('target'));
+        }
+
+        return $target;
+    }
+
+    private function eloficTargetYears(string $fromdate, string $todate): array
+    {
+        return $this->eloficMonthlyBuckets($fromdate, $todate)
+            ->map(fn ($bucket) => (int) Carbon::parse($bucket['from'])->format('Y'))
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function eloficTargetMonthValues(string $fromdate, string $todate): array
+    {
+        return $this->eloficMonthlyBuckets($fromdate, $todate)
+            ->flatMap(function ($bucket) {
+                $date = Carbon::parse($bucket['from']);
+                return [
+                    $date->format('M'),
+                    $date->format('F'),
+                    $date->format('m'),
+                    $date->format('n'),
+                ];
+            })
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function eloficMonthlyBuckets(string $fromdate, string $todate)
+    {
+        $start = Carbon::parse($fromdate)->startOfMonth();
+        $end = Carbon::parse($todate)->endOfMonth();
+        $buckets = collect([]);
+
+        while ($start->lte($end)) {
+            $bucketFrom = $start->copy()->max(Carbon::parse($fromdate));
+            $bucketTo = $start->copy()->endOfMonth()->min(Carbon::parse($todate));
+            $buckets->push([
+                'label' => $start->format('M y'),
+                'from' => $bucketFrom->toDateString(),
+                'to' => $bucketTo->toDateString(),
+            ]);
+            $start->addMonth();
+        }
+
+        return $buckets;
     }
 
     /*

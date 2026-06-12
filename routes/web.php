@@ -250,6 +250,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('salesSummaryData', [DashboardController::class, 'salesSummaryData']);
     Route::post('activityDashboardCount', [DashboardController::class, 'activityDashboardCount']);
     Route::post('secondarySalesKpiData', [DashboardController::class, 'secondarySalesKpiData']);
+    Route::get('dashboard/secondary-sales', [DashboardController::class, 'eloficSecondarySalesDashboard'])->name('dashboard.secondary-sales');
+    Route::get('dashboard/products', [DashboardController::class, 'eloficProductDashboard'])->name('dashboard.products');
+    Route::get('dashboard/primary-sales', [DashboardController::class, 'eloficPrimarySalesDashboard'])->name('dashboard.primary-sales');
+    Route::get('dashboard/employees', [DashboardController::class, 'eloficEmployeesDashboard'])->name('dashboard.employees');
 
     // Secondary Sales Dashboard
     Route::get('secondary_dashboard/sales', [DashboardController::class, 'secondary_dashboard_sales'])->name('secondary_dashboard.sales');
