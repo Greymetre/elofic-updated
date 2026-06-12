@@ -1729,7 +1729,7 @@ class DashboardController extends Controller
             $primaryAchievement = $this->eloficPrimaryEmployeeAchievement($fromdate, $todate, $user);
             $target = $this->eloficEmployeeTargetTotal($fromdate, $todate, $user->id);
             $achievement = $secondaryAchievement + $primaryAchievement;
-            $employeeCode = trim((string) ($user->employee_codes ?? ''));
+            $employeeCode = trim((string) ($user->name ?? ''));
             return [
                 'label' => $employeeCode !== '' ? $employeeCode : ('User #' . $user->id),
                 'name' => $user->name ?: ('User #' . $user->id),
