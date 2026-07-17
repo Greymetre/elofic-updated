@@ -127,10 +127,10 @@
                             <div class="form-group has-default bmd-form-group">
                                 <select class="form-control select2" name="executive_id" required style="width:100%;">
                                     <option value="">Select Employee</option>
-                                    @foreach($users ?? [] as $user)
-                                    <option value="{{ $user->id }}"
-                                        {{ old('executive_id', $orders->executive_id ?? '') == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name }}
+                                    @foreach($users ?? [] as $employee)
+                                    <option value="{{ $employee->id }}"
+                                        {{ old('executive_id', $orders->executive_id ?? '') == $employee->id ? 'selected' : '' }}>
+                                        {{ $employee->name }}
                                     </option>
                                     @endforeach
                                 </select>
@@ -235,6 +235,14 @@
                             @enderror
                         </div>
                         @endif
+                        <div class="col-md-6">
+                            <label class="col-form-label">Order Remark</label>
+                            <textarea name="order_remark" class="form-control" rows="3" maxlength="1000"
+                                placeholder="Enter order remark">{{ old('order_remark', $orders->order_remark ?? '') }}</textarea>
+                            @error('order_remark')
+                            <p class="text-danger">{{ $message }}</p>
+                            @enderror
+                        </div>
 <!-- 
                         <div class="col-md-6">
                             <label class="col-form-label">Division</label>

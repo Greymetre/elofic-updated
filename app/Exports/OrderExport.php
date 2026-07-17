@@ -50,11 +50,13 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('created_by', $this->userids);
                 }
-                if ($this->pending_status == '0') {
-                    $query->where('status_id', NULL);
-                } else {
-                    $query->where('status_id', $this->pending_status);
-                }
+                $status = match ((string) $this->pending_status) {
+                    '0' => 'pending',
+                    '2' => 'partial',
+                    '1' => 'dispatched',
+                    default => '',
+                };
+                $query->dispatchStatus($status);
                 if ($this->startdate) {
                     $query->where('order_date', '>=', $this->startdate);
                 }
@@ -300,6 +302,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
         $ship_qty = $data['shipped_qty'] ?? 0;
         $pending_qty = $qty - $ship_qty;
         $order = $data['orders'] ?? [];
+        $orderModel = $data->orders;
         $customerType = strtoupper((string) ($order['customer_type'] ?? $order['buyers']['type'] ?? ''));
         $customerType = $customerType === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $customerType;
 
@@ -341,7 +344,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 $order['getuserdetails']['getbranch']['branch_name'] ?? '',
                 $order['getuserdetails']['getdivision']['division_name'] ?? '',
                 $order['getuserdetails']['getdesignation']['designation_name'] ?? '',
-                $order['statusname']['status_name'] ?? 'Pending',
+                $orderModel?->dispatch_status ?? 'Pending',
             ];
         }
 
@@ -374,7 +377,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             $order['getuserdetails']['getbranch']['branch_name'] ?? '',
             $order['getuserdetails']['getdivision']['division_name'] ?? '',
             $order['getuserdetails']['getdesignation']['designation_name'] ?? '',
-            $order['statusname']['status_name'] ?? 'Pending',
+            $orderModel?->dispatch_status ?? 'Pending',
         ];
 
         if ($this->dividion_id == '1') {

@@ -25,7 +25,7 @@
                       <select class="select2" name="retailers_id" id="retailers_id" title="Select Retailers">
                         <option value="">Select Retailers</option>
                         @foreach($retailers as $user)
-                        <option value="{!! $user['id'] !!}" {{ old( 'retailers_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                        <option value="{!! $user->id !!}" {{ old('retailers_id') == $user->id ? 'selected' : '' }}>{!! $user->shop_name !!}</option>
                         @endforeach
                       </select>
                     </div>
@@ -33,7 +33,7 @@
                       <select class="select2" name="customer_type_id" id="customer_type_id" title="Select Retailers">
                         <option value="">Customer Type</option>
                         @foreach($customer_types as $customer_type)
-                        <option value="{!! $customer_type['id'] !!}" {{ old( 'customer_type_id') == $customer_type->id ? 'selected' : '' }}>{!! $customer_type['customertype_name'] !!}</option>
+                        <option value="{{ $customer_type }}" {{ old('customer_type_id') == $customer_type ? 'selected' : '' }}>{{ ucfirst(strtolower($customer_type)) }}</option>
                         @endforeach
                       </select>
                     </div>
@@ -41,7 +41,7 @@
                       <select class="select2" name="distributor_id" id="distributor_id" title="Select Distributor">
                         <option value="">Select Distributor</option>
                         @foreach($distributors as $user)
-                        <option value="{!! $user['id'] !!}" {{ old( 'distributor_id') == $user->id ? 'selected' : '' }}>{!! $user['name'] !!}</option>
+                        <option value="{!! $user->id !!}" {{ old('distributor_id') == $user->id ? 'selected' : '' }}>{!! $user->trade_name ?: $user->legal_name !!}</option>
                         @endforeach
                       </select>
                     </div>
@@ -120,6 +120,7 @@
                 <td>Order No</td>
                 <th>{!! trans('panel.global.buyer_name') !!}</th>
                 <th>{!! trans('panel.global.seller_name') !!}</th>
+                <th>Customer Type</th>
                 <th>{!! trans('panel.sale.fields.invoice_no') !!}</th>
                 <th>{!! trans('panel.sale.fields.invoice_date') !!}</th>
                 <th>{!! trans('panel.sale.fields.grand_total') !!}</th>
@@ -184,13 +185,18 @@
             "defaultContent": ''
           },
           {
-            data: 'buyers.name',
-            name: 'buyers.name',
+            data: 'buyer_name',
+            name: 'buyer_name',
             "defaultContent": ''
           },
           {
-            data: 'sellers.name',
-            name: 'sellers.name',
+            data: 'seller_name',
+            name: 'seller_name',
+            "defaultContent": ''
+          },
+          {
+            data: 'customer_type',
+            name: 'customer_type',
             "defaultContent": ''
           },
           {
@@ -224,8 +230,8 @@
             "defaultContent": ''
           },
           {
-            data: 'status.status_name',
-            name: 'status.status_name',
+            data: 'dispatch_status',
+            name: 'dispatch_status',
             "defaultContent": ''
           },
           {

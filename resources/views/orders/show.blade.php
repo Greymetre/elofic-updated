@@ -330,18 +330,18 @@
               <!-- this row will not appear when printing -->
               <div class="row no-print">
                 <div class="col-12">
-                  @if($orders['status_id'] != 1 && $orders['status_id'] != 4)
+                  @if($orders->dispatch_status !== 'Dispatched' && $orders['status_id'] != 4)
                   <a href="{!! url('order-dispatched/'.encrypt($orders->id)) !!}" class="btn btn-success float-right">Fully Dispatched</a>
                   @endif
 
-                  @if($orders['status_id'] != 1 && $orders['status_id'] != 4)
+                  @if($orders->dispatch_status !== 'Dispatched' && $orders['status_id'] != 4)
                   <a href="{!! url('order-partially-dispatched/'.encrypt($orders->id)) !!}" class="btn btn-theme float-right">Partially Dispatched</a>
                   @endif
 
-                  @if($orders['status_id'] != 1 && $orders['status_id'] != 4)
+                  @if($orders->dispatch_status !== 'Dispatched' && $orders['status_id'] != 4)
                   <button type="button" data-orderid="{!! encrypt($orders->id) !!}" id="cancleButton" class="btn btn-danger float-right">Cancel</button>
                   @endif
-                  @if($orders['status_id'] != NULL)
+                  @if($orders->dispatched_quantity > 0)
                   @if(auth()->user()->can('pendding_orders'))
                   <button type="button" data-orderid="{!! encrypt($orders->id) !!}" id="penddingButton" class="btn btn-warning float-right">Pending</button>
                   @endif
@@ -349,7 +349,7 @@
                   @if($orders['status_id'] == 4)
                   <button type="button" disabled class="btn btn-danger float-right">Canceled</button>
                   @endif
-                  @if($orders['status_id'] == 1)
+                  @if($orders->dispatch_status === 'Dispatched' && $orders['status_id'] != 4)
                   <button type="button" disabled class="btn btn-success float-right">Dispatched</button>
                   @endif
                 </div>

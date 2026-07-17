@@ -29,7 +29,7 @@ class OrderDataTable extends DataTable
                 return $data->gst5_amt + $data->gst12_amt + $data->gst18_amt + $data->gst28_amt;
             })
             ->editColumn('statusname.status_name', function ($data) {
-                return $data->status_id ? $data->statusname->status_name : 'Pending';
+                return $data->dispatch_status;
             })
             ->addColumn('customer_type_name', fn ($data) => strtoupper((string) $data->customer_type))
             ->addColumn('buyer_name', function ($data) {
@@ -96,7 +96,7 @@ class OrderDataTable extends DataTable
     {
         $userids = getUsersReportingToAuth();
 
-        $query = $model->with('sellers', 'buyers', 'statusname', 'createdbyname');
+        $query = $model->with('sellers', 'buyers', 'statusname', 'createdbyname', 'orderdetails');
 
         if (auth()->user()->hasRole('Distributor')) {
             $query->where('seller_id', auth()->user()->customerid);
@@ -117,11 +117,13 @@ class OrderDataTable extends DataTable
 
 
         if (request()->get('pending_status') != '' && request()->get('pending_status') != NULL) {
-            if (request()->get('pending_status') == '0') {
-                $query->where('status_id', NULL);
-            } else {
-                $query->where('status_id', request()->get('pending_status'));
-            }
+            $status = match ((string) request()->get('pending_status')) {
+                '0' => 'pending',
+                '2' => 'partial',
+                '1' => 'dispatched',
+                default => '',
+            };
+            $query->dispatchStatus($status);
         }
         if (request()->get('startdate')) {
             $query->where('order_date', '>=', request()->get('startdate'));

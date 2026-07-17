@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Order extends Model
 {
@@ -175,6 +176,47 @@ class Order extends Model
             : MasterDistributor::find($this->seller_id);
 
         return $this->setRelation('buyers', $buyer)->setRelation('sellers', $seller);
+    }
+
+    public function getOrderedQuantityAttribute(): float
+    {
+        return (float) ($this->relationLoaded('orderdetails')
+            ? $this->orderdetails->sum('quantity')
+            : $this->orderdetails()->sum('quantity'));
+    }
+
+    public function getDispatchedQuantityAttribute(): float
+    {
+        return (float) ($this->relationLoaded('orderdetails')
+            ? $this->orderdetails->sum('shipped_qty')
+            : $this->orderdetails()->sum('shipped_qty'));
+    }
+
+    public function getDispatchStatusAttribute(): string
+    {
+        $ordered = $this->ordered_quantity;
+        $shipped = $this->dispatched_quantity;
+
+        if ($shipped <= 0) {
+            return 'Pending';
+        }
+
+        return $ordered > 0 && $shipped < $ordered
+            ? 'Partially Dispatched'
+            : 'Dispatched';
+    }
+
+    public function scopeDispatchStatus(Builder $query, string $status): Builder
+    {
+        $ordered = '(SELECT COALESCE(SUM(od.quantity), 0) FROM order_details od WHERE od.order_id = orders.id)';
+        $shipped = '(SELECT COALESCE(SUM(od.shipped_qty), 0) FROM order_details od WHERE od.order_id = orders.id)';
+
+        return match ($status) {
+            'pending' => $query->whereRaw("{$shipped} <= 0"),
+            'partial' => $query->whereRaw("{$shipped} > 0 AND {$shipped} < {$ordered}"),
+            'dispatched' => $query->whereRaw("{$ordered} > 0 AND {$shipped} >= {$ordered}"),
+            default => $query,
+        };
     }
 
           // Buyer = SecondaryCustomer

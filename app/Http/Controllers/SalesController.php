@@ -25,7 +25,8 @@ use App\Imports\SalesImport;
 use App\Exports\SalesExport;
 use App\Exports\SalesTemplate;
 use App\Models\Category;
-use App\Models\CustomerType;
+use App\Models\MasterDistributor;
+use App\Models\SecondaryCustomer;
 
 class SalesController extends Controller
 {
@@ -41,9 +42,9 @@ class SalesController extends Controller
         $sellers_ids = $this->sales->distinct()->pluck('seller_id');
         $buyer_ids = $this->sales->distinct()->pluck('buyer_id');
         $divisions = Category::where('active', 'Y')->get();
-        $retailers = Customers::whereIn("id", $buyer_ids)->get();
-        $distributors = Customers::whereIn("id", $sellers_ids)->get();
-        $customer_types = CustomerType::where('active', 'Y')->get();
+        $retailers = SecondaryCustomer::whereIn('id', $buyer_ids)->where('active', 'Y')->get();
+        $distributors = MasterDistributor::whereIn('id', $sellers_ids)->where('business_status', 'Active')->get();
+        $customer_types = ['RETAILER', 'WORKSHOP', 'MECHANIC', 'GARAGE', 'DISTRIBUTOR'];
         return $dataTable->render('sales.index', compact('divisions', 'retailers', 'distributors', 'customer_types'));
     }
 

@@ -27,6 +27,16 @@ class SalesDataTable extends DataTable
             ->editColumn('invoice_date', function ($data) {
                 return isset($data->invoice_date) ? showdateformat($data->invoice_date) : '';
             })
+            ->addColumn('buyer_name', function ($data) {
+                $order = $data->orders?->resolveCustomerRelations();
+                return $order?->buyers?->shop_name ?? $order?->buyers?->trade_name ?? $order?->buyers?->legal_name ?? '-';
+            })
+            ->addColumn('seller_name', function ($data) {
+                $order = $data->orders?->resolveCustomerRelations();
+                return $order?->sellers?->shop_name ?? $order?->sellers?->trade_name ?? $order?->sellers?->legal_name ?? '-';
+            })
+            ->addColumn('customer_type', fn ($data) => strtoupper((string) ($data->orders?->customer_type ?? '-')))
+            ->addColumn('dispatch_status', fn ($data) => $data->orders?->dispatch_status ?? 'Pending')
             
             ->addColumn('action', function ($query) {
                 $btn = '';
@@ -78,7 +88,7 @@ class SalesDataTable extends DataTable
     public function query(Sales $model, Request $request)
     {
         $userids = getUsersReportingToAuth();
-        $query = $model->with('buyers', 'sellers', 'createdbyname', 'status', 'orders')->whereHas('orders', function ($query) use ($userids) {
+        $query = $model->with('createdbyname', 'orders.orderdetails')->whereHas('orders', function ($query) use ($userids) {
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Sub billing')) {
                 $query->where(function ($subQuery) use ($userids) {
                     $subQuery->whereIn('executive_id', $userids)
@@ -87,11 +97,18 @@ class SalesDataTable extends DataTable
             }
         });
 
-        $query->whereHas('buyers', function ($query) use ($request) {
-            if (request()->has('customer_type_id') && request()->get('customer_type_id') != '') {
-                $query->where('customertype', request()->get('customer_type_id'));
-            }
-        });
+        if ($request->filled('customer_type_id')) {
+            $query->whereHas('orders', fn ($orderQuery) => $orderQuery
+                ->where('customer_type', strtoupper((string) $request->customer_type_id)));
+        }
+
+        if ($request->filled('retailers_id')) {
+            $query->whereHas('orders', fn ($orderQuery) => $orderQuery->where('buyer_id', $request->retailers_id));
+        }
+
+        if ($request->filled('distributor_id')) {
+            $query->whereHas('orders', fn ($orderQuery) => $orderQuery->where('seller_id', $request->distributor_id));
+        }
 
         if ($request->dividion_id && !empty($request->dividion_id) ) {
             $order_ids = Order::where('product_cat_id', $request->dividion_id)->pluck('id');
@@ -102,11 +119,13 @@ class SalesDataTable extends DataTable
 
 
         if (request()->get('pending_status') != '' && request()->get('pending_status') != NULL) {
-            if (request()->get('pending_status') == '0') {
-                $query->where('status_id', NULL);
-            } else {
-                $query->where('status_id', request()->get('pending_status'));
-            }
+            $status = match ((string) request()->get('pending_status')) {
+                '0' => 'pending',
+                '2' => 'partial',
+                '1' => 'dispatched',
+                default => '',
+            };
+            $query->whereHas('orders', fn ($orderQuery) => $orderQuery->dispatchStatus($status));
         }
 
         if ($request->start_date) {
@@ -116,9 +135,7 @@ class SalesDataTable extends DataTable
             $query->whereDate('created_at', '<=', $request->end_date);
         }
 
-        $query = $query->latest()->newQuery();
-
-        return $query;
+        return $query->latest();
     }
 
     /**

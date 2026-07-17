@@ -101,7 +101,7 @@
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $userids);
                 }
-            })->whereHas('roles', function ($query) {
+            })->whereNull('customerid')->whereHas('roles', function ($query) {
                 $query->whereNot('id', ['29']);
             })->select('id', 'name')->orderBy('id', 'desc')->get();
             $subcategories = Subcategory::where('active', 'Y')
@@ -261,16 +261,16 @@
                     'buyer_id'        => $order->buyer_id,
                     'seller_id'       => $order->seller_id,
                     'retailer_id'     => $order->retailer_id,
-                    'executive_id'    => $user->id,
+                    'executive_id'    => $order->executive_id ?? $request->executive_id ?? Auth::id(),
                     'order_type'      => $order->order_type,
                     'customer_type'   => $order->customer_type,
-                    'sub_total'       => round($sub_total, 2),
-                    'total_gst'       => round($total_gst, 2),
-                    'grand_total'     => round($grand_total, 2),
+                    'sub_total'       => round((float) $order->sub_total, 2),
+                    'total_gst'       => round((float) $order->total_gst, 2),
+                    'grand_total'     => round((float) $order->grand_total, 2),
                     'total_qty'       => $order->total_qty,
                     'order_remark'    => $order->order_remark,
                     'order_date'      => $order->order_date,
-                    'products'        => $orderDetailsData,
+                    'products'        => $orderdetail->toArray(),
 
 
                             // 'order_no'   => $order->orderno ?? null,
@@ -305,7 +305,7 @@
 
                     $user = User::find($request->executive_id);
 
-                    if ($user->userinfo->order_mails  && $user->userinfo->order_mails != null && $user->userinfo->order_mails != '') {
+                    if ($user?->userinfo?->order_mails) {
                         $mail_id_array = explode(',', $user->userinfo->order_mails);
                         $buyer = MasterDistributor::find($request['seller_id']);
                         $seller = SecondaryCustomer::find($request['buyer_id']);
@@ -429,7 +429,7 @@
                 if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                     $query->whereIn('id', $userids);
                 }
-            })->whereHas('roles', function ($query) {
+            })->whereNull('customerid')->whereHas('roles', function ($query) {
                 $query->whereNot('id', ['29']);
             })->select('id', 'name')->orderBy('id', 'desc')->get();
 
@@ -484,6 +484,7 @@
             $orders->executive_id = isset($request['executive_id']) ? $request['executive_id'] : null;
             //$orders->seller_id = isset($request['seller_id']) ? $request['seller_id'] :null ;
             $orders->order_date = isset($request['order_date']) ? $request['order_date'] : null;
+            $orders->order_remark = $request->input('order_remark');
             $orders->total_gst = isset($request['total_gst']) ? $request['total_gst'] : 0.00;
             $orders->total_discount = isset($request['total_discount']) ? $request['total_discount'] : 0.00;
             $orders->extra_discount = isset($request['extra_discount']) ? $request['extra_discount'] : 0.00;

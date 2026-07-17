@@ -81,6 +81,8 @@ class OrderRequest extends FormRequest
             'seller_type' => $type === 'DISTRIBUTOR'
                 ? ['nullable']
                 : ['required', Rule::in($type === 'RETAILER' ? ['DISTRIBUTOR'] : ['DISTRIBUTOR', 'RETAILER'])],
+            'executive_id' => ['required', 'integer', Rule::exists('users', 'id')->whereNull('customerid')],
+            'order_remark' => ['nullable', 'string', 'max:1000'],
             'orderdetail.*.subcategory_id' => [
                 'nullable',
                 'integer',
