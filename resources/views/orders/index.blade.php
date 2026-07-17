@@ -190,7 +190,6 @@
         </div>
     </div>
     <script type="text/javascript">
-    let userMapping = @json(\App\Models\User::pluck('name','branch_id', 'id'));
     $(function() {
         $.ajaxSetup({
             headers: {
@@ -231,15 +230,19 @@
                 },
 
                 {
-    data: 'executive_id',
-    name: 'executive_id',
-    defaultContent: '-'
-},
+                    data: 'executive_name',
+                    name: 'executive.name',
+                    defaultContent: '-',
+                    orderable: false,
+                    searchable: false
+                },
                 {
-    data: 'executive.getbranch.branch_name',
-    name: 'executive.getbranch.branch_name',
-    defaultContent: '-'
-},
+                    data: 'branch_name',
+                    name: 'executive.branch.branch_name',
+                    defaultContent: '-',
+                    orderable: false,
+                    searchable: false
+                },
                 {
                     data: 'order_date',
                     name: 'order_date',

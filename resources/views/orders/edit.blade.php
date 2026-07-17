@@ -334,7 +334,7 @@
                                             <th class="text-center">Family</th>
                                             <th class="text-center">Products</th>
                                             <th class="text-center">Quantity</th>
-                                            <th class="text-center">MRP / HSN</th>
+                                            <th class="text-center">MRP</th>
                                             <th class="text-center">Amount</th>
                                             <th></th>
                                         </tr>
@@ -548,7 +548,6 @@ $(document).ready(function () {
                 <select name="orderdetail[${rowCount}][subcategory_id]"
                         class="form-control select2 subcategory-select"
                         data-row="${rowCount}">
-                    <option value="">Select Family</option>
                     ${$('#tab_logic tbody tr:first .subcategory-select').html().replace(/selected/g,'')}
                 </select>
             </td>
@@ -567,7 +566,7 @@ $(document).ready(function () {
 
             <td>
                 <input type="number" name="orderdetail[${rowCount}][price]"
-                       class="form-control price rowchange">
+                       class="form-control price rowchange" readonly>
             </td>
 
             <td>
@@ -645,10 +644,8 @@ $(document).ready(function () {
        SUBCATEGORY → PRODUCTS
     ============================== */
     $(document).on('change', '.subcategory-select', function () {
-        let row = $(this).data('row');
         let subcat_id = $(this).val();
-
-        let $product = $(`select[name="orderdetail[${row}][product_id]"]`);
+        let $product = $(this).closest('tr').find('.product');
 
         if (!subcat_id) {
             $product.html('<option value="">Select Product</option>');
@@ -664,7 +661,7 @@ $(document).ready(function () {
             let html = '<option value="">Select Product</option>';
 
             $.each(res.products || [], function (i, p) {
-                html += `<option value="${p.id}" data-hsn="${p.hsn || ''}">
+                html += `<option value="${p.id}" data-price="${p.price ?? 0}">
                     ${p.product_name} (${p.product_code || ''})
                 </option>`;
             });
@@ -683,9 +680,13 @@ $(document).ready(function () {
     ============================== */
     $(document).on('change', '.product', function () {
         let $row = $(this).closest('tr');
-        let hsn = $(this).find(':selected').data('hsn') || 0;
+        let price = $(this).find(':selected').data('price');
 
-        $row.find('.price').val(hsn);
+        if (price !== undefined) {
+            $row.find('.price').val(price);
+        } else if (!$(this).val()) {
+            $row.find('.price').val(0);
+        }
         calc();
     });
 

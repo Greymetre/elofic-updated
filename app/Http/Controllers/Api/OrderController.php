@@ -72,7 +72,7 @@ class OrderController extends Controller
             $user_id = $user->id;
             $customer_id = $request->customer_id ?? '';
             $user_ids = getUsersReportingToAuth($user->id);
-            $pageSize = $request->input('pageSqueryize');
+            $pageSize = $request->input('pageSize', $request->input('pageSqueryize'));
             $query = $this->orders->latest()
     ->with(['buyer', 'seller', 'orderdetails.products']);
             $start_date = $request->startdate ?? '';
@@ -101,11 +101,13 @@ class OrderController extends Controller
             }
 
             if ((isset($selectedstatus_id) || $selectedstatus_id == 0) && $selectedstatus_id != '') {
-                if ($selectedstatus_id == 0) {
-                    $query->whereNull('status_id');
-                } else {
-                    $query->where('status_id', $selectedstatus_id);
-                }
+                $status = match ((string) $selectedstatus_id) {
+                    '0' => 'pending',
+                    '2' => 'partial',
+                    '1', '3' => 'dispatched',
+                    default => '',
+                };
+                $query->dispatchStatus($status);
             }
 
 
@@ -116,7 +118,7 @@ class OrderController extends Controller
             $users = User::whereDoesntHave('roles', function ($query) {
                 $query->where('id', 29);
             })->where('active', 'Y')->whereIn('id', $user_ids)->select('id', 'name')->orderBy('name', 'asc')->get();
-            $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Dispatched'], ['id' => '2', 'name' => 'Partially Dispatched'], ['id' => '3', 'name' => 'Full Dispatch'], ['id' => '4', 'name' => 'Cancel']];
+            $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '2', 'name' => 'Partially Dispatched'], ['id' => '1', 'name' => 'Dispatched']];
             if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
                     $value->resolveCustomerRelations();
@@ -161,15 +163,19 @@ class OrderController extends Controller
                         'customer_type' => $value->customer_type,
                         // 'total_qty' => isset($value['total_qty']) ? $value['total_qty'] : 0,
                         'total_qty' => $value->orderdetails->sum('quantity') ?? 0,
-                        'shipped_qty' => isset($value['shipped_qty']) ? $value['shipped_qty'] : 0,
+                        'shipped_qty' => $value->dispatched_quantity,
                         'orderno' => isset($value['orderno']) ? $value['orderno'] : '',
                         'order_date' => isset($value['order_date']) ? $value['order_date'] : '',
                         'order_remark' => isset($value['order_remark']) ? $value['order_remark'] : '',
                         'completed_date' => isset($value['completed_date']) ? $value['completed_date'] : '',
                         'grand_total' => $grand_total,
                         'sub_total' => isset($value['sub_total']) ? $value['sub_total'] : 0.00,
-                        'order_status' => isset($value['statusname']) ? $value['statusname']['status_name'] : 'Pending',
-                        'order_status_id' => (isset($value['status_id']) && $value['status_id'] != NULL) ? $value['status_id'] : '0',
+                        'order_status' => $value->dispatch_status,
+                        'order_status_id' => match ($value->dispatch_status) {
+                            'Dispatched' => '1',
+                            'Partially Dispatched' => '2',
+                            default => '0',
+                        },
                         'order_details' => $order_details,
                         'creatd_by'    => isset($value['createdbyname']) ? $value['createdbyname']['name'] : '',
                     ]);
@@ -194,18 +200,25 @@ class OrderController extends Controller
             $user = $request->user();
             $user_id = $user->id;
             $order_id = $request->input('order_id');
-            $data = $this->orders->with('orderdetails', 'orderdetails.products', 'statusname', 'orderdetails.productdetails', 'createdbyname', 'getsalesdetail', 'seller', 'buyer',)->where('id', $order_id)->first();
+            $data = $this->orders->with('orderdetails', 'orderdetails.products', 'orderdetails.productdetails', 'createdbyname', 'getsalesdetail')->where('id', $order_id)->first();
+            if (!$data) {
+                return response()->json(['status' => 'error', 'message' => 'Order not found.'], $this->notFound);
+            }
+            $data->resolveCustomerRelations();
             $salesdetails = Sales::where('order_id', $order_id)->first() ?? [];
             // Later when preparing response:
-            $data['seller_name']    = $data->seller?->trade_name ?? $data->seller?->legal_name ?? '';
-            $data['seller_address'] = $data->seller?->billing_address ?? '';
+            $data['seller_name']    = $data->sellers?->shop_name ?? $data->sellers?->trade_name ?? $data->sellers?->legal_name ?? '';
+            $data['seller_address'] = $data->sellers?->address_line ?? $data->sellers?->billing_address ?? '';
 
-            $data['buyer_name']     = $data->buyer?->shop_name ?? $data->buyer?->owner_name ?? '';
-            $data['buyer_address']  = $data->buyer?->address_line ?? '';
+            $data['buyer_name']     = $data->buyers?->shop_name ?? $data->buyers?->trade_name ?? $data->buyers?->legal_name ?? $data->buyers?->owner_name ?? '';
+            $data['buyer_address']  = $data->buyers?->address_line ?? $data->buyers?->billing_address ?? '';
 
             $data['schme_amount'] = (string)$data['schme_amount'];
             $data['schme_val'] = (string)$data['schme_val'];
-            $data['order_status'] = isset($data['statusname']) ? $data['statusname']['status_name'] : 'Pending';
+            $data['order_status'] = $data->dispatch_status;
+            $data['ordered_quantity'] = $data->ordered_quantity;
+            $data['dispatched_quantity'] = $data->dispatched_quantity;
+            $data['pending_quantity'] = max(0, $data->ordered_quantity - $data->dispatched_quantity);
             $data['dispatch_date'] = isset($salesdetails) ? (isset($salesdetails['dispatch_date']) ? Carbon::parse($salesdetails['dispatch_date'])->format('d-m-Y') : '') : '';
             $data['lr_no'] = isset($salesdetails) ? isset($salesdetails['lr_no']) ? (string)$salesdetails['lr_no']  : '' : '';
             $data['invoice_no'] = isset($salesdetails) ? (isset($salesdetails['invoice_no']) ? $salesdetails['invoice_no']  : '') : '';
@@ -231,7 +244,11 @@ class OrderController extends Controller
             $data['gst12_amt'] = (string)$data['gst12_amt'];
             $data['gst18_amt'] = (string)$data['gst18_amt'];
             $data['gst28_amt'] = (string)$data['gst28_amt'];
-            $data['status_id'] = ($data['status_id'] && $data['status_id'] != NULL) ? (string)$data['status_id'] : "0";
+            $data['status_id'] = match ($data->dispatch_status) {
+                'Dispatched' => '1',
+                'Partially Dispatched' => '2',
+                default => '0',
+            };
             $data['address_id'] = (string)$data['address_id'];
             $data['suc_del'] = (string)$data['suc_del'];
             $data['gst_amount'] = (string)$data['gst_amount'];
@@ -287,7 +304,7 @@ class OrderController extends Controller
                 // $data['seller_address'] = isset($data['sellers']['customeraddress']) ? $data['sellers']['customeraddress'] : '';
                 // $data['buyer_name'] = isset($data['buyers']['name']) ? $data['buyers']['name'] : '';
                 // $data['buyer_address'] = isset($data['buyers']['customeraddress']) ? $data['buyers']['customeraddress'] : '';
-                $data['buyer_type'] = isset($data['buyers']['customertypes']) ? $data['buyers']['customertypes']['customertype_name'] : '';
+                $data['buyer_type'] = $data->customer_type;
                 $data['orderdetails'] = $orderdetails;
                 return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], $this->successStatus);
             }
@@ -493,6 +510,9 @@ class OrderController extends Controller
                 'customer_type' => 'required|in:RETAILER,WORKSHOP,MECHANIC,GARAGE,DISTRIBUTOR',
                 'buyer_id' => 'required|integer',
                 'seller_id' => $customerType === 'DISTRIBUTOR' ? 'nullable' : 'required|integer',
+                'orderdetail' => 'required|array|min:1',
+                'orderdetail.*.product_id' => 'required|integer|exists:products,id',
+                'orderdetail.*.quantity' => 'required|numeric|gt:0',
             ]);
 
             if ($validator->fails()) {
@@ -508,6 +528,11 @@ class OrderController extends Controller
                 if (!SecondaryCustomer::whereKey($request->buyer_id)->where('type', $customerType)->where('active', 'Y')->exists()) {
                     return response()->json(['status' => 'error', 'message' => 'Invalid customer.'], 422);
                 }
+                if ($customerType === 'RETAILER') {
+                    $sellerType = 'DISTRIBUTOR';
+                } elseif (!in_array($sellerType, ['RETAILER', 'DISTRIBUTOR'], true)) {
+                    return response()->json(['status' => 'error', 'message' => 'Parent type must be RETAILER or DISTRIBUTOR.'], 422);
+                }
                 $validParent = $sellerType === 'RETAILER'
                     ? SecondaryCustomer::whereKey($request->seller_id)->where('type', 'RETAILER')->where('active', 'Y')->exists()
                     : MasterDistributor::whereKey($request->seller_id)->where('business_status', 'Active')->exists();
@@ -516,6 +541,7 @@ class OrderController extends Controller
                 }
                 $request->merge(['seller_type' => $sellerType]);
             }
+            $request->merge(['customer_type' => $customerType]);
 
             $request['created_by'] = $user->id;
             $request['order_remark'] = $request['remark'] ?? '';
@@ -546,7 +572,7 @@ class OrderController extends Controller
                 'seller_id'      => $request->seller_id ?? null,
                 'seller_type'    => $request->seller_type ?? 'DISTRIBUTOR',
                 'executive_id'   => $user->id,
-                'retailer_id'    => $request['retailer_id'],
+                'retailer_id'    => $request->input('retailer_id'),
                 'total_qty'      => 0,
                 'shipped_qty'    => 0,
                 'order_date'     => $request['order_date'],
@@ -676,8 +702,12 @@ class OrderController extends Controller
             // ========================
             // Notifications
             // ========================
-            $buyerName = SecondaryCustomer::where('id', $request->buyer_id)
-                            ->value('shop_name') ?? 'Unknown Buyer';
+            $order->resolveCustomerRelations();
+            $buyerName = $order->buyers?->shop_name
+                ?? $order->buyers?->trade_name
+                ?? $order->buyers?->legal_name
+                ?? $order->buyers?->owner_name
+                ?? 'Unknown Buyer';
     
             $adminnotify = collect([
                 'title' => 'Order collected',
@@ -1044,7 +1074,16 @@ class OrderController extends Controller
             $orders['transport_details'] = $request['transport_details'];
             $orders['order_id'] = $orderid;
             $orders['status_id'] = $status_id;
-            $orders['saledetail'] = $orders['orderdetails'];
+            $remainingDetails = $orders->orderdetails->map(function ($detail) {
+                $remaining = max(0, (float) $detail->quantity - (float) $detail->shipped_qty);
+                $row = $detail->toArray();
+                $row['quantity'] = $remaining;
+                return $row;
+            })->filter(fn ($detail) => $detail['quantity'] > 0)->values();
+            if ($remainingDetails->isEmpty()) {
+                return response(['status' => 'error', 'message' => 'Order is already fully dispatched.'], 422);
+            }
+            $orders['saledetail'] = $remainingDetails;
             $data = collect([$orders]);
             
             
@@ -1054,7 +1093,14 @@ class OrderController extends Controller
 
                 $status_id = Status::where('status_name', '=', 'Dispatched')->pluck('id')->first();
 
-                Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id]);
+                foreach ($orders->orderdetails as $detail) {
+                    $detail->update(['shipped_qty' => $detail->quantity, 'status_id' => $status_id]);
+                }
+                Order::where('id', '=', $request['order_id'])->update([
+                    'status_id' => $status_id,
+                    'shipped_qty' => $orders->ordered_quantity,
+                    'completed_date' => $request->dispatch_date,
+                ]);
 
                 return response(['status' => 'success', 'message' => 'Order Dispatched Successfully.'], 200);
             } else {
@@ -1080,13 +1126,27 @@ class OrderController extends Controller
                 'order_id' => 'required',
                 'grand_total' => 'required',
                 'lr_no'            => 'required',
-                'dispatch_date'    => 'required'
+                'dispatch_date' => 'required',
+                'orderdetail' => 'required|array|min:1',
+                'orderdetail.*.product_id' => 'required|integer',
+                'orderdetail.*.quantity' => 'required|numeric|gt:0',
             ]);
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
 
             $order = Order::where('id', '=', $request['order_id'])->first();
+            if (!$order) {
+                return response(['status' => 'error', 'message' => 'Order not found.'], 404);
+            }
+
+            foreach ($request->orderdetail as $row) {
+                $detail = OrderDetails::where('order_id', $order->id)
+                    ->where('product_id', $row['product_id'])->first();
+                if (!$detail || ((float) $detail->shipped_qty + (float) $row['quantity']) > (float) $detail->quantity) {
+                    return response(['status' => 'error', 'message' => 'Dispatch quantity exceeds the pending quantity for a product.'], 422);
+                }
+            }
             
             $request['orderno'] = $order->orderno;
             $request['saledetail'] = $request['orderdetail'];
@@ -1094,7 +1154,7 @@ class OrderController extends Controller
             $data = collect([$request]);
             $response = insertSales($data);
             if ($response['status'] == 'success') {
-                $partiallystatus = $request['status_id'];
+                $partiallystatus = Status::where('status_name', 'Partially Dispatched')->value('id') ?? 2;
                 if (isset($request['orderdetail'])) {
                     foreach ($request['orderdetail'] as $key => $rows) {
                         $orderdetail = OrderDetails::where('order_id', '=', $request['order_id'])
@@ -1102,17 +1162,23 @@ class OrderController extends Controller
                         if (isset($orderdetail)) {
                             // $orderdetail->cash_dis = $rows['cash_dis'];
                             // $orderdetail->cash_amounts = $rows['cash_amounts'];
-                            $orderdetail->status_id = $request['status_id'];
+                            $orderdetail->status_id = $partiallystatus;
                             $orderdetail->increment('shipped_qty', $rows['quantity']);
                             $orderdetail->save();
                         }
                     }
                 }
-                if (OrderDetails::where('order_id', '=', $request['order_id'])->where('status_id', '=', $partiallystatus)->exists()) {
-                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
-                } else {
-                    Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus, 'cash_discount' => $request->cash_discount, 'cash_amount' => $request->cash_amount, 'order_remark' => $request->order_remark]);
-                }
+                $order->load('orderdetails');
+                $derivedStatus = $order->dispatch_status;
+                $derivedStatusId = $derivedStatus === 'Dispatched'
+                    ? (Status::where('status_name', 'Dispatched')->value('id') ?? 1)
+                    : $partiallystatus;
+                $order->update([
+                    'status_id' => $derivedStatusId,
+                    'shipped_qty' => $order->dispatched_quantity,
+                    'completed_date' => $derivedStatus === 'Dispatched' ? $request->dispatch_date : null,
+                    'order_remark' => $request->order_remark,
+                ]);
                 return response(['status' => 'success', 'message' => 'Order Partially Dispatched Successfully.'], 200);
             }
             return response(['status' => 'error', 'message' => 'Order Status Not Updated.'], 200);
@@ -1127,6 +1193,110 @@ class OrderController extends Controller
      * 
      * @return \Illuminate\Http\JsonResponse
      */
+    public function getCustomerOptions(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'customer_type' => 'required|in:RETAILER,WORKSHOP,MECHANIC,GARAGE,DISTRIBUTOR',
+            'mode' => 'nullable|in:customer,parent',
+            'parent_type' => 'nullable|in:RETAILER,DISTRIBUTOR',
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'message' => $validator->errors()], 422);
+        }
+
+        $type = strtoupper((string) $request->customer_type);
+        $mode = $request->input('mode', 'customer');
+        $term = trim((string) $request->input('term', ''));
+        $perPage = (int) $request->input('per_page', 20);
+
+        if ($mode === 'parent' && $type === 'DISTRIBUTOR') {
+            return response()->json(['status' => 'success', 'data' => [], 'pagination' => ['more' => false]]);
+        }
+
+        if ($mode === 'parent' && $type !== 'RETAILER' && !$request->filled('parent_type')) {
+            $retailers = SecondaryCustomer::query()->where('active', 'Y')->where('type', 'RETAILER')
+                ->when($term !== '', fn ($q) => $q->where(function ($search) use ($term) {
+                    $search->where('shop_name', 'like', "%{$term}%")
+                        ->orWhere('owner_name', 'like', "%{$term}%")
+                        ->orWhere('mobile_number', 'like', "%{$term}%");
+                }))->select('id', 'shop_name', 'owner_name', 'mobile_number')
+                ->orderBy('shop_name')->paginate($perPage, ['*'], 'page', (int) $request->input('page', 1));
+            $distributors = MasterDistributor::query()->where('business_status', 'Active')
+                ->when($term !== '', fn ($q) => $q->where(function ($search) use ($term) {
+                    $search->where('trade_name', 'like', "%{$term}%")
+                        ->orWhere('legal_name', 'like', "%{$term}%")
+                        ->orWhere('distributor_code', 'like', "%{$term}%")
+                        ->orWhere('mobile', 'like', "%{$term}%");
+                }))->select('id', 'trade_name', 'legal_name', 'distributor_code', 'mobile')
+                ->orderBy('trade_name')->paginate($perPage, ['*'], 'page', (int) $request->input('page', 1));
+
+            $items = collect($retailers->items())->map(fn ($row) => [
+                'id' => $row->id, 'text' => $row->shop_name ?: $row->owner_name,
+                'name' => $row->shop_name ?: $row->owner_name, 'code' => null,
+                'mobile' => $row->mobile_number, 'entity_type' => 'RETAILER',
+            ])->concat(collect($distributors->items())->map(fn ($row) => [
+                'id' => $row->id, 'text' => $row->trade_name ?: $row->legal_name,
+                'name' => $row->trade_name ?: $row->legal_name, 'code' => $row->distributor_code,
+                'mobile' => $row->mobile, 'entity_type' => 'DISTRIBUTOR',
+            ]))->values();
+
+            return response()->json([
+                'status' => 'success', 'data' => $items,
+                'pagination' => ['more' => $retailers->hasMorePages() || $distributors->hasMorePages()],
+            ]);
+        }
+
+        $useDistributors = $mode === 'customer'
+            ? $type === 'DISTRIBUTOR'
+            : ($type === 'RETAILER' || strtoupper((string) $request->parent_type) === 'DISTRIBUTOR');
+
+        if ($useDistributors) {
+            $query = MasterDistributor::query()->where('business_status', 'Active')
+                ->when($term !== '', fn ($q) => $q->where(function ($search) use ($term) {
+                    $search->where('trade_name', 'like', "%{$term}%")
+                        ->orWhere('legal_name', 'like', "%{$term}%")
+                        ->orWhere('distributor_code', 'like', "%{$term}%")
+                        ->orWhere('mobile', 'like', "%{$term}%");
+                }))
+                ->select('id', 'trade_name', 'legal_name', 'distributor_code as code', 'mobile');
+            $page = $query->orderBy('trade_name')->paginate($perPage);
+            $items = collect($page->items())->map(fn ($row) => [
+                'id' => $row->id,
+                'text' => $row->trade_name ?: $row->legal_name,
+                'name' => $row->trade_name ?: $row->legal_name,
+                'code' => $row->code,
+                'mobile' => $row->mobile,
+                'entity_type' => 'DISTRIBUTOR',
+            ]);
+        } else {
+            $secondaryType = $mode === 'parent' ? 'RETAILER' : $type;
+            $query = SecondaryCustomer::query()->where('active', 'Y')->where('type', $secondaryType)
+                ->when($term !== '', fn ($q) => $q->where(function ($search) use ($term) {
+                    $search->where('shop_name', 'like', "%{$term}%")
+                        ->orWhere('owner_name', 'like', "%{$term}%")
+                        ->orWhere('mobile_number', 'like', "%{$term}%");
+                }))
+                ->select('id', 'shop_name', 'owner_name', 'mobile_number');
+            $page = $query->orderBy('shop_name')->paginate($perPage);
+            $items = collect($page->items())->map(fn ($row) => [
+                'id' => $row->id,
+                'text' => $row->shop_name ?: $row->owner_name,
+                'name' => $row->shop_name ?: $row->owner_name,
+                'code' => null,
+                'mobile' => $row->mobile_number,
+                'entity_type' => 'RETAILER',
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $items,
+            'pagination' => ['more' => $page->hasMorePages()],
+        ]);
+    }
+
     public function getOrderBuyers(Request $request)
     {
         try {
@@ -1140,8 +1310,7 @@ class OrderController extends Controller
                 ->select(
                     'secondary_customers.id as buyer_id',
                     DB::raw("COALESCE(secondary_customers.shop_name, secondary_customers.owner_name, 'Unknown') as name"),
-                    'secondary_customers.mobile_no',
-                    'secondary_customers.city'
+                    'secondary_customers.mobile_number as mobile'
                 )
                 ->distinct()
                 ->orderBy('name', 'asc')
@@ -1179,8 +1348,7 @@ class OrderController extends Controller
                 ->select(
                     'master_distributors.id as seller_id',
                     DB::raw("COALESCE(master_distributors.trade_name, master_distributors.legal_name, 'Unknown') as name"),
-                    'master_distributors.mobile_no',
-                    'master_distributors.city'
+                    'master_distributors.mobile'
                 )
                 ->distinct()
                 ->orderBy('name', 'asc')

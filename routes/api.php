@@ -267,6 +267,7 @@ Route::group(['middleware' => ['auth:users,customers']], function () {
     Route::post('leadToCustomer', [CustomerController::class, 'leadToCustomer']);
     // Get Order List
     Route::post('insertOrder', [OrderController::class, 'insertOrder']);
+    Route::get('order/customer-options', [OrderController::class, 'getCustomerOptions']);
     Route::any('getOrderList', [OrderController::class, 'getOrderList']);
     Route::get('getHierarchyOrderStats', [OrderController::class, 'getHierarchyOrderStats']);
     Route::any('getClusterOrderList', [OrderController::class, 'getClusterOrderList']);
@@ -446,4 +447,3 @@ Route::group(['middleware' => ['auth:users,customers']], function () {
     
     Route::post('/customer-outstanding', [CustomerOutstandingController::class, 'store']);
 });
-

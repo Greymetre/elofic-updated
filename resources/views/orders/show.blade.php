@@ -48,33 +48,47 @@
               </div>
               <hr>
               <!-- info row -->
+              @php
+                $seller = $orders->sellers;
+                $buyer = $orders->buyers;
+
+                $sellerName = $seller?->shop_name ?? $seller?->trade_name ?? $seller?->legal_name ?? $seller?->owner_name ?? '';
+                $sellerAddress = $seller?->address_line ?? $seller?->billing_address ?? '';
+                $sellerArea = $seller?->belt_area_market_name ?? '';
+                $sellerCity = $seller?->city?->city_name ?? $seller?->billing_city ?? '';
+                $sellerPincode = $seller?->pincode?->pincode ?? $seller?->billing_pincode ?? '';
+                $sellerPhone = $seller?->mobile_number ?? $seller?->mobile ?? '';
+                $sellerContact = $seller?->owner_name ?? $seller?->contact_person ?? '';
+
+                $buyerName = $buyer?->shop_name ?? $buyer?->trade_name ?? $buyer?->legal_name ?? $buyer?->owner_name ?? '';
+                $buyerAddress = $buyer?->address_line ?? $buyer?->billing_address ?? '';
+                $buyerArea = $buyer?->belt_area_market_name ?? '';
+                $buyerCity = $buyer?->city?->city_name ?? $buyer?->billing_city ?? '';
+                $buyerPincode = $buyer?->pincode?->pincode ?? $buyer?->billing_pincode ?? '';
+                $buyerPhone = $buyer?->mobile_number ?? $buyer?->mobile ?? '';
+                $buyerContact = $buyer?->owner_name ?? $buyer?->contact_person ?? '';
+              @endphp
               <div class="row invoice-info">
                 <div class="col-sm-6 invoice-col">
                   From
                   <address>
-                    <strong>{!! isset($orders['sellers']['legal_name']) ? $orders['sellers']['trade_name'] :'' !!} </strong><br>
-                    {!! $orders['sellers']['billing_address']??'' !!} ,{!! $orders['sellers']['customeraddress']['address2']??'' !!}<br>
-                    {!! $orders['sellers']['customeraddress']['locality']??'-' !!}, {!! $orders['sellers']['billing_city']['city_name']??'-' !!} {!! $orders['sellers']['billing_pincode']['pincode']??'-' !!}<br>
-                    Phone: {!! $orders['sellers']['mobile'] ?? '' !!}<br>
-                    Email: {!! $orders['sellers']['email'] ?? '' !!}
+                    <strong>{{ $sellerName }}</strong><br>
+                    {{ $sellerAddress }}<br>
+                    {{ collect([$sellerArea, $sellerCity, $sellerPincode])->filter()->implode(', ') }}<br>
+                    Phone: {{ $sellerPhone }}<br>
+                    @if($sellerContact) Contact: {{ $sellerContact }}<br> @endif
+                    @if($seller?->email) Email: {{ $seller->email }} @endif
                   </address>
                 </div>
                 <!-- /.col -->
                 <div class="col-sm-6 invoice-col">
                   To
                   <address>
-                    <strong>{{ $orders->buyers->shop_name ?? $orders->buyers->trade_name ?? $orders->buyers->legal_name ?? '' }}</strong><br>
-
-                    {{ $orders->buyers->address_line ?? $orders->buyers->billing_address ?? '' }}<br>
-
-                    {!! $orders['buyers']['belt_area_market_name'] ?? '' !!},
-
-                    {!! $orders['buyers']['city']['city_name'] ?? '' !!}
-
-                    {!! $orders['buyers']['pincode']['pincode'] ?? '' !!}<br>
-
-                    Phone: {{ $orders->buyers->mobile_number ?? $orders->buyers->mobile ?? '' }}<br>
-                    Owner: {!! $orders['buyers']['owner_name'] ?? '' !!}
+                    <strong>{{ $buyerName }}</strong><br>
+                    {{ $buyerAddress }}<br>
+                    {{ collect([$buyerArea, $buyerCity, $buyerPincode])->filter()->implode(', ') }}<br>
+                    Phone: {{ $buyerPhone }}<br>
+                    @if($buyerContact) Contact: {{ $buyerContact }} @endif
                   </address>
                 </div>
               </div>

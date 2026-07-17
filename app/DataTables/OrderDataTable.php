@@ -32,6 +32,8 @@ class OrderDataTable extends DataTable
                 return $data->dispatch_status;
             })
             ->addColumn('customer_type_name', fn ($data) => strtoupper((string) $data->customer_type))
+            ->addColumn('executive_name', fn ($data) => $data->executive?->name ?? '-')
+            ->addColumn('branch_name', fn ($data) => $data->executive?->branch?->branch_name ?? '-')
             ->addColumn('buyer_name', function ($data) {
                 $data->resolveCustomerRelations();
                 return $data->buyers->shop_name ?? $data->buyers->trade_name ?? $data->buyers->legal_name ?? '-';
@@ -96,7 +98,7 @@ class OrderDataTable extends DataTable
     {
         $userids = getUsersReportingToAuth();
 
-        $query = $model->with('sellers', 'buyers', 'statusname', 'createdbyname', 'orderdetails');
+        $query = $model->with('sellers', 'buyers', 'statusname', 'createdbyname', 'executive.branch', 'orderdetails');
 
         if (auth()->user()->hasRole('Distributor')) {
             $query->where('seller_id', auth()->user()->customerid);

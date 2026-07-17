@@ -266,7 +266,7 @@
                                             <th class="text-center">Segment</th>
                                             <th class="text-center">Products</th>
                                             <th class="text-center">Quantity</th>
-                                            <th class="text-center">MRP / HSN</th>
+                                            <th class="text-center">MRP</th>
                                             <th class="text-center">Amount</th>
                                             <th></th>
                                         </tr>
@@ -429,7 +429,6 @@
 
         <td>
             <select name="orderdetail[${rowCount}][subcategory_id]" class="form-control select2 subcategory-select" data-row="${rowCount}">
-                <option value="">Select Segment</option>
                 ${$('#tab_logic tbody tr:first .subcategory-select').html().replace(/selected/g,'')}
             </select>
         </td>

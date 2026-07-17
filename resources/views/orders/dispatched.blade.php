@@ -24,10 +24,6 @@
                <div class="row">
                   <div class="col-12">
                      <h4>
-                        <!-- <img src="{!! asset('assets/img/logo.png') !!}" class="brand-image" width="70px" alt="Logo"> <span> {!! config('app.name') !!}</span> -->
-                        <img src="{!! url('/').'/'.asset('assets/img/bediya.jpg') !!}" width="70">
-                        <img src="{!! url('/').'/'.asset('assets/img/silver.png') !!}" width="70">
-
                         <small class="float-right">Date: {!! date("d-M-Y", strtotime($orders['order_date'])) !!}</small>
                      </h4>
                   </div>
@@ -886,6 +882,21 @@
       <!-- <script src="{{ url('/').'/'.asset('assets/js/validation_orders.js') }}"></script> -->
       <!-- <script src="{{ url('/').'/'.asset('assets/js/invoice_js') }}"></script> -->
       <script type="text/javascript">
+         $(function () {
+            // Dispatch records use the pricing already saved on the order.
+            // Discounts and tax cannot be entered or changed during dispatch.
+            $('#all-discount-div-pump, #all-discount-div-fan').hide();
+            $('.cash_discount').closest('.form-group.row').hide();
+            $('#subtotal').closest('.form-group.row').hide();
+            $('[name="5_gst"], [name="12_gst"], [name="18_gst"], [name="28_gst"], [name="total_gst"]').closest('.form-group.row').hide();
+            $('a.add-rows').remove();
+            $('#tab_logic thead th:nth-child(7), #tab_logic thead th:nth-child(6), #tab_logic thead th:nth-child(5)').hide();
+            $('#tab_logic tbody tr').each(function () {
+               $(this).children('td').eq(7).hide();
+               $(this).children('td').eq(6).hide();
+               $(this).children('td').eq(5).hide();
+            });
+         });
          $(document).ready(function() {
 
             var $table = $('table.kvcodes-dynamic-rows-example'),
