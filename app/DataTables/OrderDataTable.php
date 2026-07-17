@@ -31,6 +31,15 @@ class OrderDataTable extends DataTable
             ->editColumn('statusname.status_name', function ($data) {
                 return $data->status_id ? $data->statusname->status_name : 'Pending';
             })
+            ->addColumn('customer_type_name', fn ($data) => strtoupper((string) $data->customer_type))
+            ->addColumn('buyer_name', function ($data) {
+                $data->resolveCustomerRelations();
+                return $data->buyers->shop_name ?? $data->buyers->trade_name ?? $data->buyers->legal_name ?? '-';
+            })
+            ->addColumn('seller_name', function ($data) {
+                $data->resolveCustomerRelations();
+                return $data->sellers->shop_name ?? $data->sellers->trade_name ?? $data->sellers->legal_name ?? '-';
+            })
             ->addColumn('action', function ($query) {
                 $btn = '';
                 $activebtn = '';

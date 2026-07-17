@@ -9,6 +9,28 @@ use Illuminate\Validation\Rule;
 
 class OrderRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $type = strtoupper((string) $this->input('type'));
+        $type = $type === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $type;
+        $sellerId = $this->input('seller_id');
+        $sellerType = strtoupper((string) $this->input('seller_type'));
+
+        if (is_string($sellerId) && str_contains($sellerId, ':')) {
+            [$sellerType, $sellerId] = array_pad(explode(':', $sellerId, 2), 2, null);
+        }
+
+        if ($type === 'RETAILER') {
+            $sellerType = 'DISTRIBUTOR';
+        }
+
+        $this->merge([
+            'type' => $type,
+            'seller_id' => $sellerId,
+            'seller_type' => $sellerType ?: null,
+        ]);
+    }
+
     public function authorize()
     {
         abort_if(Gate::denies('order_create') || Gate::denies('order_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -21,23 +43,49 @@ class OrderRequest extends FormRequest
         $type = strtoupper((string) $this->input('type'));
         $type = $type === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $type;
 
+        $buyerRules = $type === 'DISTRIBUTOR'
+            ? ['required', 'integer', 'exists:master_distributors,id']
+            : [
+                'required',
+                'integer',
+                Rule::exists('secondary_customers', 'id')->where(fn ($query) => $query
+                    ->where('type', $type)
+                    ->where(function ($activeQuery) {
+                        $activeQuery->where('active', 'Y')->orWhere('status', 'Active');
+                    })),
+            ];
+
+        $sellerRules = $type === 'DISTRIBUTOR'
+            ? ['nullable']
+            : ['required', 'integer'];
+
+        if ($type === 'RETAILER') {
+            $sellerRules[] = 'exists:master_distributors,id';
+        } elseif ($type !== 'DISTRIBUTOR') {
+            $sellerRules[] = function ($attribute, $value, $fail) {
+                $valid = $this->input('seller_type') === 'DISTRIBUTOR'
+                    ? \App\Models\MasterDistributor::whereKey($value)->where('business_status', 'Active')->exists()
+                    : ($this->input('seller_type') === 'RETAILER'
+                        && \App\Models\SecondaryCustomer::whereKey($value)->where('type', 'RETAILER')->where('active', 'Y')->exists());
+
+                if (!$valid) {
+                    $fail('The selected parent must be an active Retailer or Distributor.');
+                }
+            };
+        }
+
         $customerRules = [
             'type' => ['required', Rule::in(['RETAILER', 'WORKSHOP', 'MECHANIC', 'GARAGE', 'DISTRIBUTOR'])],
-            'seller_id' => ['required', 'integer', 'exists:master_distributors,id'],
-            'buyer_id' => $type === 'DISTRIBUTOR'
+            'buyer_id' => $buyerRules,
+            'seller_id' => $sellerRules,
+            'seller_type' => $type === 'DISTRIBUTOR'
                 ? ['nullable']
-                : [
-                    'required',
-                    'integer',
-                    Rule::exists('secondary_customers', 'id')->where(fn ($query) => $query->where('type', $type)),
-                ],
-            'retailer_id' => in_array($type, ['GARAGE', 'WORKSHOP'], true)
-                ? [
-                    'required',
-                    'integer',
-                    Rule::exists('secondary_customers', 'id')->where(fn ($query) => $query->where('type', 'RETAILER')),
-                ]
-                : ['nullable'],
+                : ['required', Rule::in($type === 'RETAILER' ? ['DISTRIBUTOR'] : ['DISTRIBUTOR', 'RETAILER'])],
+            'orderdetail.*.subcategory_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('subcategories', 'id')->where(fn ($query) => $query->where('active', 'Y')),
+            ],
         ];
 
         $rules = [];

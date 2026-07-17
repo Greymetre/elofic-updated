@@ -80,6 +80,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
 
             $query->chunk(1000, function ($results) use (&$final) {
                 foreach ($results as $row) {
+                    $row->orders?->resolveCustomerRelations();
                     $final->push($row);
                 }
             });
@@ -151,6 +152,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
 
             $query->chunk(1000, function ($results) use (&$final) {
                 foreach ($results as $row) {
+                    $row->orders?->resolveCustomerRelations();
                     $final->push($row);
                 }
             });
@@ -188,6 +190,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 'Pending Qty',
                 'Rate',
                 'Total',
+                'Order Amount',
                 'Employee Code',
                 'User Name',
                 'Branch',
@@ -199,11 +202,11 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
 
         return [
             'Order Date',
-            'Customer ID',
+            'Buyer Code',
             'Customer Type',
-            'Customer Name',
-            'Dealer & Distributor Code',
-            'Dealer & Distributor Name',
+            'Buyer Name',
+            'Seller or Parent Code',
+            'Seller or Parent Name',
             'Order No',
             'Category',
             'Subcategory',
@@ -214,6 +217,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             'Pending Qty',
             'Rate',
             'Total',
+            'Order Amount',
             'Order Remark',
             'Employee Code',
             'User Name',
@@ -331,6 +335,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 $pending_qty,
                 $data['products']['productpriceinfo']['mrp'] ?? '',
                 $data['line_total'] ?? '',
+                $order['grand_total'] ?? '',
                 $order['getuserdetails']['employee_codes'] ?? '',
                 $order['createdbyname']['name'] ?? '',
                 $order['getuserdetails']['getbranch']['branch_name'] ?? '',
@@ -348,8 +353,10 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 ?? $order['sellers']['trade_name']
                 ?? $order['sellers']['legal_name']
                 ?? '',
-            $order['sellers']['distributor_code'] ?? '',
-            $order['sellers']['trade_name'] ?? $order['sellers']['legal_name'] ?? '',
+            ($order['seller_type'] ?? 'DISTRIBUTOR') === 'RETAILER'
+                ? ($order['sellers']['id'] ?? '')
+                : ($order['sellers']['distributor_code'] ?? ''),
+            $order['sellers']['shop_name'] ?? $order['sellers']['trade_name'] ?? $order['sellers']['legal_name'] ?? '',
             $order['orderno'] ?? '',
             $data['products']['categories']['category_name'] ?? '',
             $data['products']['subcategories']['subcategory_name'] ?? '',
@@ -360,6 +367,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             $pending_qty,
             $data['products']['productpriceinfo']['mrp'] ?? '',
             $data['line_total'] ?? '',
+            $order['grand_total'] ?? '',
             $order['order_remark'] ?? '',
             $order['getuserdetails']['employee_codes'] ?? '',
             $order['createdbyname']['name'] ?? '',

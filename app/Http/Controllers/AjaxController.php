@@ -1014,21 +1014,30 @@ public function getCustomerDataSelect(Request $request)
     $term = trim($request->get('term', ''));
     $type = strtoupper((string) $request->get('type'));
     $type = $type === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $type;
+    $page = max(1, (int) $request->get('page', 1));
+    $perPage = 10;
+    $sourcePerPage = $type === 'PARENT' ? 5 : $perPage;
 
     $results = collect();
 
     // ────────────────────────────────────────────────
     // DISTRIBUTORS (MasterDistributor)
     // ────────────────────────────────────────────────
-    if (!$type || $type === 'DISTRIBUTOR') {
+    if (!$type || in_array($type, ['DISTRIBUTOR', 'PARENT'], true)) {
         $masterDistributors = MasterDistributor::query()
+            ->where('business_status', 'Active')
             ->when($term, function ($q) use ($term) {
-                $q->where('trade_name', 'LIKE', "%{$term}%")
-                  ->orWhere('distributor_code', 'LIKE', "%{$term}%")
-                  ->orWhere('legal_name', 'LIKE', "%{$term}%");
+                $q->where(function ($searchQuery) use ($term) {
+                    $searchQuery->where('trade_name', 'LIKE', "%{$term}%")
+                        ->orWhere('distributor_code', 'LIKE', "%{$term}%")
+                        ->orWhere('legal_name', 'LIKE', "%{$term}%");
+                });
             })
+            ->orderBy('trade_name')
+            ->skip(($page - 1) * $sourcePerPage)
+            ->limit($sourcePerPage + 1)
             ->get()
-            ->map(function ($distributor) {
+            ->map(function ($distributor) use ($type) {
                 // Build full address using existing fields (no relations needed)
                 $addressParts = array_filter([
                     $distributor->billing_address ?? '',
@@ -1042,7 +1051,9 @@ public function getCustomerDataSelect(Request $request)
                 $full_address = trim(implode(', ', $addressParts));
 
                 return [
-                    'id'           => $distributor->id,
+                    'id'           => $type === 'PARENT' ? 'DISTRIBUTOR:' . $distributor->id : $distributor->id,
+                    'entity_id'    => $distributor->id,
+                    'entity_type'  => 'DISTRIBUTOR',
                     'text'         => trim(($distributor->trade_name ?: $distributor->legal_name) . ($distributor->distributor_code ? ' - ' . $distributor->distributor_code : '')),
                     'model_type'   => 'master',
                     'full_address' => $full_address,
@@ -1076,6 +1087,7 @@ public function getCustomerDataSelect(Request $request)
     // SECONDARY CUSTOMERS (only when specific type is requested)
     // ────────────────────────────────────────────────
     if ($type && $type !== 'DISTRIBUTOR') {
+       $secondaryType = $type === 'PARENT' ? 'RETAILER' : $type;
        $secondaryCustomers = \App\Models\SecondaryCustomer::with([
     'city',
     'district',
@@ -1083,12 +1095,20 @@ public function getCustomerDataSelect(Request $request)
     'country',
     'pincode'
 ])
-->where('type', $type)
+->where('type', $secondaryType)
+->where('active', 'Y')
 ->when($term, function ($q) use ($term) {
-    $q->where('shop_name', 'LIKE', "%{$term}%");
+    $q->where(function ($searchQuery) use ($term) {
+        $searchQuery->where('shop_name', 'LIKE', "%{$term}%")
+            ->orWhere('owner_name', 'LIKE', "%{$term}%")
+            ->orWhere('mobile_number', 'LIKE', "%{$term}%");
+    });
 })
+->orderBy('shop_name')
+->skip(($page - 1) * $sourcePerPage)
+->limit($sourcePerPage + 1)
 ->get()
-            ->map(function ($customer) use ($type) {
+            ->map(function ($customer) use ($type, $secondaryType) {
                 
 $addressParts = array_filter([
     $customer->address_line ?? '',
@@ -1102,11 +1122,13 @@ $addressParts = array_filter([
                 $full_address = trim(implode(', ', $addressParts));
 
                 return [
-                    'id'           => $customer->id,
+                    'id'           => $type === 'PARENT' ? 'RETAILER:' . $customer->id : $customer->id,
+                    'entity_id'    => $customer->id,
+                    'entity_type'  => 'RETAILER',
                     'text'         => trim($customer->shop_name . ($customer->belt_area_market_name ? ' - ' . $customer->belt_area_market_name : '')),
                     'model_type'   => 'secondary',
                     'full_address' => $full_address,
-                    'data-type'    => $type,
+                    'data-type'    => $secondaryType,
                     'customeraddress' => [
                         'id'           => $customer->id,
                         'address1'     => $customer->address_line ?? '',
@@ -1134,16 +1156,34 @@ $addressParts = array_filter([
         $results = $results->merge($secondaryCustomers);
     }
 
-    // Pagination
-    $page    = max(1, (int) ($request->page ?? 1));
-    $perPage = 10;
+    if ($type === 'PARENT') {
+        $distributors = $results->where('entity_type', 'DISTRIBUTOR')->values();
+        $retailers = $results->where('entity_type', 'RETAILER')->values();
+        $hasMore = $distributors->count() > $sourcePerPage || $retailers->count() > $sourcePerPage;
+        $distributors = $distributors->take($sourcePerPage);
+        $retailers = $retailers->take($sourcePerPage);
+        $interleaved = collect();
 
-    $paginated = $results->forPage($page, $perPage);
+        for ($index = 0; $index < max($distributors->count(), $retailers->count()); $index++) {
+            if ($distributors->has($index)) {
+                $interleaved->push($distributors[$index]);
+            }
+            if ($retailers->has($index)) {
+                $interleaved->push($retailers[$index]);
+            }
+        }
+
+        $results = $interleaved;
+    } else {
+        $hasMore = $results->count() > $perPage;
+    }
+
+    $paginated = $results->take($perPage);
 
     return response()->json([
         'results'    => $paginated->values()->all(),
         'pagination' => [
-            'more' => $results->count() > ($page * $perPage)
+            'more' => $hasMore
         ]
     ]);
 }

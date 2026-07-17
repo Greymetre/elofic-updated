@@ -104,7 +104,9 @@
             })->whereHas('roles', function ($query) {
                 $query->whereNot('id', ['29']);
             })->select('id', 'name')->orderBy('id', 'desc')->get();
-            $subcategories = Subcategory::select('id','subcategory_name')->get();
+            $subcategories = Subcategory::where('active', 'Y')
+                ->orderBy('subcategory_name')
+                ->get(['id', 'subcategory_name']);
 
             $category = Category::where('active', 'Y')->get();
             // dd($products,$masterDistributors,$secondaryCustomers,$users,$category,$subcategories);
@@ -153,8 +155,8 @@
                     $request['order_type'] = 'MASTER_DISTRIBUTOR';
 
                     // Distributor order
-                    $request['seller_id'] = $request['seller_id'];
-                    $request['buyer_id'] = null;
+                    $request['seller_id'] = $request['buyer_id'];
+                    $request['seller_type'] = 'DISTRIBUTOR';
                     $request['retailer_id'] = null;
 
                 } else {
@@ -164,6 +166,7 @@
                     // Retailer / Workshop / Garage / Mechanic order
                     $request['seller_id'] = $request['seller_id'];
                     $request['buyer_id'] = $request['buyer_id'];
+                    $request['seller_type'] = $request['seller_type'];
 
                 }
 
@@ -336,6 +339,7 @@
             abort_if(Gate::denies('order_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $id = decrypt($id);
             $orders = $this->orders->with('sellers', 'createdbyname', 'buyers')->find($id);
+            $orders?->resolveCustomerRelations();
             $orderdetails = OrderDetails::with('products')->where('order_id', '=', $id)->get();
             if ($orders->product_cat_id == '1') {
                 $totalLP = 0;
@@ -382,6 +386,7 @@
                 'sellers',
                 'orderdetails.products'
             ])->find($id);
+            $orders?->resolveCustomerRelations();
             $orders->type = in_array($orders->order_type, ['MASTER_DISTRIBUTER', 'MASTER_DISTRIBUTOR'], true)
                 ? 'DISTRIBUTOR'
                 : strtoupper($orders->customer_type ?: ($orders->buyers->type ?? 'RETAILER'));
@@ -389,7 +394,9 @@
 
             // $orderdetail = OrderDetails::with('products')->where('order_id', '=', $id)->get();
             $products = Product::where('active', '=', 'Y')->select('id', 'display_name', 'product_image')->get();
-            $subcategories = Subcategory::select('id','subcategory_name')->get();
+            $subcategories = Subcategory::where('active', 'Y')
+                ->orderBy('subcategory_name')
+                ->get(['id', 'subcategory_name']);
             $cities = \App\Models\City::pluck('city_name', 'id');
             $states = \App\Models\State::pluck('state_name', 'id');
             $districts = \App\Models\District::pluck('district_name', 'id');
@@ -464,15 +471,14 @@
 
             $orders = Order::with('orderdetails.products.subcategories','retailers')->find($id);
             $oldOrderData = $orders->toArray();
-            $orders->buyer_id = $customerType === 'DISTRIBUTOR' ? null : $request->buyer_id;
-            $orders->seller_id = $request->seller_id;
+            $orders->buyer_id = $request->buyer_id;
+            $orders->seller_id = $customerType === 'DISTRIBUTOR' ? $request->buyer_id : $request->seller_id;
+            $orders->seller_type = $customerType === 'DISTRIBUTOR' ? 'DISTRIBUTOR' : $request->seller_type;
             $orders->customer_type = $customerType;
             $orders->order_type = $customerType === 'DISTRIBUTOR'
                 ? 'MASTER_DISTRIBUTOR'
                 : 'SECONDARY_CUSTOMER';
-            $orders->retailer_id = in_array($customerType, ['GARAGE', 'WORKSHOP'], true)
-                ? $request->retailer_id
-                : null;
+            $orders->retailer_id = null;
 
             //$orders->buyer_id = isset($request['buyer_id']) ? $request['buyer_id'] :null ;
             $orders->executive_id = isset($request['executive_id']) ? $request['executive_id'] : null;
@@ -828,6 +834,7 @@
 
             $orderid = decrypt($orderid);
             $orders = $this->orders->with('orderdetails')->find($orderid);
+            $orders?->resolveCustomerRelations();
             $category = Category::where('active', 'Y')->get();
             return view('orders.full_dispatched', compact('category'))->with('orders', $orders);
         }
@@ -894,7 +901,10 @@
                     if (OrderDetails::where('order_id', '=', $request['order_id'])->where('status_id', '=', $partiallystatus)->exists()) {
                         Order::where('id', '=', $request['order_id'])->update(['status_id' => $partiallystatus]);
                     } else {
-                        Order::where('id', '=', $request['order_id'])->update(['status_id' => $status_id]);
+                        Order::where('id', '=', $request['order_id'])->update([
+                            'status_id' => $status_id,
+                            'completed_date' => $request->dispatch_date,
+                        ]);
                     }
                     return Redirect::to('sales')->with('message_success', 'Sales Store Successfully');
 
@@ -915,6 +925,7 @@
         {
             $orderid = decrypt($orderid);
             $orders = $this->orders->find($orderid);
+            $orders?->resolveCustomerRelations();
             $category = Category::where('active', 'Y')->get();
             return view('orders.dispatched', compact('category'))->with('orders', $orders);
         }

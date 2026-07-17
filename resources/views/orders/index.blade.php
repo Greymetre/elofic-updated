@@ -167,9 +167,10 @@
                                 <th>{!! trans('panel.order.order_date') !!}</th>
                                 <th>{!! trans('panel.order.orderno') !!}</th>
                                 <!-- <th>{!! trans('panel.global.buyer_name') !!}</th> -->
-                                <th>Secondary Customer Name</th>
+                                <th>Buyer Customer</th>
                                 <!-- <th>{!! trans('panel.global.seller_name') !!}</th> -->
-                                <th>Primary Customer Name</th>
+                                <th>Seller / Parent Customer</th>
+                                <th>Customer Type</th>
 
                                 <th>{!! trans('panel.order.completed_date') !!}</th>
                                 <!-- <th>{!! trans('panel.order.total_gst') !!}</th> -->
@@ -200,7 +201,7 @@
             processing: true,
             serverSide: true,
             "order": [
-                [12, 'desc']
+                [13, 'desc']
             ],
             ajax: {
                 url: "{{ route('orders.index') }}",
@@ -253,14 +254,21 @@
                     orderable: false,
                 },
                 {
-                    data: 'buyers.shop_name',
-                    name: 'buyers.shop_name',
+                    data: 'buyer_name',
+                    name: 'buyer_name',
                     "defaultContent": '',
                     orderable: false,
                 },
                 {
-                    data: 'sellers.legal_name',
-                    name: 'sellers.legal_name',
+                    data: 'seller_name',
+                    name: 'seller_name',
+                    "defaultContent": '',
+                    orderable: false,
+                },
+
+                {
+                    data: 'customer_type_name',
+                    name: 'customer_type',
                     "defaultContent": '',
                     orderable: false,
                 },

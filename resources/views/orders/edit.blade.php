@@ -184,7 +184,7 @@
 
                                 @if($orders->buyer_id && $orders->buyers)
                                 <option value="{{ $orders->buyer_id }}" selected>
-                                    {{ $orders->buyers->shop_name }}
+                                    {{ $orders->buyers->shop_name ?? $orders->buyers->trade_name ?? $orders->buyers->legal_name ?? '' }}
                                 </option>
                                 @endif
                             </select>
@@ -204,8 +204,8 @@
                                 </div> -->
                                 <div class="buyer_address address-text">
                                  @if($orders->buyers)
-                                    {{ $orders->buyers->address_line ?? $orders->buyers->customeraddress->address1 ?? '' }},
-                                    {{ $cities[$orders->buyers->city_id] ?? $orders->buyers->customeraddress->city->city_name ?? '' }},
+                                    {{ $orders->buyers->address_line ?? $orders->buyers->billing_address ?? '' }},
+                                    {{ $cities[$orders->buyers->city_id] ?? $orders->buyers->billing_city ?? '' }},
                                     {{ $districts[$orders->buyers->district_id] ?? '' }},
                                     {{ $states[$orders->buyers->state_id] ?? '' }} -
                                     {{ $pincodes[$orders->buyers->pincode_id] ?? '' }}
@@ -218,15 +218,15 @@
                         </div>
                         <!-- Distributor -->
                         <div class="col-md-6" id="seller_div" style="display:none;">
-                            <label class="col-form-label">Dealer / Distributor <span
+                            <label class="col-form-label">Parent <span
                                     class="text-danger">*</span></label>
 
                             <select class="form-control select2" name="seller_id" id="seller_id">
                                 <option value="">Select Dealer / Distributor</option>
 
                                 @if($orders->seller_id && $orders->sellers)
-                                <option value="{{ $orders->seller_id }}" selected>
-                                    {{ $orders->sellers->trade_name }}
+                                <option value="{{ ($orders->seller_type ?: 'DISTRIBUTOR') . ':' . $orders->seller_id }}" selected>
+                                    {{ $orders->sellers->shop_name ?? $orders->sellers->trade_name ?? $orders->sellers->legal_name ?? '' }}
                                 </option>
                                 @endif
                             </select>
@@ -241,11 +241,11 @@
 
                                  <div id="customer_address_div" class="address-text">
                                  @if($orders->sellers)
-                                    {{ $orders->sellers->billing_address ?? '' }},
-                                    {{ $cities[$orders->sellers->billing_city] ?? '' }},
-                                    {{ $districts[$orders->sellers->billing_district] ?? '' }},
-                                    {{ $states[$orders->sellers->billing_state] ?? '' }} -
-                                    {{ $pincodes[$orders->sellers->billing_pincode] ?? '' }}
+                                    {{ $orders->sellers->address_line ?? $orders->sellers->billing_address ?? '' }},
+                                    {{ $cities[$orders->sellers->city_id] ?? $orders->sellers->billing_city ?? '' }},
+                                    {{ $districts[$orders->sellers->district_id] ?? $orders->sellers->billing_district ?? '' }},
+                                    {{ $states[$orders->sellers->state_id] ?? $orders->sellers->billing_state ?? '' }} -
+                                    {{ $pincodes[$orders->sellers->pincode_id] ?? $orders->sellers->billing_pincode ?? '' }}
                                  @else
                                     Select distributor to view address
                                  @endif
@@ -489,7 +489,7 @@ $(document).ready(function () {
 
          preloadDropdown('#buyer_id', type);
 
-         preloadDropdown('#seller_id', 'DISTRIBUTOR');
+         preloadDropdown('#seller_id', type === 'RETAILER' ? 'DISTRIBUTOR' : 'PARENT');
 
          preloadDropdown('#retailer_id', 'RETAILER');
       }
@@ -762,15 +762,15 @@ $('#type').on('change', function () {
     // ==============================
     if (type === 'DISTRIBUTOR') {
 
-        $('#seller_div').show();
-        $('#de_dis').hide();
+        $('#seller_div').hide();
+        $('#de_dis').show();
         $('#retailer_div').hide();
 
     } else if (['GARAGE', 'WORKSHOP'].includes(type)) {
 
         $('#seller_div').show();
         $('#de_dis').show();
-        $('#retailer_div').show();
+        $('#retailer_div').hide();
 
     } else if (['RETAILER', 'MECHANIC'].includes(type)) {
 
@@ -789,7 +789,7 @@ $('#type').on('change', function () {
 
          preloadDropdown('#buyer_id', type);
 
-         preloadDropdown('#seller_id', 'DISTRIBUTOR');
+         preloadDropdown('#seller_id', type === 'RETAILER' ? 'DISTRIBUTOR' : 'PARENT');
 
          if (['GARAGE', 'WORKSHOP'].includes(type)) {
             preloadDropdown('#retailer_id', 'RETAILER');
@@ -941,7 +941,7 @@ function initSellerDropdown() {
 
             data: params => ({
                 term: params.term || '',
-                type: 'DISTRIBUTOR',
+                type: $('#type').val() === 'RETAILER' ? 'DISTRIBUTOR' : 'PARENT',
                 page: params.page || 1
             }),
 

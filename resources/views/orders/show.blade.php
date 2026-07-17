@@ -63,9 +63,9 @@
                 <div class="col-sm-6 invoice-col">
                   To
                   <address>
-                    <strong>{!! $orders['buyers']['shop_name'] ?? '' !!}</strong><br>
+                    <strong>{{ $orders->buyers->shop_name ?? $orders->buyers->trade_name ?? $orders->buyers->legal_name ?? '' }}</strong><br>
 
-                    {!! $orders['buyers']['address_line'] ?? '' !!}<br>
+                    {{ $orders->buyers->address_line ?? $orders->buyers->billing_address ?? '' }}<br>
 
                     {!! $orders['buyers']['belt_area_market_name'] ?? '' !!},
 
@@ -73,7 +73,7 @@
 
                     {!! $orders['buyers']['pincode']['pincode'] ?? '' !!}<br>
 
-                    Phone: {!! $orders['buyers']['mobile_number'] ?? '' !!}<br>
+                    Phone: {{ $orders->buyers->mobile_number ?? $orders->buyers->mobile ?? '' }}<br>
                     Owner: {!! $orders['buyers']['owner_name'] ?? '' !!}
                   </address>
                 </div>

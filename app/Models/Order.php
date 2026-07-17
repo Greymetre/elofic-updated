@@ -11,7 +11,7 @@ class Order extends Model
 
     protected $table = 'orders';
 
-    protected $fillable = [ 'active','buyer_id','seller_id','retailer_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','schme_val','ebd_amount','ebd_discount',	'special_discount','special_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount', 'agri_standard_discount', 'agri_standard_discount_amount','gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid','order_type','customer_type'];
+    protected $fillable = [ 'active','buyer_id','seller_id','seller_type','retailer_id','executive_id','total_qty','shipped_qty','orderno','order_date','completed_date','estimated_date','total_gst','total_discount','extra_discount','extra_discount_amount','sub_total','grand_total','order_taking','status_id','address_id','suc_del','gst_amount','schme_amount','schme_val','ebd_amount','ebd_discount',	'special_discount','special_amount','cluster_discount','cluster_amount','deal_discount','deal_amount','distributor_discount','distributor_amount','frieght_discount','frieght_amount', 'agri_standard_discount', 'agri_standard_discount_amount','gst5_amt','gst12_amt','gst18_amt','gst28_amt','order_remark','discount_status','created_by', 'updated_by','deleted_at','created_at','updated_at','beatscheduleid','order_type','customer_type'];
 
     public function message()
     {
@@ -50,6 +50,7 @@ class Order extends Model
 
                 'buyer_id' => isset($request['buyer_id'])? $request['buyer_id']:null,
                 'seller_id' => isset($request['seller_id'])? $request['seller_id']:null,
+                'seller_type' => isset($request['seller_type']) ? $request['seller_type'] : null,
                 'retailer_id' => isset($request['retailer_id']) ? $request['retailer_id'] : null,
                 
                 // 'buyer_id' => isset($request['seller_id'])? $request['seller_id']:null,
@@ -156,6 +157,24 @@ class Order extends Model
     public function sellers()
     {
         return $this->belongsTo(\App\Models\MasterDistributor::class,'seller_id' );
+    }
+
+    public function resolveCustomerRelations(): self
+    {
+        $customerType = strtoupper((string) $this->customer_type);
+        $isDistributorOrder = $customerType === 'DISTRIBUTOR'
+            || in_array($this->order_type, ['MASTER_DISTRIBUTER', 'MASTER_DISTRIBUTOR'], true);
+
+        $buyer = $isDistributorOrder
+            ? MasterDistributor::find($this->buyer_id ?: $this->seller_id)
+            : SecondaryCustomer::find($this->buyer_id);
+
+        $sellerType = strtoupper((string) ($this->seller_type ?: 'DISTRIBUTOR'));
+        $seller = $sellerType === 'RETAILER'
+            ? SecondaryCustomer::find($this->seller_id)
+            : MasterDistributor::find($this->seller_id);
+
+        return $this->setRelation('buyers', $buyer)->setRelation('sellers', $seller);
     }
 
           // Buyer = SecondaryCustomer

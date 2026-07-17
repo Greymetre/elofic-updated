@@ -119,7 +119,7 @@ class OrderController extends Controller
             $all_status = [['id' => '0', 'name' => 'Pending'], ['id' => '1', 'name' => 'Dispatched'], ['id' => '2', 'name' => 'Partially Dispatched'], ['id' => '3', 'name' => 'Full Dispatch'], ['id' => '4', 'name' => 'Cancel']];
             if ($db_data->isNotEmpty()) {
                 foreach ($db_data as $key => $value) {
-                    
+                    $value->resolveCustomerRelations();
 
                     $order_details = [];
 
@@ -147,13 +147,18 @@ class OrderController extends Controller
                     $data->push([
                         'order_id' => isset($value['id']) ? $value['id'] : 0,
                         'seller_id'    => $value->seller_id ?? null,
-                        'seller_name'  => $value->seller?->trade_name 
-                                    ?? $value->seller?->legal_name 
+                        'seller_type'  => $value->seller_type ?? 'DISTRIBUTOR',
+                        'seller_name'  => $value->sellers?->shop_name
+                                    ?? $value->sellers?->trade_name
+                                    ?? $value->sellers?->legal_name
                                     ?? '',
                         'buyer_id'     => $value->buyer_id ?? null,
-                        'buyer_name'   => $value->buyer?->shop_name 
-                                    ?? $value->buyer?->owner_name 
+                        'buyer_name'   => $value->buyers?->shop_name
+                                    ?? $value->buyers?->trade_name
+                                    ?? $value->buyers?->legal_name
+                                    ?? $value->buyers?->owner_name
                                     ?? '',
+                        'customer_type' => $value->customer_type,
                         // 'total_qty' => isset($value['total_qty']) ? $value['total_qty'] : 0,
                         'total_qty' => $value->orderdetails->sum('quantity') ?? 0,
                         'shipped_qty' => isset($value['shipped_qty']) ? $value['shipped_qty'] : 0,
@@ -480,6 +485,38 @@ class OrderController extends Controller
     
         try {
             $user = $request->user();
+            $customerType = strtoupper((string) $request->input('customer_type'));
+            $customerType = $customerType === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $customerType;
+            $sellerType = strtoupper((string) $request->input('seller_type', 'DISTRIBUTOR'));
+
+            $validator = Validator::make($request->all(), [
+                'customer_type' => 'required|in:RETAILER,WORKSHOP,MECHANIC,GARAGE,DISTRIBUTOR',
+                'buyer_id' => 'required|integer',
+                'seller_id' => $customerType === 'DISTRIBUTOR' ? 'nullable' : 'required|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' => $validator->errors()], $this->badrequest);
+            }
+
+            if ($customerType === 'DISTRIBUTOR') {
+                if (!MasterDistributor::whereKey($request->buyer_id)->where('business_status', 'Active')->exists()) {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid distributor.'], 422);
+                }
+                $request->merge(['seller_id' => $request->buyer_id, 'seller_type' => 'DISTRIBUTOR']);
+            } else {
+                if (!SecondaryCustomer::whereKey($request->buyer_id)->where('type', $customerType)->where('active', 'Y')->exists()) {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid customer.'], 422);
+                }
+                $validParent = $sellerType === 'RETAILER'
+                    ? SecondaryCustomer::whereKey($request->seller_id)->where('type', 'RETAILER')->where('active', 'Y')->exists()
+                    : MasterDistributor::whereKey($request->seller_id)->where('business_status', 'Active')->exists();
+                if (!$validParent) {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid parent customer.'], 422);
+                }
+                $request->merge(['seller_type' => $sellerType]);
+            }
+
             $request['created_by'] = $user->id;
             $request['order_remark'] = $request['remark'] ?? '';
     
@@ -507,6 +544,7 @@ class OrderController extends Controller
                 'active'         => 'Y',
                 'buyer_id'       => $request->buyer_id ?? null,
                 'seller_id'      => $request->seller_id ?? null,
+                'seller_type'    => $request->seller_type ?? 'DISTRIBUTOR',
                 'executive_id'   => $user->id,
                 'retailer_id'    => $request['retailer_id'],
                 'total_qty'      => 0,

@@ -184,13 +184,13 @@
                             </div>
                         </div>
 
-                        <!-- Distributor -->
+                        <!-- Parent Customer -->
                         <div class="col-md-6" id="seller_div" style="display:none;">
-                            <label class="col-form-label">Dealer / Distributor <span
+                            <label class="col-form-label">Parent <span
                                     class="text-danger">*</span></label>
 
                             <select class="form-control select2" name="seller_id" id="seller_id">
-                                <option value="">Select Dealer / Distributor</option>
+                                <option value="">Select Parent</option>
                             </select>
 
                             <div class="address-card mt-2">
@@ -255,7 +255,7 @@
                                     <thead class="text-white">
                                         <tr>
                                             <th class="text-center">#</th>
-                                            <th class="text-center">Family</th>
+                                            <th class="text-center">Segment</th>
                                             <th class="text-center">Products</th>
                                             <th class="text-center">Quantity</th>
                                             <th class="text-center">MRP / HSN</th>
@@ -272,7 +272,7 @@
                                                 <select name="orderdetail[{{ $key }}][subcategory_id]"
                                                     class="form-control select2 subcategory-select"
                                                     data-row="{{ $key }}">
-                                                    <option value="">Select Family</option>
+                                                    <option value="">Select Segment</option>
                                                     @foreach($subcategories as $sub)
                                                     <option value="{{ $sub->id }}"
                                                         {{ old("orderdetail.$key.subcategory_id", $detail->subcategory_id ?? '') == $sub->id ? 'selected' : '' }}>
@@ -315,7 +315,7 @@
                                             <td>
                                                 <select name="orderdetail[0][subcategory_id]"
                                                     class="form-control select2 subcategory-select" data-row="0">
-                                                    <option value="">Select Family</option>
+                                                    <option value="">Select Segment</option>
                                                     @foreach($subcategories as $sub)
                                                     <option value="{{ $sub->id }}">{{ $sub->subcategory_name }}</option>
                                                     @endforeach
@@ -421,7 +421,7 @@
 
         <td>
             <select name="orderdetail[${rowCount}][subcategory_id]" class="form-control select2 subcategory-select" data-row="${rowCount}">
-                <option value="">Select Family</option>
+                <option value="">Select Segment</option>
                 ${$('#tab_logic tbody tr:first .subcategory-select').html().replace(/selected/g,'')}
             </select>
         </td>
@@ -497,7 +497,7 @@ function updateRowNumbers(){
         // Recalculate on change
         $('#tab_logic').on('change keyup', '.rowchange', calc);
 
-        // Family → load products
+        // Segment → load products
         $(document).on('change', '.subcategory-select', function() {
             let row = $(this).data('row');
             let subcat_id = $(this).val();
@@ -546,9 +546,8 @@ function updateRowNumbers(){
 
             if (type === 'DISTRIBUTOR') {
 
-                $('#seller_div').show();
-
-                $('#seller_id').prop('required', true);
+                $('#de_dis').show();
+                $('#buyer_id').prop('required', true);
 
             } 
             else if (type === 'RETAILER') {
@@ -564,11 +563,9 @@ function updateRowNumbers(){
 
                 $('#seller_div').show();
                 $('#de_dis').show();
-                $('#retailer_div').show();
 
                 $('#seller_id').prop('required', true);
                 $('#buyer_id').prop('required', true);
-                $('#retailer_id').prop('required', true);
 
             } 
             else if (type === 'MECHANIC') {
@@ -594,7 +591,7 @@ function updateRowNumbers(){
 
             $('#seller_id').select2({
 
-                    placeholder: 'Select Dealer/Distributer...',
+                    placeholder: 'Select Parent...',
                     allowClear: true,
 
                     ajax: {
@@ -604,7 +601,7 @@ function updateRowNumbers(){
 
                         data: params => ({
                             term: params.term || '',
-                            type: 'DISTRIBUTOR',
+                            type: $('#type').val() === 'RETAILER' ? 'DISTRIBUTOR' : 'PARENT',
                             page: params.page || 1
                         }),
 

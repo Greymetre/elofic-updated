@@ -37,20 +37,19 @@
                   <div class="col-sm-6 invoice-col">
                      From
                      <address>
-                        <strong>{!! isset($orders['sellers']['name']) ? $orders['sellers']['name'] :'' !!} </strong><br>
-                        {!! $orders['sellers']['customeraddress']['address1'] !!} {!! $orders['sellers']['customeraddress']['address2'] !!}<br>
-                        {!! $orders['sellers']['customeraddress']['cityname']['city_name']??'' !!} {!! $orders['sellers']['customeraddress']['pincodename']['pincode']??'' !!}<br>
-                        Phone: {!! $orders['sellers']['mobile']??'' !!}<br>
-                        Email: {!! $orders['sellers']['email']??'' !!}
+                        <strong>{{ $orders->sellers->shop_name ?? $orders->sellers->trade_name ?? $orders->sellers->legal_name ?? '' }}</strong><br>
+                        {{ $orders->sellers->address_line ?? $orders->sellers->billing_address ?? '' }}<br>
+                        Phone: {{ $orders->sellers->mobile_number ?? $orders->sellers->mobile ?? '' }}<br>
+                        Email: {{ $orders->sellers->email ?? '' }}
                      </address>
                   </div>
                   <div class="col-sm-6 invoice-col">
                      <strong>To </strong>
                      <address>
-                        <strong>{!! $orders['buyers']['name'] !!}</strong><br>
-                        {!! $orders['buyers']['customeraddress']['address1'] !!} ,{!! $orders['buyers']['customeraddress']['address2'] !!}<br>{!! isset($orders['buyers']['customeraddress']['cityname']['city_name']) ? $orders['buyers']['customeraddress']['cityname']['city_name'] :'' !!} {!! isset($orders['buyers']['customeraddress']['pincodename']['pincode']) ? $orders['buyers']['customeraddress']['pincodename']['pincode'] :'' !!}<br>
-                        Phone: {!! $orders['buyers']['mobile'] !!}<br>
-                        Email: {!! $orders['buyers']['email'] !!}
+                        <strong>{{ $orders->buyers->shop_name ?? $orders->buyers->trade_name ?? $orders->buyers->legal_name ?? '' }}</strong><br>
+                        {{ $orders->buyers->address_line ?? $orders->buyers->billing_address ?? '' }}<br>
+                        Phone: {{ $orders->buyers->mobile_number ?? $orders->buyers->mobile ?? '' }}<br>
+                        Email: {{ $orders->buyers->email ?? '' }}
                      </address>
                   </div>
                </div>
@@ -82,8 +81,8 @@
                <!--                <input type="hidden" name="buyer_id" value="{!! $orders['buyer_id'] !!}">
                <input type="hidden" name="seller_id" value="{!! $orders['seller_id'] !!}"> -->
 
-               <input type="hidden" name="buyer_id" value="{!! $orders['seller_id'] !!}">
-               <input type="hidden" name="seller_id" value="{!! $orders['buyer_id'] !!}">
+               <input type="hidden" name="buyer_id" value="{!! $orders['buyer_id'] !!}">
+               <input type="hidden" name="seller_id" value="{!! $orders['seller_id'] !!}">
 
                <input type="hidden" name="order_id" value="{!! $orders['id'] !!}">
                <input type="hidden" name="orderno" value="{!! $orders['orderno'] !!}">
