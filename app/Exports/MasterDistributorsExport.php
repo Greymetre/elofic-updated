@@ -41,6 +41,7 @@ class MasterDistributorsExport implements FromCollection, WithHeadings, WithMapp
         $headings = [
             'ID',
             'Distributor Code',
+            'Plant',
             'Legal Name',
             'Trade Name',
             'Category',
@@ -146,6 +147,7 @@ $shippingAddresses = $distributor->shipping_address;
         return [
             $distributor->id,
             $distributor->distributor_code,
+            $distributor->plant,
             $distributor->legal_name,
             $distributor->trade_name,
             $distributor->category,

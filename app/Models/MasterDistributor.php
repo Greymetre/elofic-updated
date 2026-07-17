@@ -18,6 +18,7 @@ class MasterDistributor extends Model
         'legal_name',
         'trade_name',
         'distributor_code',
+        'plant',
         'category',
         'business_status',
         'business_start_date',

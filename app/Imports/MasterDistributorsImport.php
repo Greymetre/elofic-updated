@@ -19,6 +19,7 @@ use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 use PhpOffice\PhpSpreadsheet\Shared\Date;
@@ -80,6 +81,26 @@ class MasterDistributorsImport implements
         }
 
         return trim((string) $value);
+    }
+
+    private function findDistributorByMobile($mobile): ?MasterDistributor
+    {
+        $mobile = substr(preg_replace('/\D/', '', (string) $mobile), -10);
+
+        if ($mobile === '') {
+            return null;
+        }
+
+        return MasterDistributor::query()
+            ->get(['id', 'mobile'])
+            ->first(function (MasterDistributor $distributor) use ($mobile) {
+                $storedMobile = substr(
+                    preg_replace('/\D/', '', (string) $distributor->mobile),
+                    -10
+                );
+
+                return $storedMobile === $mobile;
+            });
     }
 
     // ======================================================
@@ -406,8 +427,13 @@ class MasterDistributorsImport implements
 
             $data = [
 
-                'distributor_code' => $row['distributor_code']
-                    ?? 'MD-' . Str::random(8),
+                'distributor_code' => isset($row['distributor_code']) && $row['distributor_code'] !== ''
+                    ? trim((string) $row['distributor_code'])
+                    : 'MD-' . Str::random(8),
+
+                'plant' => isset($row['plant']) && $row['plant'] !== ''
+                    ? trim((string) $row['plant'])
+                    : null,
 
                 'legal_name' => $row['legal_name']
                     ?? '',
@@ -580,8 +606,53 @@ class MasterDistributorsImport implements
             ];
 
             // ==================================================
-            // UPDATE / CREATE
+            // RESOLVE UPDATE TARGET
             // ==================================================
+
+            $distributor = $id ? MasterDistributor::find($id) : null;
+
+            if ($id && !$distributor) {
+                throw new \Exception("Distributor with ID {$id} not found.");
+            }
+
+            $mobileDistributor = $this->findDistributorByMobile($data['mobile']);
+
+            if (!$distributor && $mobileDistributor) {
+                $distributor = $mobileDistributor;
+                $id = $distributor->id;
+            } elseif (
+                $distributor &&
+                $mobileDistributor &&
+                $mobileDistributor->id !== $distributor->id
+            ) {
+                throw new \Exception(
+                    "Mobile Number '{$data['mobile']}' belongs to another distributor."
+                );
+            }
+
+            Validator::make($data, [
+                'distributor_code' => [
+                    'required',
+                    'string',
+                    'max:100',
+                    Rule::unique('master_distributors', 'distributor_code')->ignore($id),
+                ],
+                'plant' => ['nullable', 'string', 'max:255'],
+                'mobile' => ['nullable', 'digits:10'],
+                'email' => [
+                    'nullable',
+                    'email',
+                    Rule::unique('master_distributors', 'email')->ignore($id),
+                ],
+                'gst_number' => [
+                    'nullable',
+                    'regex:/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/',
+                ],
+                'pan_number' => [
+                    'nullable',
+                    'regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/',
+                ],
+            ], $this->customValidationMessages())->validate();
 
             // ==================================================
             // CHECK DUPLICATE DISTRIBUTOR CODE
@@ -647,23 +718,10 @@ class MasterDistributorsImport implements
             // UPDATE / CREATE
             // ==================================================
 
-            if ($id) {
-
-                $distributor = MasterDistributor::find($id);
-
-                if (!$distributor) {
-
-                    throw new \Exception(
-                        "Distributor with ID {$id} not found."
-                    );
-                }
-
+            if ($distributor) {
                 $distributor->update($data);
-
             } else {
-
-                $distributor =
-                    MasterDistributor::create($data);
+                $distributor = MasterDistributor::create($data);
             }
 
             // ==================================================

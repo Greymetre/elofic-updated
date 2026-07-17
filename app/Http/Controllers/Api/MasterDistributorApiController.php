@@ -669,9 +669,14 @@ class MasterDistributorApiController extends Controller
 
     private function validateData(Request $request, $id = null)
     {
+        if ($request->has('plant') && $request->input('plant') !== null) {
+            $request->merge(['plant' => (string) $request->input('plant')]);
+        }
+
         $rules = [
             'legal_name'         => 'required|string|max:255',
             'trade_name'         => 'nullable|string|max:255',
+            'plant'              => 'nullable|string|max:255',
             'distributor_code'   => [
                 'required',
                 'string',

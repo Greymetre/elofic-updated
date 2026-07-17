@@ -497,6 +497,9 @@
                                                         <strong class="text-dark">Distributor Code:</strong> &nbsp; {{ $distributor->distributor_code ?? '-' }}
                                                     </li>
                                                     <li class="list-group-item border-0 ps-0 text-sm">
+                                                        <strong class="text-dark">Plant:</strong> &nbsp; {{ $distributor->plant ?? '-' }}
+                                                    </li>
+                                                    <li class="list-group-item border-0 ps-0 text-sm">
                                                         <strong class="text-dark">Contact Person:</strong> &nbsp; {{ $distributor->contact_person ?? '-' }}
                                                     </li>
                                                     <li class="list-group-item border-0 ps-0 text-sm">

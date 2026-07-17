@@ -247,6 +247,7 @@
                                 <tr>
                                     <th width="80">Action</th>
                                     <th>Distributor Code</th>
+                                    <th>Plant</th>
                                     <th>Legal Name</th>
                                     <th>Trade Name</th>
                                     <th>Contact Person</th>
@@ -348,7 +349,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         searching: false,
-        order: [[9, 'desc']],
+        order: [[10, 'desc']],
         ajax: {
             url: "{{ route('master-distributors.index') }}",
             type: "GET",
@@ -369,6 +370,7 @@ $(document).ready(function() {
         columns: [
             { data: 'action', orderable: false, searchable: false },
             { data: 'distributor_code' },
+            { data: 'plant', defaultContent: '-' },
             { data: 'legal_name' },
             { data: 'trade_name' },
             { data: 'contact_person' },

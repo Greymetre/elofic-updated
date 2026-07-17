@@ -479,6 +479,13 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
+                                        <label class="col-form-label">Plant</label>
+                                        {!! Form::text('plant', old('plant', $distributor->plant ?? ''),
+                                        ['class' => 'form-control fillable-field', 'maxlength' => 255,
+                                        'placeholder' => 'Enter plant']) !!}
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label class="col-form-label">
                                             Distributor Category <span class="text-danger">*</span>
                                         </label>
@@ -3251,7 +3258,7 @@ setTimeout(function() {
             @if($errors->any())
             // List of accordions with their field names that can have errors
             const errorMapping = {
-                'basicInfo': ['legal_name', 'trade_name', 'distributor_code', 'category', 'business_status',
+                'basicInfo': ['legal_name', 'trade_name', 'distributor_code', 'plant', 'category', 'business_status',
                     'business_start_date'
                 ],
                 'contactInfo': ['contact_person', 'designation', 'mobile', 'alternate_mobile', 'email',

@@ -46,6 +46,7 @@ class MasterDistributorController extends Controller
         ->select([
             'id',
             'distributor_code',
+            'plant',
             'legal_name',
             'trade_name',
             'contact_person',
@@ -89,6 +90,7 @@ class MasterDistributorController extends Controller
         $query->where(function ($q) use ($search) {
         $q->where('distributor_code', 'like', "%{$search}%")
           ->orWhere('legal_name', 'like', "%{$search}%")
+          ->orWhere('plant', 'like', "%{$search}%")
           ->orWhere('trade_name', 'like', "%{$search}%")
           ->orWhere('contact_person', 'like', "%{$search}%")
           ->orWhere('mobile', 'like', "%{$search}%")
@@ -173,6 +175,7 @@ if ($request->filled('billing_city')) {
             $query->where(function($q) use ($search) {
                 $q->where('distributor_code', 'like', "%{$search}%")
                   ->orWhere('legal_name', 'like', "%{$search}%")
+                  ->orWhere('plant', 'like', "%{$search}%")
                   ->orWhere('trade_name', 'like', "%{$search}%")
                   ->orWhere('contact_person', 'like', "%{$search}%")
                   ->orWhere('mobile', 'like', "%{$search}%");
@@ -389,6 +392,7 @@ if ($request->filled('billing_city')) {
         // Basic Info
         // 'legal_name'         => 'required|string|max:255',
         'distributor_code'   => 'required|string|max:100|unique:master_distributors,distributor_code',
+        'plant'              => 'nullable|string|max:255',
         'category'           => 'required',
         'business_status'    => 'required|in:Active,Inactive,On Hold',
         'business_start_date'=> 'required|date',
@@ -822,6 +826,7 @@ try {
         return $request->validate([
             'legal_name' => 'required|string|max:255',
             'distributor_code' => 'required|string|max:100|unique:master_distributors,distributor_code,' . $id,
+            'plant' => 'nullable|string|max:255',
             'business_status' => 'required',
             'contact_person' => 'required',
             'mobile' => 'required',
@@ -910,6 +915,7 @@ if ($request->filled('global_search')) {
     $search = trim($request->global_search);
     $query->where(function ($q) use ($search) {
         $q->where('distributor_code', 'like', "%{$search}%")
+          ->orWhere('plant', 'like', "%{$search}%")
           ->orWhere('legal_name', 'like', "%{$search}%")
           ->orWhere('trade_name', 'like', "%{$search}%")
           ->orWhere('contact_person', 'like', "%{$search}%")
