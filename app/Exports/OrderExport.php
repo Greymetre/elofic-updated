@@ -67,7 +67,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                     $query->where('id', $this->order_id);
                 }
                 if ($this->user_id) {
-                    $query->where('created_by', $this->user_id);
+                    $query->where('executive_id', $this->user_id);
                 }
                 if ($this->dividion_id) {
                     $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
@@ -114,7 +114,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                         $query->where('id', $this->order_id);
                     }
                     if ($this->user_id) {
-                        $query->where('created_by', $this->user_id);
+                        $query->where('executive_id', $this->user_id);
                     }
                     if ($this->dividion_id) {
                         $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
@@ -137,7 +137,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                         $query->where('id', $this->order_id);
                     }
                     if ($this->user_id) {
-                        $query->where('created_by', $this->user_id);
+                        $query->where('executive_id', $this->user_id);
                     }
                     if ($this->dividion_id) {
                         $order_ids = Order::where('product_cat_id', $this->dividion_id)->pluck('id');
@@ -313,13 +313,13 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 ?? '';
 
             return [
-                $order['orderno'] ?? '',
+                '',
                 'ZAFM',
                 $order['sellers']['plant'] ?? '',
                 '1000',
                 '20',
                 '0',
-                $order['order_remark'] ?? '',
+                $order['orderno'] ?? '',
                 !empty($order['order_date']) ? date('Y-m-d', strtotime($order['order_date'])) : '',
                 $data['products']['product_code'] ?? '',
                 $data['quantity'] ?? '',

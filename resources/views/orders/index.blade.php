@@ -163,7 +163,7 @@
                                 <th>{!! trans('panel.global.no') !!}</th>
                                 <th>{!! trans('panel.global.action') !!}</th>
                                 <th>Employee</th>
-                                <th>Branch</th>
+                                <th>Zone</th>
                                 <th>{!! trans('panel.order.order_date') !!}</th>
                                 <th>{!! trans('panel.order.orderno') !!}</th>
                                 <!-- <th>{!! trans('panel.global.buyer_name') !!}</th> -->

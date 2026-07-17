@@ -50,13 +50,15 @@
         {
             abort_if(Gate::denies('order_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $sellers_ids = $this->orders->distinct()->pluck('seller_id');
-            $user_ids = $this->orders->distinct()->pluck('created_by');
+            $createdByIds = $this->orders->whereNotNull('created_by')->distinct()->pluck('created_by');
+            $executiveIds = $this->orders->whereNotNull('executive_id')->distinct()->pluck('executive_id');
+            $user_ids = $createdByIds->merge($executiveIds)->filter()->unique()->values();
             $buyer_ids = $this->orders->distinct()->pluck('buyer_id');
             $divisions = Category::where('active', 'Y')->get();
             $retailers = SecondaryCustomer::whereIn("id", $buyer_ids)->get();
             $distributors = MasterDistributor::whereIn("id", $sellers_ids)->get();
             $customer_types = ['RETAILER', 'WORKSHOP', 'MECHANIC', 'GARAGE', 'DISTRIBUTOR'];
-            $users = User::whereIn('id' , $user_ids)->get();
+            $users = User::whereIn('id', $user_ids)->orderBy('name')->get();
             return $dataTable->render('orders.index', compact('divisions', 'retailers', 'distributors', 'customer_types' , 'users'));
         }
 
