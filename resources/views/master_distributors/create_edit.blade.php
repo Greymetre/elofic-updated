@@ -888,8 +888,8 @@
             $distributor->shipping_address ?? ['']
         );
     @endphp
-
-    @foreach($shippingAddresses as $index => $address)
+    
+    @foreach(is_array($shippingAddresses) ? $shippingAddresses : [$shippingAddresses] as $index => $address)
 
     <div class="shipping-address-item border rounded p-3 mb-2 position-relative">
 
@@ -939,9 +939,10 @@
                                     value="{{ old('billing_city', $distributor->billing_city ?? '') }}">
                                 <input type="hidden" name="billing_pincode"
                                     value="{{ old('billing_pincode', $distributor->billing_pincode ?? '') }}">
-                         <input type="hidden"
+                         <div id="shipping-hidden-fields"></div>
+                                    <!-- <input type="hidden"
        name="shipping_address"
-       value='@json(old("shipping_address", $distributor->shipping_address ?? []))'>
+       value='@json(old("shipping_address", $distributor->shipping_address ?? []))'> -->
                                 <!-- <input type="hidden" name="shipping_country"
                                     value="{{ old('shipping_country', $distributor->shipping_country ?? '') }}">
                                 <input type="hidden" name="shipping_state"
@@ -2673,13 +2674,33 @@ const mouInput     = document.getElementById('mou_file');
             });
 
             // Optional form submit validation
-            $('#storeMasterDistributor').on('submit', function(e) {
-                if (!validateGST() || !validatePAN()) {
-                    e.preventDefault();
-                    alert('Please correct the errors in GST or PAN number.');
-                }
-            });
+          //  $('#storeMasterDistributor').on('submit', function(e) {
+           //     if (!validateGST() || !validatePAN()) {
+             //       e.preventDefault();
+               //     alert('Please correct the errors in GST or PAN number.');
+           //     }
+            // });
 
+            $('#storeMasterDistributor').on('submit', function () {
+
+                $('#shipping-hidden-fields').html('');
+
+                $('input[name="shipping_addresses[]"]').each(function () {
+
+                    let address = $(this).val().trim();
+
+                    if (address !== '') {
+
+                        $('#shipping-hidden-fields').append(
+                            '<input type="hidden" name="shipping_address[]" value="' +
+                            $('<div>').text(address).html() +
+                            '">'
+                        );
+
+                    }
+                });
+
+            });
             // Initial validation on page load
             validateGST();
             validatePAN();

@@ -64,7 +64,7 @@
         --toggle-color: #DDD;
         --text-color: #707070;
 
-        /* ====== Transition ====== */ƒ
+        /* ====== Transition ====== */
         /*  --tran-03: all 0.2s ease;
       --tran-03: all 0.3s ease;
       --tran-04: all 0.3s ease;
@@ -781,7 +781,7 @@
                   <span class="name"> {!! Auth::user()->name !!}</span>
                </div>
             </div>--}}
-                <!-- <i class='bx bx-chevron-right toggle'></i> -->
+                <i class='bx bx-chevron-right toggle'></i>
             </header>
             <div class="menu-bar">
                 <div class="menu">
@@ -794,8 +794,8 @@
                             <div class="d-none mobile_hide"> {!! trans('panel.sidemenu.dashboard') !!}</div>
                         </a>
                         </li>
-<!-- 
-                        <li
+
+                        {{--<li
                             class="nav-link {{ request()->is('sales_summary_dashboard*') || request()->is('dealer_dashboard') ? 'active' : '' }}">
                             <a class="collapsed hoveradd" data-toggle="collapse" href="#dashMenu" aria-expanded="false">
                                 <i class="material-icons icon">diversity_3</i>
@@ -836,7 +836,7 @@
                                     @endif
                                 </ul>
                             </div>
-                        </li> -->   
+                        </li>--}}
                         @endif
                         @if(auth()->user()->can(['lead_management_access']))
                         <li
@@ -929,6 +929,7 @@
                             <div class="collapse" id="masterDistributorMenu">
                                 <ul class="navd">
                                     <!-- Existing Master Distributor -->
+                                     @if(auth()->user()->can(['distributor_customer_access']))
                                     <li class="nav-link-btn {{ request()->is('master-distributors*') ? 'active' : '' }}">
                                         <a class="hoveradd2" href="{{ route('master-distributors.index') }}">
                                             <i class="material-icons icon">inventory</i>
@@ -936,8 +937,10 @@
                                             <div class="d-none mobile_hide">{!! trans('panel.sidemenu.master_distributor_list') !!}</div>
                                         </a>
                                     </li>
+                                    @endif
 
                                     <!-- NEW: Mechanic -->
+                                     @if(auth()->user()->can(['machanic_customer_access']))
                                     <li class="nav-link-btn {{ request()->is('mechanics*') ? 'active' : '' }}">
                                         <a class="hoveradd2" href="{{ route('mechanics.index') }}">
                                             <i class="material-icons icon">build_circle</i>
@@ -945,8 +948,10 @@
                                             <div class="d-none mobile_hide">Mechanic</div>
                                         </a>
                                     </li>
+                                    @endif
 
                                     <!-- NEW: Garage -->
+                                     @if(auth()->user()->can(['garages_customer_access']))
                                     <li class="nav-link-btn {{ request()->is('garages*') ? 'active' : '' }}">
                                         <a class="hoveradd2" href="{{ route('garages.index') }}">
                                             <i class="material-icons icon">home_repair_service</i>
@@ -954,8 +959,10 @@
                                             <div class="d-none mobile_hide">Garage</div>
                                         </a>
                                     </li>
+                                    @endif
 
                                     <!-- NEW: Retailer -->
+                                     @if(auth()->user()->can(['retailers_customer_access']))
                                     <li class="nav-link-btn {{ request()->is('retailers*') ? 'active' : '' }}">
                                         <a class="hoveradd2" href="{{ route('retailers.index') }}">
                                             <i class="material-icons icon">storefront</i>
@@ -963,8 +970,10 @@
                                             <div class="d-none mobile_hide">Retailer</div>
                                         </a>
                                     </li>
+                                    @endif
 
                                     <!-- NEW: Workshop -->
+                                     @if(auth()->user()->can(['workshops_customer_access']))
                                     <li class="nav-link-btn {{ request()->is('workshops*') ? 'active' : '' }}">
                                         <a class="hoveradd2" href="{{ route('workshops.index') }}">
                                             <i class="material-icons icon">engineering</i>
@@ -972,6 +981,7 @@
                                             <div class="d-none mobile_hide">Workshop</div>
                                         </a>
                                     </li>
+                                    @endif
                                 </ul>
 
                             </div>
@@ -2727,7 +2737,7 @@
             <div class="container-fluid" style="background: transparent; !important">
                 <div class="new_demo">
                     <!-- <img class="rounded ml-2 iconimg" alt="Blueneba" src="{!! asset('assets/img/bnt_logo.png') !!}?" width="120"> -->
-                    <img class="rounded ml-2  iconimg" src="{!! asset('assets/img/elofic.png') !!}" width="133">
+                    <img class="rounded ml-2  iconimg" src="{!! asset('assets/img/elofic.png') !!}" width="100">
                 </div>
                 <!-- <img src="{!! asset('assets/img/logo.png') !!}" width="50"> -->
                 <div class="navbar-wrapper">

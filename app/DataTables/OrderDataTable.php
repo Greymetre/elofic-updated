@@ -89,11 +89,16 @@ class OrderDataTable extends DataTable
 
         $query = $model->with('sellers', 'buyers', 'statusname', 'createdbyname');
 
-        if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Sub billing')  && !Auth::user()->hasRole('Customer Dealer')) {
-            $query->where(function ($subQuery) use ($userids) {
-                $subQuery->whereIn('executive_id', $userids)
-                    ->orWhereIn('created_by', $userids);
-            });
+        if (auth()->user()->hasRole('Distributor')) {
+            $query->where('seller_id', auth()->user()->customerid);
+        } else {
+
+            if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('Sub_Admin') && !Auth::user()->hasRole('Sub billing')  && !Auth::user()->hasRole('Customer Dealer')) {
+                $query->where(function ($subQuery) use ($userids) {
+                    $subQuery->whereIn('executive_id', $userids)
+                        ->orWhereIn('created_by', $userids);
+                });
+            }
         }
         // $query->whereHas('buyers', function ($query) {
         //     if (request()->has('customer_type_id') && request()->get('customer_type_id') != '') {
@@ -127,7 +132,7 @@ class OrderDataTable extends DataTable
             // }
         }
 
-        $query->newQuery();
+        // $query->newQuery();
 
 
         // dd($query->toSql());
@@ -141,14 +146,18 @@ class OrderDataTable extends DataTable
             $query->where('buyer_id', request()->get('retailers_id'));
         }
 
-         return $model->newQuery()
-        ->with([
-            'executive.getbranch',
-            'buyers',
-            'sellers',
-            'statusname',
-            'createdbyname'
-        ]);
+        if (request()->get('distributor_id') != '' && request()->get('distributor_id') != null) {
+            $query->where('seller_id', request()->get('distributor_id'));
+        }
+
+        // return $query->with([
+        //     'executive.getbranch',
+        //     'buyers',
+        //     'sellers',
+        //     'statusname',
+        //     'createdbyname'
+        // ]);
+        return $query;
     }
 
 

@@ -133,14 +133,14 @@ class UsersDataTable extends DataTable
                     $query->where('department_id', $request->department_id);
                 }
             })
-            // ->whereHas('roles', function ($query) use ($request) {
+            ->whereHas('roles', function ($query) use ($request) {
                 
-            //     if ($request->user_type == 'customer') {
-            //         $query->whereIn('id', config('constants.customer_roles'));
-            //     } else {
-            //         $query->whereNotIn('id', config('constants.customer_roles'));
-            //     }
-            // })
+                if ($request->user_type == 'customer') {
+                    $query->whereIn('id', config('constants.customer_roles'));
+                } else {
+                    $query->whereNotIn('id', config('constants.customer_roles'));
+                }
+            })
             ->latest()
             ->newQuery();
 

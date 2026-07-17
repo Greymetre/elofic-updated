@@ -323,12 +323,14 @@ class SecondaryCustomersImport implements ToCollection, WithHeadingRow,WithChunk
                     //     throw new \Exception("Invalid state_id");
                     // }
 
-                    if ($country && $state->country_id != $country->id) {
-                        throw new \Exception("state_id does not belong to country_id");
-                    }
+                    // if ($country && $state->country_id != $country->id) {
+                    //     throw new \Exception("state_id does not belong to country_id");
+                    // }
                 }
 
                 $district = null;
+                
+                // dd(!empty($row['district_id']), $row['district_id']);
 
                 if (!empty($row['district_id'])) {
                     $district = $districts[$row['district_id']] ?? null;
@@ -337,9 +339,9 @@ class SecondaryCustomersImport implements ToCollection, WithHeadingRow,WithChunk
                     //     throw new \Exception("Invalid district_id");
                     // }
 
-                    if ($state && $district->state_id != $state->id) {
-                        throw new \Exception("district_id does not belong to state_id");
-                    }
+                    // if ($state && $district->state_id != $state->id) {
+                    //     throw new \Exception("district_id does not belong to state_id");
+                    // }
                 }
 
                 $city = null;
@@ -351,9 +353,9 @@ class SecondaryCustomersImport implements ToCollection, WithHeadingRow,WithChunk
                     //     throw new \Exception("Invalid city_id");
                     // }
 
-                    if ($district && $city->district_id != $district->id) {
-                        throw new \Exception("city_id does not belong to district_id");
-                    }
+                    // if ($district && $city->district_id != $district->id) {
+                    //     throw new \Exception("city_id does not belong to district_id");
+                    // }
                 }
 
                 $pincode = null;
@@ -365,9 +367,9 @@ class SecondaryCustomersImport implements ToCollection, WithHeadingRow,WithChunk
                     //     throw new \Exception("Invalid pincode_id");
                     // }
 
-                    if ($city && $pincode->city_id != $city->id) {
-                        throw new \Exception("pincode_id does not belong to city_id");
-                    }
+                    // if ($city && $pincode->city_id != $city->id) {
+                    //     throw new \Exception("pincode_id does not belong to city_id");
+                    // }
                 }
 
                 $beat = null;
@@ -449,9 +451,9 @@ class SecondaryCustomersImport implements ToCollection, WithHeadingRow,WithChunk
                     'country_id'  => $country?->id ?? '',
                     'gmap' => $gmapAddress ?? null,
                     'state_id'    => $state?->id ?? '',
-                    'district_id' => $district?->id ?? '',
-                    'city_id'     => $city?->id ?? '',
-                    'pincode_id'  => $pincode?->id ?? '',
+                    'district_id' => $district ? $district->id : '0',
+                    'city_id'     => $city ? $city->id : '0',
+                    'pincode_id'  => $pincode ? $pincode->id : '0',
                     'beat_id'     => $beat?->id ?? null,
                     'distributor_name'        => $distributor?->id ?? null,
                     'employee_id'             => $employees->implode(','),

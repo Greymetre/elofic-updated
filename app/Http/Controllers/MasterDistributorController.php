@@ -56,6 +56,34 @@ class MasterDistributorController extends Controller
             'created_at'
         ]);
 
+            if (auth()->user()->hasRole('Distributor')) {
+
+                $query->where('id', auth()->user()->customerid);
+
+            } elseif (
+                auth()->user()->hasRole('superadmin') ||
+                auth()->user()->hasRole('Admin')
+            ) {
+
+                // No restriction. Show all distributors.
+
+            } else {
+
+                $allowedUserIds = getUsersReportingToAuth();
+
+                $query->where(function ($q) use ($allowedUserIds) {
+
+                    $q->whereIn('supervisor_id', $allowedUserIds);
+
+                    $q->orWhere(function ($sub) use ($allowedUserIds) {
+                        foreach ($allowedUserIds as $id) {
+                            $sub->orWhereJsonContains('sales_executive_id', $id);
+                        }
+                    });
+
+                });
+            }
+
         if ($request->filled('global_search')) {
         $search = $request->global_search;
         $query->where(function ($q) use ($search) {
@@ -161,16 +189,22 @@ if ($request->filled('billing_city')) {
     $activebtn = '';
 
     // TEMPORARY: Sab permissions ignore kar ke buttons dikhao
+    if(auth()->user()->can(['master_distributor_edit']))
+    {
     $btn .= '<a href="' . route('master-distributors.edit', $row->id) . '" 
                 class="btn btn-info btn-just-icon btn-sm" title="Edit">
                 <i class="material-icons">edit</i>
              </a>';
-
+    }
+    if(auth()->user()->can(['master_distributor_show']))
+    {
     $btn .= '<a href="' . route('master-distributors.show', $row->id) . '" 
                 class="btn btn-info btn-just-icon btn-sm" title="View">
                 <i class="material-icons">visibility</i>
              </a>';
-
+    }
+    if(auth()->user()->can(['master_distributor_delete']))
+    {
              $btn .= '<form action="' . route('master-distributors.destroy', $row->id) . '" method="POST" style="display:inline;">
             ' . csrf_field() . '
             ' . method_field('DELETE') . '
@@ -179,6 +213,9 @@ if ($request->filled('billing_city')) {
                 <i class="material-icons">delete</i>
             </button>
          </form>';
+    }
+    if(auth()->user()->can(['master_distributor_active']))
+    {
     $checked = ($row->business_status === 'Active') ? 'checked' : '';
     $activebtn = '<div class="togglebutton">
                     <label>
@@ -189,7 +226,7 @@ if ($request->filled('billing_city')) {
                         <span class="toggle"></span>
                     </label>
                   </div>';
-
+    }
     return '<div class="btn-group btn-group-sm" role="group">
                 ' . $btn . ' ' . $activebtn . '
             </div>';
@@ -225,33 +262,100 @@ if ($request->filled('billing_city')) {
     }     
 
 
+    $filterQuery = MasterDistributor::query();
+
+    if (auth()->user()->hasRole('Distributor')) {
+
+        $filterQuery->where('id', auth()->user()->customerid);
+
+    } elseif (
+        auth()->user()->hasRole('superadmin') ||
+        auth()->user()->hasRole('Admin')
+    ) {
+
+        // No restriction
+
+    } else {
+
+        $allowedUserIds = getUsersReportingToAuth();
+
+        $filterQuery->where(function ($q) use ($allowedUserIds) {
+
+            $q->whereIn('supervisor_id', $allowedUserIds);
+
+            $q->orWhere(function ($sub) use ($allowedUserIds) {
+                foreach ($allowedUserIds as $id) {
+                    $sub->orWhereJsonContains('sales_executive_id', $id);
+                }
+            });
+
+        });
+    }
+
+    $salesExecutiveIds = (clone $filterQuery)
+    ->pluck('sales_executive_id')
+    ->filter()
+    ->flatMap(function ($item) {
+
+        if (is_array($item)) {
+            return $item;
+        }
+
+        return json_decode($item, true) ?? [];
+    })
+    ->unique()
+    ->values();
+
+
     // View mein dropdown options ke liye data fetch kar rahe hain
-   $filters = [
-        'distributor_codes'  => MasterDistributor::distinct()->orderBy('distributor_code')->pluck('distributor_code')->filter()->values()->toArray(),
-        'legal_names'        => MasterDistributor::distinct()->orderBy('legal_name')->pluck('legal_name')->filter()->values()->toArray(),
-        'trade_names'        => MasterDistributor::distinct()->whereNotNull('trade_name')->orderBy('trade_name')->pluck('trade_name')->filter()->values()->toArray(),
-        // 'contact_persons'    => MasterDistributor::distinct()->orderBy('contact_person')->pluck('contact_person')->filter()->values()->toArray(),
-        
-        'sales_executives' => \App\Models\User::whereIn(
-            'id',
-            MasterDistributor::pluck('sales_executive_id')
-                ->filter()
-                ->flatMap(function ($item) {
+    $filters = [
 
-                    if (is_array($item)) {
-                        return $item;
-                    }
+        'distributor_codes' => (clone $filterQuery)
+            ->distinct()
+            ->orderBy('distributor_code')
+            ->pluck('distributor_code')
+            ->filter()
+            ->values()
+            ->toArray(),
 
-                    return json_decode($item, true) ?? [];
-                })
-                ->unique()
-                ->values()
-        )->orderBy('name')
-        ->get(['id', 'name']),         
-        'mobiles'            => MasterDistributor::distinct()->orderBy('mobile')->pluck('mobile')->filter()->values()->toArray(),
-        'billing_cities'     => City::orderBy('city_name')->pluck('city_name', 'id')->toArray(),
-        'billing_states'     => State::orderBy('state_name')->pluck('state_name', 'id')->toArray(),
-        'business_statuses'  => ['Active', 'Inactive'],
+        'legal_names' => (clone $filterQuery)
+            ->distinct()
+            ->orderBy('legal_name')
+            ->pluck('legal_name')
+            ->filter()
+            ->values()
+            ->toArray(),
+
+        'trade_names' => (clone $filterQuery)
+            ->whereNotNull('trade_name')
+            ->distinct()
+            ->orderBy('trade_name')
+            ->pluck('trade_name')
+            ->filter()
+            ->values()
+            ->toArray(),
+
+        'sales_executives' => User::whereIn('id', $salesExecutiveIds)
+            ->orderBy('name')
+            ->get(['id', 'name']),
+
+        'mobiles' => (clone $filterQuery)
+            ->distinct()
+            ->orderBy('mobile')
+            ->pluck('mobile')
+            ->filter()
+            ->values()
+            ->toArray(),
+
+        'billing_cities' => City::orderBy('city_name')
+            ->pluck('city_name', 'id')
+            ->toArray(),
+
+        'billing_states' => State::orderBy('state_name')
+            ->pluck('state_name', 'id')
+            ->toArray(),
+
+        'business_statuses' => ['Active', 'Inactive'],
     ];
     
 
@@ -369,9 +473,7 @@ if ($request->filled('billing_city')) {
 
     $data['beat_id'] = $request->beat_id;
     $data['beat_route'] = $request->beat_route;
-    $data['shipping_address'] = json_encode(
-        $request->shipping_addresses ?? []
-    );
+    $data['shipping_address'] = $request->shipping_addresses ?? [];
     $data['billing_address']  = $request->address1;
     $data['billing_country']  = $request->country_id;
     $data['billing_state']    = $request->state_id;
@@ -491,6 +593,7 @@ $data['credit_days'] = $request->input('credit_days') !== null
     /* ================= UPDATE ================= */
     public function update(Request $request, $id)
 {
+
     // dd($request);
     $distributor = MasterDistributor::findOrFail($id);
     $beats = Beat::where('active', 'Y')
@@ -518,9 +621,7 @@ $data['credit_days'] = $request->input('credit_days') !== null
 
     $data['beat_id'] = $request->beat_id;
     $data['beat_route'] = $request->beat_route;
-    $data['shipping_address'] = json_encode(
-        $request->shipping_addresses ?? []
-    );
+    $data['shipping_address'] = $request->shipping_addresses ?? [];
 
 $data['same_as_billing'] = $request->boolean('same_as_billing');  // true/false
 

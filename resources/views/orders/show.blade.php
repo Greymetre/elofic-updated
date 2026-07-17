@@ -55,8 +55,8 @@
                     <strong>{!! isset($orders['sellers']['legal_name']) ? $orders['sellers']['trade_name'] :'' !!} </strong><br>
                     {!! $orders['sellers']['billing_address']??'' !!} ,{!! $orders['sellers']['customeraddress']['address2']??'' !!}<br>
                     {!! $orders['sellers']['customeraddress']['locality']??'-' !!}, {!! $orders['sellers']['billing_city']['city_name']??'-' !!} {!! $orders['sellers']['billing_pincode']['pincode']??'-' !!}<br>
-                    Phone: {!! $orders['sellers']['mobile'] !!}<br>
-                    Email: {!! $orders['sellers']['email'] !!}
+                    Phone: {!! $orders['sellers']['mobile'] ?? '' !!}<br>
+                    Email: {!! $orders['sellers']['email'] ?? '' !!}
                   </address>
                 </div>
                 <!-- /.col -->

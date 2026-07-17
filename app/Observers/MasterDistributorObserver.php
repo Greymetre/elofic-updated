@@ -60,19 +60,55 @@ class MasterDistributorObserver
         $user = User::create($userData);
 
         // Assign Distributor role
+        \Log::info('Distributor Observer Running');
+
         $role = Role::where('name', 'Distributor')
             ->where('guard_name', 'users')
             ->first();
 
+        \Log::info('Role Found', [
+            'role' => $role ? $role->id : null
+        ]);
+        // $role = Role::where('name', 'Distributor')
+        //     ->where('guard_name', 'users')
+        //     ->first();
+
         if ($role) {
-            $user->assignRole($role);
-            
-            // Assign role permissions to user
-            $permissions = $role->permissions;
-            if ($permissions->isNotEmpty()) {
-                $user->givePermissionTo($permissions);
-            }
+
+    try {
+
+        $user->assignRole($role);
+
+        \Log::info('Role Assigned Successfully', [
+            'user_id' => $user->id,
+            'roles' => $user->getRoleNames()
+        ]);
+
+        $permissions = $role->permissions;
+
+        if ($permissions->isNotEmpty()) {
+            $user->givePermissionTo($permissions);
         }
+
+    } catch (\Exception $e) {
+
+        \Log::error('Role Assignment Failed', [
+            'message' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile()
+        ]);
+    }
+}
+
+        // if ($role) {
+        //     $user->assignRole($role);
+            
+        //     // Assign role permissions to user
+        //     $permissions = $role->permissions;
+        //     if ($permissions->isNotEmpty()) {
+        //         $user->givePermissionTo($permissions);
+        //     }
+        // }
     }
 
     /**

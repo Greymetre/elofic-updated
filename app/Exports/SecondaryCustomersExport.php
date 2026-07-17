@@ -101,10 +101,10 @@ class SecondaryCustomersExport implements
         })
         ->when(!empty($this->filters['start_date']) && !empty($this->filters['end_date']), function ($q) {
 
-            $startDate = Carbon::createFromFormat('Y-m-d', $this->filters['start_date'])
-                ->format('Y-m-d');
+            $startDate = Carbon::parse($this->filters['start_date'])
+    ->format('Y-m-d');
 
-            $endDate = Carbon::createFromFormat('Y-m-d', $this->filters['end_date'])
+            $endDate = Carbon::parse($this->filters['end_date'])
                 ->format('Y-m-d');
 
             $q->whereDate('created_at', '>=', $startDate)
@@ -112,14 +112,14 @@ class SecondaryCustomersExport implements
         })
         ->when(!empty($this->filters['start_date']) && empty($this->filters['end_date']), function ($q) {
 
-            $startDate = Carbon::createFromFormat('Y-m-d', $this->filters['start_date'])
-                ->format('Y-m-d');
+            $startDate = Carbon::parse($this->filters['start_date'])
+    ->format('Y-m-d');
 
             $q->whereDate('created_at', '>=', $startDate);
         })
         ->when(empty($this->filters['start_date']) && !empty($this->filters['end_date']), function ($q) {
 
-            $endDate = Carbon::createFromFormat('Y-m-d', $this->filters['end_date'])
+            $endDate = Carbon::parse($this->filters['end_date'])
                 ->format('Y-m-d');
 
             $q->whereDate('created_at', '<=', $endDate);

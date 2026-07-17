@@ -17,10 +17,11 @@
                                 data-target="#advanceFilter">
                                 <i class="material-icons">filter_list</i> Filters
                             </button>
-
+                            @if(auth()->user()->can(['customer_create']))
                             <a href="{{ route('mechanics.create') }}" class="btn btn-theme">
                                 <i class="material-icons">add_circle</i> Add New Mechanic
                             </a>
+                            @endif
                         </span>
                     </h4>
                 </div>
@@ -55,7 +56,7 @@
     <label>Mobile Number</label>
 {!! Form::select('mobile', [], null, [
     'class' => 'form-control',
-    'text' => 'mobile'
+    'id' => 'mobile'
 ]) !!}
 </div>
 
@@ -510,26 +511,33 @@
         }
     });
     
-    $('#mobile').select2({
-        placeholder: 'Select mobile',
-        allowClear: true,
-        width: '100%',
-        ajax: {
-            url: "{{ url('/secondary-customers/dropdown') }}",
-            dataType: 'json',
-            delay: 250,
-            data: function(params) {
-                return {
-                    search: params.term || '',
-                    type: 'mobile',
-                    customer_type: "{{ $type }}"
-                };
-            },
-            processResults: function(data) {
-                return data;
-            }
+   $('#mobile').select2({
+    placeholder: 'Select Mobile',
+    allowClear: true,
+    width: '100%',
+    ajax: {
+        url: "{{ url('/secondary-customers/dropdown') }}",
+        dataType: 'json',
+        delay: 250,
+        data: function(params) {
+            return {
+                search: params.term || '',
+                type: 'mobile',
+                customer_type: "{{ $type }}"
+            };
+        },
+        processResults: function(data) {
+
+            data.results.unshift({
+                id: '',
+                text: 'Select Mobile'
+            });
+
+            return data;
         }
-    });
+    }
+});
+    
 });
         // ====== STATE CHANGE → CITY LOAD + TABLE FILTER ======
 

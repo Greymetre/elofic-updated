@@ -78,7 +78,7 @@ class SecondaryCustomerController extends Controller
         ->select('secondary_customers.*'); // Important: select table with alias or all
 
     $query->where('type', $type);
-
+    
 
     if ($request->ajax()) {
         $query = SecondaryCustomer::select(
@@ -99,6 +99,24 @@ class SecondaryCustomerController extends Controller
         
        
         $query->where('type', $type);
+
+        if (auth()->user()->hasRole('Distributor')) {
+
+            $query->where('distributor_name', auth()->user()->customerid);
+
+        } elseif (
+            auth()->user()->hasRole('superadmin') ||
+            auth()->user()->hasRole('Admin')
+        ) {
+
+            // No restriction - show all records
+
+        } else {
+
+            $userIds = getUsersReportingToAuth();
+            $query->whereIn('created_by', $userIds);
+
+        }
 
         // Global Search
     if ($request->filled('global_search')) {
@@ -182,17 +200,26 @@ class SecondaryCustomerController extends Controller
         ->addColumn('action', function ($row) use ($type) {
             $routePrefix = strtolower($type) . 's';
             $encryptedId = encrypt($row->id);
-
+            if(auth()->user()->can(['customer_edit']))
+            {
             $btn = '<a href="' . route($routePrefix . '.edit', $encryptedId) . '" class="btn btn-info btn-just-icon btn-sm" title="Edit">
                         <i class="material-icons">edit</i>
                     </a>';
+            }
+            if(auth()->user()->can(['customer_show']))
+            { 
             $btn .= '<a href="' . route($routePrefix . '.show', $encryptedId) . '" class="btn btn-theme btn-just-icon btn-sm" title="View">
                         <i class="material-icons">visibility</i>
                     </a>';
+            }
             // DELETE
+            if(auth()->user()->can(['customer_delete']))
+            { 
             $btn .= '<button data-url="'.route($routePrefix.'.destroy',$row->id).'" 
             class="btn btn-danger btn-just-icon btn-sm deleteCustomer">
             <i class="material-icons">delete</i></button>';            // ACTIVE / INACTIVE
+            }
+            if (auth()->user()->can(['customer_active'])) {
             $checked = $row->active == 'Y' ? 'checked' : '';
 
             $btn .= '<div class="togglebutton">
@@ -204,7 +231,7 @@ class SecondaryCustomerController extends Controller
                                 <span class="toggle"></span>
                             </label>
                         </div>';
-
+            }
             return '<div class="btn-group">' . $btn . '</div>';
         }) 
         ->addColumn('active', function ($row) {

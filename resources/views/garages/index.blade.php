@@ -14,9 +14,11 @@
                                 data-target="#advanceFilter">
                                 <i class="material-icons">tune</i> Filter
                             </button>
+                            @if(auth()->user()->can(['customer_create']))
                             <a href="{{ route('garages.create') }}" class="btn btn-theme">
                                 <i class="material-icons">add_circle</i> Add New Garage
                             </a>
+                            @endif
                         </span>
                     </h4>
                 </div>

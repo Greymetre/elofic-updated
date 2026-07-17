@@ -153,13 +153,30 @@ class SecondaryCustomerController extends Controller
                 }
     
                 $query = SecondaryCustomer::with([
-                    'country', 'state', 'district', 'city', 'pincode', 'beat', 'distributor'
+                    'country',
+                    'state',
+                    'district',
+                    'city',
+                    'pincode',
+                    'beat',
+                    'distributor'
                 ])
                 ->where('type', $type)
                 ->where('active', 'Y')
                 ->where(function ($q) use ($visibleUserIds) {
-                    $q->whereIn('created_by', $visibleUserIds)
-                      ->orWhereIn('employee_id', $visibleUserIds);
+            
+                    // created_by is single user id
+                    $q->whereIn('created_by', $visibleUserIds);
+            
+                    // employee_id is comma separated: 1,2,3
+                    $q->orWhere(function ($subQ) use ($visibleUserIds) {
+                        foreach ($visibleUserIds as $userId) {
+                            $subQ->orWhereRaw(
+                                "FIND_IN_SET(?, REPLACE(employee_id, ' ', ''))",
+                                [$userId]
+                            );
+                        }
+                    });
                 })
                 ->select('secondary_customers.*');
             }

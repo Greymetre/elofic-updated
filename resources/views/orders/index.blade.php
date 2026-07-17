@@ -39,7 +39,7 @@
                                                 @foreach($retailers as $user)
                                                 <option value="{!! $user['id'] !!}"
                                                     {{ old( 'retailers_id') == $user->id ? 'selected' : '' }}>{!!
-                                                    $user['name'] !!}</option>
+                                                    $user['shop_name'] !!}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -62,7 +62,7 @@
                                                 @foreach($distributors as $user)
                                                 <option value="{!! $user['id'] !!}"
                                                     {{ old( 'distributor_id') == $user->id ? 'selected' : '' }}>{!!
-                                                    $user['name'] !!}</option>
+                                                    $user['trade_name'] !!}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -230,8 +230,8 @@
                 },
 
                 {
-    data: 'executive.name',
-    name: 'executive.name',
+    data: 'executive_id',
+    name: 'executive_id',
     defaultContent: '-'
 },
                 {

@@ -26,10 +26,11 @@
                                 <button class="btn btn-info" type="button" data-toggle="collapse" data-target="#filterSection">
                                     <i class="material-icons">tune</i>
                                 </button>
-
+                                @if(auth()->user()->can(['master_distributor_create']))
                                 <a href="{{ route('master-distributors.create') }}" class="btn btn-theme">
                                     <i class="material-icons">add_circle</i>
                                 </a>
+                                @endif
                             </div>
                         </div>
 
@@ -98,7 +99,7 @@
                 {{-- ================= FILTERS ================= --}}
                 
                 <div class="collapse" id="filterSection">
-                    @if(auth()->user()->can(['customer_download']))
+                    
                     <form action="{{ route('master-distributors.export') }}" method="GET" id="exportForm">
                         <input type="hidden" name="global_search" id="export_global_search" value="">
                         <div class="d-flex flex-wrap flex-row">
@@ -187,17 +188,19 @@
                                     name="end_date" 
                                     placeholder="End Date" 
                                     autocomplete="off">
-                            </div>                            
+                            </div>                   
+                            @if(auth()->user()->can(['master_distributor_report']))         
                             <div class="p-1"><button class="btn btn-just-icon btn-theme"
                                     title="{!!  trans('panel.global.download') !!} {!! trans('panel.customers.title') !!}"><i
                                         class="material-icons">cloud_download</i></button></div>
+                            @endif
 
                         </div>
                     </form>
                     
-                    @endif
+                    
                     <div class="next-btn">
-                        @if(auth()->user()->can(['customer_upload']))
+                        @if(auth()->user()->can(['master_distributor_import']))
                         <form action="{{ route('master-distributors.import') }}" method="POST" class="form-horizontal" enctype="multipart/form-data">
                             @csrf
                             <div class="input-group">
@@ -219,7 +222,7 @@
                         </form>
                         @endif
                         <div class="input-group-append">
-                        @if(auth()->user()->can(['customer_template']))
+                        @if(auth()->user()->can(['master_distributor_template']))
                     
                         <div class='mr-2'>
                             <button type="button" id="templateDownloadBtn" class="btn btn-just-icon btn-theme"
