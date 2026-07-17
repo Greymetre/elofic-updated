@@ -138,12 +138,12 @@ class Order extends Model
 
     public function masterDistributor()
     {
-        return $this->belongsTo(\App\Models\MasterDistributor::class, 'buyer_id');
+        return $this->belongsTo(\App\Models\MasterDistributor::class, 'seller_id');
     }
 
     public function secondaryCustomer()
     {
-        return $this->belongsTo(\App\Models\SecondaryCustomer::class, 'seller_id');
+        return $this->belongsTo(\App\Models\SecondaryCustomer::class, 'buyer_id');
     }
 
      // Buyer = SecondaryCustomer

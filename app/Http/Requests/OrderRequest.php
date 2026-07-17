@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Symfony\Component\HttpFoundation\Response;
 use Gate;
+use Illuminate\Validation\Rule;
 
 class OrderRequest extends FormRequest
 {
@@ -17,6 +18,28 @@ class OrderRequest extends FormRequest
 
     public function rules()
     {
+        $type = strtoupper((string) $this->input('type'));
+        $type = $type === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $type;
+
+        $customerRules = [
+            'type' => ['required', Rule::in(['RETAILER', 'WORKSHOP', 'MECHANIC', 'GARAGE', 'DISTRIBUTOR'])],
+            'seller_id' => ['required', 'integer', 'exists:master_distributors,id'],
+            'buyer_id' => $type === 'DISTRIBUTOR'
+                ? ['nullable']
+                : [
+                    'required',
+                    'integer',
+                    Rule::exists('secondary_customers', 'id')->where(fn ($query) => $query->where('type', $type)),
+                ],
+            'retailer_id' => in_array($type, ['GARAGE', 'WORKSHOP'], true)
+                ? [
+                    'required',
+                    'integer',
+                    Rule::exists('secondary_customers', 'id')->where(fn ($query) => $query->where('type', 'RETAILER')),
+                ]
+                : ['nullable'],
+        ];
+
         $rules = [];
         switch($this) {
             case !empty($this->id) :
@@ -58,6 +81,6 @@ class OrderRequest extends FormRequest
                 ];
                 break;
         }
-        return $rules;
+        return array_merge($rules, $customerRules);
     }
 }

@@ -152,8 +152,8 @@
                                 </option>
                                 <option value="WORKSHOP" {{ old('type') == 'WORKSHOP'   ? 'selected' : '' }}>WORKSHOP
                                 </option>
-                                <option value="DISTRIBUTER" {{ old('type') == 'DISTRIBUTER'? 'selected' : '' }}>
-                                    DISTRIBUTER</option>
+                                <option value="DISTRIBUTOR" {{ old('type') == 'DISTRIBUTOR'? 'selected' : '' }}>
+                                    DISTRIBUTOR</option>
                             </select>
                         </div>
                     </div>
@@ -544,7 +544,7 @@ function updateRowNumbers(){
             $('#buyer_id').prop('required', false);
             $('#retailer_id').prop('required', false);
 
-            if (type === 'DISTRIBUTER') {
+            if (type === 'DISTRIBUTOR') {
 
                 $('#seller_div').show();
 

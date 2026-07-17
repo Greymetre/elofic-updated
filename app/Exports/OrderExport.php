@@ -12,10 +12,13 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Illuminate\Support\Facades\Auth;
 
 
-class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping
+class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
 {
     public function __construct($request)
     {
@@ -71,11 +74,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 }
 
                 if ($this->customer_type_id && $this->customer_type_id != '') {
-                    $Order_ids = Order::with('buyers')
-                        ->whereHas('buyers', function ($query) {
-                            $query->where('customertype', $this->customer_type_id);
-                        })->pluck('id');
-                    $query->whereIn('order_id', $order_ids);
+                    $this->applyCustomerTypeFilter($query);
                 }
             });
 
@@ -121,11 +120,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                     }
 
                     if ($this->customer_type_id && $this->customer_type_id != '') {
-                        $Order_ids = Order::with('buyers')
-                            ->whereHas('buyers', function ($query) {
-                                $query->where('customertype', $this->customer_type_id);
-                            })->pluck('id');
-                        $query->whereIn('order_id', $order_ids);
+                        $this->applyCustomerTypeFilter($query);
                     }
                     // $query->where('orders.product_cat_id',$this->dividion_id);
                 } else {
@@ -148,11 +143,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                     }
 
                     if ($this->customer_type_id && $this->customer_type_id != '') {
-                        $Order_ids = Order::with('buyers')
-                            ->whereHas('buyers', function ($query) {
-                                $query->where('customertype', $this->customer_type_id);
-                            })->pluck('id');
-                        $query->whereIn('order_id', $order_ids);
+                        $this->applyCustomerTypeFilter($query);
                     }
                 }
             })->select('id', 'order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at', 'scheme_name', 'scheme_discount', 'scheme_amount', 'cluster_discount', 'cluster_amount', 'deal_discount', 'deal_amount', 'distributor_discount', 'distributor_amount');
@@ -170,13 +161,119 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
 
     public function headings(): array
     {
-        if ($this->dividion_id == '1') {
-            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Dealer & Distributor BP Code', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage', 'kW', 'HP', 'Suc x Del', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'Trade Discount%', 'Scheme Discount%', 'Scheme Name', 'EBD Discount%', 'MOU Discount%', 'Special Discount%', 'Frieght Discount%', 'Cluster Discount%', 'Deal Dicount%', 'Cash Discount%', 'Total Discount%', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
-        } elseif ($this->dividion_id == '2') {
-            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Dealer & Distributor BP Code', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'DOD Discount%', 'Special Distribution Discount%', 'Distribution Margin Discount%', 'Cash Discount%', 'Total Discount%', 'Total Discount', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
-        } else {
-            return ['id', 'Order Date', 'Employee Code', 'User Name', 'Branch', 'Division', 'Designation', 'Retailer ID', 'Customer', 'Customer Name', 'Dealer ID', 'Dealer & Distributor Name', 'Dealer & Distributor BP Code', 'Order No', 'Order ID', 'Category', 'Subcategory', 'Product Code', 'Product Name', 'Product ID', 'Product Stage', 'kW', 'HP', 'Suc x Del', 'Quantity', 'Shipped Qty', 'Pending Qty', 'Rate(LP)', 'Tax%', 'Sub Total', 'Total', 'Order Remark', 'Discount Approvel Remark', 'Discount Approve By', 'Status'];
+        if ($this->isDistributorExport()) {
+            return [
+                'Sale Order',
+                'Document Type',
+                'Plant',
+                'Sales Org',
+                'Dist Chnl',
+                'Division',
+                'Customer PO No',
+                'Customer PO Dt',
+                'Material Code',
+                'Quantity',
+                'Delivery Date',
+                'Customer',
+                'Storage Location',
+                'PO Amendment No',
+                'PO Amendment Dt',
+                'Customer Material No',
+                'Ship To Party',
+                'Dealer & Distributor Name',
+                'Category',
+                'Subcategory',
+                'Product Name',
+                'Shipped Qty',
+                'Pending Qty',
+                'Rate',
+                'Total',
+                'Employee Code',
+                'User Name',
+                'Branch',
+                'Division',
+                'Designation',
+                'Status',
+            ];
         }
+
+        return [
+            'Order Date',
+            'Customer ID',
+            'Customer Type',
+            'Customer Name',
+            'Dealer & Distributor Code',
+            'Dealer & Distributor Name',
+            'Order No',
+            'Category',
+            'Subcategory',
+            'Product Code',
+            'Product Name',
+            'Quantity',
+            'Shipped Qty',
+            'Pending Qty',
+            'Rate',
+            'Total',
+            'Order Remark',
+            'Employee Code',
+            'User Name',
+            'Branch',
+            'Division',
+            'Designation',
+            'Status',
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+                $lastRow = $sheet->getHighestDataRow();
+                $lastColumn = $sheet->getHighestDataColumn();
+                $headingRange = 'A1:' . $lastColumn . '1';
+
+                $sheet->getRowDimension(1)->setRowHeight(25);
+                $sheet->getStyle($headingRange)->getAlignment()->setWrapText(true);
+                $sheet->getStyle($headingRange)->getFont()->setSize(14);
+
+                $sheet->getStyle($headingRange)->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '00AADB'],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['argb' => 'FF000000'],
+                        ],
+                    ],
+                ]);
+
+                if ($lastRow >= 2) {
+                    $sheet->getStyle('A2:' . $lastColumn . $lastRow)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['argb' => 'FF000000'],
+                            ],
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_LEFT,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
+                }
+            },
+        ];
     }
 
     public function map($data): array
@@ -198,6 +295,79 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
         $qty = $data['quantity'] ?? 0;
         $ship_qty = $data['shipped_qty'] ?? 0;
         $pending_qty = $qty - $ship_qty;
+        $order = $data['orders'] ?? [];
+        $customerType = strtoupper((string) ($order['customer_type'] ?? $order['buyers']['type'] ?? ''));
+        $customerType = $customerType === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $customerType;
+
+        if ($this->isDistributorExport()) {
+            $distributorCode = $order['sellers']['distributor_code'] ?? '';
+            $distributorName = $order['sellers']['trade_name']
+                ?? $order['sellers']['legal_name']
+                ?? '';
+
+            return [
+                $order['orderno'] ?? '',
+                'ZAFM',
+                $order['sellers']['plant'] ?? '',
+                '1000',
+                '20',
+                '0',
+                $order['order_remark'] ?? '',
+                !empty($order['order_date']) ? date('Y-m-d', strtotime($order['order_date'])) : '',
+                $data['products']['product_code'] ?? '',
+                $data['quantity'] ?? '',
+                !empty($order['completed_date']) ? date('Y-m-d', strtotime($order['completed_date'])) : '',
+                $distributorCode,
+                '',
+                '',
+                '',
+                '',
+                $distributorCode,
+                $distributorName,
+                $data['products']['categories']['category_name'] ?? '',
+                $data['products']['subcategories']['subcategory_name'] ?? '',
+                $data['products']['product_name'] ?? '',
+                $data['shipped_qty'] ?? '',
+                $pending_qty,
+                $data['products']['productpriceinfo']['mrp'] ?? '',
+                $data['line_total'] ?? '',
+                $order['getuserdetails']['employee_codes'] ?? '',
+                $order['createdbyname']['name'] ?? '',
+                $order['getuserdetails']['getbranch']['branch_name'] ?? '',
+                $order['getuserdetails']['getdivision']['division_name'] ?? '',
+                $order['getuserdetails']['getdesignation']['designation_name'] ?? '',
+                $order['statusname']['status_name'] ?? 'Pending',
+            ];
+        }
+
+        return [
+            isset($order['order_date']) ? date('Y-m-d', strtotime($order['order_date'])) : '',
+            $order['buyer_id'] ?? $order['seller_id'] ?? '',
+            $customerType,
+            $order['buyers']['shop_name']
+                ?? $order['sellers']['trade_name']
+                ?? $order['sellers']['legal_name']
+                ?? '',
+            $order['sellers']['distributor_code'] ?? '',
+            $order['sellers']['trade_name'] ?? $order['sellers']['legal_name'] ?? '',
+            $order['orderno'] ?? '',
+            $data['products']['categories']['category_name'] ?? '',
+            $data['products']['subcategories']['subcategory_name'] ?? '',
+            $data['products']['product_code'] ?? '',
+            $data['products']['product_name'] ?? '',
+            $data['quantity'] ?? '',
+            $data['shipped_qty'] ?? '',
+            $pending_qty,
+            $data['products']['productpriceinfo']['mrp'] ?? '',
+            $data['line_total'] ?? '',
+            $order['order_remark'] ?? '',
+            $order['getuserdetails']['employee_codes'] ?? '',
+            $order['createdbyname']['name'] ?? '',
+            $order['getuserdetails']['getbranch']['branch_name'] ?? '',
+            $order['getuserdetails']['getdivision']['division_name'] ?? '',
+            $order['getuserdetails']['getdesignation']['designation_name'] ?? '',
+            $order['statusname']['status_name'] ?? 'Pending',
+        ];
 
         if ($this->dividion_id == '1') {
             return [
@@ -344,5 +514,24 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                 isset($data['orders']['statusname']) ? $data['orders']['statusname']['status_name'] : 'Pending',
             ];
         }
+    }
+
+    private function applyCustomerTypeFilter($query): void
+    {
+        $customerType = strtoupper((string) $this->customer_type_id);
+
+        if ($customerType === 'DISTRIBUTOR') {
+            $query->whereIn('order_type', ['MASTER_DISTRIBUTER', 'MASTER_DISTRIBUTOR']);
+            return;
+        }
+
+        $query->whereHas('buyers', function ($buyerQuery) use ($customerType) {
+            $buyerQuery->where('type', $customerType);
+        });
+    }
+
+    private function isDistributorExport(): bool
+    {
+        return strtoupper((string) $this->customer_type_id) === 'DISTRIBUTOR';
     }
 }

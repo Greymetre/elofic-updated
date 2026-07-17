@@ -1012,7 +1012,8 @@ public function getCustomerDataSelect(Request $request)
     }
 
     $term = trim($request->get('term', ''));
-    $type = $request->get('type');
+    $type = strtoupper((string) $request->get('type'));
+    $type = $type === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $type;
 
     $results = collect();
 
@@ -1024,7 +1025,7 @@ public function getCustomerDataSelect(Request $request)
             ->when($term, function ($q) use ($term) {
                 $q->where('trade_name', 'LIKE', "%{$term}%")
                   ->orWhere('distributor_code', 'LIKE', "%{$term}%")
-                  ->orWhere('sap_code', 'LIKE', "%{$term}%"); // if you have sap_code column
+                  ->orWhere('legal_name', 'LIKE', "%{$term}%");
             })
             ->get()
             ->map(function ($distributor) {
@@ -1042,7 +1043,7 @@ public function getCustomerDataSelect(Request $request)
 
                 return [
                     'id'           => $distributor->id,
-                    'text'         => trim($distributor->trade_name . ($distributor->sap_code ? ' - ' . $distributor->sap_code : '')),
+                    'text'         => trim(($distributor->trade_name ?: $distributor->legal_name) . ($distributor->distributor_code ? ' - ' . $distributor->distributor_code : '')),
                     'model_type'   => 'master',
                     'full_address' => $full_address,
                     'data-type'    => 'DISTRIBUTOR',

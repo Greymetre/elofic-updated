@@ -6,7 +6,6 @@
     use Illuminate\Http\Request;
     use App\Models\OrderDetails;
     use App\Models\Product;
-    use App\Models\Customers;
     use App\Models\Status;
     use App\Models\City;
     use App\Models\User;
@@ -28,7 +27,6 @@
     use App\Http\Requests\OrderRequest;
     use App\Mail\OrderMailWithAttachment;
     use App\Models\Category;
-    use App\Models\CustomerType;
     use App\Models\Division;
     use App\Models\Sales;
     use App\Models\MasterDistributor;
@@ -57,7 +55,7 @@
             $divisions = Category::where('active', 'Y')->get();
             $retailers = SecondaryCustomer::whereIn("id", $buyer_ids)->get();
             $distributors = MasterDistributor::whereIn("id", $sellers_ids)->get();
-            $customer_types = CustomerType::where('active', 'Y')->get();
+            $customer_types = ['RETAILER', 'WORKSHOP', 'MECHANIC', 'GARAGE', 'DISTRIBUTOR'];
             $users = User::whereIn('id' , $user_ids)->get();
             return $dataTable->render('orders.index', compact('divisions', 'retailers', 'distributors', 'customer_types' , 'users'));
         }
@@ -136,6 +134,10 @@
                 $request['orderno'] = isset($request['orderno']) ? $request['orderno'] : date('Ymd') . '_' . autoIncrementId('Order', 'id');
 
 
+                $customerType = strtoupper((string) $request->type);
+                $customerType = $customerType === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $customerType;
+                $request->merge(['type' => $customerType]);
+
                 // if (!empty($request['buyer_id'])) {
                 //     $buyer = $request['buyer_id'];
                 // } else {
@@ -146,13 +148,14 @@
                 // $request['buyer_id'] = isset($request['seller_id']) ? $request['seller_id'] : null;
                 // $request['seller_id'] = $buyer;
                 // Order type mapping
-                if (strtoupper($request->type) == 'DISTRIBUTER') {
+                if ($customerType === 'DISTRIBUTOR') {
 
-                    $request['order_type'] = 'MASTER_DISTRIBUTER';
+                    $request['order_type'] = 'MASTER_DISTRIBUTOR';
 
                     // Distributor order
                     $request['seller_id'] = $request['seller_id'];
                     $request['buyer_id'] = null;
+                    $request['retailer_id'] = null;
 
                 } else {
 
@@ -178,12 +181,12 @@
                 $request['gst18_amt'] = $request['18_gst'];
                 $request['gst28_amt'] = $request['28_gst'];
                 // Order type mapping
-                if (strtoupper($request->type) == 'DISTRIBUTER') {
+                if ($customerType === 'DISTRIBUTOR') {
 
-                    $request['order_type'] = 'MASTER_DISTRIBUTER';
+                    $request['order_type'] = 'MASTER_DISTRIBUTOR';
 
                     // optional
-                    $request['customer_type'] = 'DISTRIBUTER';
+                    $request['customer_type'] = 'DISTRIBUTOR';
 
                 } else {
 
@@ -379,11 +382,10 @@
                 'sellers',
                 'orderdetails.products'
             ])->find($id);
-            if ($orders->order_type === 'MASTER_DISTRIBUTER') {
-                $orders->type = 'DISTRIBUTER';
-            } else {
-                $orders->type = 'RETAILER';
-            }
+            $orders->type = in_array($orders->order_type, ['MASTER_DISTRIBUTER', 'MASTER_DISTRIBUTOR'], true)
+                ? 'DISTRIBUTOR'
+                : strtoupper($orders->customer_type ?: ($orders->buyers->type ?? 'RETAILER'));
+            $orders->customer_type = $orders->type;
 
             // $orderdetail = OrderDetails::with('products')->where('order_id', '=', $id)->get();
             $products = Product::where('active', '=', 'Y')->select('id', 'display_name', 'product_image')->get();
@@ -457,18 +459,20 @@
             $request['gst12_amt'] = $request['12_gst'];
             $request['gst28_amt'] = $request['18_gst'];
             $request['gst18_amt'] = $request['28_gst'];
-            $ss_customer_type = Customers::where('id', $request['seller_id'])->pluck('customertype')->first();
-
-            if ($ss_customer_type == '1' || $ss_customer_type == '3') {
-                $request['buyer_id'] = $request['seller_id'];
-            }
+            $customerType = strtoupper((string) $request->type);
+            $customerType = $customerType === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $customerType;
 
             $orders = Order::with('orderdetails.products.subcategories','retailers')->find($id);
             $oldOrderData = $orders->toArray();
-            $orders->buyer_id = $request->buyer_id ?? null;
-$orders->seller_id = $request->seller_id ?? null;
-$orders->customer_type = $request->type ?? null;
-$orders->retailer_id = $request->retailer_id ?? null;
+            $orders->buyer_id = $customerType === 'DISTRIBUTOR' ? null : $request->buyer_id;
+            $orders->seller_id = $request->seller_id;
+            $orders->customer_type = $customerType;
+            $orders->order_type = $customerType === 'DISTRIBUTOR'
+                ? 'MASTER_DISTRIBUTOR'
+                : 'SECONDARY_CUSTOMER';
+            $orders->retailer_id = in_array($customerType, ['GARAGE', 'WORKSHOP'], true)
+                ? $request->retailer_id
+                : null;
 
             //$orders->buyer_id = isset($request['buyer_id']) ? $request['buyer_id'] :null ;
             $orders->executive_id = isset($request['executive_id']) ? $request['executive_id'] : null;
@@ -700,6 +704,11 @@ $orders->retailer_id = $request->retailer_id ?? null;
         public function download(Request $request)
         {
             abort_if(Gate::denies('order_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+            $request->validate([
+                'customer_type_id' => 'required|in:RETAILER,WORKSHOP,MECHANIC,GARAGE,DISTRIBUTOR',
+            ], [
+                'customer_type_id.required' => 'Customer Type is required for order export.',
+            ]);
             if (ob_get_contents()) ob_end_clean();
             ob_start();
             return Excel::download(new OrderExport($request), 'orders.xlsx');

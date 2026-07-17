@@ -45,12 +45,12 @@
                                         </div>
                                         <div class="p-2" style="width:190px;">
                                             <select class="select2" name="customer_type_id" id="customer_type_id"
-                                                title="Select Retailers">
-                                                <option value="">Customer Type</option>
+                                                title="Select Customer Type" required>
+                                                <option value="">Select Customer Type *</option>
                                                 @foreach($customer_types as $customer_type)
-                                                <option value="{!! $customer_type['id'] !!}"
-                                                    {{ old( 'customer_type_id') == $customer_type->id ? 'selected' : '' }}>
-                                                    {!! $customer_type['customertype_name'] !!}</option>
+                                                <option value="{{ $customer_type }}"
+                                                    {{ old('customer_type_id') == $customer_type ? 'selected' : '' }}>
+                                                    {{ $customer_type }}</option>
                                                 @endforeach
                                             </select>
                                         </div>

@@ -150,6 +150,18 @@ class OrderDataTable extends DataTable
             $query->where('seller_id', request()->get('distributor_id'));
         }
 
+        if (request()->filled('customer_type_id')) {
+            $customerType = strtoupper((string) request()->get('customer_type_id'));
+
+            if ($customerType === 'DISTRIBUTOR') {
+                $query->whereIn('order_type', ['MASTER_DISTRIBUTER', 'MASTER_DISTRIBUTOR']);
+            } else {
+                $query->whereHas('buyers', function ($buyerQuery) use ($customerType) {
+                    $buyerQuery->where('type', $customerType);
+                });
+            }
+        }
+
         // return $query->with([
         //     'executive.getbranch',
         //     'buyers',
