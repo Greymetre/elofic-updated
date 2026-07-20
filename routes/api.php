@@ -267,6 +267,7 @@ Route::group(['middleware' => ['auth:users,customers']], function () {
     Route::post('leadToCustomer', [CustomerController::class, 'leadToCustomer']);
     // Get Order List
     Route::post('insertOrder', [OrderController::class, 'insertOrder']);
+    Route::match(['put', 'post'], 'orders/{order}', [OrderController::class, 'updateOrder']);
     Route::get('order/customer-options', [OrderController::class, 'getCustomerOptions']);
     Route::any('getOrderList', [OrderController::class, 'getOrderList']);
     Route::get('getHierarchyOrderStats', [OrderController::class, 'getHierarchyOrderStats']);

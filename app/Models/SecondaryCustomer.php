@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\VehicleSegmentArray;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,6 +28,9 @@ class SecondaryCustomer extends Model
     'nistha_awareness_status',
     'opportunity_status',
     'gps_location',
+    'latitude',
+    'longitude',
+    'is_current_location',
 
   
     'country_id',
@@ -43,6 +47,13 @@ class SecondaryCustomer extends Model
     'gmap',
     'sales_exception_assignment',
     
+];
+
+protected $casts = [
+    'vehicle_segment' => VehicleSegmentArray::class,
+    'is_current_location' => 'boolean',
+    'latitude' => 'float',
+    'longitude' => 'float',
 ];
 
 public function state()

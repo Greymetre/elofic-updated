@@ -22,6 +22,7 @@ use App\Imports\MasterDistributorsImport;
 use Carbon\Carbon;
 use App\Models\Order;
 use App\Models\OrderDetails;
+use App\Support\CustomerApiValidation;
 
 
 
@@ -387,6 +388,12 @@ if ($request->filled('billing_city')) {
     /* ================= STORE ================= */
    public function store(Request $request)
 {
+    $request->merge([
+        'alternate_mobile' => $request->filled('alternate_mobile')
+            ? $request->input('alternate_mobile')
+            : null,
+    ]);
+
     // dd($request);
     $rules = [
         // Basic Info
@@ -400,6 +407,7 @@ if ($request->filled('billing_city')) {
         // Contact
         'contact_person'     => 'required|string|max:255',
         'mobile'             => 'required|digits:10|unique:master_distributors,mobile',
+        'alternate_mobile'   => CustomerApiValidation::optionalMobileRules(),
         'email'              => 'required|email|unique:master_distributors,email',
 
         // Business & Operation
@@ -823,6 +831,12 @@ try {
     /* ================= VALIDATION ================= */
     private function validateData(Request $request, $id = null)
     {
+        $request->merge([
+            'alternate_mobile' => $request->filled('alternate_mobile')
+                ? $request->input('alternate_mobile')
+                : null,
+        ]);
+
         return $request->validate([
             'legal_name' => 'required|string|max:255',
             'distributor_code' => 'required|string|max:100|unique:master_distributors,distributor_code,' . $id,
@@ -830,6 +844,7 @@ try {
             'business_status' => 'required',
             'contact_person' => 'required',
             'mobile' => 'required',
+            'alternate_mobile' => CustomerApiValidation::optionalMobileRules(),
             'beat_route' => 'required|string',
         ]);
     }

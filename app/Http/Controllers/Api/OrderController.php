@@ -95,9 +95,12 @@ class OrderController extends Controller
             }
 
             if (!empty($selecteduser_id)) {
-                $query->where('created_by', $selecteduser_id);
+                $query->where('executive_id', $selecteduser_id);
             } else {
-                $query->whereIn('created_by', $user_ids);
+                $query->where(function ($visibleQuery) use ($user_ids) {
+                    $visibleQuery->whereIn('executive_id', $user_ids)
+                        ->orWhereIn('created_by', $user_ids);
+                });
             }
 
             if ((isset($selectedstatus_id) || $selectedstatus_id == 0) && $selectedstatus_id != '') {
@@ -284,7 +287,7 @@ class OrderController extends Controller
                         'detail_title' =>  isset($value['products']['product_no']) ? $value['products']['product_no'] : '',
                         'quantity' =>  isset($value['quantity']) ? $value['quantity'] : 0,
                         'ebd_amount' =>  isset($value['price']) ? $value['price'] : 0.00,
-                        'gst' =>  isset($value['products']['productpriceinfo']) ? $value['products']['productpriceinfo']['gst'] : 0,
+                        'gst' =>  isset($value['gst']) ? $value['gst'] : 0,
                         'shipped_qty'  =>  isset($value['shipped_qty']) ? $value['shipped_qty'] : 0,
                         'price'  =>  isset($value['price']) ? $value['price'] : 0.00,
                         'tax_amount'  =>  isset($value['tax_amount']) ? $value['tax_amount'] : 0.00,
@@ -498,8 +501,6 @@ class OrderController extends Controller
     
     public function insertOrder(Request $request)
     {
-        DB::beginTransaction();
-    
         try {
             $user = $request->user();
             $customerType = strtoupper((string) $request->input('customer_type'));
@@ -512,7 +513,9 @@ class OrderController extends Controller
                 'seller_id' => $customerType === 'DISTRIBUTOR' ? 'nullable' : 'required|integer',
                 'orderdetail' => 'required|array|min:1',
                 'orderdetail.*.product_id' => 'required|integer|exists:products,id',
+                'orderdetail.*.product_detail_id' => 'nullable|integer',
                 'orderdetail.*.quantity' => 'required|numeric|gt:0',
+                'orderdetail.*.price' => 'required|numeric|min:0',
             ]);
 
             if ($validator->fails()) {
@@ -562,6 +565,8 @@ class OrderController extends Controller
             $request['order_taking'] = 'MobileApp';
             $request['executive_id'] = $user->id;
             $request['order_date']   = now()->toDateString();
+
+            DB::beginTransaction();
     
             // ========================
             // Create Order First (without orderno)
@@ -584,6 +589,10 @@ class OrderController extends Controller
                 // Totals will be calculated and updated later
                 'sub_total'      => 0,
                 'total_gst'      => 0,
+                'gst5_amt'       => 0,
+                'gst12_amt'      => 0,
+                'gst18_amt'      => 0,
+                'gst28_amt'      => 0,
                 'grand_total'    => $request['grand_total'],
                 'customer_type'  => $request['customer_type']
             ]);
@@ -606,38 +615,27 @@ class OrderController extends Controller
             $total_gst = 0;
     
             foreach ($request->orderdetail as $rows) {
-                $product = Product::with('productpriceinfo')->find($rows['product_id']);
-    
+                $quantity = (float) ($rows['quantity'] ?? 0);
+                $price = (float) ($rows['price'] ?? 0);
                 $gst_percent = 0;
-                $gst_amount  = 0;
-    
-                if ($product && $product->productpriceinfo) {
-                    $gst_percent = (int)$product->productpriceinfo->gst ?? 0;
-                    $base_amount = $rows['quantity'] * ($rows['price'] ?? 0);
-                    $gst_amount  = ($base_amount * $gst_percent) / 100;
-                }
-    
-                // Use line_total from payload, fallback to calculation
-                $line_total = $rows['line_total'] ?? 
-                             ($rows['quantity'] * ($rows['price'] ?? 0));
-    
-                // Grand total per line = line_total + gst_amount
-                $line_grand_total = $line_total + $gst_amount;
+                $gst_amount = 0;
+                $line_total = round($quantity * $price, 2);
     
                 $orderDetailsData[] = [
                     'active'            => 'Y',
                     'order_id'          => $order->id,
                     'product_id'        => $rows['product_id'] ?? null,
                     'product_detail_id' => $rows['product_detail_id'] ?? null,
-                    'quantity'          => $rows['quantity'] ?? 0,
-                    'shipped_qty'       => $rows['shipped_qty'] ?? 0,
-                    'price'             => $rows['price'] ?? 0.00,
-                    'tax_amount'        => $rows['tax_amount'] ?? $gst_amount,
+                    'quantity'          => $quantity,
+                    'shipped_qty'       => 0,
+                    'price'             => $price,
+                    'tax_amount'        => 0,
                     'line_total'        => $line_total,
                     'gst'               => $gst_percent,
                     'gst_amount'        => $gst_amount,
-                    'discount'          => $rows['discount'] ?? 0.00,
-                    'ebd_amount'        => $rows['ebd_amount'] ?? 0.00,
+                    'discount'          => 0,
+                    'discount_amount'   => 0,
+                    'ebd_amount'        => 0,
                     'created_at'        => getcurentDateTime(),
                     // 'category_id'       => $product->category_id ?? null,
                     // 'subcategory_id'    => $product->subcategory_id ?? null,
@@ -655,13 +653,13 @@ class OrderController extends Controller
             // ========================
             // Calculate & Update Grand Total in Order
             // ========================
-            $grand_total = $sub_total + $total_gst;
+            $grand_total = $sub_total;
     
             $order->update([
                 'sub_total'   => round($sub_total, 2),
                 'total_gst'   => round($total_gst, 2),
                 'grand_total' => round($grand_total, 2),
-                'total_qty'   => array_sum(array_column($request->orderdetail, 'quantity')) ?? 0,
+                'total_qty'   => collect($request->orderdetail)->sum(fn ($row) => (float) ($row['quantity'] ?? 0)),
             ]);
     
             DB::commit();
@@ -730,13 +728,191 @@ class OrderController extends Controller
             ], 200);
     
         } catch (\Exception $e) {
-            DB::rollBack();
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
             \Log::error('API Order Insert Error: ' . $e->getMessage());
             
             return response()->json([
                 'status'  => 'error',
                 'message' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function updateOrder(Request $request, Order $order)
+    {
+        try {
+            $user = $request->user();
+            $visibleUserIds = getUsersReportingToAuth($user->id);
+
+            if (!in_array((int) $order->created_by, array_map('intval', $visibleUserIds), true)
+                && !in_array((int) $order->executive_id, array_map('intval', $visibleUserIds), true)) {
+                return response()->json(['status' => 'error', 'message' => 'You are not allowed to update this order.'], 403);
+            }
+
+            $customerType = strtoupper((string) $request->input('customer_type'));
+            $customerType = $customerType === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $customerType;
+            $sellerType = strtoupper((string) $request->input('seller_type', 'DISTRIBUTOR'));
+
+            $validator = Validator::make($request->all(), [
+                'customer_type' => 'required|in:RETAILER,WORKSHOP,MECHANIC,GARAGE,DISTRIBUTOR',
+                'buyer_id' => 'required|integer',
+                'seller_id' => $customerType === 'DISTRIBUTOR' ? 'nullable' : 'required|integer',
+                'orderdetail' => 'required|array|min:1',
+                'orderdetail.*.orderdetail_id' => 'nullable|integer',
+                'orderdetail.*.product_id' => 'required|integer|exists:products,id',
+                'orderdetail.*.product_detail_id' => 'nullable|integer',
+                'orderdetail.*.quantity' => 'required|numeric|gt:0',
+                'orderdetail.*.price' => 'required|numeric|min:0',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'message' => $validator->errors()], 422);
+            }
+
+            if ($customerType === 'DISTRIBUTOR') {
+                if (!MasterDistributor::whereKey($request->buyer_id)->where('business_status', 'Active')->exists()) {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid distributor.'], 422);
+                }
+                $request->merge(['seller_id' => $request->buyer_id]);
+                $sellerType = 'DISTRIBUTOR';
+            } else {
+                if (!SecondaryCustomer::whereKey($request->buyer_id)->where('type', $customerType)->where('active', 'Y')->exists()) {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid customer.'], 422);
+                }
+
+                if ($customerType === 'RETAILER') {
+                    $sellerType = 'DISTRIBUTOR';
+                } elseif (!in_array($sellerType, ['RETAILER', 'DISTRIBUTOR'], true)) {
+                    return response()->json(['status' => 'error', 'message' => 'Parent type must be RETAILER or DISTRIBUTOR.'], 422);
+                }
+
+                $validParent = $sellerType === 'RETAILER'
+                    ? SecondaryCustomer::whereKey($request->seller_id)->where('type', 'RETAILER')->where('active', 'Y')->exists()
+                    : MasterDistributor::whereKey($request->seller_id)->where('business_status', 'Active')->exists();
+
+                if (!$validParent) {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid parent customer.'], 422);
+                }
+            }
+
+            $existingDetails = $order->orderdetails()->get()->keyBy('id');
+            $resolvedSellerId = $customerType === 'DISTRIBUTOR' ? (int) $request->buyer_id : (int) $request->seller_id;
+            $hasDispatch = $existingDetails->sum(fn ($detail) => (float) $detail->shipped_qty) > 0;
+
+            if ($hasDispatch && (
+                strtoupper((string) $order->customer_type) !== $customerType
+                || (int) $order->buyer_id !== (int) $request->buyer_id
+                || (int) $order->seller_id !== $resolvedSellerId
+                || strtoupper((string) ($order->seller_type ?: 'DISTRIBUTOR')) !== $sellerType
+            )) {
+                return response()->json(['status' => 'error', 'message' => 'Customer relationships cannot be changed after dispatch has started.'], 422);
+            }
+
+            $incomingIds = collect($request->orderdetail)
+                ->pluck('orderdetail_id')->filter()->map(fn ($id) => (int) $id)->values();
+
+            foreach ($incomingIds as $detailId) {
+                if (!$existingDetails->has($detailId)) {
+                    return response()->json(['status' => 'error', 'message' => "Order detail {$detailId} does not belong to this order."], 422);
+                }
+            }
+
+            $removedDetails = $existingDetails->except($incomingIds->all());
+            if ($removedDetails->contains(fn ($detail) => (float) $detail->shipped_qty > 0)) {
+                return response()->json(['status' => 'error', 'message' => 'A product that has already been dispatched cannot be removed.'], 422);
+            }
+
+            foreach ($request->orderdetail as $row) {
+                $detailId = !empty($row['orderdetail_id']) ? (int) $row['orderdetail_id'] : null;
+                $detail = $detailId ? $existingDetails->get($detailId) : null;
+                if ($detail && (float) $detail->shipped_qty > (float) $row['quantity']) {
+                    return response()->json(['status' => 'error', 'message' => 'Ordered quantity cannot be lower than the already dispatched quantity.'], 422);
+                }
+                if ($detail && (float) $detail->shipped_qty > 0
+                    && ((int) $detail->product_id !== (int) $row['product_id']
+                        || (float) $detail->price !== (float) $row['price'])) {
+                    return response()->json(['status' => 'error', 'message' => 'Product and rate cannot be changed after that line has been dispatched.'], 422);
+                }
+            }
+
+            DB::beginTransaction();
+
+            $totalQuantity = 0;
+            $grandTotal = 0;
+
+            foreach ($request->orderdetail as $row) {
+                $quantity = (float) $row['quantity'];
+                $price = (float) $row['price'];
+                $lineTotal = round($quantity * $price, 2);
+                $detailId = !empty($row['orderdetail_id']) ? (int) $row['orderdetail_id'] : null;
+                $detail = $detailId ? $existingDetails->get($detailId) : new OrderDetails(['order_id' => $order->id]);
+
+                $detail->fill([
+                    'active' => 'Y',
+                    'product_id' => $row['product_id'],
+                    'product_detail_id' => $row['product_detail_id'] ?? null,
+                    'quantity' => $quantity,
+                    'price' => $price,
+                    'line_total' => $lineTotal,
+                    'gst' => 0,
+                    'gst_amount' => 0,
+                    'tax_amount' => 0,
+                    'discount' => 0,
+                    'discount_amount' => 0,
+                ]);
+                $detail->order_id = $order->id;
+                $detail->save();
+
+                $totalQuantity += $quantity;
+                $grandTotal += $lineTotal;
+            }
+
+            if ($removedDetails->isNotEmpty()) {
+                OrderDetails::whereIn('id', $removedDetails->keys())->delete();
+            }
+
+            $firstProductId = $request->input('orderdetail.0.product_id');
+            $productCategoryId = Product::whereKey($firstProductId)->value('category_id');
+
+            $order->update([
+                'customer_type' => $customerType,
+                'buyer_id' => $request->buyer_id,
+                'seller_id' => $customerType === 'DISTRIBUTOR' ? $request->buyer_id : $request->seller_id,
+                'seller_type' => $sellerType,
+                'product_cat_id' => $productCategoryId,
+                'order_remark' => $request->input('remark', $request->input('order_remark', '')),
+                'total_qty' => $totalQuantity,
+                'sub_total' => $grandTotal,
+                'total_gst' => 0,
+                'gst5_amt' => 0,
+                'gst12_amt' => 0,
+                'gst18_amt' => 0,
+                'gst28_amt' => 0,
+                'grand_total' => round($grandTotal, 2),
+                'updated_by' => $user->id,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order updated successfully',
+                'data' => [
+                    'order_id' => $order->id,
+                    'orderno' => $order->orderno,
+                    'grand_total' => round($grandTotal, 2),
+                    'total_qty' => $totalQuantity,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+            Log::error('API Order Update Error', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -802,26 +978,27 @@ class OrderController extends Controller
         try {
             $user = $request->user();
             $validator = Validator::make($request->all(), [
-                'order_id' => 'required',
-                'customer_type_id' => 'required',
+                'order_id' => 'required|integer|exists:orders,id',
             ]);
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' =>  $validator->errors()], $this->badrequest);
             }
-            $data = [
-                'order' => Order::with('sellers', 'buyers', 'orderdetails', 'orderdetails.products', 'orderdetails.products.productdetails')->find($request->order_id),
-            ];
-            if ($request->customer_type_id == '2') {
-                $html = view('order_pdf.order_pdf_retailer', $data)->render();
-                $pdfDirectory = public_path('pdf/orders/');
-                File::makeDirectory($pdfDirectory, $mode = 0755, true, true);
-                $pdfFilePath = $pdfDirectory . 'order_retailer_' . $request->order_id . '.pdf';
-            } else {
-                $html = view('order_pdf.order_pdf_dealer', $data)->render();
-                $pdfDirectory = public_path('pdf/orders/');
-                File::makeDirectory($pdfDirectory, $mode = 0755, true, true);
-                $pdfFilePath = $pdfDirectory . 'order_dealer_' . $request->order_id . '.pdf';
+
+            $visibleUserIds = getUsersReportingToAuth($user->id);
+            $order = Order::with(['orderdetails.products', 'createdbyname'])->findOrFail($request->order_id);
+            if (!in_array((int) $order->created_by, array_map('intval', $visibleUserIds), true)
+                && !in_array((int) $order->executive_id, array_map('intval', $visibleUserIds), true)) {
+                return response()->json(['status' => 'error', 'message' => 'You are not allowed to download this order.'], 403);
             }
+
+            $order->resolveCustomerRelations();
+            $html = view('order_pdf.order_pdf', compact('order'))->render();
+            $pdfDirectory = public_path('pdf/orders');
+            if (!File::isDirectory($pdfDirectory)) {
+                File::makeDirectory($pdfDirectory, 0755, true);
+            }
+            $filename = 'order_' . $order->id . '.pdf';
+            $pdfFilePath = $pdfDirectory . DIRECTORY_SEPARATOR . $filename;
 
             $options = new Options();
             $options->set('isHtml5ParserEnabled', true);
@@ -831,8 +1008,11 @@ class OrderController extends Controller
             $dompdf->render();
 
             file_put_contents($pdfFilePath, $dompdf->output());
-            $data_main['pdf_url'] = $url = url(str_replace('/var/www/html/', '', $pdfFilePath));
-            return response(['status' => 'Success', 'message' => 'Data retrieved successfully.', 'data' => $data_main], 200);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order PDF generated successfully.',
+                'data' => ['pdf_url' => url('pdf/orders/' . $filename)],
+            ]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], $this->internalError);
         }

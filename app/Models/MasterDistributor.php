@@ -32,6 +32,10 @@ class MasterDistributor extends Model
         'alternate_mobile',
         'email',
         'secondary_email',
+        'gps_location',
+        'latitude',
+        'longitude',
+        'is_current_location',
 
         /* ================= BILLING ADDRESS ================= */
         'billing_address',
@@ -111,6 +115,9 @@ class MasterDistributor extends Model
         'sales_executive_id' => 'array',
         'same_as_billing' => 'boolean',
         'shipping_address' => 'array',  
+        'latitude' => 'float',
+        'longitude' => 'float',
+        'is_current_location' => 'boolean',
         
     ];
 

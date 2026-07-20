@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Support\CustomerApiValidation;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MasterDistributorsExport;
 use App\Exports\MasterDistributorsTemplateExport;
@@ -669,6 +670,12 @@ class MasterDistributorApiController extends Controller
 
     private function validateData(Request $request, $id = null)
     {
+        $request->merge([
+            'alternate_mobile' => $request->filled('alternate_mobile')
+                ? $request->input('alternate_mobile')
+                : null,
+        ]);
+
         if ($request->has('plant') && $request->input('plant') !== null) {
             $request->merge(['plant' => (string) $request->input('plant')]);
         }
@@ -693,14 +700,14 @@ class MasterDistributorApiController extends Controller
                 'digits:10',
                 Rule::unique('master_distributors', 'mobile')->ignore($id),
             ],
-            'alternate_mobile'   => 'nullable|digits:10',
+            'alternate_mobile'   => CustomerApiValidation::optionalMobileRules(),
             'email'              => [
                 'nullable',
                 'email',
                 Rule::unique('master_distributors', 'email')->ignore($id),
             ],
             'secondary_email'    => 'nullable|email',
-            'gps_location'    => 'nullable|string|max:255',
+            ...CustomerApiValidation::locationRules(),
 
             'billing_address'    => 'required|string|max:500',
             'billing_city'       => 'required|string',

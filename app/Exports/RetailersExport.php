@@ -95,7 +95,7 @@ class RetailersExport implements
             $row->shop_name ?? '-',
             $row->mobile_number ?? '-',
             $row->whatsapp_number ?? '-',
-            $row->vehicle_segment ?? '-',
+            is_array($row->vehicle_segment) ? implode(', ', $row->vehicle_segment) : ($row->vehicle_segment ?? '-'),
             $row->address_line ?? '-',
             $row->belt_area_market_name ?? '-',
             $row->country?->country_name ?? '-',

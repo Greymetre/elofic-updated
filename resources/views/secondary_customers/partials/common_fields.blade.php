@@ -13,7 +13,12 @@
 <div class="row mt-3">
     <div class="col-md-4">
         <label>WhatsApp / Alternate Number</label>
-        {!! Form::text('whatsapp_number', null, ['class' => 'form-control']) !!}
+        {!! Form::text('whatsapp_number', null, [
+            'class' => 'form-control',
+            'maxlength' => 10,
+            'pattern' => '[6-9][0-9]{9}',
+            'placeholder' => 'Optional – 10-digit number'
+        ]) !!}
     </div>
     <div class="col-md-4">
         <label>Sales Exception Assignment</label>
@@ -21,8 +26,7 @@
     </div>
     <div class="col-md-4">
         <label>Select Vehicle Segment</label>
-        {!! Form::select('vehicle_segment', [
-        '' => 'Select Vehicle Segment',
+        {!! Form::select('vehicle_segment[]', [
         '2W' => '2W',
         '3W' => '3W',
         'AGRICULTURE – Tractor' => 'AGRICULTURE – Tractor',
@@ -32,7 +36,11 @@
         'LCV' => 'LCV',
         'LUBRICANT' => 'LUBRICANT',
         'PASSENGER VEHICLE (PV)' => 'PASSENGER VEHICLE (PV)'
-        ], null, ['class' => 'form-control select2']) !!}
+        ], old('vehicle_segment', $customer->vehicle_segment ?? []), [
+            'class' => 'form-control select2',
+            'multiple' => true,
+            'data-placeholder' => 'Select Vehicle Segments'
+        ]) !!}
     </div>
 </div>
 
@@ -297,7 +305,8 @@ old('assigned_users', isset($customer) && $customer->employee_id
         'COLD' => 'COLD – Low interest / only enquiry',
         'WARM' => 'WARM – Interested but needs time',
         'HOT' => 'HOT – Very interested/almost confirm',
-        'LOST' => 'LOST – Deal cancelled'
+        'LOST' => 'LOST – Deal cancelled',
+        'EXISTING' => 'EXISTING – Existing customer'
         ], null, ['class' => 'form-control select2', 'required']) !!}
     </div>
 

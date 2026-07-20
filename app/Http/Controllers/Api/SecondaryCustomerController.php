@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SecondaryCustomersExport;
 use App\Exports\SecondaryCustomersTemplateExport;
 use Illuminate\Validation\Rule;   // ← this line is MISSING or commented out
+use App\Support\CustomerApiValidation;
 use App\Models\User;
 class SecondaryCustomerController extends Controller
 {
@@ -729,6 +730,15 @@ if (!empty($changesNew)) {
 
     private function validateData(Request $request, $id = null)
     {
+        $request->merge([
+            'whatsapp_number' => $request->filled('whatsapp_number')
+                ? $request->input('whatsapp_number')
+                : null,
+            'vehicle_segment' => $this->normalizeVehicleSegments(
+                $request->input('vehicle_segment', [])
+            ),
+        ]);
+
         $rules = [
             'type'                  => 'required|in:RETAILER,WORKSHOP,MECHANIC,GARAGE',
             'owner_name'            => 'required|string|max:255',
@@ -738,9 +748,9 @@ if (!empty($changesNew)) {
                 'digits:10',
                 Rule::unique('secondary_customers', 'mobile_number')->ignore($id),
             ],
-            'whatsapp_number'       => 'nullable|digits:10',
+            'whatsapp_number'       => CustomerApiValidation::optionalMobileRules(),
             'address_line'          => 'required|string|max:500',
-            'gps_location'          => 'nullable|string|max:100',
+            ...CustomerApiValidation::locationRules(),
 
             'country_id'            => 'required|integer|exists:countries,id',
             'state_id'              => 'required|integer|exists:states,id',
@@ -749,13 +759,13 @@ if (!empty($changesNew)) {
             'pincode_id'            => 'required|integer|exists:pincodes,id',
 
             'beat_id'               => 'nullable|integer|exists:beats,id',
-            'opportunity_status'    => 'required|in:HOT,WARM,COLD,LOST',
+            'opportunity_status'    => CustomerApiValidation::opportunityStatusRules(),
 
             'nistha_awareness_status' => 'nullable|in:Done,Not Done',
             'saathi_awareness_status' => 'nullable|in:Done,Not Done',
 
             'sub_type'              => 'nullable|string|max:100',
-            'vehicle_segment'       => 'nullable|string|max:100',
+            ...CustomerApiValidation::vehicleSegmentRules(),
             'belt_area_market_name' => 'nullable|string|max:150',
             'sales_exception_assignment'=> 'nullable|string|max:255',
             // ──── LIGHT FILE VALIDATION ────
@@ -784,6 +794,27 @@ if (!empty($changesNew)) {
         ];
 
         return $request->validate($rules, $messages);
+    }
+
+    private function normalizeVehicleSegments($value): array
+    {
+        if ($value === null || $value === '') {
+            return [];
+        }
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            $value = is_array($decoded) ? $decoded : explode(',', $value);
+        }
+
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        return array_values(array_unique(array_filter(array_map(
+            static fn ($segment) => trim((string) $segment),
+            $value
+        ), static fn ($segment) => $segment !== '')));
     }
 
     // ────────────────────────────────────────────────

@@ -434,7 +434,7 @@
                                                 <strong class="text-dark">WhatsApp / Alternate:</strong> &nbsp; {{ $customer->whatsapp_number ?? '-' }}
                                             </li>
                                             <li class="list-group-item border-0 ps-0 pt-0 text-sm">
-                                                <strong class="text-dark">Vehicle Segment:</strong> &nbsp; {{ $customer->vehicle_segment ?? '-' }}
+                                                <strong class="text-dark">Vehicle Segment:</strong> &nbsp; {{ is_array($customer->vehicle_segment) ? implode(', ', $customer->vehicle_segment) : ($customer->vehicle_segment ?? '-') }}
                                             </li>
                                             <li class="list-group-item border-0 ps-0 pt-0 text-sm">
                                                 <strong class="text-dark">Distributor Name:</strong> &nbsp; 

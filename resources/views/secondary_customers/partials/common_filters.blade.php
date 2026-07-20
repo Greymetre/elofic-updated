@@ -74,6 +74,7 @@
                     <option value="WARM">WARM</option>
                     <option value="COLD">COLD</option>
                     <option value="LOST">LOST</option>
+                    <option value="EXISTING">EXISTING</option>
                 </select>
             </div>
 

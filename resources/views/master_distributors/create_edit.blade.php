@@ -610,8 +610,8 @@
                                             'class' => 'form-control fillable-field',
                                             'id' => 'alternate_mobile',
                                             'maxlength' => '10',
-                                            'pattern' => '[0-9]{10}',
-                                            'title' => 'Enter exactly 10 digits or leave blank',
+                                            'pattern' => '[6-9][0-9]{9}',
+                                            'title' => 'Enter a valid 10-digit mobile number or leave blank',
                                             'placeholder' => 'Optional – 10-digit number'
                                         ]) !!}
                                         <div class="invalid-feedback">
@@ -1977,10 +1977,16 @@
             return;
         }
 
-        // Must be exactly 10 digits
-        if (!/^\d{10}$/.test(value)) {
+        const validPattern = input.id === 'alternate_mobile'
+            ? /^[6-9]\d{9}$/
+            : /^\d{10}$/;
+
+        // Must be a valid 10-digit number
+        if (!validPattern.test(value)) {
             if (value.length !== 10) {
                 input.setCustomValidity(`Must be exactly 10 digits (currently ${value.length}).`);
+            } else if (input.id === 'alternate_mobile') {
+                input.setCustomValidity('Mobile number must start with 6, 7, 8, or 9.');
             } else {
                 input.setCustomValidity('Only numbers 0-9 are allowed.');
             }

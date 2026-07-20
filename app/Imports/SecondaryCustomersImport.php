@@ -278,7 +278,8 @@ class SecondaryCustomersImport implements ToCollection, WithHeadingRow,WithChunk
                     'COLD',
                     'WARM',
                     'HOT',
-                    'LOST'
+                    'LOST',
+                    'EXISTING'
                 ];
 
                 if (!in_array($opportunityStatus, $allowedOpportunityStatuses, true)) {

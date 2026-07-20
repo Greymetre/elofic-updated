@@ -82,7 +82,7 @@
         <div class="col-md-3 mt-3">
             <label>Opportunity Status</label>
             {!! Form::select('opportunity_status', 
-                ['' => 'All', 'HOT' => 'HOT', 'WARM' => 'WARM', 'COLD' => 'COLD', 'LOST' => 'LOST'], 
+                ['' => 'All', 'HOT' => 'HOT', 'WARM' => 'WARM', 'COLD' => 'COLD', 'LOST' => 'LOST', 'EXISTING' => 'EXISTING'],
                 null, 
                 ['class' => 'form-control select2', 'id' => 'opportunity_status']) !!}
         </div>

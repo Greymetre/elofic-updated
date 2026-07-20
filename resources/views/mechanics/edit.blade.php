@@ -106,7 +106,8 @@
             'COLD' => 'COLD – Low interest / only enquiry',
             'WARM' => 'WARM – Interested but needs time',
             'HOT' => 'HOT – Very interested/almost confirm',
-            'LOST' => 'LOST – Deal cancelled'
+            'LOST' => 'LOST – Deal cancelled',
+            'EXISTING' => 'EXISTING – Existing customer'
         ], old('opportunity_status', $customer->opportunity_status ?? null), [
             'class' => 'form-control select2',
             'required'

@@ -215,7 +215,7 @@ class SecondaryCustomersExport implements
             $row->shop_name ?? '-',
             $row->mobile_number ?? '-',
             $row->whatsapp_number ?? '-',
-            $row->vehicle_segment ?? '-',
+            is_array($row->vehicle_segment) ? implode(', ', $row->vehicle_segment) : ($row->vehicle_segment ?? '-'),
             $row->sales_exception_assignment ?? '-',
             $row->distributor?->trade_name ?? $row->distributor?->legal_name ?? '-',
             $row->distributor?->id ?? '-',

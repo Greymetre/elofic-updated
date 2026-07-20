@@ -19,6 +19,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderDetails;
 use Carbon\Carbon;
+use App\Support\CustomerApiValidation;
 
 
 use Illuminate\Support\Facades\Auth;
@@ -265,6 +266,7 @@ class SecondaryCustomerController extends Controller
                 'WARM'  => 'badge-warning',
                 'COLD'  => 'badge-info',
                 'LOST'  => 'badge-secondary',
+                'EXISTING' => 'badge-success',
                 default => 'badge-dark',
             };
             return '<span class="badge ' . $badge . '">' . $status . '</span>';
@@ -566,8 +568,10 @@ if (!empty($validated['gps_location'])) {
             $oldValue = $oldData[$key] ?? null;
             $newValue = $newData[$key] ?? null;
 
-            // compare (string cast to avoid false mismatch)
-            if ((string)$oldValue !== (string)$newValue) {
+            $oldComparable = is_array($oldValue) ? json_encode($oldValue) : (string) $oldValue;
+            $newComparable = is_array($newValue) ? json_encode($newValue) : (string) $newValue;
+
+            if ($oldComparable !== $newComparable) {
                 $changesOld[$key] = $oldValue;
                 $changesNew[$key] = $newValue;
             }
@@ -685,21 +689,30 @@ public function destroy($id)
     /* ================= VALIDATION ================= */
     private function validateData(Request $request, $id = null)
 {
+    $request->merge([
+        'whatsapp_number' => $request->filled('whatsapp_number')
+            ? $request->input('whatsapp_number')
+            : null,
+        'vehicle_segment' => $this->normalizeVehicleSegments(
+            $request->input('vehicle_segment', [])
+        ),
+    ]);
+
     $rules = [
         'type' => 'required|string|in:RETAILER,WORKSHOP,MECHANIC,GARAGE',
         'sub_type' => 'nullable|string|max:255', // Mechanic ke liye required hai, baaki ke liye optional
         'owner_name' => 'required|string|max:255',
         'shop_name' => 'required|string|max:255',
         'mobile_number' => 'required|digits:10|unique:secondary_customers,mobile_number,' . $id,
-        'whatsapp_number' => 'nullable|digits:10',
+        'whatsapp_number' => CustomerApiValidation::optionalMobileRules(),
         'owner_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'shop_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'vehicle_segment' => 'nullable|string|max:255',
+        ...CustomerApiValidation::vehicleSegmentRules(),
         'address_line' => 'required|string',
         'belt_area_market_name' => 'nullable|string|max:255',
         'saathi_awareness_status' => 'nullable|in:Done,Not Done',
         'distributor_name' => 'nullable|exists:master_distributors,id',
-        'opportunity_status' => 'required|in:HOT,WARM,COLD,LOST',
+        'opportunity_status' => 'required|in:HOT,WARM,COLD,LOST,EXISTING',
         'gps_location' => 'nullable|string|max:255',
 
         // ====== YE RULES ADD KARO ======
@@ -732,6 +745,27 @@ public function destroy($id)
     }
 
     return $request->validate($rules);
+}
+
+private function normalizeVehicleSegments($value): array
+{
+    if ($value === null || $value === '') {
+        return [];
+    }
+
+    if (is_string($value)) {
+        $decoded = json_decode($value, true);
+        $value = is_array($decoded) ? $decoded : explode(',', $value);
+    }
+
+    if (!is_array($value)) {
+        $value = [$value];
+    }
+
+    return array_values(array_unique(array_filter(array_map(
+        static fn ($segment) => trim((string) $segment),
+        $value
+    ), static fn ($segment) => $segment !== '')));
 }
 
     /* ================= FILE UPLOADER ================= */
