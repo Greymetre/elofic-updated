@@ -135,7 +135,7 @@ class AttendanceController extends Controller
                 );
             }
             
-            $distance ;
+            $distance = null;
 
             if (
                 !empty($user->latitude) &&
@@ -147,8 +147,8 @@ class AttendanceController extends Controller
                 $distance = getRoadDistance(
                     $user->latitude,
                     $user->longitude,
-                    $request['punchin_longitude'],
-                    $request['punchin_latitude']
+                    $request['punchin_latitude'],
+                    $request['punchin_longitude']
                    
                 );
             }
