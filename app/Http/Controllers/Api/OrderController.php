@@ -1375,6 +1375,14 @@ class OrderController extends Controller
      */
     public function getCustomerOptions(Request $request)
     {
+        $authUser = $request->user();
+        if (!$authUser) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthenticated - please provide a valid token',
+            ], 401);
+        }
+
         $validator = Validator::make($request->all(), [
             'customer_type' => 'required|in:RETAILER,WORKSHOP,MECHANIC,GARAGE,DISTRIBUTOR',
             'mode' => 'nullable|in:customer,parent',
@@ -1396,14 +1404,18 @@ class OrderController extends Controller
         }
 
         if ($mode === 'parent' && $type !== 'RETAILER' && !$request->filled('parent_type')) {
-            $retailers = SecondaryCustomer::query()->where('active', 'Y')->where('type', 'RETAILER')
+            $retailers = SecondaryCustomer::query()->where('active', 'Y')->where('type', 'RETAILER');
+            $this->restrictSecondaryCustomersToAssignedUser($retailers, $authUser);
+            $retailers = $retailers
                 ->when($term !== '', fn ($q) => $q->where(function ($search) use ($term) {
                     $search->where('shop_name', 'like', "%{$term}%")
                         ->orWhere('owner_name', 'like', "%{$term}%")
                         ->orWhere('mobile_number', 'like', "%{$term}%");
                 }))->select('id', 'shop_name', 'owner_name', 'mobile_number')
                 ->orderBy('shop_name')->paginate($perPage, ['*'], 'page', (int) $request->input('page', 1));
-            $distributors = MasterDistributor::query()->where('business_status', 'Active')
+            $distributors = MasterDistributor::query()->where('business_status', 'Active');
+            $this->restrictDistributorsToAssignedUser($distributors, $authUser);
+            $distributors = $distributors
                 ->when($term !== '', fn ($q) => $q->where(function ($search) use ($term) {
                     $search->where('trade_name', 'like', "%{$term}%")
                         ->orWhere('legal_name', 'like', "%{$term}%")
@@ -1433,7 +1445,9 @@ class OrderController extends Controller
             : ($type === 'RETAILER' || strtoupper((string) $request->parent_type) === 'DISTRIBUTOR');
 
         if ($useDistributors) {
-            $query = MasterDistributor::query()->where('business_status', 'Active')
+            $query = MasterDistributor::query()->where('business_status', 'Active');
+            $this->restrictDistributorsToAssignedUser($query, $authUser);
+            $query
                 ->when($term !== '', fn ($q) => $q->where(function ($search) use ($term) {
                     $search->where('trade_name', 'like', "%{$term}%")
                         ->orWhere('legal_name', 'like', "%{$term}%")
@@ -1452,7 +1466,9 @@ class OrderController extends Controller
             ]);
         } else {
             $secondaryType = $mode === 'parent' ? 'RETAILER' : $type;
-            $query = SecondaryCustomer::query()->where('active', 'Y')->where('type', $secondaryType)
+            $query = SecondaryCustomer::query()->where('active', 'Y')->where('type', $secondaryType);
+            $this->restrictSecondaryCustomersToAssignedUser($query, $authUser);
+            $query
                 ->when($term !== '', fn ($q) => $q->where(function ($search) use ($term) {
                     $search->where('shop_name', 'like', "%{$term}%")
                         ->orWhere('owner_name', 'like', "%{$term}%")
@@ -1475,6 +1491,51 @@ class OrderController extends Controller
             'data' => $items,
             'pagination' => ['more' => $page->hasMorePages()],
         ]);
+    }
+
+    private function restrictSecondaryCustomersToAssignedUser($query, User $user): void
+    {
+        if ($this->isSuperAdminUser($user)) {
+            return;
+        }
+
+        $userId = (int) $user->id;
+        $query->whereRaw(
+            "FIND_IN_SET(?, REPLACE(COALESCE(employee_id, ''), ' ', '')) > 0",
+            [$userId]
+        );
+    }
+
+    private function restrictDistributorsToAssignedUser($query, User $user): void
+    {
+        if ($this->isSuperAdminUser($user)) {
+            return;
+        }
+
+        $userId = (int) $user->id;
+        $query->where(function ($assigned) use ($userId) {
+            $assigned->whereJsonContains('sales_executive_id', $userId)
+                ->orWhereJsonContains('sales_executive_id', (string) $userId);
+        });
+    }
+
+    private function isSuperAdminUser(User $user): bool
+    {
+        if (method_exists($user, 'hasRole') && $user->hasRole('superadmin')) {
+            return true;
+        }
+
+        if ($user->roles()->where('name', 'superadmin')->exists()) {
+            return true;
+        }
+
+        $userTypes = $user->user_type;
+        if (is_string($userTypes)) {
+            $decoded = json_decode($userTypes, true);
+            $userTypes = is_array($decoded) ? $decoded : [$userTypes];
+        }
+
+        return in_array('superadmin', (array) $userTypes, true);
     }
 
     public function getOrderBuyers(Request $request)
