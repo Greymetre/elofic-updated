@@ -252,6 +252,7 @@
                                     <th>Trade Name</th>
                                     <th>Contact Person</th>
                                     <th>Mobile</th>
+                                    <th>Assigned Employee Name</th>
                                     <th>City</th>
                                     <th>State</th>
                                     <th>Status</th>
@@ -349,7 +350,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         searching: false,
-        order: [[10, 'desc']],
+        order: [[11, 'desc']],
         ajax: {
             url: "{{ route('master-distributors.index') }}",
             type: "GET",
@@ -375,6 +376,7 @@ $(document).ready(function() {
             { data: 'trade_name' },
             { data: 'contact_person' },
             { data: 'mobile' },
+            { data: 'assigned_employee_name', orderable: false, searchable: false, defaultContent: '' },
             { data: 'billing_city_name' },
             { data: 'billing_state_name' },
             { data: 'business_status', orderable: false },

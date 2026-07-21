@@ -95,7 +95,7 @@ public function creator()
 
 public function getEmployeeNamesAttribute()
 {
-    if (!$this->employee_id) return '-';
+    if (!$this->employee_id) return '';
 
     $ids = explode(',', $this->employee_id);
 

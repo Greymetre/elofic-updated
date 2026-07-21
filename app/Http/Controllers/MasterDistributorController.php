@@ -55,7 +55,8 @@ class MasterDistributorController extends Controller
             'billing_city',
             'billing_state',
             'business_status',
-            'created_at'
+            'created_at',
+            'sales_executive_id'
         ]);
 
             if (auth()->user()->hasRole('Distributor')) {
@@ -243,6 +244,9 @@ if ($request->filled('billing_city')) {
             })
             ->editColumn('created_at', function ($row) {
                 return showdatetimeformat($row->created_at);
+            })
+            ->addColumn('assigned_employee_name', function ($row) {
+                return $row->salesExecutives()->pluck('name')->filter()->implode(', ');
             })
             ->editColumn('beat_route', function ($row) {
     return $row->beat_route 

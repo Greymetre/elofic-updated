@@ -96,6 +96,7 @@ class SecondaryCustomerController extends Controller
             'created_at',
             'beat_id',
             'active',
+            'employee_id',
         );
         
        
@@ -242,6 +243,10 @@ class SecondaryCustomerController extends Controller
             }
 
             return '<span class="badge badge-danger">INACTIVE</span>';
+        })
+
+        ->addColumn('assigned_employee_name', function ($row) {
+            return $row->employee_names;
         })
 
         ->addColumn('awareness_status', function ($row) use ($type) {

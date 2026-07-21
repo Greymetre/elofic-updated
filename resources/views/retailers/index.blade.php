@@ -216,6 +216,7 @@
                                 <th>Owner Name</th>
                                 <th>Shop Name</th>
                                 <th>Mobile</th>
+                                <th>Assigned Employee Name</th>
                                 <th>Beat</th>
                                 <th>State</th>
                                 <th>District</th>
@@ -253,7 +254,7 @@ $(document).ready(function () {
 
                 updatePageDropdown();
             },
-        order: [[9, 'desc']], // Latest first
+        order: [[10, 'desc']], // Latest first
         ajax: {
             url: "{{ route(strtolower($type).'s.index') }}",
             type: "GET",
@@ -277,6 +278,7 @@ $(document).ready(function () {
             { data: 'owner_name',              name: 'owner_name' },
             { data: 'shop_name',               name: 'shop_name' },
             { data: 'mobile_number',           name: 'mobile_number' },
+            { data: 'assigned_employee_name',  name: 'assigned_employee_name', orderable: false, searchable: false, defaultContent: '' },
            { data: 'beat_id', name: 'beats.beat_name',defaultContent: '-' },
                 {
                     data: 'state_id',

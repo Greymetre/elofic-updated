@@ -261,6 +261,7 @@
                                 <th>Owner Name</th>
                                 <th>Shop Name</th>
                                 <th>Mobile</th>
+                                <th>Assigned Employee Name</th>
                                 <th>Beat</th>
                                 <th>State</th>
                                 <th>City</th>
@@ -323,7 +324,7 @@
                 updatePageDropdown();
             },
             order: [
-                [9, 'desc']
+                [10, 'desc']
             ], // Created At descending
             ajax: {
                 url: "{{ route(strtolower($type).'s.index') }}",
@@ -355,6 +356,12 @@
                 },
                 {
                     data: 'mobile_number'
+                },
+                {
+                    data: 'assigned_employee_name',
+                    orderable: false,
+                    searchable: false,
+                    defaultContent: ''
                 },
                 {
                     data: 'beat_id'
