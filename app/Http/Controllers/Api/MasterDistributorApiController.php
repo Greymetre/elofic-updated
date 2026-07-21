@@ -391,7 +391,7 @@ class MasterDistributorApiController extends Controller
                 // $data['shipping_pincode'] = $data['billing_pincode'] ?? null;
             }
     
-            $data['sales_executive_id'] = json_encode($request->input('sales_executive_id', []));
+            $data['sales_executive_id'] = array_values((array) $request->input('sales_executive_id', []));
     
             // File uploads with logging
             if ($request->hasFile('shop_image')) {
@@ -508,7 +508,7 @@ class MasterDistributorApiController extends Controller
             }
 
             // Handle sales executive IDs
-            $data['sales_executive_id'] = json_encode($request->input('sales_executive_id', []));
+            $data['sales_executive_id'] = array_values((array) $request->input('sales_executive_id', []));
 
             // Handle files
             if ($request->hasFile('shop_image')) {

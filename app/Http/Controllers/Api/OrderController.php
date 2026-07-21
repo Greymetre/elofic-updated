@@ -1515,7 +1515,14 @@ class OrderController extends Controller
         $userId = (int) $user->id;
         $query->where(function ($assigned) use ($userId) {
             $assigned->whereJsonContains('sales_executive_id', $userId)
-                ->orWhereJsonContains('sales_executive_id', (string) $userId);
+                ->orWhereJsonContains('sales_executive_id', (string) $userId)
+                // Older API records were sometimes JSON-encoded twice.
+                ->orWhereRaw(
+                    "JSON_VALID(JSON_UNQUOTE(sales_executive_id)) AND (" .
+                    "JSON_CONTAINS(JSON_UNQUOTE(sales_executive_id), ?) OR " .
+                    "JSON_CONTAINS(JSON_UNQUOTE(sales_executive_id), ?))",
+                    [json_encode($userId), json_encode((string) $userId)]
+                );
         });
     }
 
