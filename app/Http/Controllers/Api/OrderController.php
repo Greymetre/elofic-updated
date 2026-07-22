@@ -1466,7 +1466,10 @@ class OrderController extends Controller
             ]);
         } else {
             $secondaryType = $mode === 'parent' ? 'RETAILER' : $type;
-            $query = SecondaryCustomer::query()->where('active', 'Y')->where('type', $secondaryType);
+            $query = SecondaryCustomer::query()
+                ->with('distributor:id,trade_name,legal_name')
+                ->where('active', 'Y')
+                ->where('type', $secondaryType);
             $this->restrictSecondaryCustomersToAssignedUser($query, $authUser);
             $query
                 ->when($term !== '', fn ($q) => $q->where(function ($search) use ($term) {
@@ -1474,7 +1477,7 @@ class OrderController extends Controller
                         ->orWhere('owner_name', 'like', "%{$term}%")
                         ->orWhere('mobile_number', 'like', "%{$term}%");
                 }))
-                ->select('id', 'shop_name', 'owner_name', 'mobile_number');
+                ->select('id', 'shop_name', 'owner_name', 'mobile_number', 'distributor_name');
             $page = $query->orderBy('shop_name')->paginate($perPage);
             $items = collect($page->items())->map(fn ($row) => [
                 'id' => $row->id,
@@ -1483,6 +1486,9 @@ class OrderController extends Controller
                 'code' => null,
                 'mobile' => $row->mobile_number,
                 'entity_type' => 'RETAILER',
+                'parent_id' => $row->distributor_name,
+                'parent_name' => $row->distributor?->trade_name ?: $row->distributor?->legal_name,
+                'parent_entity_type' => $row->distributor_name ? 'DISTRIBUTOR' : null,
             ]);
         }
 
