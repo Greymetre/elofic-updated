@@ -321,6 +321,7 @@ class ExpensesTypeController extends Controller
                 $datas['expenses_type_name'] = $expense->expense_type->name ?? "";
                 $datas['rate'] = $expense->expense_type->rate ?? "";
                 $datas['allowance_type_id'] = $expense->expense_type->allowance_type_id ?? "";
+                $datas['city_id'] = $expense->city_id ?? "";
                 $datas['user_id'] = $expense->user_id ?? "";
                 $datas['user_name'] = $expense->users->name ?? "";
                 $datas['date'] = date("d-m-Y", strtotime($expense->date));
