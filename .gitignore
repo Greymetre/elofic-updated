@@ -18,3 +18,5 @@ yarn-error.log
 /public/pdf/orders
 /padmin
 /docs
+*.aab
+*.aab

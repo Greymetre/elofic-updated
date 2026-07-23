@@ -6,7 +6,7 @@
                     <div class="sales-box-content w-100" style="margin-top: 20px !important;">
                         <div class="mb-5">
                             <h2>PRIVACY POLICY</h2>
-                            <p class="text-muted mb-2"><strong>Last Updated:</strong> April 30, 2026</p>
+                            <p class="text-muted mb-2"><strong>Last Updated:</strong> July 23, 2026</p>
                             <p>This Privacy Policy explains how <strong>Greymetre Consultants Pvt. Ltd.</strong> ("Greymetre", "we", "us", or "our") collects, uses, stores, and protects the personal information of its employees through the <strong>FieldKonnect</strong> mobile application ("App").</p>
                         </div>
 
@@ -31,9 +31,10 @@
 
                         <p class="mt-3 mb-1"><strong>B. Location Data</strong></p>
                         <ul>
-                            <li><strong>Punch In / Punch Out Location:</strong> We capture your current GPS location only when you Punch In or Punch Out.</li>
+                            <li><strong>Punch In / Punch Out Location:</strong> We capture your precise GPS location when you Punch In or Punch Out.</li>
                             <li><strong>Customer Visit Location:</strong> We capture your current GPS location only when you check in at a customer shop.</li>
-                            <li>Location is not collected continuously or in the background. It is captured only at the specific moment when you perform Punch In, Punch Out, or Customer Check-in.</li>
+                            <li><strong>Background Location:</strong> While you are punched in, FieldKonnect collects your precise location when the App is in the background, closed, or not in use. This enables attendance verification, assigned-route monitoring, customer-visit verification, and field-activity tracking. Background tracking stops when you punch out.</li>
+                            <li>Location information is available only to authorized Greymetre managers for internal workforce management and is not sold to third parties.</li>
                         </ul>
 
                         <p class="mt-3 mb-1"><strong>C. Usage &amp; Activity Data</strong></p>

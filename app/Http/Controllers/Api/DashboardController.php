@@ -683,8 +683,13 @@ class DashboardController extends Controller
     public function getVersion()
     {
         $fieldConnect = FieldKonnectAppSetting::with('media')->first();
-        $data["app_version"] = isset($fieldConnect) ? (isset($fieldConnect->app_version) ? $fieldConnect->app_version : '') : '';
-        $data["media"] = $fieldConnect->media->toArray();
+        $appVersion = $fieldConnect?->app_version ?? '';
+        $data["app_version"] = $appVersion;
+        // Keep these aliases for released mobile clients that expect
+        // platform-specific response keys.
+        $data["android_version"] = $appVersion;
+        $data["ios_version"] = $appVersion;
+        $data["media"] = $fieldConnect?->media?->toArray() ?? [];
 
         return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);
     }

@@ -91,6 +91,8 @@ Route::any('getRetailerList', [CustomController::class, 'getRetailerList']);
 Route::any('getslider', [CustomController::class, 'getslider']);
 Route::get('getsettings', [DashboardController::class, 'getsettings']);
 Route::get('get-field-connet-version', [DashboardController::class, 'getVersion']);
+// Backward-compatible endpoint used by FieldKonnect mobile version 5.0.
+Route::get('getAppVersion', [DashboardController::class, 'getVersion']);
 Route::any('insert_sap_stock', [SapStockController::class, 'insertSapStock']);
 Route::any('insert_sap_sell', [SapStockController::class, 'insertSapSell']);
 Route::get('master-distributors/supervisors', [MasterDistributorApiController::class, 'getSupervisors']);
