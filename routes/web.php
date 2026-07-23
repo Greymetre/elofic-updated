@@ -160,7 +160,8 @@ Route::get('aboutus/abridgeit', function () {
 Route::get('contactus', function () {
     return view('contactus');
 });
-Route::get('/privcay-policy', [NewJoiningController::class, 'privacyPolicy'])->name('privacyPolicy');
+Route::get('/privacy-policy', [NewJoiningController::class, 'privacyPolicy'])->name('privacyPolicy');
+Route::redirect('/privcay-policy', '/privacy-policy');
 
 //New Joining without auth Route
 Route::get('/new-joining-form', [NewJoiningController::class, 'create'])->name('joining-form');
