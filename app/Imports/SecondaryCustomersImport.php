@@ -473,10 +473,11 @@ class SecondaryCustomersImport implements ToCollection, WithHeadingRow,WithChunk
                 /** ================== UPSERT RECORD ================== */
                 if (!empty($row['id'])) {
 
-                    $customer = SecondaryCustomer::find($row['id']);
+                    $customerId = trim((string) $row['id']);
+                    $customer = SecondaryCustomer::find($customerId);
 
                     if (!$customer) {
-                        throw new \Exception("Invalid ID: record not found");
+                        throw new \Exception("Invalid ID {$customerId}: record not found");
                     }
 
                     $customer->update($data);

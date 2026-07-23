@@ -2,7 +2,7 @@
 
 namespace App\DataTables;
 
-use App\Models\Field;
+use App\Models\MarketIntelligencesField;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Html\Editor\Editor;
@@ -10,7 +10,7 @@ use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
 use Illuminate\Support\Facades\Auth;
-class FieldsDataTable extends DataTable
+class MarketIntelligencesFieldsDataTable extends DataTable
 {
     
 
@@ -37,7 +37,7 @@ class FieldsDataTable extends DataTable
                   // }
                   // if(auth()->user()->can(['category_edit']))
                   // {
-                      $btn = $btn.'<a href="'.url("fields/".encrypt($query->id).'/edit') .'" class="btn btn-info btn-just-icon btn-sm" title="'.trans('panel.global.edit').' '.trans('panel.content.title_singular').'">
+                      $btn = $btn.'<a href="'.url("market_intelligences/".encrypt($query->id).'/edit') .'" class="btn btn-info btn-just-icon btn-sm" title="'.trans('panel.global.edit').' '.trans('panel.content.title_singular').'">
                                     <i class="material-icons">edit</i>
                                 </a>';
                   // }
@@ -66,7 +66,7 @@ class FieldsDataTable extends DataTable
      * @param \App\Field $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(Field $model)
+    public function query(MarketIntelligencesField $model)
     {
         return $model->with('createdbyname','customertypes')->latest()->newQuery();
     }
