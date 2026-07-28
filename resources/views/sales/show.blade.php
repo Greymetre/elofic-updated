@@ -33,23 +33,16 @@
                 <div class="col-sm-5 invoice-col">
                   From
                   <address>
-                    <strong>{!! $sales['sellers']['name'] ?? '' !!}</strong><br>
-
-                    @if(isset($sales['sellers']['customeraddress']))
-                    {!! $sales['sellers']['customeraddress']['address1'] ?? '' !!}
-                    @if(!empty($sales['sellers']['customeraddress']['address2'])), {!! $sales['sellers']['customeraddress']['address2'] !!}@endif<br>
-
-                    {!! $sales['sellers']['customeraddress']['locality'] ?? '' !!},
-                    {!! $sales['sellers']['customeraddress']['cityname']['city_name'] ?? '' !!}
-                    {!! $sales['sellers']['customeraddress']['pincodename']['pincode'] ?? '' !!}<br>
-
-                    @if(!empty($sales['sellers']['mobile']))
-                    Phone: {!! $sales['sellers']['mobile'] !!}<br>
+                    <strong>{{ data_get($fromParty, 'shop_name') ?? data_get($fromParty, 'trade_name') ?? data_get($fromParty, 'legal_name') ?? data_get($fromParty, 'name') ?? '-' }}</strong><br>
+                    {{ data_get($fromParty, 'address_line') ?? data_get($fromParty, 'billing_address') ?? data_get($fromParty, 'customeraddress.address1') ?? '' }}<br>
+                    {{ data_get($fromParty, 'belt_area_market_name') ?? data_get($fromParty, 'customeraddress.locality') ?? '' }}
+                    {{ data_get($fromParty, 'city.city_name') ?? data_get($fromParty, 'billing_city') ?? data_get($fromParty, 'customeraddress.cityname.city_name') ?? '' }}
+                    {{ data_get($fromParty, 'pincode.pincode') ?? data_get($fromParty, 'billing_pincode') ?? data_get($fromParty, 'customeraddress.pincodename.pincode') ?? '' }}<br>
+                    @if(data_get($fromParty, 'mobile_number') ?? data_get($fromParty, 'mobile'))
+                    Phone: {{ data_get($fromParty, 'mobile_number') ?? data_get($fromParty, 'mobile') }}<br>
                     @endif
-
-                    @if(!empty($sales['sellers']['email']))
-                    Email: {!! $sales['sellers']['email'] !!}
-                    @endif
+                    @if(data_get($fromParty, 'email'))
+                    Email: {{ data_get($fromParty, 'email') }}
                     @endif
                   </address>
                 </div>
@@ -57,23 +50,16 @@
                 <div class="col-sm-5 invoice-col">
                   To
                   <address>
-                    <strong>{!! $sales['buyers']['name'] ?? '' !!}</strong><br>
-
-                    @if(isset($sales['buyers']['customeraddress']))
-                    {!! $sales['buyers']['customeraddress']['address1'] ?? '' !!}
-                    @if(!empty($sales['buyers']['customeraddress']['address2'])), {!! $sales['buyers']['customeraddress']['address2'] !!}@endif<br>
-
-                    {!! $sales['buyers']['customeraddress']['locality'] ?? '' !!},
-                    {!! $sales['buyers']['customeraddress']['cityname']['city_name'] ?? '' !!}
-                    {!! $sales['buyers']['customeraddress']['pincodename']['pincode'] ?? '' !!}<br>
-
-                    @if(!empty($sales['buyers']['mobile']))
-                    Phone: {!! $sales['buyers']['mobile'] !!}<br>
+                    <strong>{{ data_get($toParty, 'shop_name') ?? data_get($toParty, 'trade_name') ?? data_get($toParty, 'legal_name') ?? data_get($toParty, 'name') ?? '-' }}</strong><br>
+                    {{ data_get($toParty, 'address_line') ?? data_get($toParty, 'billing_address') ?? data_get($toParty, 'customeraddress.address1') ?? '' }}<br>
+                    {{ data_get($toParty, 'belt_area_market_name') ?? data_get($toParty, 'customeraddress.locality') ?? '' }}
+                    {{ data_get($toParty, 'city.city_name') ?? data_get($toParty, 'billing_city') ?? data_get($toParty, 'customeraddress.cityname.city_name') ?? '' }}
+                    {{ data_get($toParty, 'pincode.pincode') ?? data_get($toParty, 'billing_pincode') ?? data_get($toParty, 'customeraddress.pincodename.pincode') ?? '' }}<br>
+                    @if(data_get($toParty, 'mobile_number') ?? data_get($toParty, 'mobile'))
+                    Phone: {{ data_get($toParty, 'mobile_number') ?? data_get($toParty, 'mobile') }}<br>
                     @endif
-
-                    @if(!empty($sales['buyers']['email']))
-                    Email: {!! $sales['buyers']['email'] !!}
-                    @endif
+                    @if(data_get($toParty, 'email'))
+                    Email: {{ data_get($toParty, 'email') }}
                     @endif
                   </address>
                 </div>

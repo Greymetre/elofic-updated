@@ -82,8 +82,8 @@
                <!--                <input type="hidden" name="buyer_id" value="{!! $orders['buyer_id'] !!}">
                <input type="hidden" name="seller_id" value="{!! $orders['seller_id'] !!}"> -->
 
-               <input type="hidden" name="buyer_id" value="{!! $orders['seller_id'] !!}">
-               <input type="hidden" name="seller_id" value="{!! $orders['buyer_id'] !!}">
+               <input type="hidden" name="buyer_id" value="{!! $orders['buyer_id'] !!}">
+               <input type="hidden" name="seller_id" value="{!! $orders['seller_id'] !!}">
 
                <input type="hidden" name="order_id" value="{!! $orders['id'] !!}">
                <input type="hidden" name="orderno" value="{!! $orders['orderno'] !!}">

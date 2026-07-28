@@ -21,6 +21,7 @@ use App\Models\Settings;
 use App\Models\SchemeHeader;
 use App\Models\Coupons;
 use App\Models\Holiday;
+use App\Models\Order;
 use App\Models\OrderDetails;
 use App\Models\Payment;
 use App\Models\Pincode;
@@ -625,10 +626,29 @@ if (! function_exists('getUsersReportingToAuth')) {
 if (! function_exists('insertSales')) {
     function insertSales($data)
     {
+        $data = $data->map(function ($item) {
+            $orderId = data_get($item, 'order_id');
+            $order = $orderId ? Order::find($orderId) : null;
+
+            if ($order) {
+                // Never trust swapped/legacy hidden form values. The order is
+                // the authoritative source for both parties.
+                $item['buyer_id'] = $order->buyer_id;
+                $item['seller_id'] = $order->seller_id;
+                $item['buyer_type'] = strtoupper((string) $order->customer_type) === 'DISTRIBUTOR'
+                    ? 'MASTER_DISTRIBUTOR'
+                    : 'SECONDARY_CUSTOMER';
+                $item['seller_type'] = strtoupper((string) $order->seller_type) === 'RETAILER'
+                    ? 'SECONDARY_CUSTOMER'
+                    : 'MASTER_DISTRIBUTOR';
+            }
+
+            return $item;
+        });
+
         $sallers = $data->pluck('seller_id');
         $buyers = $data->pluck('buyer_id');
         $order_ids = $data->pluck('order_id');
-        $customers = Customers::whereIn('id', $sallers)->orWhereIn('id', $buyers)->select('id', 'customertype')->get();
         $existsales = Sales::whereIn('seller_id', $sallers)->whereIn('buyer_id', $buyers)->whereIn('order_id', $order_ids)->select('buyer_id', 'seller_id', 'sales_no', 'invoice_no', 'grand_total', 'invoice_date')->get();
         $sales = collect([]);
         $saledetails = collect([]);
@@ -638,7 +658,9 @@ if (! function_exists('insertSales')) {
             if (!$existsales->contains('sales_no', $item['sales_no'])) {
                 $sales->push([
                     'buyer_id' => isset($item['buyer_id']) ? $item['buyer_id'] : null,
+                    'buyer_type' => isset($item['buyer_type']) ? $item['buyer_type'] : null,
                     'seller_id' => isset($item['seller_id']) ? $item['seller_id'] : null,
+                    'seller_type' => isset($item['seller_type']) ? $item['seller_type'] : null,
                     'order_id' => isset($item['order_id']) ? $item['order_id'] : null,
                     'total_qty' => isset($item['total_qty']) ? $item['total_qty'] : 0,
                     'shipped_qty' => isset($item['shipped_qty']) ? $item['shipped_qty'] : 0,

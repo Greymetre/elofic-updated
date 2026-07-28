@@ -558,7 +558,9 @@ class OrderController extends Controller
             // ========================
             // Order Type & Defaults
             // ========================
-            $request['order_type']   = 'SECONDARY_CUSTOMER';
+            $request['order_type']   = $customerType === 'DISTRIBUTOR'
+                ? 'MASTER_DISTRIBUTOR'
+                : 'SECONDARY_CUSTOMER';
             $request['active']       = 'Y';
             $request['total_qty']    = $request['total_qty'] ?? 0;
             $request['shipped_qty']  = 0;

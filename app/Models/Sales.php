@@ -11,7 +11,7 @@ class Sales extends Model
 
     protected $table = 'sales';
 
-    protected $fillable = [ 'active', 'buyer_id', 'seller_id', 'order_id', 'total_qty', 'shipped_qty', 'orderno', 'fiscal_year', 'sales_no', 'invoice_no', 'invoice_date','transport_name','lr_no','dispatch_date', 'transport_details', 'total_gst', 'sub_total', 'grand_total', 'paid_amount','payment_status','description', 'status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at'];
+    protected $fillable = [ 'active', 'buyer_id', 'buyer_type', 'seller_id', 'seller_type', 'order_id', 'total_qty', 'shipped_qty', 'orderno', 'fiscal_year', 'sales_no', 'invoice_no', 'invoice_date','transport_name','lr_no','dispatch_date', 'transport_details', 'total_gst', 'sub_total', 'grand_total', 'paid_amount','payment_status','description', 'status_id', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at'];
 
     public function message()
     {
@@ -64,11 +64,25 @@ class Sales extends Model
         try
         {
             $created_at = getcurentDateTime();
+            $order = !empty($request['order_id']) ? Order::find($request['order_id']) : null;
+
+            if ($order) {
+                $request['buyer_id'] = $order->buyer_id;
+                $request['seller_id'] = $order->seller_id;
+                $request['buyer_type'] = strtoupper((string) $order->customer_type) === 'DISTRIBUTOR'
+                    ? 'MASTER_DISTRIBUTOR'
+                    : 'SECONDARY_CUSTOMER';
+                $request['seller_type'] = strtoupper((string) $order->seller_type) === 'RETAILER'
+                    ? 'SECONDARY_CUSTOMER'
+                    : 'MASTER_DISTRIBUTOR';
+            }
 
             if( $sales_id = Sales::insertGetId([
                 'active' => 'Y',
                 'buyer_id' => isset($request['buyer_id'])? $request['buyer_id']:null,
+                'buyer_type' => isset($request['buyer_type'])? $request['buyer_type']:null,
                 'seller_id' => isset($request['seller_id'])? $request['seller_id']:null,
+                'seller_type' => isset($request['seller_type'])? $request['seller_type']:null,
                 'order_id' => isset($request['order_id'])? $request['order_id']:null,
                 'total_qty' => isset($request['total_qty'])? array_sum($request['total_qty']):0,
                 'shipped_qty' => isset($request['shipped_qty'])? array_sum($request['shipped_qty']):0,
@@ -103,11 +117,23 @@ class Sales extends Model
 
     public function sellers()
     {
-        return $this->belongsTo('App\Models\Customers', 'seller_id', 'id')->select('id','name', 'first_name', 'last_name');
+        if (empty($this->seller_type)) {
+            return $this->belongsTo(Customers::class, 'seller_id');
+        }
+
+        return strtoupper((string) $this->seller_type) === 'SECONDARY_CUSTOMER'
+            ? $this->belongsTo(SecondaryCustomer::class, 'seller_id')
+            : $this->belongsTo(MasterDistributor::class, 'seller_id');
     }
     public function buyers()
     {
-        return $this->belongsTo('App\Models\Customers', 'buyer_id', 'id');
+        if (empty($this->buyer_type)) {
+            return $this->belongsTo(Customers::class, 'buyer_id');
+        }
+
+        return strtoupper((string) $this->buyer_type) === 'MASTER_DISTRIBUTOR'
+            ? $this->belongsTo(MasterDistributor::class, 'buyer_id')
+            : $this->belongsTo(SecondaryCustomer::class, 'buyer_id');
     }
 
     public function customeraddress()

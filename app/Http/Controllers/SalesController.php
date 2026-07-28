@@ -127,8 +127,21 @@ class SalesController extends Controller
     {
         abort_if(Gate::denies('sale_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $id = decrypt($id);
-        $sales = $this->sales->with('saledetails', 'saledetails.products', 'saledetails.productdetails')->find($id);
-        return view('sales.show')->with('sales', $sales);
+        $sales = $this->sales
+            ->with('saledetails', 'saledetails.products', 'saledetails.productdetails', 'orders')
+            ->findOrFail($id);
+
+        if ($sales->orders) {
+            $sales->orders->resolveCustomerRelations();
+            $fromParty = $sales->orders->sellers;
+            $toParty = $sales->orders->buyers;
+        } else {
+            // Preserve support for manually entered legacy sales.
+            $fromParty = $sales->sellers;
+            $toParty = $sales->buyers;
+        }
+
+        return view('sales.show', compact('sales', 'fromParty', 'toParty'));
     }
 
     /**
