@@ -254,10 +254,15 @@ class LoginController extends Controller
 
         $token = $user->createToken('mobile-app-token')->accessToken;
 
-        $user->update([
-            'notification_id' => $request->fcm_token ?? $user->notification_id,
-            'device_type'     => $request->device_type ?? $user->device_type,
-        ]);
+        $userUpdates = [
+            'device_type' => $request->device_type ?? $user->device_type,
+        ];
+
+        if ($request->filled('fcm_token')) {
+            $userUpdates['notification_id'] = trim($request->fcm_token);
+        }
+
+        $user->update($userUpdates);
 
         // Prepare response (your existing structure)
         $data = [
@@ -293,10 +298,15 @@ class LoginController extends Controller
         $token = $customer->createToken('mobile-app-token')->accessToken;
 
         // Update device/login info
-        CustomerDetails::updateOrCreate(
-            ['customer_id' => $customer->id],
-            ['fcm_token' => $request->fcm_token ?? null]
-        );
+        $customerDetails = CustomerDetails::firstOrNew([
+            'customer_id' => $customer->id,
+        ]);
+
+        if ($request->filled('fcm_token')) {
+            $customerDetails->fcm_token = trim($request->fcm_token);
+        }
+
+        $customerDetails->save();
 
         MobileUserLoginDetails::updateOrCreate(
             ['customer_id' => $customer->id],
