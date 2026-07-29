@@ -1346,6 +1346,7 @@ if (!function_exists('SendPushNotification')) {
             }
 
             $fcmToken = $user->notification_id;
+            $deviceType = strtolower(trim((string) $user->device_type));
             $title = 'FieldKonnect';
             $credentialsPath = storage_path('app/elofic-fieldkonnect-firebase-adminsdk-fbsvc-9eab4a7d6a.json');
             $scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
@@ -1357,15 +1358,56 @@ if (!function_exists('SendPushNotification')) {
             $credentials->fetchAuthToken();
             $token = $credentials->getLastReceivedToken()['access_token'];
 
-            $messagePayload = [
-                'message' => [
-                    'token' => $deviceToken,
-                    'data' => [
-                        'title' => $title,
-                        'body'  => $message,
-                        'image' => $model,
+            $firebaseMessage = [
+                'token' => $deviceToken,
+                'notification' => [
+                    'title' => $title,
+                    'body'  => $message,
+                ],
+                'data' => [
+                    'title' => $title,
+                    'body'  => $message,
+                    'image' => $model,
+                ],
+            ];
+
+            $androidOptions = [
+                'priority' => 'HIGH',
+                'notification' => [
+                    'sound' => 'default',
+                    'notification_priority' => 'PRIORITY_HIGH',
+                ],
+            ];
+
+            $iosOptions = [
+                'headers' => [
+                    'apns-priority' => '10',
+                    'apns-push-type' => 'alert',
+                ],
+                'payload' => [
+                    'aps' => [
+                        'sound' => 'default',
                     ],
                 ],
+            ];
+
+            if (str_contains($deviceType, 'android')) {
+                $firebaseMessage['android'] = $androidOptions;
+            } elseif (
+                str_contains($deviceType, 'ios')
+                || str_contains($deviceType, 'iphone')
+                || str_contains($deviceType, 'ipad')
+                || str_contains($deviceType, 'apple')
+            ) {
+                $firebaseMessage['apns'] = $iosOptions;
+            } else {
+                // Keep older users with an empty/unknown device type working.
+                $firebaseMessage['android'] = $androidOptions;
+                $firebaseMessage['apns'] = $iosOptions;
+            }
+
+            $messagePayload = [
+                'message' => $firebaseMessage,
             ];
 
             $response = $client->post("https://fcm.googleapis.com/v1/projects/$projectId/messages:send", [
@@ -1377,6 +1419,11 @@ if (!function_exists('SendPushNotification')) {
             ]);
 
             if ($response->getStatusCode() == 200) {
+                \Log::info('Push notification accepted by Firebase.', [
+                    'user_id' => $user_id,
+                    'device_type' => $deviceType ?: 'unknown',
+                    'firebase_response' => json_decode((string) $response->getBody(), true),
+                ]);
                 return true;
             }
         } catch (\Exception $e) {
