@@ -369,6 +369,16 @@ class LeaveController extends Controller
             $user->save();
         }
 
+        if (!empty($user->reportingid)) {
+            SendPushNotification(
+                $user->reportingid,
+                $user->name . ' has applied for leave from ' . $leave->from_date . ' to ' . $leave->to_date . '.',
+                'leave',
+                $leave->id,
+                'Leave request'
+            );
+        }
+
         return redirect()->route('leaves.index')
             ->with('message_success', 'Leave added successfully.');
 
@@ -544,10 +554,18 @@ class LeaveController extends Controller
     public function approveLeave(Request $request)
     {
         try {
-            if (Leave::where('id', '=', $request['id'])->update([
+            $leave = Leave::find($request['id']);
+            if ($leave && $leave->update([
                 'status' => 1,
                 'remark_status' => null
             ])) {
+                SendPushNotification(
+                    $leave->user_id,
+                    'Your leave request from ' . $leave->from_date . ' to ' . $leave->to_date . ' has been approved.',
+                    'leave',
+                    $leave->id,
+                    'Leave approved'
+                );
                 return redirect()->back()->with('message_success', 'Leave Approved Successfully');
             }
             return redirect()->back()->with('message_danger', 'Error in Leave Approved')->withInput();
@@ -561,10 +579,22 @@ class LeaveController extends Controller
     {
         $remark_status  = $request['remark_status'] ?? null;
         try {
-            if (Leave::where('id', '=', $request['leave_id'])->update([
+            $leave = Leave::find($request['leave_id']);
+            if ($leave && $leave->update([
                 'status' => 2,
                 'remark_status' => $remark_status ?? null,
             ])) {
+                $message = 'Your leave request from ' . $leave->from_date . ' to ' . $leave->to_date . ' has been rejected.';
+                if ($remark_status) {
+                    $message .= ' Remark: ' . $remark_status;
+                }
+                SendPushNotification(
+                    $leave->user_id,
+                    $message,
+                    'leave',
+                    $leave->id,
+                    'Leave rejected'
+                );
                 return Redirect::to('leaves')->with('message_success', 'Leave Rejected Successfully');
             }
             return redirect()->back()->with('message_danger', 'Error in Leave Rejected')->withInput();

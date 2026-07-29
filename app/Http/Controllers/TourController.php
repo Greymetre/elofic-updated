@@ -454,7 +454,17 @@ public function edit($id)
         $tours = TourProgramme::whereIn('id',$request->id)->get();
         if($tours){  
             foreach($tours as $tour){
-              $tour->update(['status'=>$request->status]);    
+              $tour->update(['status'=>$request->status]);
+              if (in_array((int) $request->status, [1, 2], true)) {
+                $statusLabel = (int) $request->status === 1 ? 'approved' : 'rejected';
+                SendPushNotification(
+                  $tour->userid,
+                  'Your tour plan for ' . $tour->date . ' has been ' . $statusLabel . '.',
+                  'tour_plan',
+                  $tour->id,
+                  'Tour plan ' . $statusLabel
+                );
+              }
             }
             return response()->json(["status"=>"success"]);
         }else{
