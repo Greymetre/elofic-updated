@@ -1347,8 +1347,15 @@ if (!function_exists('SendPushNotification')) {
 
             $fcmToken = $user->notification_id;
             $deviceType = strtolower(trim((string) $user->device_type));
+            $isIosDevice = str_contains($deviceType, 'ios')
+                || str_contains($deviceType, 'iphone')
+                || str_contains($deviceType, 'ipad')
+                || str_contains($deviceType, 'apple');
             $title = 'FieldKonnect';
-            $credentialsPath = storage_path('app/elofic-fieldkonnect-firebase-adminsdk-fbsvc-9eab4a7d6a.json');
+            $credentialsFile = $isIosDevice
+                ? 'elofic-fieldkonnect-firebase-adminsdk-fbsvc-7f8e05239a.json'
+                : 'elofic-fieldkonnect-firebase-adminsdk-fbsvc-9eab4a7d6a.json';
+            $credentialsPath = storage_path('app/' . $credentialsFile);
             $scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
             $projectId = 'elofic-fieldkonnect';
             $deviceToken = $fcmToken;
@@ -1393,12 +1400,7 @@ if (!function_exists('SendPushNotification')) {
 
             if (str_contains($deviceType, 'android')) {
                 $firebaseMessage['android'] = $androidOptions;
-            } elseif (
-                str_contains($deviceType, 'ios')
-                || str_contains($deviceType, 'iphone')
-                || str_contains($deviceType, 'ipad')
-                || str_contains($deviceType, 'apple')
-            ) {
+            } elseif ($isIosDevice) {
                 $firebaseMessage['apns'] = $iosOptions;
             } else {
                 // Keep older users with an empty/unknown device type working.
@@ -1422,6 +1424,7 @@ if (!function_exists('SendPushNotification')) {
                 \Log::info('Push notification accepted by Firebase.', [
                     'user_id' => $user_id,
                     'device_type' => $deviceType ?: 'unknown',
+                    'credentials_file' => $credentialsFile,
                     'firebase_response' => json_decode((string) $response->getBody(), true),
                 ]);
                 return true;
