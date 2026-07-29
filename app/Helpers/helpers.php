@@ -1347,9 +1347,9 @@ if (!function_exists('SendPushNotification')) {
 
             $fcmToken = $user->notification_id;
             $title = 'FieldKonnect';
-            $credentialsPath = storage_path('app/fieldkonnectsilver-firebase-adminsdk-q2cko-90f50017b3.json');
+            $credentialsPath = storage_path('app/elofic-fieldkonnect-firebase-adminsdk-fbsvc-9eab4a7d6a.json');
             $scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
-            $projectId = 'fieldkonnectsilver';
+            $projectId = 'elofic-fieldkonnect';
             $deviceToken = $fcmToken;
 
             $client = new Client();

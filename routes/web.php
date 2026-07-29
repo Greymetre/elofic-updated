@@ -43,6 +43,7 @@ use App\Http\Controllers\TourController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserReportingController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\NotificationManagementController;
 use App\Http\Controllers\VisitReportController;
 use App\Http\Controllers\VisitTypeController;
 use App\Http\Controllers\WalletController;
@@ -439,6 +440,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('usercity-upload', [UsersController::class, 'userCityUpload'])->name('usercity.upload');
     Route::any('usercity-download', [UsersController::class, 'userCitydownload'])->name('usercity.download');
     Route::any('customer-user', [UsersController::class, 'CustomerUserView'])->name('customers.user.create');
+    Route::get('notification-management', [NotificationManagementController::class, 'index'])->name('notification-management.index');
+    Route::get('notification-management/filters', [NotificationManagementController::class, 'filters'])->name('notification-management.filters');
+    Route::post('notification-management/send', [NotificationManagementController::class, 'send'])->name('notification-management.send');
     //Targets
     Route::resource('reportings', UserReportingController::class);
     //Sales Weightege

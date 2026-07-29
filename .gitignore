@@ -3,6 +3,7 @@
 /public/hot
 /public/storage
 /storage/*.key
+/storage/app/elofic-fieldkonnect-firebase-adminsdk-fbsvc-9eab4a7d6a.json
 /vendor
 .env
 .env.backup

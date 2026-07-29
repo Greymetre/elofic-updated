@@ -1370,6 +1370,16 @@
                                         </a>
                                     </li>
                                     @endif
+                                     @if(auth()->user()->can('dashboard_primary_sales_access'))
+                                    <!-- <li
+                                        class="nav-link-btn {{ request()->is('reports/primary_sales*') ? 'active' : '' }}">
+                                        <a class="hoveradd2" href="{{ url('reports/primary_sales') }}">
+                                            <i class="material-icons icon">stay_primary_landscape</i>
+                                            <span>Primary Sales</span>
+                                            <div class="d-none mobile_hide"> Primary Sales</div>
+                                        </a>
+                                    </li> -->
+                                    @endif
                                     @if(auth()->user()->can('branch_wise_sales_target_access'))
                                     <!-- <li
                                         class="nav-link-btn {{ request()->is('branches_sales_target') ? 'active' : '' }}">
@@ -1627,6 +1637,15 @@
                         @endif
                     </ul>
                 </div>
+                </li>
+                @endif
+                @if(auth()->user()->can('user_access'))
+                <li class="nav-link hide_icon {{ request()->is('notification-management*') ? 'active' : '' }}">
+                    <a class="hoveradd" href="{{ route('notification-management.index') }}">
+                        <i class="material-icons icon">notifications_active</i>
+                        <span>Notification Management</span>
+                        <div class="d-none mobile_hide">Notification Management</div>
+                    </a>
                 </li>
                 @endif
                 @if(auth()->user()->can(['account_access']))
@@ -2405,16 +2424,6 @@
                                     <div class="d-none mobile_hide"> CH/BM Rating Report</div>
                                  </a>
                               </li> -->
-                                    @endif
-                                    @if(auth()->user()->can('dashboard_primary_sales_access'))
-                                    <li
-                                        class="nav-link-btn {{ request()->is('reports/primary_sales*') ? 'active' : '' }}">
-                                        <a class="hoveradd2" href="{{ url('reports/primary_sales') }}">
-                                            <i class="material-icons icon">stay_primary_landscape</i>
-                                            <span>Primary Sales</span>
-                                            <div class="d-none mobile_hide"> Primary Sales</div>
-                                        </a>
-                                    </li>
                                     @endif
                                     @if(auth()->user()->can('dashboard_secondary_sales_access'))
                                     <!-- <li
