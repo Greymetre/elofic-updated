@@ -33,7 +33,10 @@ class SendPendingTaskNotification extends Command
             if ($minutesRemaining <= 10 && $minutesRemaining >= 9) {
                 SendPushNotification(
                     $task->assigned_to,
-                    '⏰ Reminder: The task "' . $task->description . '" for ' . $task->lead->company_name . ' is due in ' . $minutesRemaining . ' minutes.'
+                    '⏰ Reminder: The task "' . $task->description . '" for ' . $task->lead->company_name . ' is due in ' . $minutesRemaining . ' minutes.',
+                    'task',
+                    $task->id,
+                    'Task Reminder'
                 );
             }
         }
@@ -60,7 +63,10 @@ class SendPendingTaskNotification extends Command
                     foreach ($task->assigned_users as $assigned_user) {
                         SendPushNotification(
                             $assigned_user->user_id,
-                            '⏰ Reminder: The task "' . $task->title . '" is due in ' . $minutesRemaining . ' minutes.'
+                            '⏰ Reminder: The task "' . $task->title . '" is due in ' . $minutesRemaining . ' minutes.',
+                            'task_management',
+                            $task->id,
+                            'Task Reminder'
                         );
                     }
                 }

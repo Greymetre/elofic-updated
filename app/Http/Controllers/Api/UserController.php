@@ -52,7 +52,7 @@ class UserController extends Controller
                         ->orderBy('datetime','desc')
                         ->select('id','title', 'descriptions', 'datetime', 'reminder', 'completed_at', 'completed', 'is_done', 'customer_id', 'status_id','remark')->latest();
             $data = (!empty($pageSize)) ? $query->paginate($pageSize) : $query->get();
-            if($data->isNotEmpty())
+            if($data->count() > 0)
             {
                 return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
             }
@@ -404,8 +404,26 @@ class UserController extends Controller
         try
         { 
             $user_id = $request->user()->id;
-            $date = $request->input('date') ? $request->input('date') :date('Y-m-d');
-            $data = Notification::with('users')->select('id','type', 'data','customer_id','user_id', 'created_at')->get();
+            $data = Notification::with('users')
+                ->where('user_id', $user_id)
+                ->when($request->filled('read'), function ($query) use ($request) {
+                    $query->where('read', $request->boolean('read'));
+                })
+                ->select(
+                    'id',
+                    'type',
+                    'data',
+                    'read',
+                    'model',
+                    'model_id',
+                    'delivery_status',
+                    'sent_at',
+                    'customer_id',
+                    'user_id',
+                    'created_at'
+                )
+                ->latest()
+                ->paginate($request->input('pageSize', 30));
             if($data->isNotEmpty())
             {
                 return response()->json(['status' => 'success','message' => 'Data retrieved successfully.','data' => $data ], $this->successStatus);
@@ -416,6 +434,29 @@ class UserController extends Controller
         {
             return response()->json(['status' => 'error','message' => $e->getMessage() ], $this->internalError);
         }
+    }
+
+    public function readNotification(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'required|integer|exists:notifications,id',
+        ]);
+
+        $updated = Notification::where('id', $validated['id'])
+            ->where('user_id', $request->user()->id)
+            ->update(['read' => true]);
+
+        if (!$updated) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Notification not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Notification marked as read successfully.',
+        ], $this->successStatus);
     }
 
     public function masterStateCity(Request $request)
