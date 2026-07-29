@@ -45,7 +45,7 @@ class MasterDistributorObserver
         $nameParts = preg_split('/\s+/', $name, 2);
 
         $userData = [
-            'active' => 'Y',
+            'active' => strcasecmp((string) $distributor->business_status, 'Active') === 0 ? 'Y' : 'N',
             'name' => $name,
             'first_name' => $nameParts[0] ?? $name,
             'last_name' => $nameParts[1] ?? '',
@@ -117,15 +117,20 @@ class MasterDistributorObserver
      */
     public function updating(MasterDistributor $distributor): void
     {
+        $user = User::where('customerid', $distributor->id)
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'Distributor')
+                    ->where('guard_name', 'users');
+            })
+            ->first();
+
+        if ($user && $distributor->isDirty('business_status')) {
+            $user->active = strcasecmp((string) $distributor->business_status, 'Active') === 0 ? 'Y' : 'N';
+            $user->save();
+        }
+
         // Check if email or mobile changed
         if ($distributor->isDirty('email') || $distributor->isDirty('mobile')) {
-            $user = User::where('customerid', $distributor->id)
-                ->whereHas('roles', function ($query) {
-                    $query->where('name', 'Distributor')
-                        ->where('guard_name', 'users');
-                })
-                ->first();
-
             if ($user) {
                 $email = strtolower(trim($distributor->email ?? ''));
                 $mobile = preg_replace('/\D+/', '', $distributor->mobile ?? '') ?? '';
@@ -144,7 +149,6 @@ class MasterDistributorObserver
                         $user->update([
                             'email' => $email,
                             'mobile' => $mobile,
-                            'password' => Hash::make($mobile),
                         ]);
                     }
                 }

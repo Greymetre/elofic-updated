@@ -159,6 +159,15 @@ class User extends Authenticatable implements HasMedia
         return $this->belongsTo('App\Models\Customers', 'customerid', 'id');
     }
 
+    /**
+     * Master distributor linked to users created by MasterDistributorObserver
+     * or the distributors:create-users backfill command.
+     */
+    public function masterDistributor()
+    {
+        return $this->belongsTo(MasterDistributor::class, 'customerid', 'id');
+    }
+
     public function getdepartment()
     {
         return $this->belongsTo('App\Models\Department', 'department_id', 'id')->select('id', 'name');

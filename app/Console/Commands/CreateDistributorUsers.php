@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\MasterDistributor;
 use App\Models\User;
+use App\Models\UserCityAssign;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -42,11 +43,12 @@ class CreateDistributorUsers extends Command
         $stats = [
             'created' => 0,
             'updated' => 0,
+            'deleted' => 0,
             'skipped' => 0,
         ];
 
         MasterDistributor::query()
-            ->select(['id', 'legal_name', 'trade_name', 'contact_person', 'mobile', 'email'])
+            ->select(['id', 'legal_name', 'trade_name', 'contact_person', 'mobile', 'email', 'business_status'])
             ->orderBy('id')
             ->chunkById(200, function ($distributors) use ($role, $dryRun, &$stats) {
                 foreach ($distributors as $distributor) {
@@ -65,12 +67,9 @@ class CreateDistributorUsers extends Command
                         continue;
                     }
 
-                    $userByCustomer = User::where('customerid', $distributor->id)
-                        ->whereHas('roles', function ($roleQuery) use ($role) {
-                            $roleQuery->where('name', $role->name)
-                                ->where('guard_name', $role->guard_name);
-                        })
-                        ->first();
+                    // customerid is the distributor link. Do not require the role here:
+                    // this command is also responsible for repairing a missing role.
+                    $userByCustomer = User::where('customerid', $distributor->id)->first();
 
                     $userByEmail = User::where('email', $email)->first();
 
@@ -107,14 +106,13 @@ class CreateDistributorUsers extends Command
                     }
 
                     DB::transaction(function () use ($distributor, $email, $mobile, $role, $user, &$stats) {
-                        $data = $this->userData($distributor, $email, $mobile);
-
                         if ($user) {
-                            $user->fill($data);
+                            // Never reset an existing user's password during a backfill.
+                            $user->fill($this->userData($distributor, $email, $mobile, false));
                             $user->save();
                             $stats['updated']++;
                         } else {
-                            $user = User::create($data);
+                            $user = User::create($this->userData($distributor, $email, $mobile, true));
                             $stats['created']++;
                         }
 
@@ -128,13 +126,50 @@ class CreateDistributorUsers extends Command
                 }
             });
 
+        User::query()
+            ->whereNotNull('customerid')
+            ->whereHas('roles', function ($roleQuery) use ($role) {
+                $roleQuery->where('roles.id', $role->id);
+            })
+            ->whereNotIn('customerid', MasterDistributor::query()->select('id'))
+            ->orderBy('id')
+            ->chunkById(200, function ($users) use ($dryRun, &$stats) {
+                foreach ($users as $user) {
+                    if ($dryRun) {
+                        $stats['deleted']++;
+                        $this->line("Would delete orphan distributor user #{$user->id} ({$user->email}); distributor #{$user->customerid} does not exist.");
+                        continue;
+                    }
+
+                    try {
+                        DB::transaction(function () use ($user) {
+                            $user->tokens()->delete();
+                            UserCityAssign::where('userid', $user->id)->delete();
+                            $user->syncPermissions([]);
+                            $user->syncRoles([]);
+                            $user->delete();
+                        });
+
+                        $stats['deleted']++;
+                    } catch (\Throwable $exception) {
+                        $stats['skipped']++;
+                        $this->error("Could not delete orphan distributor user #{$user->id}: {$exception->getMessage()}");
+                    }
+                }
+            });
+
         $mode = $dryRun ? 'Dry run complete' : 'Distributor user creation complete';
-        $this->info("{$mode}. Created: {$stats['created']}, Updated: {$stats['updated']}, Skipped: {$stats['skipped']}.");
+        $this->info("{$mode}. Created: {$stats['created']}, Updated: {$stats['updated']}, Deleted: {$stats['deleted']}, Skipped: {$stats['skipped']}.");
 
         return Command::SUCCESS;
     }
 
-    private function userData(MasterDistributor $distributor, string $email, string $mobile): array
+    private function userData(
+        MasterDistributor $distributor,
+        string $email,
+        string $mobile,
+        bool $includePassword
+    ): array
     {
         $name = trim((string) ($distributor->contact_person ?: $distributor->trade_name ?: $distributor->legal_name));
         $name = $name !== '' ? $name : 'Distributor ' . $distributor->id;
@@ -142,17 +177,20 @@ class CreateDistributorUsers extends Command
         $nameParts = preg_split('/\s+/', $name, 2);
 
         $data = [
-            'active' => 'Y',
+            'active' => strcasecmp((string) $distributor->business_status, 'Active') === 0 ? 'Y' : 'N',
             'name' => $name,
             'first_name' => $nameParts[0] ?? $name,
             'last_name' => $nameParts[1] ?? '',
             'mobile' => $mobile,
             'email' => $email,
-            'password' => Hash::make($mobile),
             'customerid' => $distributor->id,
         ];
 
-        if (Schema::hasColumn('users', 'password_string')) {
+        if ($includePassword) {
+            $data['password'] = Hash::make($mobile);
+        }
+
+        if ($includePassword && Schema::hasColumn('users', 'password_string')) {
             $data['password_string'] = $mobile;
         }
 
