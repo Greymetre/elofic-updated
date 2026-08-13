@@ -2376,7 +2376,7 @@
                                  @endif -->
                         @if(auth()->user()->can('reports_sale'))
                         <li
-                            class="nav-link-btn add_icon {{ request()->is('tours*') || request()->is('reports/attendancereport') || request()->is('reports/attendancereportSummary') || request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') || request()->is('reports/product_analysis_qty*') || request()->is('reports/product_analysis_branch*') || request()->is('reports/product_analysis_value*') || request()->is('reports/group_wise_analysis*') || request()->is('reports/asm_rating*') || request()->is('reports/ch_rating*') ? 'active' : '' }}">
+                            class="nav-link-btn add_icon {{ request()->is('tours*') || request()->is('reports/customervisit*') || request()->is('reports/attendancereport') || request()->is('reports/attendancereportSummary') || request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') || request()->is('reports/product_analysis_qty*') || request()->is('reports/product_analysis_branch*') || request()->is('reports/product_analysis_value*') || request()->is('reports/group_wise_analysis*') || request()->is('reports/asm_rating*') || request()->is('reports/ch_rating*') ? 'active' : '' }}">
                             <a class="hoveradd" data-toggle="collapse" href="#salesReportsMenu"
                                 aria-expanded="false">
                                 <i class="material-icons icon">point_of_sale</i>
@@ -2412,6 +2412,15 @@
                                             <i class="material-icons icon">tour</i>
                                             <span>Tour</span>
                                             <div class="d-none mobile_hide">Tour</div>
+                                        </a>
+                                    </li>
+                                    @endif
+                                    @if(auth()->user()->can('visit_report'))
+                                    <li class="nav-link-btn {{ request()->is('reports/customervisit*') ? 'active' : '' }}">
+                                        <a class="hoveradd2" href="{{ url('reports/customervisit') }}">
+                                            <i class="material-icons icon">dashboard_customize</i>
+                                            <span>Checkin-Checkout</span>
+                                            <div class="d-none mobile_hide">Checkin-Checkout</div>
                                         </a>
                                     </li>
                                     @endif
@@ -2659,15 +2668,6 @@
             <li class="nav-link-btn">
                 <div class="collapse" id="customerReportsMenu" style="">
                     <ul class="navd">
-                        @if(auth()->user()->can('visit_report'))
-                        <li class="nav-link-btn {{ request()->is('reports/customervisit*') ? 'active' : '' }}">
-                            <a class="hoveradd2" href="{{ url('reports/customervisit') }}">
-                                <i class="material-icons icon">dashboard_customize</i>
-                                <span>Customer Visit</span>
-                                <div class="d-none mobile_hide"> Customer Visit</div>
-                            </a>
-                        </li>
-                        @endif
                         @if(auth()->user()->can('customers_report'))
                         <!-- <li class="nav-link-btn ">
                             <a class="hoveradd2" href="{{ url('reports/customersreport') }}">
