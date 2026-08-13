@@ -15,13 +15,14 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 use Illuminate\Support\Facades\Auth;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use PHPUnit\Framework\Constraint\Count;
 
-class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping
+class UserExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithStrictNullComparison
 {
     public function __construct(Request $request)
     {
