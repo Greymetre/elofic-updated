@@ -32,6 +32,11 @@ class TourProgramme extends Model
         return $this->hasMany('App\Models\TourDetail', 'tourid', 'id');
     }
 
+    public function attendance()
+    {
+        return $this->hasOne(Attendance::class, 'tourid', 'id')->latestOfMany();
+    }
+
     public function city()
     {
         return $this->belongsTo(City::class, 'town', 'id');

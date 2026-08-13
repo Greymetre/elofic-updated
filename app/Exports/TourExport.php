@@ -42,7 +42,7 @@
             //                     })->select('id','date', 'userid', 'town', 'objectives', 'type', 'status')->latest()->get();
 
             if(!empty($this->user_id) ||!empty($this->start_date) ||!empty($this->end_date)){
-                return TourProgramme::with('tourdetails','userinfo')->where(function ($query)  {
+                return TourProgramme::with('tourdetails', 'userinfo', 'attendance')->where(function ($query)  {
                                     if($this->user_id)
                                     {
                                         $query->where('userid', $this->user_id);
@@ -67,7 +67,7 @@
 
             }else{
 
-                return TourProgramme::with('tourdetails','userinfo')->where(function ($query)  {
+                return TourProgramme::with('tourdetails', 'userinfo', 'attendance')->where(function ($query)  {
                                     if(!empty($this->division_id)){
                                         $userIds = User::where('division_id', $request['division_id'])->pluck('id');
                                         $query->whereIn('executive_id', $userIds);
@@ -93,7 +93,7 @@
             // 'userid',
             'Username',
             'Designation',
-            'District', 'Town','objectives','Zone','Approval Status','Reporting Manager','Based location','Actual','Dif','Distance from Base Location',
+            'District', 'Town','objectives','Zone','Approval Status','Reporting Manager','Based location','Actual','Dif','Distance from Base Location (KM)',
             //  'type', 'city_id',  'last_visited','Division', 'Actual',
             ];
         }
@@ -186,7 +186,7 @@
 
 $baseCity = '';
 $actualCity = '';
-$distance = '';
+$distance = null;
 
 if(!empty($data->tourdetails) && count($data->tourdetails) > 0){
 
@@ -196,7 +196,36 @@ if(!empty($data->tourdetails) && count($data->tourdetails) > 0){
 
     $actualCity = $tourDetail->punchin_city ?? '';
 
-    $distance = $tourDetail->distance ?? '';
+}
+
+$baseLatitude = $data->userinfo?->latitude;
+$baseLongitude = $data->userinfo?->longitude;
+$actualLatitude = $data->attendance?->punchin_latitude;
+$actualLongitude = $data->attendance?->punchin_longitude;
+
+if (
+    is_numeric($baseLatitude) && is_numeric($baseLongitude) &&
+    is_numeric($actualLatitude) && is_numeric($actualLongitude) &&
+    $baseLatitude >= -90 && $baseLatitude <= 90 &&
+    $actualLatitude >= -90 && $actualLatitude <= 90 &&
+    $baseLongitude >= -180 && $baseLongitude <= 180 &&
+    $actualLongitude >= -180 && $actualLongitude <= 180
+) {
+    $distance = getRoadDistance(
+        (float) $baseLatitude,
+        (float) $baseLongitude,
+        (float) $actualLatitude,
+        (float) $actualLongitude
+    );
+
+    if (!is_numeric($distance)) {
+        $distance = round(haversineGreatCircleDistance(
+            (float) $baseLatitude,
+            (float) $baseLongitude,
+            (float) $actualLatitude,
+            (float) $actualLongitude
+        ), 2);
+    }
 }
 
 
@@ -265,7 +294,7 @@ $this->debugData[] = [
                         ? 'Match'
                         : 'Miss Match'
                 ),
-                !empty($distance) ? $distance . ' KM' : '',                   
+                $distance,
                 // $visited_date,
                 // $visited_cityid,
                 // $last_visited,
