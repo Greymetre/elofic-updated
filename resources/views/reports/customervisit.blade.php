@@ -6,7 +6,7 @@
           <div class="card-icon">
             <i class="material-icons">perm_identity</i>
           </div>
-          <h4 class="card-title">Customer Visit Report
+          <h4 class="card-title">Checkin-Checkout Report
             <span class="">
               <div class="btn-group header-frm-btn">
                 @if(auth()->user()->can(['checkin_download']))
