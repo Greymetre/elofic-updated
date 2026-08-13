@@ -2380,8 +2380,8 @@
                             <a class="hoveradd" data-toggle="collapse" href="#salesReportsMenu"
                                 aria-expanded="false">
                                 <i class="material-icons icon">point_of_sale</i>
-                                <span>Sales</span>
-                                <div class="d-none mobile_hide"> Sales</div>
+                                <span>User</span>
+                                <div class="d-none mobile_hide"> User</div>
                             </a>
                         <li class="nav-link-btn ">
                             <div class="collapse" id="salesReportsMenu" style="">
