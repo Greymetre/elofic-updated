@@ -66,13 +66,13 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin')) {
             return ['id', 'Employee Code', 'Employee Name', 'Designation', 'Zone',
             //  'Division', 
-             'Punchin Date', 'Punchin Time', 'Punchout Time', 'Worked Time', 'Calculated Status', 'Objective', 'Attendance Status', 'Remark Status', 'Punchin Address', 'Punchout Address',
+             'Punchin Date', 'Punchin Time', 'Punchout Time', 'Worked Time', 'Status', 'Objective', 'Attendance Status', 'Remark Status', 'Punchin Address', 'Punchout Address',
             //  'punchin_longitude', 'punchin_latitude', 'punchout_longitude', 'punchout_latitude', 
              'From', 'Approve/Reject By'];
         } else {
             return ['id', 'Employee Code', 'Employee Name', 'Designation', 'Zone',
             //  'Division', 
-             'Punchin Date', 'Punchin Time', 'Punchout Time', 'Worked Time', 'Calculated Status', 'Objective', 'Attendance Status', 'Remark Status', 'Punchin Address', 'Punchout Address',
+             'Punchin Date', 'Punchin Time', 'Punchout Time', 'Worked Time', 'Status', 'Objective', 'Attendance Status', 'Remark Status', 'Punchin Address', 'Punchout Address',
             //  'punchin_longitude', 'punchin_latitude', 'punchout_longitude', 'punchout_latitude'
             'From', 'Approve/Reject By'
              ];
