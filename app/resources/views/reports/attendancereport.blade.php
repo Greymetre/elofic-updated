@@ -157,8 +157,7 @@
                 <th>Punch Out Time</th>
                 <th>Punch Out Address</th>
                 <th>Working Time</th>
-                <th>Punch In summary</th>
-                <th>Working Type</th>
+                <th>Objective</th>
                 <th>Attendance Status</th>
                 <th>Remark</th>
                 <th>Action</th>
@@ -560,13 +559,6 @@
         {
           data: 'worked_time',
           name: 'worked_time',
-          "defaultContent": '',
-          orderable: false,
-          searchable: false
-        },
-        {
-          data: 'punchin_summary',
-          name: 'punchin_summary',
           "defaultContent": '',
           orderable: false,
           searchable: false

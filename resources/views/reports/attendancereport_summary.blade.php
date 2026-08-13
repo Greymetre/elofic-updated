@@ -149,7 +149,7 @@
               <th>Punch Out Letitude</th> -->
                                 <th>Punch In summary</th>
                                 <!-- <th>Punch Out summary</th> -->
-                                <th>Working Type</th>
+                                <th>Objective</th>
                                 <th>Attendance Status</th>
                                 <th>Remark</th>
                                 <th>Action</th>
