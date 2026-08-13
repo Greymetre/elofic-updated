@@ -13,10 +13,11 @@
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Facades\DB;
     use Carbon\Carbon;
+    use PhpOffice\PhpSpreadsheet\Style\Alignment;
     
 
 
-    class TourExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMapping
+    class TourExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithEvents
     {
         protected $debugData = [];
         public function __construct($request)
@@ -95,6 +96,19 @@
             'Designation',
             'District', 'Town','objectives','Zone','Approval Status','Reporting Manager','Based location','Actual','Dif','Distance from Base Location (KM)',
             //  'type', 'city_id',  'last_visited','Division', 'Actual',
+            ];
+        }
+
+        public function registerEvents(): array
+        {
+            return [
+                AfterSheet::class => function (AfterSheet $event) {
+                    $lastRow = $event->sheet->getHighestRow();
+
+                    $event->sheet->getStyle("N2:N{$lastRow}")
+                        ->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                },
             ];
         }
 
