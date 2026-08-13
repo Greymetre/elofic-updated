@@ -57,7 +57,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 });
             }
         })
-            ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_address', 'punchout_date', 'punchout_time', 'punchout_address', 'worked_time', 'punchin_summary', 'punchout_summary', 'punchin_longitude', 'punchin_latitude', 'punchout_latitude', 'punchout_longitude', 'working_type', 'attendance_status', 'remark_status', 'attendance_status','punchin_from', 'approve_reject_by')
+            ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_address', 'punchout_date', 'punchout_time', 'punchout_address', 'worked_time', 'punchout_summary', 'punchin_longitude', 'punchin_latitude', 'punchout_latitude', 'punchout_longitude', 'working_type', 'attendance_status', 'remark_status', 'attendance_status','punchin_from', 'approve_reject_by')
             ->limit(5000)->latest()->get();
     }
 
@@ -66,13 +66,13 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasRole('Admin')) {
             return ['id', 'Employee Code', 'Employee Name', 'Designation', 'Zone',
             //  'Division', 
-             'Punchin Date', 'Punchin Time', 'Punchout Time', 'Worked Time', 'Working Type', 'Attendance Status', 'Remark Status', 'Punchin Address', 'Punchout Address', 'Punchin Summary',
+             'Punchin Date', 'Punchin Time', 'Punchout Time', 'Worked Time', 'Calculated Status', 'Objective', 'Attendance Status', 'Remark Status', 'Punchin Address', 'Punchout Address',
             //  'punchin_longitude', 'punchin_latitude', 'punchout_longitude', 'punchout_latitude', 
              'From', 'Approve/Reject By'];
         } else {
             return ['id', 'Employee Code', 'Employee Name', 'Designation', 'Zone',
             //  'Division', 
-             'Punchin Date', 'Punchin Time', 'Punchout Time', 'Worked Time', 'Working Type', 'Attendance Status', 'Remark Status', 'Punchin Address', 'Punchout Address', 'Punchin Summary',
+             'Punchin Date', 'Punchin Time', 'Punchout Time', 'Worked Time', 'Calculated Status', 'Objective', 'Attendance Status', 'Remark Status', 'Punchin Address', 'Punchout Address',
             //  'punchin_longitude', 'punchin_latitude', 'punchout_longitude', 'punchout_latitude'
             'From', 'Approve/Reject By'
              ];
@@ -107,6 +107,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 $data['punchin_time'],
                 isset($data['punchout_time']) ? $data['punchout_time'] : 'misspunch',
                 $data['worked_time'],
+                $this->calculatedStatus($data),
                 isset($data['working_type']) ? $data['working_type'] . (isset($leave_details) && $leave_details ? ' - ' . $leave_details['bal_type'] : '') : '',
                 $status,
                 $data['remark_status'],
@@ -114,7 +115,6 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 $data['punchin_address'],
 
                 $data['punchout_address'],
-                $data['punchin_summary'],
                 // isset($data['punchin_longitude']) ? $data['punchin_longitude'] : '',
                 // isset($data['punchin_latitude']) ? $data['punchin_latitude'] : '',
                 // isset($data['punchout_longitude']) ? $data['punchout_longitude'] : '',
@@ -135,6 +135,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 $data['punchin_time'],
                 isset($data['punchout_time']) ? $data['punchout_time'] : 'misspunch',
                 $data['worked_time'],
+                $this->calculatedStatus($data),
                 isset($data['working_type']) ? $data['working_type'] . (isset($leave_details) && $leave_details ? ' - ' . $leave_details['bal_type'] : '') : '',
                 $status,
                 $data['remark_status'],
@@ -142,7 +143,6 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 $data['punchin_address'],
 
                 $data['punchout_address'],
-                $data['punchin_summary'],
                 // isset($data['punchin_longitude']) ? $data['punchin_longitude'] : '',
                 // isset($data['punchin_latitude']) ? $data['punchin_latitude'] : '',
                 // isset($data['punchout_longitude']) ? $data['punchout_longitude'] : '',
@@ -152,6 +152,37 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
             ];
         }
+    }
+
+    private function calculatedStatus($data): string
+    {
+        $leaveTypes = ['Leave', 'Full Day Leave', 'First Half Leave', 'Second Half Leave'];
+
+        if (in_array(trim((string) $data['working_type']), $leaveTypes, true)) {
+            return 'Leave';
+        }
+
+        if (empty($data['punchout_time'])) {
+            return 'Misspunch';
+        }
+
+        $workedTime = trim((string) $data['worked_time']);
+        if (!preg_match('/^(\d+):([0-5]\d)(?::([0-5]\d))?$/', $workedTime, $matches)) {
+            return 'Absent';
+        }
+
+        $workedSeconds = (((int) $matches[1] * 60) + (int) $matches[2]) * 60
+            + (int) ($matches[3] ?? 0);
+
+        if ($workedSeconds >= 510 * 60) {
+            return 'Full Day';
+        }
+
+        if ($workedSeconds >= 270 * 60) {
+            return 'Half Day';
+        }
+
+        return 'Absent';
     }
 
     public function registerEvents(): array
