@@ -1297,7 +1297,8 @@ if (!function_exists('SendPushNotification')) {
         $model = 'general',
         $model_id = null,
         $title = 'FieldKonnect',
-        $customer_id = null
+        $customer_id = null,
+        $image = null
     )
     {
         $notification = null;
@@ -1317,6 +1318,7 @@ if (!function_exists('SendPushNotification')) {
             $notification = Notification::create([
                 'type' => $title,
                 'data' => $message,
+                'image' => $image,
                 'read' => false,
                 'model' => $model ?: 'general',
                 'model_id' => $model_id,
@@ -1359,11 +1361,18 @@ if (!function_exists('SendPushNotification')) {
                     'body'  => $message,
                 ],
                 'data' => [
-                    'title' => $title,
-                    'body'  => $message,
-                    'image' => $model,
+                    'title' => (string) $title,
+                    'body' => (string) $message,
+                    'model' => (string) ($model ?: 'general'),
+                    'model_id' => $model_id === null ? '' : (string) $model_id,
                 ],
             ];
+
+            if (!empty($image)) {
+                $image = (string) $image;
+                $firebaseMessage['notification']['image'] = $image;
+                $firebaseMessage['data']['image'] = $image;
+            }
 
             $androidOptions = [
                 'priority' => 'HIGH',
@@ -1372,6 +1381,9 @@ if (!function_exists('SendPushNotification')) {
                     'notification_priority' => 'PRIORITY_HIGH',
                 ],
             ];
+            if (!empty($image)) {
+                $androidOptions['notification']['image'] = $image;
+            }
 
             $iosOptions = [
                 'headers' => [
@@ -1381,9 +1393,13 @@ if (!function_exists('SendPushNotification')) {
                 'payload' => [
                     'aps' => [
                         'sound' => 'default',
+                        'mutable-content' => 1,
                     ],
                 ],
             ];
+            if (!empty($image)) {
+                $iosOptions['fcm_options'] = ['image' => $image];
+            }
 
             if (str_contains($deviceType, 'android')) {
                 $firebaseMessage['android'] = $androidOptions;

@@ -15,6 +15,7 @@ class Notification extends Model
         'active',
         'type',
         'data',
+        'image',
         'read',
         'model',
         'model_id',
