@@ -714,9 +714,7 @@
         {
             abort_if(Gate::denies('order_download'), Response::HTTP_FORBIDDEN, '403 Forbidden');
             $request->validate([
-                'customer_type_id' => 'required|in:RETAILER,WORKSHOP,MECHANIC,GARAGE,DISTRIBUTOR',
-            ], [
-                'customer_type_id.required' => 'Customer Type is required for order export.',
+                'customer_type_id' => 'nullable|in:RETAILER,WORKSHOP,MECHANIC,GARAGE,DISTRIBUTOR',
             ]);
             if (ob_get_contents()) ob_end_clean();
             ob_start();

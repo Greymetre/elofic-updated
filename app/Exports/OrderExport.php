@@ -75,9 +75,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                     // $query->where('orders.product_cat_id',$this->dividion_id);
                 }
 
-                if ($this->customer_type_id && $this->customer_type_id != '') {
-                    $this->applyCustomerTypeFilter($query);
-                }
+                $this->applyCustomerTypeFilter($query);
             });
 
             $query->chunk(1000, function ($results) use (&$final) {
@@ -122,9 +120,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                         // $query->where('orders.product_cat_id',$this->dividion_id);
                     }
 
-                    if ($this->customer_type_id && $this->customer_type_id != '') {
-                        $this->applyCustomerTypeFilter($query);
-                    }
+                    $this->applyCustomerTypeFilter($query);
                     // $query->where('orders.product_cat_id',$this->dividion_id);
                 } else {
                     if ($this->startdate) {
@@ -145,9 +141,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
                         // $query->where('orders.product_cat_id',$this->dividion_id);
                     }
 
-                    if ($this->customer_type_id && $this->customer_type_id != '') {
-                        $this->applyCustomerTypeFilter($query);
-                    }
+                    $this->applyCustomerTypeFilter($query);
                 }
             })->select('id', 'order_id', 'product_id', 'product_detail_id', 'quantity', 'shipped_qty', 'price', 'discount', 'discount_amount', 'tax_amount', 'line_total', 'status_id', 'created_at', 'scheme_name', 'scheme_discount', 'scheme_amount', 'cluster_discount', 'cluster_amount', 'deal_discount', 'deal_amount', 'distributor_discount', 'distributor_amount');
 
@@ -529,10 +523,20 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
 
     private function applyCustomerTypeFilter($query): void
     {
-        $customerType = strtoupper((string) $this->customer_type_id);
+        $customerType = strtoupper(trim((string) $this->customer_type_id));
+        $distributorOrderTypes = ['MASTER_DISTRIBUTER', 'MASTER_DISTRIBUTOR'];
 
         if ($customerType === 'DISTRIBUTOR') {
-            $query->whereIn('order_type', ['MASTER_DISTRIBUTER', 'MASTER_DISTRIBUTOR']);
+            $query->whereIn('order_type', $distributorOrderTypes);
+            return;
+        }
+
+        $query->where(function ($orderTypeQuery) use ($distributorOrderTypes) {
+            $orderTypeQuery->whereNull('order_type')
+                ->orWhereNotIn('order_type', $distributorOrderTypes);
+        });
+
+        if ($customerType === '') {
             return;
         }
 

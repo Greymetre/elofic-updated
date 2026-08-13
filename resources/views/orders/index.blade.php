@@ -45,8 +45,8 @@
                                         </div>
                                         <div class="p-2" style="width:190px;">
                                             <select class="select2" name="customer_type_id" id="customer_type_id"
-                                                title="Select Customer Type" required>
-                                                <option value="">Select Customer Type *</option>
+                                                title="Select Customer Type">
+                                                <option value="">All Customer Types (Except Distributor)</option>
                                                 @foreach($customer_types as $customer_type)
                                                 <option value="{{ $customer_type }}"
                                                     {{ old('customer_type_id') == $customer_type ? 'selected' : '' }}>
