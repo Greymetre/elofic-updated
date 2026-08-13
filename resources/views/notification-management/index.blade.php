@@ -74,7 +74,7 @@
             <div class="card">
                 <div class="card-header card-header-icon card-header-theme">
                     <div class="card-icon"><i class="material-icons">notifications_active</i></div>
-                    <h4 class="card-title">News Management</h4>
+                    <h4 class="card-title">Notification Management</h4>
                 </div>
                 <div class="card-body">
                     @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
@@ -140,7 +140,7 @@
                             </div>
                             <div class="col-md-12 mt-3">
                                 <button type="submit" class="btn btn-theme" id="sendButton">
-                                    <i class="material-icons">send</i> Send News
+                                    <i class="material-icons">send</i> Send Notification
                                 </button>
                             </div>
                         </div>

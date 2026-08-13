@@ -103,12 +103,12 @@ class NotificationManagementController extends Controller
         $pushFailed = $pushEligible - $sent;
         $withoutToken = $stored - $pushEligible;
 
-        $message = "News saved successfully for {$stored} user(s). Push notification sent to {$sent} user(s).";
+        $message = "Notification saved successfully for {$stored} user(s). Push notification sent to {$sent} user(s).";
         if ($withoutToken > 0) {
             $message .= " {$withoutToken} user(s) had no FCM token and can read it from the mobile notification screen.";
         }
         if ($pushFailed > 0) {
-            $message .= " {$pushFailed} push delivery attempt(s) failed; the news is still available in the mobile notification screen.";
+            $message .= " {$pushFailed} push delivery attempt(s) failed; the notification is still available in the mobile notification screen.";
         }
 
         return redirect()->route('notification-management.index')->with(

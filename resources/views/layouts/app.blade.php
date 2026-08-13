@@ -1643,8 +1643,8 @@
                 <li class="nav-link hide_icon {{ request()->is('notification-management*') ? 'active' : '' }}">
                     <a class="hoveradd" href="{{ route('notification-management.index') }}">
                         <i class="material-icons icon">notifications_active</i>
-                        <span>News Management</span>
-                        <div class="d-none mobile_hide">News Management</div>
+                        <span>Notification Management</span>
+                        <div class="d-none mobile_hide">Notification Management</div>
                     </a>
                 </li>
                 @endif
