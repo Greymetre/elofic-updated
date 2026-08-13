@@ -214,8 +214,10 @@ if(!empty($data->tourdetails) && count($data->tourdetails) > 0){
 
 $baseLatitude = $data->userinfo?->latitude;
 $baseLongitude = $data->userinfo?->longitude;
-$actualLatitude = $data->attendance?->punchin_latitude;
-$actualLongitude = $data->attendance?->punchin_longitude;
+// Mobile attendance currently stores the incoming latitude in
+// punchin_longitude and longitude in punchin_latitude.
+$actualLatitude = $data->attendance?->punchin_longitude;
+$actualLongitude = $data->attendance?->punchin_latitude;
 
 if (
     is_numeric($baseLatitude) && is_numeric($baseLongitude) &&
