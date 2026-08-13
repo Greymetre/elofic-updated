@@ -303,8 +303,8 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
             $data->user->getbranch->branch_name ?? '-',
 
 
-            isset($data['checkin_time']) ? $data['checkin_time'] : '-',
-            isset($data['checkout_time']) ? $data['checkout_time'] : '-',
+            $this->formatTime($data['checkin_time'] ?? null),
+            $this->formatTime($data['checkout_time'] ?? null),
             isset($data['time_interval']) ? $data['time_interval'] : '-',
             isset($data['checkin_address']) ? $data['checkin_address'] : '-',
             isset($data['checkout_address']) ? $data['checkout_address'] : '-',
@@ -346,5 +346,12 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
             // $sum_qty,
             // (!empty($data['orders_sum'])) ? $data['orders_sum']->sum('grand_total') : 0,
         ];
+    }
+
+    private function formatTime($time): string
+    {
+        return $time
+            ? Carbon::createFromFormat('H:i:s', $time)->format('h:i:s A')
+            : '-';
     }
 }
