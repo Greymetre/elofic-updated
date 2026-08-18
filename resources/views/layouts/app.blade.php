@@ -1631,7 +1631,7 @@
                 @endif
                 {{-- Location Management --}}
                 @if(auth()->user()->can('user_location'))
-                <li class="nav-link {{ request()->is('livelocation*') ? 'active' : '' }}">
+                <li class="nav-link {{ request()->is('livelocation*') || request()->routeIs('location.punch-in-locator') ? 'active' : '' }}">
                     <a class="collapsed hoveradd" data-toggle="collapse" href="#locationManagementMenu"
                         aria-expanded="false">
                         <i class="material-icons icon">location_on</i>
@@ -1646,6 +1646,15 @@
                                     <i class="material-icons icon">share_location</i>
                                     <span>User Live Location</span>
                                     <div class="d-none mobile_hide"> User Live Location</div>
+                                </a>
+                            </li>
+                            @endif
+                            @if(auth()->user()->can('user_location'))
+                            <li class="nav-link-btn {{ request()->routeIs('location.punch-in-locator') ? 'active' : '' }}">
+                                <a class="hoveradd2" href="{{ route('location.punch-in-locator') }}">
+                                    <i class="material-icons icon">where_to_vote</i>
+                                    <span>User Punch-In Locator</span>
+                                    <div class="d-none mobile_hide"> User Punch-In Locator</div>
                                 </a>
                             </li>
                             @endif

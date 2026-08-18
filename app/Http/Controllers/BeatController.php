@@ -23,6 +23,7 @@
   use App\Exports\BeatExport;
   use App\Exports\BeatTemplate;
   use App\Http\Requests\BeatRequest;
+  use App\Models\Attendance;
   use App\Models\MasterDistributor;
   use App\Models\SecondaryCustomer;
 
@@ -1305,6 +1306,65 @@ break;
       }
 
       return view('beats.livelocation', compact('users', 'branches', 'divisions', 'departments', 'date', 'user_id'));
+    }
+
+    /**
+     * Map every punch-in recorded today by the users reporting to the logged in
+     * user, so their starting point for the day can be seen on a single map.
+     */
+    public function punchInLocator()
+    {
+      $accessibleUserIds = getUsersReportingToAuth();
+      $punchIns = Attendance::with(['users.getdesignation', 'users.getdivision'])
+        ->whereIn('user_id', $accessibleUserIds)
+        ->whereDate('punchin_date', Carbon::today())
+        ->whereNotNull('punchin_latitude')
+        ->whereNotNull('punchin_longitude')
+        ->orderBy('punchin_time')
+        ->get()
+        ->map(function ($attendance) {
+          $user = $attendance->users;
+          if (!is_numeric($attendance->punchin_latitude) || !is_numeric($attendance->punchin_longitude)) {
+            return null;
+          }
+
+          $latitude = (float) $attendance->punchin_latitude;
+          $longitude = (float) $attendance->punchin_longitude;
+
+          // The mobile punch-in API stores the request latitude in punchin_longitude
+          // and the request longitude in punchin_latitude, so reverse that for App records.
+          if (strcasecmp((string) $attendance->punchin_from, 'App') === 0) {
+            [$latitude, $longitude] = [$longitude, $latitude];
+          } else {
+            $directIsIndia = $latitude >= 6 && $latitude <= 38 && $longitude >= 68 && $longitude <= 98;
+            $swappedIsIndia = $longitude >= 6 && $longitude <= 38 && $latitude >= 68 && $latitude <= 98;
+            if (!$directIsIndia && $swappedIsIndia) {
+              [$latitude, $longitude] = [$longitude, $latitude];
+            }
+          }
+
+          if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180 ||
+              (abs($latitude) < 0.000001 && abs($longitude) < 0.000001)) {
+            return null;
+          }
+
+          return [
+            'attendance_id' => $attendance->id,
+            'user_id' => $attendance->user_id,
+            'name' => optional($user)->name ?: 'Unknown user',
+            'employee_code' => optional($user)->employee_codes ?: '',
+            'designation' => optional(optional($user)->getdesignation)->designation_name ?: 'Field employee',
+            'zone' => optional(optional($user)->getdivision)->division_name ?: '',
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'address' => $attendance->punchin_address ?: 'Address unavailable',
+            'time' => $attendance->punchin_time ? Carbon::parse($attendance->punchin_time)->format('h:i A') : '--',
+          ];
+        })
+        ->filter()
+        ->values();
+
+      return view('beats.punchin_locator', compact('punchIns'));
     }
 
   public function globalScheduleForm()
