@@ -14,8 +14,24 @@
         .live-locator-shell .live-users-search:focus, .live-locator-shell .live-users-zone-filter:focus { border-color:#3694cc; outline:0; }
         .live-users-zone-wrap { margin-top:8px; }
         .live-users-filters { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
-        .live-locator-shell .live-user-filter { margin:0; padding:4px 9px; border:1px solid #dbe2ec; border-radius:20px; background:#fff; color:#5b6b83; font-size:10px; font-weight:600; line-height:1.6; text-transform:none; box-shadow:none; }
-        .live-locator-shell .live-user-filter.active { border-color:transparent; background:linear-gradient(45deg,#3860a4 0%,#3694cc 100%); color:#fff; }
+        /* Material's global .btn rules win on colour, so the chips state their own. */
+        .live-locator-shell .live-users-filters .btn.live-user-filter {
+            margin:0 !important; padding:5px 11px !important; border:1px solid #d3dced !important; border-radius:20px !important;
+            background:#fff !important; background-image:none !important; color:#55637d !important;
+            font-size:10px !important; font-weight:600 !important; line-height:1.6 !important; text-transform:none !important;
+            letter-spacing:.2px !important; box-shadow:none !important; opacity:1 !important; transition:.18s ease;
+        }
+        .live-locator-shell .live-users-filters .btn.live-user-filter:hover,
+        .live-locator-shell .live-users-filters .btn.live-user-filter:focus {
+            border-color:#9dbfe0 !important; background:#eef4fb !important; background-image:none !important; color:#2f4f83 !important; box-shadow:none !important;
+        }
+        .live-locator-shell .live-users-filters .btn.live-user-filter.active,
+        .live-locator-shell .live-users-filters .btn.live-user-filter.active:hover,
+        .live-locator-shell .live-users-filters .btn.live-user-filter.active:focus {
+            border-color:transparent !important;
+            background:linear-gradient(45deg,#3860a4 0%,#3694cc 100%) !important;
+            color:#fff !important; box-shadow:0 2px 5px rgba(56,96,164,.28) !important;
+        }
         .live-users-list { height:calc(100% - 158px); padding:8px; overflow-y:auto; }
         .live-user-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:5px; padding:9px 10px; border:1px solid transparent; border-radius:6px; cursor:pointer; transition:.18s ease; }
         .live-user-row:hover, .live-user-row.active { border-color:#cfe0f2; background:#eef4fb; }
