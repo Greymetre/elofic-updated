@@ -883,7 +883,7 @@ public function getRetailerlist(Request $request)
             $user_id = $request->input('user_id');
 
             $punchInOut = Attendance::where('user_id', $user_id)->where('punchin_date', $date)->get();
-            $checkInOut = CheckIn::with('visitreports')->with('customers')->where('user_id', $user_id)->where('checkin_date', $date)->get();
+            $checkInOut = CheckIn::with('visitreport')->with('customer')->where('user_id', $user_id)->where('checkin_date', $date)->get();
             $orders = Order::with('buyers')->where('created_by', $user_id)->whereRaw('DATE(created_at)="' . $date . '"')->get();
             $customer_add = Customers::with('customeraddress')->where('created_by', $user_id)->whereRaw('DATE(created_at)="' . $date . '"')->get();
             $customer_update = Customers::with('customeraddress')->where('created_by', $user_id)->whereColumn('updated_at', '>', 'created_at')->whereRaw('DATE(updated_at)="' . $date . '"')->get();
@@ -921,7 +921,7 @@ public function getRetailerlist(Request $request)
                     $checkInData[$k]['time'] = $val->checkin_time;
                     $checkInData[$k]['latitude'] = $val->checkin_latitude != null ? $val->checkin_latitude : '';
                     $checkInData[$k]['longitude'] = $val->checkin_longitude != null ? $val->checkin_longitude : '';
-                    $checkInData[$k]['msg'] = $val->customers->name . ' - ' . $check_in_city;
+                    $checkInData[$k]['msg'] = $val->entity_name . ' - ' . $check_in_city;
                 }
                 if ($val->checkout_time != null) {
                     $check_out_city = getLatLongToCity($val->checkout_latitude, $val->checkout_longitude);
@@ -929,7 +929,7 @@ public function getRetailerlist(Request $request)
                     $checkOutData[$k]['time'] = $val->checkout_time;
                     $checkOutData[$k]['latitude'] = $val->checkout_latitude != null ? $val->checkout_latitude : '';
                     $checkOutData[$k]['longitude'] = $val->checkout_longitude != null ? $val->checkout_longitude : '';
-                    $checkOutData[$k]['msg'] = $val->customers->name . ' - ' . $check_out_city . '<br>Remark - ' . $val->visitreports->description;
+                    $checkOutData[$k]['msg'] = $val->entity_name . ' - ' . $check_out_city . '<br>Remark - ' . ($val->visitreport->description ?? '-');
                 }
             }
 
