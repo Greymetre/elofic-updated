@@ -677,6 +677,7 @@ Route::get('beats-global-schedule-form', [BeatController::class, 'globalSchedule
     Route::get('user-live-locator', [BeatController::class, 'liveLocator'])->name('location.live-locator');
     Route::get('livelocation-all-users', [BeatController::class, 'allUsersLiveLocations'])->name('livelocation.all-users');
     Route::get('user-punch-in-locator', [BeatController::class, 'punchInLocator'])->name('location.punch-in-locator');
+    Route::get('customer-locator', [BeatController::class, 'customerLocator'])->name('location.customer-locator');
     //Attendance
     Route::any('attendances', [AttendanceController::class, 'index'])->name('attendances.index');
     Route::post('submitAttendances', [AttendanceController::class, 'submitAttendances'])->name('submitAttendances');

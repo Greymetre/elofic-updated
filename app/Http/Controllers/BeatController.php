@@ -27,6 +27,7 @@
   use App\Models\UserLiveLocation;
   use App\Models\CheckIn;
   use App\Models\Order;
+  use App\Models\Customers;
   use App\Models\MasterDistributor;
   use App\Models\SecondaryCustomer;
 
@@ -1469,6 +1470,91 @@ break;
         ->values();
 
       return view('beats.punchin_locator', compact('punchIns'));
+    }
+
+    /**
+     * Map every customer / distributor / secondary customer visited today by the
+     * users reporting to the logged in user, using the check-in coordinates.
+     */
+    public function customerLocator()
+    {
+      $accessibleUserIds = getUsersReportingToAuth();
+      $checkIns = CheckIn::with(['user.getdesignation', 'user.getdivision'])
+        ->whereIn('user_id', $accessibleUserIds)
+        ->whereDate('checkin_date', Carbon::today())
+        ->whereNotNull('checkin_latitude')
+        ->whereNotNull('checkin_longitude')
+        ->orderBy('checkin_time')
+        ->get();
+
+      // Resolve the visited entity in bulk instead of per row, because check-ins
+      // point at three different tables through entity_type / entity_id.
+      $customerIds = $checkIns->filter(function ($checkIn) {
+        return empty($checkIn->entity_type) || $checkIn->entity_type === 'customer';
+      })->pluck('customer_id')->filter()->unique();
+      $distributorIds = $checkIns->where('entity_type', 'distributor')->pluck('entity_id')->filter()->unique();
+      $secondaryIds = $checkIns->where('entity_type', 'secondary_customer')->pluck('entity_id')->filter()->unique();
+
+      $customers = Customers::with('customertypes')
+        ->whereIn('id', $customerIds)
+        ->get()
+        ->keyBy('id');
+      $distributors = MasterDistributor::whereIn('id', $distributorIds)->get()->keyBy('id');
+      $secondaryCustomers = SecondaryCustomer::whereIn('id', $secondaryIds)->get()->keyBy('id');
+
+      $punchIns = $checkIns
+        ->map(function ($checkIn) use ($customers, $distributors, $secondaryCustomers) {
+          if (!is_numeric($checkIn->checkin_latitude) || !is_numeric($checkIn->checkin_longitude)) {
+            return null;
+          }
+
+          $latitude = (float) $checkIn->checkin_latitude;
+          $longitude = (float) $checkIn->checkin_longitude;
+          if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180 ||
+              (abs($latitude) < 0.000001 && abs($longitude) < 0.000001)) {
+            return null;
+          }
+
+          $name = '';
+          $code = '';
+          $type = 'Customer';
+          if ($checkIn->entity_type === 'distributor') {
+            $distributor = $distributors->get($checkIn->entity_id);
+            $name = optional($distributor)->trade_name ?: optional($distributor)->legal_name;
+            $code = optional($distributor)->distributor_code ?: '';
+            $type = 'Distributor';
+          } elseif ($checkIn->entity_type === 'secondary_customer') {
+            $secondary = $secondaryCustomers->get($checkIn->entity_id);
+            $name = optional($secondary)->shop_name ?: optional($secondary)->owner_name;
+            $type = optional($secondary)->sub_type ?: 'Secondary Customer';
+          } else {
+            $customer = $customers->get($checkIn->customer_id);
+            $name = optional($customer)->name ?: trim((optional($customer)->first_name ?? '') . ' ' . (optional($customer)->last_name ?? ''));
+            $code = optional($customer)->customer_code ?: '';
+            $type = optional(optional($customer)->customertypes)->customertype_name ?: 'Customer';
+          }
+
+          $user = $checkIn->user;
+
+          return [
+            'attendance_id' => $checkIn->id,
+            'name' => $name ?: 'Unknown customer',
+            'employee_code' => $code,
+            'designation' => $type,
+            'zone' => optional(optional($user)->getdivision)->division_name ?: '',
+            'representative' => optional($user)->name ?: 'Unknown employee',
+            'representative_role' => optional(optional($user)->getdesignation)->designation_name ?: 'Field employee',
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'address' => $checkIn->checkin_address ?: 'Address unavailable',
+            'time' => $checkIn->checkin_time ? Carbon::parse($checkIn->checkin_time)->format('h:i A') : '--',
+          ];
+        })
+        ->filter()
+        ->values();
+
+      $locatorMode = 'customer';
+      return view('beats.punchin_locator', compact('punchIns', 'locatorMode'));
     }
 
   public function globalScheduleForm()

@@ -1,4 +1,5 @@
 <x-app-layout>
+    @php($isCustomerLocator = ($locatorMode ?? 'punch') === 'customer')
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVSDwHbKULnZa93kYpYINTqX4eaWy9q18" type="text/javascript"></script>
     <style>
         .punch-locator-shell { display:flex; height:calc(100vh - 260px); min-height:520px; overflow:hidden; border:1px solid #e3e8f0; border-radius:8px; background:#fff; }
@@ -45,24 +46,24 @@
             <div class="card">
                 <div class="card-header card-header-icon card-header-theme">
                     <div class="card-icon">
-                        <i class="material-icons">where_to_vote</i>
+                        <i class="material-icons">{{ $isCustomerLocator ? 'pin_drop' : 'where_to_vote' }}</i>
                     </div>
-                    <h4 class="card-title">User Punch-In Locator</h4>
+                    <h4 class="card-title">{{ $isCustomerLocator ? 'Customer Locator' : 'User Punch-In Locator' }}</h4>
                 </div>
                 <div class="card-body">
                     <section class="punch-locator-shell">
                         <aside class="punch-locator-sidebar">
                             <div class="punch-locator-head">
                                 <div class="punch-locator-title-row">
-                                    <h2 class="punch-locator-title">Punch-ins today</h2>
+                                    <h2 class="punch-locator-title">{{ $isCustomerLocator ? 'Check-ins today' : 'Punch-ins today' }}</h2>
                                     <span class="punch-locator-count" id="punchCount">0 records</span>
                                 </div>
                                 <div class="punch-filter-grid">
                                     <div class="punch-search-wrap">
                                         <i class="material-icons">search</i>
-                                        <input type="search" class="punch-search" id="punchSearch" placeholder="Search user..." autocomplete="off">
+                                        <input type="search" class="punch-search" id="punchSearch" placeholder="{{ $isCustomerLocator ? 'Search customer...' : 'Search user...' }}" autocomplete="off">
                                     </div>
-                                    <select class="punch-zone" id="punchZone" aria-label="Filter punch-ins by division">
+                                    <select class="punch-zone" id="punchZone" aria-label="Filter records by division">
                                         <option value="all">All divisions</option>
                                     </select>
                                 </div>
@@ -80,6 +81,7 @@
 
     <script>
         var punchIns = @json($punchIns);
+        var isCustomerLocator = @json($isCustomerLocator);
         var punchMap;
         var punchInfoWindow;
 
@@ -165,7 +167,7 @@
             var $list = $('#punchList').empty();
             $('#punchCount').text(items.length + (items.length === 1 ? ' record' : ' records'));
             if (!items.length) {
-                $list.append($('<div>', { class: 'punch-empty', text: 'No punch-ins match the current filters.' }));
+                $list.append($('<div>', { class: 'punch-empty', text: isCustomerLocator ? 'No customer check-ins match the current filters.' : 'No punch-ins match the current filters.' }));
                 return;
             }
             items.forEach(function (item) {
@@ -174,8 +176,11 @@
                     $('<div>', { class: 'punch-name', text: item.name }),
                     $('<div>', { class: 'punch-role', text: item.designation }),
                     $('<div>', { class: 'punch-address', text: item.address }),
-                    $('<div>', { class: 'punch-time', text: 'Punched in ' + item.time })
+                    $('<div>', { class: 'punch-time', text: (isCustomerLocator ? 'Checked in ' : 'Punched in ') + item.time })
                 );
+                if (isCustomerLocator && item.representative) {
+                    $copy.append($('<div>', { class: 'punch-role', text: item.representative + ' \u00b7 ' + item.representative_role }));
+                }
                 $row.append($('<div>', { class: 'punch-avatar', text: initials(item.name) }), $copy)
                     .on('click', function () { focusPunch(item.attendance_id, true); });
                 $list.append($row);
@@ -197,8 +202,11 @@
                 $('<div>', { class: 'punch-popup-name', text: item.name }),
                 $('<div>', { class: 'punch-popup-role', text: item.designation }),
                 $('<div>', { class: 'punch-popup-address', text: item.address }),
-                $('<div>', { class: 'punch-popup-time', text: 'Punched in at ' + item.time })
+                $('<div>', { class: 'punch-popup-time', text: (isCustomerLocator ? 'Checked in at ' : 'Punched in at ') + item.time })
             );
+            if (isCustomerLocator && item.representative) {
+                popup.append($('<div>', { class: 'punch-popup-role', text: item.representative + ' \u00b7 ' + item.representative_role }));
+            }
             punchInfoWindow.setContent(popup.get(0));
             punchInfoWindow.open(punchMap, item.marker);
         }
