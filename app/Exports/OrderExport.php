@@ -198,6 +198,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
 
         return [
             'Order Date',
+            'Order Time',
             'Buyer Code',
             'Customer Type',
             'Sub Type',
@@ -220,6 +221,15 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             'Branch',
             'Designation',
             'Status',
+            'Group',
+            'Actual Group',
+            'Class',
+            'Product Category',
+            'Product Classification',
+            'City Name',
+            'District Name',
+            'State Name',
+            'Order From',
         ];
     }
 
@@ -344,6 +354,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
 
         return [
             isset($order['order_date']) ? date('Y-m-d', strtotime($order['order_date'])) : '',
+            !empty($order['created_at']) ? date('h:i A', strtotime($order['created_at'])) : '',
             $order['buyer_id'] ?? $order['seller_id'] ?? '',
             $customerType,
             $customerSubType,
@@ -371,6 +382,15 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             $order['getuserdetails']['getbranch']['branch_name'] ?? '',
             $order['getuserdetails']['getdesignation']['designation_name'] ?? '',
             $orderModel?->dispatch_status ?? 'Pending',
+            '', // Group
+            '', // Actual Group
+            '', // Class
+            '', // Product Category
+            '', // Product Classification
+            '', // City Name
+            '', // District Name
+            '', // State Name
+            '', // Order From
         ];
 
         if ($this->dividion_id == '1') {
