@@ -884,9 +884,9 @@ public function getRetailerlist(Request $request)
 
             $punchInOut = Attendance::where('user_id', $user_id)->where('punchin_date', $date)->get();
             $checkInOut = CheckIn::with('visitreport')->with('customer')->where('user_id', $user_id)->where('checkin_date', $date)->get();
-            $orders = Order::with('buyers')->where('created_by', $user_id)->whereRaw('DATE(created_at)="' . $date . '"')->get();
-            $customer_add = Customers::with('customeraddress')->where('created_by', $user_id)->whereRaw('DATE(created_at)="' . $date . '"')->get();
-            $customer_update = Customers::with('customeraddress')->where('created_by', $user_id)->whereColumn('updated_at', '>', 'created_at')->whereRaw('DATE(updated_at)="' . $date . '"')->get();
+            $orders = Order::with('orderdetails')->where('created_by', $user_id)->whereRaw('DATE(created_at)="' . $date . '"')->get();
+            $customer_add = SecondaryCustomer::with('city')->where('created_by', $user_id)->whereRaw('DATE(created_at)="' . $date . '"')->get();
+            $customer_update = SecondaryCustomer::with('city')->where('created_by', $user_id)->whereColumn('updated_at', '>', 'created_at')->whereRaw('DATE(updated_at)="' . $date . '"')->get();
 
             $punchInData = array();
             $punchOutData = array();
@@ -934,22 +934,29 @@ public function getRetailerlist(Request $request)
             }
 
             foreach ($orders as $k => $val) {
+                // buyer is a SecondaryCustomer or a MasterDistributor depending on the order type
+                $buyer = $val->resolveCustomerRelations()->buyers;
+                $buyer_name = $buyer->shop_name ?? $buyer->trade_name ?? $buyer->legal_name ?? '-';
+                $buyer_city = getEntityCityName($buyer);
+
                 $orderData[$k]['title'] = 'Order';
                 $orderData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
                 $orderData[$k]['latitude'] = '';
                 $orderData[$k]['longitude'] = '';
-                $orderData[$k]['msg'] = $val->buyers->name . ' - ' . $val->buyers->customeraddress->cityname->city_name . ',<br>Qty : ' . $val->orderdetails->sum('quantity') . ',<br>Total : ' . $val->grand_total;
+                $orderData[$k]['msg'] = $buyer_name . ' - ' . $buyer_city . ',<br>Qty : ' . $val->orderdetails->sum('quantity') . ',<br>Total : ' . $val->grand_total;
             }
 
             foreach ($customer_add as $k => $val) {
+                $customer_name = $val->shop_name ?? $val->owner_name ?? '-';
+
                 $customerAddData[$k]['title'] = 'New Customer Registration';
                 $customerAddData[$k]['time'] = date('H:i:s', strtotime($val->created_at));
                 $customerAddData[$k]['latitude'] = $val->latitude;
                 $customerAddData[$k]['longitude'] = $val->longitude;
-                if ($val->customeraddress->cityname != null) {
-                    $customerAddData[$k]['msg'] = $val->name . ' - ' . $val->customeraddress->cityname->city_name;
+                if ($val->city != null) {
+                    $customerAddData[$k]['msg'] = $customer_name . ' - ' . $val->city->city_name;
                 } else {
-                    $customerAddData[$k]['msg'] = $val->name . ' - City not enter';
+                    $customerAddData[$k]['msg'] = $customer_name . ' - City not enter';
                 }
             }
 

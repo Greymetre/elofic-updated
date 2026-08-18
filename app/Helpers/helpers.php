@@ -501,6 +501,25 @@ if (! function_exists('getLatLongToCity')) {
     }
 }
 
+if (! function_exists('getEntityCityName')) {
+    /**
+     * City name for the new customer models – SecondaryCustomer keeps a city_id,
+     * MasterDistributor keeps billing_city (either a city id or a plain name).
+     */
+    function getEntityCityName($entity, $default = '-')
+    {
+        if (!$entity) {
+            return $default;
+        }
+
+        if ($entity instanceof \App\Models\MasterDistributor) {
+            return $entity->billing_city_export_name ?: $default;
+        }
+
+        return $entity->city?->city_name ?: $default;
+    }
+}
+
 function logActivity($module, $moduleId, $action, $actionType = null, $old = null, $new = null, $type = null)
 {
      \App\Models\ActivityLog::create([
