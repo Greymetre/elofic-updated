@@ -24,6 +24,9 @@
   use App\Exports\BeatTemplate;
   use App\Http\Requests\BeatRequest;
   use App\Models\Attendance;
+  use App\Models\UserLiveLocation;
+  use App\Models\CheckIn;
+  use App\Models\Order;
   use App\Models\MasterDistributor;
   use App\Models\SecondaryCustomer;
 
@@ -1306,6 +1309,107 @@ break;
       }
 
       return view('beats.livelocation', compact('users', 'branches', 'divisions', 'departments', 'date', 'user_id'));
+    }
+
+    /**
+     * Live locator page: the whole field team plotted from their latest
+     * reported GPS position for today.
+     */
+    public function liveLocator()
+    {
+      return view('beats.live_locator');
+    }
+
+    /**
+     * JSON feed for the live locator map: latest position of every user
+     * reporting to the logged in user, with today's travel and sales summary.
+     */
+    public function allUsersLiveLocations()
+    {
+      $accessibleUserIds = getUsersReportingToAuth();
+      $latestLocationIds = UserLiveLocation::query()
+        ->whereIn('userid', $accessibleUserIds)
+        ->whereDate('created_at', Carbon::today())
+        ->whereNotNull('latitude')
+        ->whereNotNull('longitude')
+        ->selectRaw('MAX(id) as id')
+        ->groupBy('userid')
+        ->pluck('id');
+
+      $users = User::with(['getdesignation', 'getbranch', 'getdivision'])
+        ->whereIn('id', $accessibleUserIds)
+        ->get()
+        ->keyBy('id');
+      $latestLocations = UserLiveLocation::whereIn('id', $latestLocationIds)->get()->keyBy('userid');
+      $todayLocations = UserLiveLocation::whereIn('userid', $accessibleUserIds)
+        ->whereDate('created_at', Carbon::today())
+        ->orderBy('id')
+        ->get()
+        ->groupBy('userid');
+      $todayVisits = CheckIn::whereIn('user_id', $accessibleUserIds)
+        ->whereDate('checkin_date', Carbon::today())
+        ->selectRaw('user_id, COUNT(*) as total')
+        ->groupBy('user_id')
+        ->pluck('total', 'user_id');
+      $todayOrders = Order::whereIn('created_by', $accessibleUserIds)
+        ->whereDate('created_at', Carbon::today())
+        ->selectRaw('created_by, COALESCE(SUM(grand_total), 0) as total')
+        ->groupBy('created_by')
+        ->pluck('total', 'created_by');
+      $todayPlans = BeatSchedule::with('beats')
+        ->whereIn('user_id', $accessibleUserIds)
+        ->whereDate('beat_date', Carbon::today())
+        ->get()
+        ->groupBy('user_id');
+
+      $locations = $users->values()
+        ->map(function ($user) use ($latestLocations, $todayLocations, $todayVisits, $todayOrders, $todayPlans) {
+          $location = $latestLocations->get($user->id);
+          $reportedAt = optional($location)->created_at ? Carbon::parse($location->created_at) : null;
+          $status = !$location ? 'GPS Off' : (($reportedAt && $reportedAt->diffInMinutes(Carbon::now()) <= 15) ? 'Online' : 'Offline');
+
+          // Travelled distance is the sum of every hop reported today.
+          $distance = 0;
+          $points = $todayLocations->get($user->id, collect())->values();
+          for ($index = 1; $index < $points->count(); $index++) {
+            $previous = $points[$index - 1];
+            $current = $points[$index];
+            if (is_numeric($previous->latitude) && is_numeric($previous->longitude) && is_numeric($current->latitude) && is_numeric($current->longitude)) {
+              $distance += haversineGreatCircleDistance($previous->latitude, $previous->longitude, $current->latitude, $current->longitude);
+            }
+          }
+
+          $plan = $todayPlans->get($user->id, collect())
+            ->pluck('beats.beat_name')
+            ->filter()
+            ->unique()
+            ->implode(', ');
+
+          $reportedTime = optional($location)->time ? Carbon::parse($location->time)->format('h:i A') : null;
+
+          return [
+            'user_id' => $user->id,
+            'name' => $user->name ?: 'Unknown user',
+            'employee_code' => $user->employee_codes ?? '',
+            'designation' => optional($user->getdesignation)->designation_name ?? 'Field employee',
+            'branch' => optional($user->getbranch)->branch_name ?? '',
+            'division' => optional($user->getdivision)->division_name ?? '',
+            'mobile' => $user->mobile ?? '',
+            'today_plan' => $plan ?: 'No plan assigned',
+            'distance_km' => round($distance, 1),
+            'visits_today' => (int) ($todayVisits[$user->id] ?? 0),
+            'order_value' => (float) ($todayOrders[$user->id] ?? 0),
+            'latitude' => optional($location)->latitude,
+            'longitude' => optional($location)->longitude,
+            'address' => optional($location)->address ?: 'Address unavailable',
+            'time' => $reportedTime ?: optional($reportedAt)->format('h:i A'),
+            'reported_at' => optional($reportedAt)->toIso8601String(),
+            'status' => $status,
+          ];
+        })
+        ->values();
+
+      return response()->json(['status' => true, 'locations' => $locations]);
     }
 
     /**

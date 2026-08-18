@@ -1631,7 +1631,7 @@
                 @endif
                 {{-- Location Management --}}
                 @if(auth()->user()->can('user_location'))
-                <li class="nav-link {{ request()->is('livelocation*') || request()->routeIs('location.punch-in-locator') ? 'active' : '' }}">
+                <li class="nav-link {{ request()->is('livelocation*') || request()->routeIs('location.live-locator') || request()->routeIs('location.punch-in-locator') ? 'active' : '' }}">
                     <a class="collapsed hoveradd" data-toggle="collapse" href="#locationManagementMenu"
                         aria-expanded="false">
                         <i class="material-icons icon">location_on</i>
@@ -1641,9 +1641,18 @@
                     <div class="collapse" id="locationManagementMenu" style="">
                         <ul class="navd">
                             @if(auth()->user()->can('user_location'))
+                            <li class="nav-link-btn {{ request()->routeIs('location.live-locator') ? 'active' : '' }}">
+                                <a class="hoveradd2" href="{{ route('location.live-locator') }}">
+                                    <i class="material-icons icon">share_location</i>
+                                    <span>User Live Locator</span>
+                                    <div class="d-none mobile_hide"> User Live Locator</div>
+                                </a>
+                            </li>
+                            @endif
+                            @if(auth()->user()->can('user_location'))
                             <li class="nav-link-btn {{ request()->is('livelocation*') ? 'active' : '' }}">
                                 <a class="hoveradd2" href="{{ url('livelocation') }}">
-                                    <i class="material-icons icon">share_location</i>
+                                    <i class="material-icons icon">my_location</i>
                                     <span>Geolocator</span>
                                     <div class="d-none mobile_hide"> Geolocator</div>
                                 </a>
