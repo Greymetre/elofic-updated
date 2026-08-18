@@ -1171,30 +1171,6 @@
                             </div>
                         </li>
                         @endif
-                        {{-- Location Management --}}
-                        @if(auth()->user()->can('user_location'))
-                        <li class="nav-link {{ request()->is('livelocation*') ? 'active' : '' }}">
-                            <a class="collapsed hoveradd" data-toggle="collapse" href="#locationManagementMenu"
-                                aria-expanded="false">
-                                <i class="material-icons icon">location_on</i>
-                                <span>Location Management</span>
-                                <div class="d-none mobile_hide">Location Management</div>
-                            </a>
-                            <div class="collapse" id="locationManagementMenu" style="">
-                                <ul class="navd">
-                                    @if(auth()->user()->can('user_location'))
-                                    <li class="nav-link-btn {{ request()->is('livelocation*') ? 'active' : '' }}">
-                                        <a class="hoveradd2" href="{{ url('livelocation') }}">
-                                            <i class="material-icons icon">share_location</i>
-                                            <span>User Live Location</span>
-                                            <div class="d-none mobile_hide"> User Live Location</div>
-                                        </a>
-                                    </li>
-                                    @endif
-                                </ul>
-                            </div>
-                        </li>
-                        @endif
                         @if(auth()->user()->can(['expenses_type']))
                         <!-- <li class="nav-item {{ request()->is('expenses_type') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('expenses_type') }}">
@@ -1651,6 +1627,30 @@
                         @endif
                     </ul>
                 </div>
+                </li>
+                @endif
+                {{-- Location Management --}}
+                @if(auth()->user()->can('user_location'))
+                <li class="nav-link {{ request()->is('livelocation*') ? 'active' : '' }}">
+                    <a class="collapsed hoveradd" data-toggle="collapse" href="#locationManagementMenu"
+                        aria-expanded="false">
+                        <i class="material-icons icon">location_on</i>
+                        <span>Location Management</span>
+                        <div class="d-none mobile_hide">Location Management</div>
+                    </a>
+                    <div class="collapse" id="locationManagementMenu" style="">
+                        <ul class="navd">
+                            @if(auth()->user()->can('user_location'))
+                            <li class="nav-link-btn {{ request()->is('livelocation*') ? 'active' : '' }}">
+                                <a class="hoveradd2" href="{{ url('livelocation') }}">
+                                    <i class="material-icons icon">share_location</i>
+                                    <span>User Live Location</span>
+                                    <div class="d-none mobile_hide"> User Live Location</div>
+                                </a>
+                            </li>
+                            @endif
+                        </ul>
+                    </div>
                 </li>
                 @endif
                 @if(auth()->user()->can('user_access'))
