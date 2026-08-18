@@ -1171,6 +1171,30 @@
                             </div>
                         </li>
                         @endif
+                        {{-- Location Management --}}
+                        @if(auth()->user()->can('user_location'))
+                        <li class="nav-link {{ request()->is('livelocation*') ? 'active' : '' }}">
+                            <a class="collapsed hoveradd" data-toggle="collapse" href="#locationManagementMenu"
+                                aria-expanded="false">
+                                <i class="material-icons icon">location_on</i>
+                                <span>Location Management</span>
+                                <div class="d-none mobile_hide">Location Management</div>
+                            </a>
+                            <div class="collapse" id="locationManagementMenu" style="">
+                                <ul class="navd">
+                                    @if(auth()->user()->can('user_location'))
+                                    <li class="nav-link-btn {{ request()->is('livelocation*') ? 'active' : '' }}">
+                                        <a class="hoveradd2" href="{{ url('livelocation') }}">
+                                            <i class="material-icons icon">share_location</i>
+                                            <span>User Live Location</span>
+                                            <div class="d-none mobile_hide"> User Live Location</div>
+                                        </a>
+                                    </li>
+                                    @endif
+                                </ul>
+                            </div>
+                        </li>
+                        @endif
                         @if(auth()->user()->can(['expenses_type']))
                         <!-- <li class="nav-item {{ request()->is('expenses_type') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('expenses_type') }}">
@@ -1424,7 +1448,7 @@
                         @endif
                         @if(auth()->user()->can('hr_access'))
                         <li
-                            class="nav-link {{ request()->is('reports/attendancereport*') || request()->is('reports/attendancereportSummary*') || request()->is('holidays*') || request()->is('leaves*') || request()->is('appraisal*') || request()->is('sales_weightage*') || request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') || request()->is('new-joinings*') ? 'active' : '' }}">
+                            class="nav-link {{ request()->is('reports/attendancereport*') || request()->is('reports/attendancereportSummary*') || request()->is('holidays*') || request()->is('leaves*') || request()->is('appraisal*') || request()->is('sales_weightage*') || request()->is('users*') || request()->is('targets*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') || request()->is('new-joinings*') ? 'active' : '' }}">
                             <a class="collapsed hoveradd" data-toggle="collapse" href="#hr" aria-expanded="false">
                                 <i class="material-icons icon">family_restroom</i>
                                 <span> {!! trans('panel.sidemenu.hr') !!} Management
@@ -1541,7 +1565,7 @@
                         @endif
                         @if(auth()->user()->can('user_access'))
                         <li
-                            class="nav-link {{ request()->is('users*') || request()->is('targets*') || request()->is('livelocation*') || request()->is('roles*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') || request()->is('new-joinings*') ? 'active' : '' }}">
+                            class="nav-link {{ request()->is('users*') || request()->is('targets*') || request()->is('roles*') || request()->is('permissions*') || request()->is('tours*') || request()->is('usercity*') || request()->is('new-joinings*') ? 'active' : '' }}">
                             <a class="hoveradd" data-toggle="collapse" href="#userMenu"
                                 aria-expanded="false">
                                 <i class="material-icons icon">badge</i>
@@ -1605,16 +1629,6 @@
                                             <div class="d-none mobile_hide">User Target</div>
                                         </a>
                                     </li> -->
-                        @endif
-                        @if(auth()->user()->can('user_location'))
-                        <li
-                            class="nav-link-btn {{ request()->is('livelocation*') ? 'active' : '' }}">
-                            <a class="hoveradd2" href="{{ url('livelocation') }}">
-                                <i class="material-icons icon">share_location</i>
-                                <span>User Live Location</span>
-                                <div class="d-none mobile_hide"> User Live Location</div>
-                            </a>
-                        </li>
                         @endif
                         @if(auth()->user()->can('tours'))
                         <li class="nav-link-btn {{ request()->is('tours*') ? 'active' : '' }}">
