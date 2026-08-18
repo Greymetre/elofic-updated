@@ -98,7 +98,8 @@ class CheckIn extends Model
         return match ($this->entity_type) {
             'distributor'        => $entity->trade_name ?? $entity->legal_name ?? 'Unnamed Distributor',
             'secondary_customer' => $entity->shop_name ?? 'Unnamed Shop',
-            'customer'           => $entity->name ?? ($entity->first_name . ' ' . $entity->last_name) ?? 'Unknown Customer',
+            // legacy rows have no entity_type but still point at a customer
+            'customer', null, '' => $entity->name ?? trim($entity->first_name . ' ' . $entity->last_name) ?: 'Unknown Customer',
             default              => 'Unknown',
         };
     }

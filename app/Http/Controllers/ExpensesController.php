@@ -919,7 +919,7 @@ class ExpensesController extends Controller
                     ->where('punchin_date', $date)
                     ->first();
 
-                $checks = CheckIn::with('customers')
+                $checks = CheckIn::with('customer')
                     ->where('user_id', $request->user_id)
                     ->where('checkin_date', $date)
                     ->get();
@@ -939,7 +939,7 @@ class ExpensesController extends Controller
                         $dayCoordinates[] = [
                             'latitude' => $check->checkin_latitude,
                             'longitude' => $check->checkin_longitude,
-                            'name' => ($check->customers ? $check->customers->name : '-') . ' : Check In (' . $date . ')',
+                            'name' => $check->entity_name . ' : Check In (' . $date . ')',
                             'time' => $check->checkin_time ? Carbon::createFromFormat('H:i:s', $check->checkin_time)->format('g:i A') : '-',
                         ];
 
@@ -948,7 +948,7 @@ class ExpensesController extends Controller
                             $dayCoordinates[] = [
                                 'latitude' => $check->checkout_latitude,
                                 'longitude' => $check->checkout_longitude,
-                                'name' => ($check->customers ? $check->customers->name : '-') . ' : Check Out (' . $date . ')',
+                                'name' => $check->entity_name . ' : Check Out (' . $date . ')',
                                 'time' => $check->checkout_time ? Carbon::createFromFormat('H:i:s', $check->checkout_time)->format('g:i A') : '-',
                             ];
                         }
