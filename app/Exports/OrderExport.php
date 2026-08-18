@@ -200,6 +200,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             'Order Date',
             'Buyer Code',
             'Customer Type',
+            'Sub Type',
             'Buyer Name',
             'Seller or Parent Code',
             'Seller or Parent Name',
@@ -213,12 +214,10 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             'Pending Qty',
             'Rate',
             'Total',
-            'Order Amount',
             'Order Remark',
             'Employee Code',
             'User Name',
             'Branch',
-            'Division',
             'Designation',
             'Status',
         ];
@@ -299,6 +298,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
         $orderModel = $data->orders;
         $customerType = strtoupper((string) ($order['customer_type'] ?? $order['buyers']['type'] ?? ''));
         $customerType = $customerType === 'DISTRIBUTER' ? 'DISTRIBUTOR' : $customerType;
+        $customerSubType = $order['buyers']['sub_type'] ?? '';
 
         if ($this->isDistributorExport()) {
             $distributorCode = $order['sellers']['distributor_code'] ?? '';
@@ -346,6 +346,7 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             isset($order['order_date']) ? date('Y-m-d', strtotime($order['order_date'])) : '',
             $order['buyer_id'] ?? $order['seller_id'] ?? '',
             $customerType,
+            $customerSubType,
             $order['buyers']['shop_name']
                 ?? $order['sellers']['trade_name']
                 ?? $order['sellers']['legal_name']
@@ -364,12 +365,10 @@ class OrderExport implements FromCollection, WithHeadings, ShouldAutoSize, WithM
             $pending_qty,
             $data['products']['productpriceinfo']['mrp'] ?? '',
             $data['line_total'] ?? '',
-            $order['grand_total'] ?? '',
             $order['order_remark'] ?? '',
             $order['getuserdetails']['employee_codes'] ?? '',
             $order['createdbyname']['name'] ?? '',
             $order['getuserdetails']['getbranch']['branch_name'] ?? '',
-            $order['getuserdetails']['getdivision']['division_name'] ?? '',
             $order['getuserdetails']['getdesignation']['designation_name'] ?? '',
             $orderModel?->dispatch_status ?? 'Pending',
         ];
