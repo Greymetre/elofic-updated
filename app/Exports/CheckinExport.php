@@ -234,9 +234,9 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
 
         $customer_code = match ($data->entity_type) {
             'distributor'        => $related?->distributor_code,
-            'secondary_customer' => $related?->id,
+            'secondary_customer' => '',
             default              => $related?->customer_code,
-        } ?: '-';
+        } ?: '';
 
         $customer_registration_date = $related?->created_at
             ? Carbon::parse($related->created_at)->format('d-m-Y')
@@ -361,7 +361,7 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
     private function formatTime($time): string
     {
         return $time
-            ? Carbon::createFromFormat('H:i:s', $time)->format('h:i:s A')
+            ? Carbon::createFromFormat('H:i:s', $time)->format('h:i A')
             : '-';
     }
 }
