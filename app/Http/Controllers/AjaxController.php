@@ -901,8 +901,8 @@ public function getRetailerlist(Request $request)
                     $punch_in_city = getLatLongToCity($val->punchin_latitude, $val->punchin_longitude);
                     $punchInData[$k]['title'] = 'Punchin';
                     $punchInData[$k]['time'] = $val->punchin_time;
-                    $punchInData[$k]['latitude'] = $val->punchin_latitude != null ? $val->punchin_latitude : '';
-                    $punchInData[$k]['longitude'] = $val->punchin_longitude != null ? $val->punchin_longitude : '';
+                    $punchInData[$k]['latitude'] = $val->punchin_longitude != null ? $val->punchin_longitude : '';
+                    $punchInData[$k]['longitude'] = $val->punchin_latitude != null ? $val->punchin_latitude : '';
                     $punchInData[$k]['msg'] = $val->punchin_summary . ' - ' . $punch_in_city;
                 }
                 if ($val->punchout_time != null) {
