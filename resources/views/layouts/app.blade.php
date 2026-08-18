@@ -1644,8 +1644,8 @@
                             <li class="nav-link-btn {{ request()->is('livelocation*') ? 'active' : '' }}">
                                 <a class="hoveradd2" href="{{ url('livelocation') }}">
                                     <i class="material-icons icon">share_location</i>
-                                    <span>User Live Location</span>
-                                    <div class="d-none mobile_hide"> User Live Location</div>
+                                    <span>Geolocator</span>
+                                    <div class="d-none mobile_hide"> Geolocator</div>
                                 </a>
                             </li>
                             @endif

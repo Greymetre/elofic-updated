@@ -26,7 +26,7 @@
                         </span>
                     </div>
                     @endif
-                    <h5 class="font-weight-normal mt-4">User Live Location</h5>
+                    <h5 class="font-weight-normal mt-4">Geolocator</h5>
                     <form target="_blank" method="post" action="{{url('map-all')}}">
                         @csrf
                         <div class="row">
