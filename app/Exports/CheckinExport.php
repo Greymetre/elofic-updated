@@ -164,6 +164,8 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
     'orders',
     'visitreport',
     'visitreport.visittypename',
+    'distributor',
+    'secondaryCustomer',
     )->where(function ($query) {
             if ($this->user_id) {
                 $query->where('user_id', $this->user_id);
@@ -202,9 +204,9 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
 
     public function headings(): array
     {
-        return ['id', 'Visit Date', 'User ID', 'Employee Code', 'Employee Name','Reporting Manager', 'Designation', 'Division', 'Branch', 'Checkin Time', 'Checkout Time', 'Spend Time', 'Checkin Address', 'Checkout Address', 'Distance (KM) ', 'Customer Id', 'Customer Type', 'Customer Name', 'Customer Mobile', 'Beat Name', 'City', 'District', 'Address',
+        return ['id', 'Visit Date', 'User ID', 'Employee Code', 'Employee Name','Reporting Manager', 'Designation', 'Division', 'Branch', 'Checkin Time', 'Checkout Time', 'Spend Time', 'Checkin Address', 'Checkout Address', 'Distance (KM) ', 'Customer Id', 'Customer Code', 'Customer Type', 'Customer Name', 'Customer Mobile', 'Customer Registration Date', 'Beat Name', 'City', 'District', 'Address',
         //  'Existing',
-          'Visit Type', 'Visit Remark', 'Order Qty', 'Order Value'];
+          'Visit Type', 'Visit Remark'];
     }
 
     public function map($data): array
@@ -222,6 +224,23 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
                 ?? '-';
 
         $entity = $data->entity;
+
+        // ------------------ CUSTOMER CODE / REGISTRATION DATE ------------------
+        $related = match ($data->entity_type) {
+            'distributor'        => $data->distributor,
+            'secondary_customer' => $data->secondaryCustomer,
+            default              => $data->customer,
+        };
+
+        $customer_code = match ($data->entity_type) {
+            'distributor'        => $related?->distributor_code,
+            'secondary_customer' => $related?->id,
+            default              => $related?->customer_code,
+        } ?: '-';
+
+        $customer_registration_date = $related?->created_at
+            ? Carbon::parse($related->created_at)->format('d-m-Y')
+            : '-';
 
         // ------------------ BEAT ------------------
         $beat = 
@@ -254,9 +273,6 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
         $visit_type = $data->visitreport->visittypename->type_name ?? '-';
         $visit_remark = $data->visitreport->description ?? '-';
 
-        // Orders
-        $order_qty = $data->orders->sum('total_qty') ?? 0;
-        $order_value = $data->orders->sum('grand_total') ?? 0;
         $mobileRaw = $entity?->mobile 
                     ?? $entity?->mobile_number 
                     ?? '-';
@@ -264,11 +280,6 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
         $mobileArray = explode(',', $mobileRaw);
 
         $reportingNames = '';
-        // Orders
-        $placedOrders = $data->placedOrders()->get();
-
-        $order_qty = $placedOrders->sum('total_qty');
-        $order_value = $placedOrders->sum('grand_total');
 
         if (!empty($data->user->reportingid)) {
 
@@ -310,10 +321,13 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
             isset($data['checkout_address']) ? $data['checkout_address'] : '-',
             isset($data['distance']) ? $data['distance'] : '-',
             $entity_id ?? '-',
+            $customer_code,
             $entity_type === 'Secondary Customer' ? 'Retailer':'Distributer',
             $entity_name ?? '-',
          
             $mobile = trim($mobileArray[0] ?? '-'),
+
+            $customer_registration_date,
 
             $beat ?? '-',
             $city ?? '-',
@@ -322,10 +336,6 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
 
             $visit_type ?? '-',
             $visit_remark ?? '-',
-
-
-            $order_qty ?? 0,
-            $order_value ?? 0,
 
             // isset($data['customer_id']) ? $data['customer_id'] : '',
             // isset($data['customers']['customertypes']['customertype_name']) ? $data['customers']['customertypes']['customertype_name'] : '',
