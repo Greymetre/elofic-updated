@@ -24,6 +24,9 @@ class SecondaryCustomersExport implements
     protected $limit;
     protected $page;
 
+    /** Users keyed by id, preloaded once so map() never queries per row. */
+    protected $employees;
+
     public function __construct(array $filters, string $type)
     {
         $this->filters = $filters;
@@ -35,11 +38,13 @@ class SecondaryCustomersExport implements
     $this->page = isset($filters['export_page'])
         ? (int) $filters['export_page']
         : 1;
+
+    $this->employees = collect();
     }
 
     public function collection()
     {
-        return SecondaryCustomer::select([
+        $rows = SecondaryCustomer::select([
             'id',
             'type',
             'sub_type',
@@ -140,6 +145,36 @@ class SecondaryCustomersExport implements
         ->offset(($this->page - 1) * $this->limit)
         ->limit($this->limit)
         ->get();
+
+        $this->loadEmployees($rows);
+
+        return $rows;
+    }
+
+    /**
+     * employee_id holds a comma separated list of user ids. Resolve all of them
+     * in a single query up front, so map() can read both the name and the code.
+     */
+    private function loadEmployees($rows): void
+    {
+        $ids = $rows->flatMap(fn($row) => $this->employeeIds($row))->unique()->values();
+
+        if ($ids->isEmpty()) {
+            return;
+        }
+
+        $this->employees = \App\Models\User::whereIn('id', $ids)
+            ->get(['id', 'name', 'employee_codes'])
+            ->keyBy('id');
+    }
+
+    private function employeeIds($row)
+    {
+        return collect(explode(',', (string) $row->employee_id))
+            ->map(fn($id) => (int) trim($id))
+            ->filter()
+            ->unique()
+            ->values();
     }
 
     public function headings(): array
@@ -190,17 +225,18 @@ class SecondaryCustomersExport implements
     public function map($row): array
     {
         // Employee Logic
-        $employeeNames = $row->employee_names ?? '-';
-        $employeeCodes = '-';
+        $employees = $this->employeeIds($row)
+            ->map(fn($id) => $this->employees->get($id))
+            ->filter();
 
-        if ((empty($employeeNames) || $employeeNames === '-') && !empty($row->employee_id)) {
-            $ids = explode(',', $row->employee_id);
-            $employees = \App\Models\User::whereIn('id', $ids)
-                ->get(['name', 'employee_codes']);
+        // Keep both lists positionally aligned, so the Nth code belongs to the Nth name.
+        $employeeNames = $employees->isEmpty()
+            ? '-'
+            : $employees->map(fn($user) => filled($user->name) ? Str::title($user->name) : '-')->implode(', ');
 
-            $employeeNames = $employees->pluck('name')->implode(', ') ?: '-';
-            $employeeCodes = $employees->pluck('employee_codes')->implode(', ') ?: '-';
-        }
+        $employeeCodes = $employees->isEmpty()
+            ? '-'
+            : $employees->map(fn($user) => filled($user->employee_codes) ? $user->employee_codes : '-')->implode(', ');
 
         $awarenessLabel = in_array($row->type, ['RETAILER', 'WORKSHOP']) ? 'Nistha' : 'Saathi';
         $awarenessStatus = in_array($row->type, ['RETAILER', 'WORKSHOP'])
