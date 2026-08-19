@@ -45,6 +45,26 @@
             z-index: 50 !important;
         }
 
+        /* Account/logout dropdown trigger. The theme paints navbar links and their
+           icons white, but this navbar has a white background, so the trigger (and
+           with it the only way to reach "Log out") was invisible. */
+        .main-panel>.navbar .navbar-nav .nav-item .nav-link,
+        .main-panel>.navbar .collapse .navbar-nav .nav-item .nav-link,
+        .main-panel>.navbar .collapse .navbar-nav .nav-item .nav-link:not(.btn) .material-icons {
+            color: #3860a4 !important;
+        }
+
+        .main-panel>.navbar #navbarDropdownProfile {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .main-panel>.navbar #navbarDropdownProfile:hover,
+        .main-panel>.navbar #navbarDropdownProfile:hover .material-icons {
+            color: #3694cc !important;
+        }
+
         /* Google Font Import - Poppins */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
