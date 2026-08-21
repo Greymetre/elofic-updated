@@ -672,6 +672,9 @@ Route::group(['middleware' => ['auth']], function () {
 
 Route::get('beats-global-schedule-form', [BeatController::class, 'globalScheduleForm'])
     ->name('beats.globalScheduleForm');
+    //Beat Route Optimized
+    Route::get('beat-route-optimized', [BeatController::class, 'beatRouteOptimizer'])->name('beats.routeOptimized');
+    Route::post('beat-route-optimized-data', [BeatController::class, 'beatRouteOptimizerData'])->name('beats.routeOptimizedData');
     //Current Location
     Route::any('livelocation', [BeatController::class, 'livelocation']);
     Route::get('user-live-locator', [BeatController::class, 'liveLocator'])->name('location.live-locator');
