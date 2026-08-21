@@ -39,6 +39,11 @@ class Kernel extends ConsoleKernel
         // $schedule->command('send:all-branch-goly')->timezone('Asia/Kolkata')->dailyAt('02:30');
         // $schedule->command('tasks:send-pending-today')->everyMinute();
         // $schedule->command('sync:products')->everyMinute();
+        // safety net for live locations stored without an address (geocode failed or per request cap hit)
+        $schedule->command('locations:update-address')
+            ->timezone('Asia/Kolkata')
+            ->hourly()
+            ->withoutOverlapping();
     }
 
     /**

@@ -22,6 +22,18 @@ use App\Models\Notification;
 
 class UserController extends Controller
 {
+    /** Max reverse geocode calls allowed inside one live location request. */
+    const LIVE_LOCATION_ADDRESS_LIMIT = 10;
+
+    /** Minimum gap, in seconds, between two stored live locations for a user. */
+    const LIVE_LOCATION_MIN_GAP = 170;
+
+    /** Addresses already resolved during the current request, keyed by rounded lat,lng. */
+    private $liveLocationAddressCache = [];
+
+    /** How many reverse geocode calls the current request has made. */
+    private $liveLocationAddressLookups = 0;
+
     public function __construct()
     {
         
@@ -163,22 +175,42 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return response()->json(['status' => 'error','message' =>  $validator->errors()], $this->badrequest); 
             }
+            $lastLocation = UserLiveLocation::where('userid', $userid)
+                ->orderBy('time', 'desc')
+                ->orderBy('id', 'desc')
+                ->first();
+
             if(is_array($request['locations']))
             {
                 $collection = array();
                 foreach ($request['locations'] as $key => $row) {
-                    array_push($collection,array("active"   =>  "Y","userid" => $userid, 'latitude' => $row['latitude'], 'longitude' => $row['longitude'], 'time' => date('Y-m-d H:i:s',strtotime($row['time'])), 'created_at' => date('Y-m-d H:i:s') ));
+                    $locationTime = date('Y-m-d H:i:s', strtotime($row['time']));
+                    if (!$this->shouldStoreLiveLocation($lastLocation, $row['latitude'], $row['longitude'], $locationTime)) {
+                        continue;
+                    }
+
+                    $location = array("active"   =>  "Y","userid" => $userid, 'latitude' => $row['latitude'], 'longitude' => $row['longitude'], 'address' => $this->resolveLiveLocationAddress($row['latitude'], $row['longitude']), 'time' => $locationTime, 'created_at' => date('Y-m-d H:i:s') );
+                    array_push($collection, $location);
+                    $lastLocation = (object) $location;
                 }
             }
             else
             {
-                $collection = array('active'  =>  'Y', 'userid' => $userid, 'latitude' => $request['latitude'], 'longitude' => $request['longitude'], 'time' => date('Y-m-d H:i:s',strtotime($request['time'])), 'created_at' => date('Y-m-d H:i:s') );
+                $locationTime = date('Y-m-d H:i:s', strtotime($request['time']));
+                $collection = [];
+                if ($this->shouldStoreLiveLocation($lastLocation, $request['latitude'], $request['longitude'], $locationTime)) {
+                    $collection = array('active'  =>  'Y', 'userid' => $userid, 'latitude' => $request['latitude'], 'longitude' => $request['longitude'], 'address' => $this->resolveLiveLocationAddress($request['latitude'], $request['longitude']), 'time' => $locationTime, 'created_at' => date('Y-m-d H:i:s') );
+                }
             }
+            if (empty($collection)) {
+                return response()->json(['status' => 'success', 'message' => 'Live location skipped. Last location is less than 3 minutes old.'], $this->successStatus);
+            }
+
             if(UserLiveLocation::insert($collection))
             {
                 return response()->json(['status' => 'success','message' => 'Data inserted successfully.' ], $this->successStatus);
             }
-            return response(['status' => 'error', 'message' => 'Error in No Record Found.'],200); 
+            return response(['status' => 'error', 'message' => 'Error in No Record Found.'],200);
         }
         catch(\Exception $e)
         {
@@ -186,6 +218,67 @@ class UserController extends Controller
         }        
     }
     
+    /**
+     * Reverse geocode a live location the same way punch in / punch out does.
+     *
+     * Coordinates repeated inside one request reuse the first lookup, and the
+     * number of lookups per request is capped so a large offline batch cannot
+     * stall the API. Anything left empty is filled later by locations:update-address.
+     */
+    private function resolveLiveLocationAddress($latitude, $longitude)
+    {
+        if (!is_numeric($latitude) || !is_numeric($longitude)) {
+            return '';
+        }
+
+        $cacheKey = round((float) $latitude, 4) . ',' . round((float) $longitude, 4);
+        if (array_key_exists($cacheKey, $this->liveLocationAddressCache)) {
+            return $this->liveLocationAddressCache[$cacheKey];
+        }
+
+        if ($this->liveLocationAddressLookups >= self::LIVE_LOCATION_ADDRESS_LIMIT) {
+            return '';
+        }
+
+        $this->liveLocationAddressLookups++;
+
+        try {
+            // the helper expects longitude first - same call order used on punch in / punch out
+            $address = (string) getLatLongToAddress($longitude, $latitude);
+        } catch (\Exception $e) {
+            \Log::warning('Live location address lookup failed', [
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'error' => $e->getMessage(),
+            ]);
+            $address = '';
+        }
+
+        $address = mb_substr($address, 0, 450);
+        $this->liveLocationAddressCache[$cacheKey] = $address;
+
+        return $address;
+    }
+
+    /**
+     * Keep at least LIVE_LOCATION_MIN_GAP seconds between two stored points so the
+     * app cannot pile dozens of pings on the same spot, which made the track map
+     * draw markers directly on top of each other.
+     */
+    private function shouldStoreLiveLocation($lastLocation, $latitude, $longitude, $locationTime)
+    {
+        if (empty($lastLocation)) {
+            return true;
+        }
+
+        $lastTime = $lastLocation->time ?? $lastLocation->created_at ?? null;
+        if (empty($lastTime)) {
+            return true;
+        }
+
+        return abs(strtotime($locationTime) - strtotime($lastTime)) >= self::LIVE_LOCATION_MIN_GAP;
+    }
+
     public function reportingUsers(Request $request)
     {
         $userId = $request->user_id;

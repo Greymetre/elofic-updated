@@ -45,6 +45,12 @@
             margin-top: 4px;
         }
 
+        .map-legend .legend-counts {
+            margin: 0 0 6px;
+            color: #6b7280;
+            font-size: 11px;
+        }
+
         .map-legend i {
             width: 12px;
             height: 12px;
@@ -233,6 +239,19 @@
 
             const visitPin = (fillColor) => mapPin(fillColor);
 
+            // Movement points use a small dot instead of a full pin. A pin is roughly
+            // 22x40px, so consecutive points a few hundred metres apart completely
+            // covered each other once the map was zoomed out to fit the whole day.
+            const movementDot = (fillColor) => ({
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: fillColor,
+                fillOpacity: 1,
+                strokeColor: "#ffffff",
+                strokeWeight: 2,
+                scale: 9,
+                labelOrigin: new google.maps.Point(0, 0)
+            });
+
             function infoContent(title, subtitle, rows) {
                 const wrap = document.createElement("div");
                 wrap.className = "info-window";
@@ -260,11 +279,63 @@
                 return -1;
             })();
 
+            const movementPoints = [];
             locations.forEach((loc, index) => {
                 if (!isValidPoint(loc.latitude, loc.longitude)) return;
+                movementPoints.push({
+                    loc: loc,
+                    index: index,
+                    position: toLatLngLiteral(loc.latitude, loc.longitude),
+                    shared: 1,
+                    nudged: false
+                });
+            });
 
-                const position = toLatLngLiteral(loc.latitude, loc.longitude);
+            // The device often reports the exact same coordinates several times in a
+            // row (parked, indoors, GPS not moving). Those markers land on identical
+            // pixels and only the top one is ever visible, which looks like the other
+            // points were never plotted. Fan the repeats out around their real spot so
+            // every recorded point stays visible and clickable.
+            (function spreadCoincidentPoints() {
+                const groups = new Map();
+
+                movementPoints.forEach((point) => {
+                    const key = point.position.lat.toFixed(4) + ',' + point.position.lng.toFixed(4);
+                    if (!groups.has(key)) groups.set(key, []);
+                    groups.get(key).push(point);
+                });
+
+                const slotsPerRing = 8;
+                const ringStep = 0.00012; // roughly 13 metres
+
+                groups.forEach((group) => {
+                    if (group.length < 2) return;
+
+                    const lngScale = Math.max(0.2, Math.cos(group[0].position.lat * Math.PI / 180));
+
+                    group.forEach((point, position) => {
+                        point.shared = group.length;
+                        if (position === 0) return;
+
+                        const ring = Math.ceil(position / slotsPerRing);
+                        const angle = (2 * Math.PI * ((position - 1) % slotsPerRing)) / slotsPerRing;
+                        const radius = ringStep * ring;
+
+                        point.position = {
+                            lat: point.position.lat + radius * Math.sin(angle),
+                            lng: point.position.lng + (radius * Math.cos(angle)) / lngScale
+                        };
+                        point.nudged = true;
+                    });
+                });
+            })();
+
+            movementPoints.forEach((point) => {
+                const loc = point.loc;
+                const index = point.index;
+                const position = point.position;
                 bounds.extend(position);
+
                 const isLast = index === lastMovementIndex;
                 const heading = isLast
                     ? `Last known location (point ${index + 1})`
@@ -272,12 +343,16 @@
 
                 const marker = new google.maps.Marker({
                     position: position,
-                    label: isLast
-                        ? { text: `${index + 1}`, color: "#ffffff", fontSize: "11px", fontWeight: "700" }
-                        : `${index + 1}`,
+                    label: {
+                        text: `${index + 1}`,
+                        color: "#ffffff",
+                        fontSize: isLast ? "11px" : "10px",
+                        fontWeight: "700"
+                    },
                     title: loc.name || heading,
-                    icon: isLast ? mapPin("#7c3aed", 2.2) : undefined,
-                    zIndex: isLast ? 300 : 10,
+                    icon: isLast ? mapPin("#7c3aed", 2.2) : movementDot("#ea4335"),
+                    // stagger the z-order so a later point is never buried by an earlier one
+                    zIndex: isLast ? 300 : 10 + index,
                     map: map
                 });
 
@@ -286,6 +361,7 @@
                     wrap.appendChild(textLine(heading, "tooltip-title"));
                     wrap.appendChild(textLine(loc.time || '-'));
                     if (loc.address) wrap.appendChild(textLine(loc.address));
+                    if (point.nudged) wrap.appendChild(textLine(`Shown offset - ${point.shared} points recorded here`));
                     return wrap;
                 });
 
@@ -293,6 +369,10 @@
                     tooltip.style.display = "none";
                     const rows = [['Time', loc.time || '-']];
                     if (loc.address) rows.push(['Address', loc.address]);
+                    rows.push(['Coordinates', `${parseFloat(loc.latitude).toFixed(6)}, ${parseFloat(loc.longitude).toFixed(6)}`]);
+                    if (point.nudged) {
+                        rows.push(['Note', `${point.shared} points share these coordinates - the marker is drawn slightly offset`]);
+                    }
                     infoWindow.setContent(infoContent(
                         heading,
                         isLast ? 'Last known location' : 'Movement',
@@ -374,6 +454,11 @@
             if (!bounds.isEmpty()) {
                 map.fitBounds(bounds, 48);
             }
+
+            const counts = document.getElementById("legendCounts");
+            if (counts) {
+                counts.textContent = `${movementPoints.length} movement point${movementPoints.length === 1 ? '' : 's'} · ${validVisits.length} visit${validVisits.length === 1 ? '' : 's'}`;
+            }
         }
     </script>
 
@@ -386,6 +471,7 @@
     <div id="map"></div>
     <div class="map-legend">
         <strong>{{ \Carbon\Carbon::parse($selectedDate)->format('d M Y') }}</strong>
+        <span id="legendCounts" class="legend-counts"></span>
         <span><i style="background:#ea4335"></i> Movement point</span>
         <span><i style="background:#7c3aed"></i> Last known location</span>
         <span><i style="background:#16a34a"></i> Customer visit (check in)</span>
