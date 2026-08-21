@@ -239,19 +239,6 @@
 
             const visitPin = (fillColor) => mapPin(fillColor);
 
-            // Movement points use a small dot instead of a full pin. A pin is roughly
-            // 22x40px, so consecutive points a few hundred metres apart completely
-            // covered each other once the map was zoomed out to fit the whole day.
-            const movementDot = (fillColor) => ({
-                path: google.maps.SymbolPath.CIRCLE,
-                fillColor: fillColor,
-                fillOpacity: 1,
-                strokeColor: "#ffffff",
-                strokeWeight: 2,
-                scale: 9,
-                labelOrigin: new google.maps.Point(0, 0)
-            });
-
             function infoContent(title, subtitle, rows) {
                 const wrap = document.createElement("div");
                 wrap.className = "info-window";
@@ -343,14 +330,12 @@
 
                 const marker = new google.maps.Marker({
                     position: position,
-                    label: {
-                        text: `${index + 1}`,
-                        color: "#ffffff",
-                        fontSize: isLast ? "11px" : "10px",
-                        fontWeight: "700"
-                    },
+                    label: isLast
+                        ? { text: `${index + 1}`, color: "#ffffff", fontSize: "11px", fontWeight: "700" }
+                        : `${index + 1}`,
                     title: loc.name || heading,
-                    icon: isLast ? mapPin("#7c3aed", 2.2) : movementDot("#ea4335"),
+                    // default red pin for movement points, purple pin for the last one
+                    icon: isLast ? mapPin("#7c3aed", 2.2) : undefined,
                     // stagger the z-order so a later point is never buried by an earlier one
                     zIndex: isLast ? 300 : 10 + index,
                     map: map
@@ -368,8 +353,7 @@
                 marker.addListener("click", () => {
                     tooltip.style.display = "none";
                     const rows = [['Time', loc.time || '-']];
-                    if (loc.address) rows.push(['Address', loc.address]);
-                    rows.push(['Coordinates', `${parseFloat(loc.latitude).toFixed(6)}, ${parseFloat(loc.longitude).toFixed(6)}`]);
+                    rows.push(['Address', loc.address || 'Address not available for this point']);
                     if (point.nudged) {
                         rows.push(['Note', `${point.shared} points share these coordinates - the marker is drawn slightly offset`]);
                     }
