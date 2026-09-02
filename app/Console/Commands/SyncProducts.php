@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Models\Product;
 use App\Models\ProductDetails;
 
@@ -14,10 +15,16 @@ class SyncProducts extends Command
 
     public function handle()
     {
+        $created = 0;
+        $updated = 0;
+        $unchanged = 0;
+
         $response = Http::get('http://103.25.175.214:9297/api/catelogdata');
 
         if (!$response->successful()) {
-            \Log::error('API Failed');
+            Log::channel('product_sync')->error('Product sync API failed', [
+                'status' => $response->status(),
+            ]);
             return;
         }
 
@@ -32,6 +39,7 @@ class SyncProducts extends Command
             $product = Product::firstOrNew([
                 'product_code' => $productCode
             ]);
+            $isNewProduct = !$product->exists;
 
             // 🔹 MAP DATA
             $product->fill([
@@ -51,8 +59,8 @@ class SyncProducts extends Command
                 'active' => "Y"
             ]);
 
-            // 🔥 SAVE ONLY IF CHANGED
-            if ($product->isDirty()) {
+            $productChanges = array_keys($product->getDirty());
+            if (!empty($productChanges)) {
                 $product->save();
             }
 
@@ -80,13 +88,39 @@ class SyncProducts extends Command
                         // 'isprimary' => $item['is_primary'] ?? 0,
                     ]);
 
-                    if ($productDetail->isDirty()) {
+                    $detailChanges = array_keys($productDetail->getDirty());
+                    if (!empty($detailChanges)) {
                         $productDetail->save();
                     }
+
+                    if ($isNewProduct) {
+                        $created++;
+                        $action = 'created';
+                    } elseif (!empty($productChanges) || !empty($detailChanges)) {
+                        $updated++;
+                        $action = 'updated';
+                    } else {
+                        $unchanged++;
+                        continue;
+                    }
+
+                    Log::channel('product_sync')->info('Product sync item', [
+                        'action' => $action,
+                        'product_id' => $product->id,
+                        'product_code' => $product->product_code,
+                        'product_name' => $product->product_name,
+                        'product_fields' => $productChanges,
+                        'detail_fields' => $detailChanges,
+                    ]);
                 // }
             // }
         }
 
-            \Log::info('Product Sync Completed');
+            Log::channel('product_sync')->info('Product sync completed', [
+                'received' => count($products),
+                'created' => $created,
+                'updated' => $updated,
+                'unchanged' => $unchanged,
+            ]);
         }
     }

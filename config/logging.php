@@ -122,6 +122,12 @@ return [
             'path' => storage_path('logs/sapstock.log'),
             'level' => 'error',
         ],
+        'product_sync' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/product-sync.log'),
+            'level' => 'info',
+            'days' => 30,
+        ],
     ],
 
 ];
