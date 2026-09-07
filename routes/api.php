@@ -280,6 +280,7 @@ Route::group(['middleware' => ['auth:users,customers']], function () {
     Route::post('addCartItems', [OrderController::class, 'addCartItems']);
     Route::get('getCartItems', [OrderController::class, 'getCartItems']);
     Route::any('getOrderPfd', [OrderController::class, 'getOrderPfd']);
+    Route::get('orders/{order}/pdf', [OrderController::class, 'downloadOrderPdf']);
     Route::post('customer/deleteOrder', [OrderController::class, 'deleteOrder']);
     Route::post('submitFullyDispatched', [OrderController::class, 'submitFullyDispatched']);
     Route::post('submitPartiallyDispatched', [OrderController::class, 'submitPartiallyDispatched']);

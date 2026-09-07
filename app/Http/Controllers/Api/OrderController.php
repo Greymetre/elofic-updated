@@ -1026,6 +1026,53 @@ class OrderController extends Controller
         }
     }
 
+    public function downloadOrderPdf(Request $request, Order $order)
+    {
+        try {
+            $user = $request->user();
+            $visibleUserIds = array_map('intval', getUsersReportingToAuth($user->id));
+
+            if (!in_array((int) $order->created_by, $visibleUserIds, true)
+                && !in_array((int) $order->executive_id, $visibleUserIds, true)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You are not allowed to download this order.',
+                ], 403);
+            }
+
+            $order->load(['orderdetails.products', 'createdbyname']);
+            $order->resolveCustomerRelations();
+
+            $options = new Options();
+            $options->set('isHtml5ParserEnabled', true);
+
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml(view('order_pdf.order_pdf', compact('order'))->render());
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+
+            $orderNumber = preg_replace('/[^A-Za-z0-9_-]/', '_', (string) ($order->orderno ?: $order->id));
+            $filename = 'Order_' . $orderNumber . '.pdf';
+
+            return response($dompdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control' => 'private, no-store, max-age=0',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Order PDF download failed', [
+                'order_id' => $order->id,
+                'user_id' => optional($request->user())->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unable to generate the order PDF.',
+            ], $this->internalError);
+        }
+    }
+
     public function getClusterOrderList(Request $request)
     {
         try {
