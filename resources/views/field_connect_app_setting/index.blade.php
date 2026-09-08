@@ -180,11 +180,22 @@
 
                   <div class="col-md-6">
                      <div class="input_section">
-                        <label class="col-form-label">App Version </label>
+                        <label class="col-form-label">Android App Version </label>
                         <input type="number" name="app_version" placeholder="1.01" step="0.01" class="form-control" id="app_version" value="{{old('app_version', $field_konnect_app_setting['app_version'])}}" required>
                         @if ($errors->has('app_version'))
                         <div class="error col-lg-12">
                            <p class="text-danger">{{ $errors->first('app_version') }}</p>
+                        </div>
+                        @endif
+                     </div>
+                  </div>
+                  <div class="col-md-6">
+                     <div class="input_section">
+                        <label class="col-form-label">IOS App Version </label>
+                        <input type="text" name="ios_app_version" placeholder="2.4" class="form-control" id="ios_app_version" value="{{old('ios_app_version', $field_konnect_app_setting['ios_app_version'] ?? '')}}">
+                        @if ($errors->has('ios_app_version'))
+                        <div class="error col-lg-12">
+                           <p class="text-danger">{{ $errors->first('ios_app_version') }}</p>
                         </div>
                         @endif
                      </div>

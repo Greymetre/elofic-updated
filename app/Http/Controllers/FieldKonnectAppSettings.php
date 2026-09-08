@@ -50,6 +50,7 @@ class FieldKonnectAppSettings extends Controller
     {
         $validator = Validator::make($request->all(), [
             'app_version' => 'required',
+            'ios_app_version' => 'nullable|string|max:50',
         ]);
     
         // Check if validation fails
