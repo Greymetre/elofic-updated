@@ -10,12 +10,35 @@
             <span class="">
               <div class="btn-group header-frm-btn">
               <div class="next-btn">
-                <form method="GET" action="{{ URL::to('/usercity-download') }}">
-                  <div class="d-flex flex-row">
+                <form method="GET" action="{{ URL::to('/usercity-download') }}" id="user-city-export-form">
+                  <div class="d-flex flex-row align-items-center">
                     <input type="text" name="page_number" id="tableInfo" value="1" hidden>
-                    <input type="text" name="page_length" id="page_length" value="10" hidden>
+                    <input type="text" name="page_length" id="page_length" value="100" hidden>
 
-                    <div class="p-2"></div>
+                    <div class="p-2">
+                      <select name="user_id" id="filter_user" class="form-control select2" style="min-width: 180px;">
+                        <option value="">All Users</option>
+                        @foreach($users as $user)
+                          <option value="{{ $user->id }}">{{ $user->name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="p-2">
+                      <select name="state_id" id="filter_state" class="form-control select2" style="min-width: 180px;">
+                        <option value="">All States</option>
+                        @foreach($states as $state)
+                          <option value="{{ $state->id }}">{{ $state->state_name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="p-2">
+                      <button type="button" class="btn btn-just-icon btn-theme" id="apply-user-city-filters" title="Apply Filters">
+                        <i class="material-icons">filter_list</i>
+                      </button>
+                      <button type="button" class="btn btn-just-icon btn-default" id="reset-user-city-filters" title="Reset Filters">
+                        <i class="material-icons">refresh</i>
+                      </button>
+                    </div>
                     <div class=""><button class="btn btn-just-icon btn-theme" title="{!!  trans('panel.global.download') !!} {!! trans('User City') !!}"><i class="material-icons">cloud_download</i></button></div>
                   </div>
                 </form>
@@ -99,11 +122,18 @@
         "order": [
           [0, 'desc']
         ],
-        ajax: "{{ route('users.usercity') }}",
+        ajax: {
+          url: "{{ route('users.usercity') }}",
+          data: function(d) {
+            d.user_id = $('#filter_user').val();
+            d.state_id = $('#filter_state').val();
+          }
+        },
         lengthMenu: [
           [10, 25, 50, 100, 500, 1000, 5000],
           [10, 25, 50, 100, 500, 1000, 5000]
         ],
+        pageLength: 100,
 
         columns: [{
             data: 'DT_RowIndex',
@@ -159,6 +189,17 @@
             "defaultContent": ''
           },
         ]
+      });
+
+      $('#apply-user-city-filters').on('click', function() {
+        $('#tableInfo').val(1);
+        table.page(0).draw('page');
+      });
+
+      $('#reset-user-city-filters').on('click', function() {
+        $('#filter_user, #filter_state').val('').trigger('change');
+        $('#tableInfo').val(1);
+        table.page(0).draw('page');
       });
     });
 
