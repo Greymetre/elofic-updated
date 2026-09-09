@@ -80,84 +80,84 @@ class DealerAppointmentController extends Controller
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('profile_picture', 's3');
+                ->toMediaCollection('profile_picture', 'public');
         }
         if ($request->hasFile('service_policy')) {
             $file = $request->file('service_policy');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('service_policy', 's3');
+                ->toMediaCollection('service_policy', 'public');
         }
         if ($request->hasFile('dealer_policy')) {
             $file = $request->file('dealer_policy');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('dealer_policy', 's3');
+                ->toMediaCollection('dealer_policy', 'public');
         }
         if ($request->hasFile('mou_sheet')) {
             $file = $request->file('mou_sheet');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('mou_sheet', 's3');
+                ->toMediaCollection('mou_sheet', 'public');
         }
         if ($request->hasFile('mcl_cheque_1')) {
             $file = $request->file('mcl_cheque_1');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('mcl_cheque_1', 's3');
+                ->toMediaCollection('mcl_cheque_1', 'public');
         }
         if ($request->hasFile('mcl_cheque_2')) {
             $file = $request->file('mcl_cheque_2');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('mcl_cheque_2', 's3');
+                ->toMediaCollection('mcl_cheque_2', 'public');
         }
         if ($request->hasFile('gst_certificate')) {
             $file = $request->file('gst_certificate');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('gst_certificate', 's3');
+                ->toMediaCollection('gst_certificate', 'public');
         }
         if ($request->hasFile('adhar_card')) {
             $file = $request->file('adhar_card');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('adhar_card', 's3');
+                ->toMediaCollection('adhar_card', 'public');
         }
         if ($request->hasFile('pan_card')) {
             $file = $request->file('pan_card');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('pan_card', 's3');
+                ->toMediaCollection('pan_card', 'public');
         }
         if ($request->hasFile('bank_statement')) {
             $file = $request->file('bank_statement');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('bank_statement', 's3');
+                ->toMediaCollection('bank_statement', 'public');
         }
         if ($request->hasFile('application_form')) {
             $file = $request->file('application_form');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('application_form', 's3');
+                ->toMediaCollection('application_form', 'public');
         }
         if ($request->hasFile('shop_image')) {
             $file = $request->file('shop_image');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealer_appointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('shop_image', 's3');
+                ->toMediaCollection('shop_image', 'public');
         }
         $kyc_ckeckbox = config('constants.kyc_ckeckbox');
         return view('dealer_appointment.kyc_form', compact('kyc_ckeckbox', 'dealer_appointment'));
@@ -210,91 +210,91 @@ class DealerAppointmentController extends Controller
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('profile_picture', 's3');
+                ->toMediaCollection('profile_picture', 'public');
         }
         if ($request->hasFile('cancel_cheque')) {
             $file = $request->file('cancel_cheque');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('cancel_cheque', 's3');
+                ->toMediaCollection('cancel_cheque', 'public');
         }
         if ($request->hasFile('shop_image')) {
             $file = $request->file('shop_image');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('shop_image', 's3');
+                ->toMediaCollection('shop_image', 'public');
         }
         if ($request->hasFile('service_policy')) {
             $file = $request->file('service_policy');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('service_policy', 's3');
+                ->toMediaCollection('service_policy', 'public');
         }
         if ($request->hasFile('dealer_policy')) {
             $file = $request->file('dealer_policy');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('dealer_policy', 's3');
+                ->toMediaCollection('dealer_policy', 'public');
         }
         if ($request->hasFile('mou_sheet')) {
             $file = $request->file('mou_sheet');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('mou_sheet', 's3');
+                ->toMediaCollection('mou_sheet', 'public');
         }
         if ($request->hasFile('mcl_cheque_1')) {
             $file = $request->file('mcl_cheque_1');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('mcl_cheque_1', 's3');
+                ->toMediaCollection('mcl_cheque_1', 'public');
         }
         if ($request->hasFile('mcl_cheque_2')) {
             $file = $request->file('mcl_cheque_2');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('mcl_cheque_2', 's3');
+                ->toMediaCollection('mcl_cheque_2', 'public');
         }
         if ($request->hasFile('gst_certificate')) {
             $file = $request->file('gst_certificate');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('gst_certificate', 's3');
+                ->toMediaCollection('gst_certificate', 'public');
         }
         if ($request->hasFile('adhar_card')) {
             $file = $request->file('adhar_card');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('adhar_card', 's3');
+                ->toMediaCollection('adhar_card', 'public');
         }
         if ($request->hasFile('pan_card')) {
             $file = $request->file('pan_card');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('pan_card', 's3');
+                ->toMediaCollection('pan_card', 'public');
         }
         if ($request->hasFile('bank_statement')) {
             $file = $request->file('bank_statement');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('bank_statement', 's3');
+                ->toMediaCollection('bank_statement', 'public');
         }
         if ($request->hasFile('application_form')) {
             $file = $request->file('application_form');
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('application_form', 's3');
+                ->toMediaCollection('application_form', 'public');
         }
         return redirect(route('dealer-appointment'));
     }

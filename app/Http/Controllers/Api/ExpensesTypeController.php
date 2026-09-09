@@ -16,7 +16,6 @@ use Carbon\Carbon;
 
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ExpensesTypeController extends Controller
 {
@@ -151,7 +150,7 @@ class ExpensesTypeController extends Controller
                         $customname = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                         $expenses->addMedia($file)
                             ->usingFileName($customname)
-                            ->toMediaCollection('expense_file');
+                            ->toMediaCollection('expense_file', 'public');
                     }
                 }
     
@@ -214,10 +213,8 @@ class ExpensesTypeController extends Controller
 
                     $image = array();
 
-                    if (isset($expense) && $expense->getMedia('expense_file')->count() > 0 && Storage::disk('s3')->exists($expense->getFirstMedia('expense_file')->getPath())) {
-                        foreach ($expense->getMedia('expense_file') as $expense_image) {
-                            $image[] = $expense_image->getFullUrl();
-                        }
+                    foreach ($expense->getMedia('expense_file') as $expense_image) {
+                        $image[] = $expense_image->getFullUrl();
                     }
 
 
@@ -279,11 +276,9 @@ class ExpensesTypeController extends Controller
 
                 $image = array();
                 $image_id = array();
-                if (isset($expense) && $expense->getMedia('expense_file')->count() > 0 && Storage::disk('s3')->exists($expense->getFirstMedia('expense_file')->getPath())) {
-                    foreach ($expense->getMedia('expense_file') as $expense_image) {
-                        $image[] = $expense_image->getFullUrl();
-                        $image_id[] = $expense_image->id;
-                    }
+                foreach ($expense->getMedia('expense_file') as $expense_image) {
+                    $image[] = $expense_image->getFullUrl();
+                    $image_id[] = $expense_image->id;
                 }
 
 
@@ -417,7 +412,7 @@ class ExpensesTypeController extends Controller
                         $customname = time() . '.' . $file->getClientOriginalExtension();
                         $expense_detail->addMedia($file)
                             ->usingFileName($customname)
-                            ->toMediaCollection('expense_file');
+                            ->toMediaCollection('expense_file', 'public');
                     }
                 }
 
@@ -501,10 +496,8 @@ class ExpensesTypeController extends Controller
 
                     $image = array();
 
-                    if (isset($expense) && $expense->getMedia('expense_file')->count() > 0 && Storage::disk('s3')->exists($expense->getFirstMedia('expense_file')->getPath())) {
-                        foreach ($expense->getMedia('expense_file') as $expense_image) {
-                            $image[] = $expense_image->getFullUrl();
-                        }
+                    foreach ($expense->getMedia('expense_file') as $expense_image) {
+                        $image[] = $expense_image->getFullUrl();
                     }
 
 

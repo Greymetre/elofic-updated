@@ -78,7 +78,7 @@ class UsersDataTable extends DataTable
             })
             ->addColumn('image', function ($query) {
                 $profileimage = asset('assets/img/placeholder.jpg');
-                if ($query->getMedia('profile_image')->count() > 0 && Storage::disk('s3')->exists($query->getMedia('profile_image')[0]->getPath())) {
+                if ($query->getMedia('profile_image')->count() > 0) {
                     return '<img src="' . $query->getMedia('profile_image')[0]->getFullUrl() . '" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
                 } else {
                     return '<img src="' . $profileimage . '" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';

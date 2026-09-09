@@ -8,6 +8,7 @@ use App\Console\Commands\EveryNight;
 use App\Console\Commands\AutoPunchOut;
 use App\Console\Commands\AddressUpdate;
 use App\Console\Commands\MoveStorageToS3;
+use App\Console\Commands\MigrateS3MediaToLocal;
 use App\Models\User;
 
 class Kernel extends ConsoleKernel
@@ -15,6 +16,7 @@ class Kernel extends ConsoleKernel
 
     protected $commands = [
         \App\Console\Commands\SendPendingTaskNotification::class,
+        MigrateS3MediaToLocal::class,
     ];
 
   

@@ -205,7 +205,7 @@ class MarketingController extends Controller
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('dealer_board', 's3');
+                ->toMediaCollection('dealer_board', 'public');
         }
         return redirect()->route('marketing.new_dealer')->with('message_success', 'Board installation date and image updated successfully')->withInput();
     }
@@ -221,7 +221,7 @@ class MarketingController extends Controller
             $customname = time() . '.' . $file->getClientOriginalExtension();
             $dealerAppointment->addMedia($file)
                 ->usingFileName($customname)
-                ->toMediaCollection('welcome_kit', 's3');
+                ->toMediaCollection('welcome_kit', 'public');
         }
         return redirect()->route('marketing.new_dealer')->with('message_success', 'Welcome kit date and invoice updated successfully')->withInput();
     }

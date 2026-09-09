@@ -54,7 +54,7 @@ class MarketingDealerAppointmentDataTable extends DataTable
                 }
             })
             ->editColumn('certificate', function ($data) {
-                if($data->getMedia('certificate')->count() > 0 && Storage::disk('s3')->exists($data->getMedia('certificate')[0]->getPath())){
+                if($data->getMedia('certificate')->count() > 0){
                     return '<a target="_blank" href="'.$data->getMedia('certificate')[0]->getFullUrl().'" class="btn btn-success btn-just-icon btn-sm" title="Edit Appointment Form" ><i class="material-icons">card_membership</i></a>';
                 }else{
                     return '-';

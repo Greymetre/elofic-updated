@@ -78,7 +78,7 @@ class DealerAppointmentController extends Controller
                     'firm_name' => isset($value['firm_name']) ? $value['firm_name'] : '',
                     'place' => isset($value['place']) ? $value['place'] : '',
                     'division' => isset($value['division']) ? $value['division'] : '',
-                    'certificate' => $value->getMedia('certificate')->count() > 0 && Storage::disk('s3')->exists($value->getMedia('certificate')[0]->getPath()) ? Storage::disk('s3')->url($value->getMedia('certificate')[0]->getPath()) : ''
+                    'certificate' => $value->getFirstMediaUrl('certificate')
                 ]);
             }
         }
@@ -141,7 +141,7 @@ class DealerAppointmentController extends Controller
                     'manufacture_turn_over_2' => isset($value['manufacture_turn_over_2']) ? $value['manufacture_turn_over_2'] : '',
                     'approval_status' => isset($value['approval_status']) ? $value['approval_status'] : '0',
                     'bm_remark' => isset($value['bm_remark']) ? $value['bm_remark'] : '',
-                    'certificate' => $value->getMedia('certificate')->count() > 0 && Storage::disk('s3')->exists($value->getMedia('certificate')[0]->getPath()) ? Storage::disk('s3')->url($value->getMedia('certificate')[0]->getPath()) : '',
+                    'certificate' => $value->getFirstMediaUrl('certificate'),
                 ];
             }
             return response()->json(['status' => 'success', 'message' => 'Data retrieved successfully.', 'data' => $data], 200);

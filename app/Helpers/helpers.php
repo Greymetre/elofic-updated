@@ -113,7 +113,7 @@ if (! function_exists('base64tofile')) {
         $image = str_replace(' ', '+', $image);
         $filename = $filename . date('ymdHis') . '.jpg';
         $image = base64_decode($image);
-        $filepath =  Storage::disk('s3')->put($path, $image);
+        $filepath =  Storage::disk('public')->put($path, $image);
         return $filepath;
         // if(Storage::disk('uploads')->exists($path.$filename)) {
         //     Storage::disk('uploads')->delete($path.$filename);
