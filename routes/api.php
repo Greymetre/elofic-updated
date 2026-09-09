@@ -62,6 +62,7 @@ use App\Http\Controllers\Api\CustomerOutstandingController;
 /*================= Auth Routes ============================*/
 
 Route::post('login', [LoginController::class, 'login']);
+Route::post('signup', [LoginController::class, 'signup']);
 Route::post('customerLogin', [LoginController::class, 'customerLogin']);
 Route::post('customer/email-login', [LoginController::class, 'customerEmailLogin']);
 Route::post('customer/email-signup', [LoginController::class, 'customerEmailSignup']);

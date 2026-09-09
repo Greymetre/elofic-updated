@@ -133,12 +133,17 @@ class UsersDataTable extends DataTable
                     $query->where('department_id', $request->department_id);
                 }
             })
-            ->whereHas('roles', function ($query) use ($request) {
-                
+            ->where(function ($query) use ($request) {
                 if ($request->user_type == 'customer') {
-                    $query->whereIn('id', config('constants.customer_roles'));
+                    $query->whereHas('roles', function ($roleQuery) {
+                        $roleQuery->whereIn('id', config('constants.customer_roles'));
+                    });
                 } else {
-                    $query->whereNotIn('id', config('constants.customer_roles'));
+                    // Mobile signups remain role-less until an admin reviews them.
+                    $query->whereDoesntHave('roles')
+                        ->orWhereHas('roles', function ($roleQuery) {
+                            $roleQuery->whereNotIn('id', config('constants.customer_roles'));
+                        });
                 }
             })
             ->latest()
