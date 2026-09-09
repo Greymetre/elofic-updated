@@ -444,7 +444,7 @@
                                  $filePath = $media->getPath();
                                  @endphp
 
-                                 @if(Storage::disk('s3')->exists($filePath))
+                                 @if(file_exists($filePath))
                                  @if($media->mime_type == 'application/pdf')
                                  <a href="{!! $media->getFullUrl() !!}" target="_blank">{{ $media->file_name }}</a>
                                  @else

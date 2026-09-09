@@ -415,7 +415,7 @@ if(!empty($paln) && !empty($paln->town)){
               <div class="form-group col-md-12">
                 @foreach($expense->getMedia('expense_file') as $image)
 
-                @if(Storage::disk('s3')->exists($image->getPath()))
+                @if(file_exists($image->getPath()))
                 <?php
                 $infoPath = pathinfo($image->getFullUrl());
                 $extension = $infoPath['extension'];

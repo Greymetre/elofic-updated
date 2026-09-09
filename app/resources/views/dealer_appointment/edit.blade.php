@@ -186,7 +186,7 @@
               <div class="col-md-3">
                 <div class="profile-pic-container">
                   <div class="profile-pic">
-                    @if($dealerAppointment->exists && $dealerAppointment->getMedia('profile_picture')->count() > 0 && Storage::disk('s3')->exists($dealerAppointment->getMedia('profile_picture')[0]->getPath()))
+                    @if($dealerAppointment->exists && $dealerAppointment->getMedia('profile_picture')->count() > 0 && file_exists($dealerAppointment->getMedia('profile_picture')[0]->getPath()))
                     <img id="profileImage" src="{{$dealerAppointment->getMedia('profile_picture')[0]->getFullUrl()}}" alt="Passport Size Profile Picture">
                     @else
                     <img id="profileImage" src="default-profile.png" alt="Passport Size Profile Picture">

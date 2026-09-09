@@ -2772,7 +2772,7 @@
                             <a class="nav-link" href="javascript:;" id="navbarDropdownProfile" data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">
                                 @if (auth()->user()->getMedia('profile_image')->count() > 0 &&
-                                Storage::disk('s3')->exists(auth()->user()->getMedia('profile_image')[0]->getPath()))
+                                file_exists(auth()->user()->getMedia('profile_image')[0]->getPath()))
                                 <img src="{{ auth()->user()->getMedia('profile_image')[0]->getFullUrl() }}" border="0"
                                     width="40" class="rounded-circle" />
                                 @else

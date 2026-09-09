@@ -24,14 +24,14 @@
          @if($dealer_poster_setting->slider == 'Y')
          <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
             <ol class="carousel-indicators">
-               @if($dealer_poster_setting->exists && $dealer_poster_setting->getMedia('dealer_portal_slider_image')->count() > 0 && Storage::disk('s3')->exists($dealer_poster_setting->getMedia('dealer_portal_slider_image')[0]->getPath()))
+               @if($dealer_poster_setting->exists && $dealer_poster_setting->getMedia('dealer_portal_slider_image')->count() > 0 && file_exists($dealer_poster_setting->getMedia('dealer_portal_slider_image')[0]->getPath()))
                @foreach($dealer_poster_setting->getMedia('dealer_portal_slider_image') as $k => $media)
                <li data-target="#carouselExampleIndicators" data-slide-to="{{$k}}" class="{{$k==0?'active':''}}"></li>
                @endforeach
                @endif
             </ol>
             <div class="carousel-inner">
-               @if($dealer_poster_setting->exists && $dealer_poster_setting->getMedia('dealer_portal_slider_image')->count() > 0 && Storage::disk('s3')->exists($dealer_poster_setting->getMedia('dealer_portal_slider_image')[0]->getPath()))
+               @if($dealer_poster_setting->exists && $dealer_poster_setting->getMedia('dealer_portal_slider_image')->count() > 0 && file_exists($dealer_poster_setting->getMedia('dealer_portal_slider_image')[0]->getPath()))
                @foreach($dealer_poster_setting->getMedia('dealer_portal_slider_image') as $k => $media)
                <div class="carousel-item {{$k==0?'active':''}}">
                   <img class="d-block w-100" src="{{ $media->getFullUrl() }}" alt="{{$media->name}}">

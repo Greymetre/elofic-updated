@@ -1043,7 +1043,7 @@
                                              </div>
 
                                           @endif
-                                          <!-- @if($complaints->exists && $complaints->getMedia('complaint_attach')->count() > 0 && Storage::disk('s3')->exists($complaints->getMedia('complaint_attach')[0]->getPath()))
+                                          <!-- @if($complaints->exists && $complaints->getMedia('complaint_attach')->count() > 0 && file_exists($complaints->getMedia('complaint_attach')[0]->getPath()))
                                           @foreach($complaints->getMedia('complaint_attach') as $k=>$media)
                                           <div style="position: relative;" class="img-div">
                                              <button title="Delete Image" type="button" class="badge badge-danger delete-img-btn" data-mediaid="{{$media->id}}">X</button>

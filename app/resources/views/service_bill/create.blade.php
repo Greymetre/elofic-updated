@@ -451,7 +451,7 @@ body table td {
                              <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
                              <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
                          </div>
-                        @if($service_bill->exists && $service_bill->getMedia('product_sr_no')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('product_sr_no')[0]->getPath()))
+                        @if($service_bill->exists && $service_bill->getMedia('product_sr_no')->count() > 0 && file_exists($service_bill->getMedia('product_sr_no')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('product_sr_no')[0]->getFullUrl() }}">
                               <img width="150" src="{{ $service_bill->getMedia('product_sr_no')[0]->getFullUrl() }}" alt="">
@@ -471,7 +471,7 @@ body table td {
                              <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
                              <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
                          </div>
-                        @if($service_bill->exists && $service_bill->getMedia('scr_job_card')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('scr_job_card')[0]->getPath()))
+                        @if($service_bill->exists && $service_bill->getMedia('scr_job_card')->count() > 0 && file_exists($service_bill->getMedia('scr_job_card')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('scr_job_card')[0]->getFullUrl() }}">
                               <img width="150" src="{{ $service_bill->getMedia('scr_job_card')[0]->getFullUrl() }}" alt="">
@@ -491,7 +491,7 @@ body table td {
                              <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
                              <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
                          </div>
-                        @if($service_bill->exists && $service_bill->getMedia('photo_3')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_3')[0]->getPath()))
+                        @if($service_bill->exists && $service_bill->getMedia('photo_3')->count() > 0 && file_exists($service_bill->getMedia('photo_3')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('photo_3')[0]->getFullUrl() }}">
                               <img width="150" src="{{ $service_bill->getMedia('photo_3')[0]->getFullUrl() }}" alt="">
@@ -511,7 +511,7 @@ body table td {
                              <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
                              <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
                          </div>
-                        @if($service_bill->exists && $service_bill->getMedia('photo_4')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_4')[0]->getPath()))
+                        @if($service_bill->exists && $service_bill->getMedia('photo_4')->count() > 0 && file_exists($service_bill->getMedia('photo_4')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('photo_4')[0]->getFullUrl() }}">
                               <img width="150" src="{{ $service_bill->getMedia('photo_4')[0]->getFullUrl() }}" alt="">
@@ -531,7 +531,7 @@ body table td {
                              <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
                              <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
                          </div>
-                        @if($service_bill->exists && $service_bill->getMedia('photo_5')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('photo_5')[0]->getPath()))
+                        @if($service_bill->exists && $service_bill->getMedia('photo_5')->count() > 0 && file_exists($service_bill->getMedia('photo_5')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('photo_5')[0]->getFullUrl() }}">
                               <img width="150" src="{{ $service_bill->getMedia('photo_5')[0]->getFullUrl() }}" alt="">
@@ -551,7 +551,7 @@ body table td {
                              <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
                              <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
                          </div>
-                        @if($service_bill->exists && $service_bill->getMedia('voltage_image')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('voltage_image')[0]->getPath()))
+                        @if($service_bill->exists && $service_bill->getMedia('voltage_image')->count() > 0 && file_exists($service_bill->getMedia('voltage_image')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('voltage_image')[0]->getFullUrl() }}">
                               <img width="150" src="{{ $service_bill->getMedia('voltage_image')[0]->getFullUrl() }}" alt="">
@@ -571,7 +571,7 @@ body table td {
                              <img class="preview-img" src="" style="display:none; max-height: 100px; border-radius: 5px;" />
                              <!-- <p class="file-name" style="display:none; font-weight: bold; margin-top: 5px;"></p> -->
                          </div>
-                        @if($service_bill->exists && $service_bill->getMedia('current_image')->count() > 0 && Storage::disk('s3')->exists($service_bill->getMedia('current_image')[0]->getPath()))
+                        @if($service_bill->exists && $service_bill->getMedia('current_image')->count() > 0 && file_exists($service_bill->getMedia('current_image')[0]->getPath()))
                         <div class="imgdiv">
                            <a target="_blank" href="{{ $service_bill->getMedia('current_image')[0]->getFullUrl() }}">
                               <img width="150" src="{{ $service_bill->getMedia('current_image')[0]->getFullUrl() }}" alt="">
