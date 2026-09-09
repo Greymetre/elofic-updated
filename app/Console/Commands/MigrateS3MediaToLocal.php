@@ -39,6 +39,17 @@ class MigrateS3MediaToLocal extends Command
                     $directory = dirname($relativePath);
                     $files = Storage::disk('s3')->allFiles($directory === '.' ? '' : $directory);
 
+                    // Some S3-compatible adapters treat `1` as a raw prefix and also
+                    // return files from `10/`, `11/`, etc. Only migrate this media's
+                    // exact directory so unrelated records are never copied together.
+                    if ($directory !== '.') {
+                        $directoryPrefix = rtrim($directory, '/') . '/';
+                        $files = array_values(array_filter(
+                            $files,
+                            static fn (string $file): bool => str_starts_with($file, $directoryPrefix)
+                        ));
+                    }
+
                     if ($media->disk === 's3' && !in_array($relativePath, $files, true)) {
                         throw new \RuntimeException("Original file not found on S3: {$relativePath}");
                     }
@@ -91,14 +102,23 @@ class MigrateS3MediaToLocal extends Command
                     $this->line("[{$media->id}] migrated {$relativePath}");
                 } catch (Throwable $exception) {
                     $failed++;
-                    $this->error("[{$media->id}] {$exception->getMessage()}");
+                    $message = preg_replace(
+                        [
+                            '/<AWSAccessKeyId>.*?<\/AWSAccessKeyId>/s',
+                            '/AWSAccessKeyId=[^&\s]+/',
+                            '/AKIA[0-9A-Z]{16}/',
+                        ],
+                        '[REDACTED]',
+                        $exception->getMessage()
+                    );
+                    $this->error("[{$media->id}] {$message}");
                 }
             }
         });
 
         if ($this->option('dry-run')) {
-            $this->info('Dry run complete. No files or database records were changed.');
-            return self::SUCCESS;
+            $this->info("Dry run complete: {$total} checked, {$failed} failed. No files or database records were changed.");
+            return $failed === 0 ? self::SUCCESS : self::FAILURE;
         }
 
         $this->info("Migration complete: {$migrated} migrated, {$failed} failed.");
