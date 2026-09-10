@@ -428,6 +428,137 @@ class DashboardController extends Controller
         }
     }
 
+    public function salesPerformance(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'period' => 'nullable|in:MTD,YTD,mtd,ytd',
+                'branch_id' => 'nullable|integer',
+                'designation_id' => 'nullable|integer',
+                'user_id' => 'nullable|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $validator->errors(),
+                ], $this->badrequest);
+            }
+
+            $period = strtoupper($request->input('period', 'MTD'));
+            $today = Carbon::today();
+            if ($period === 'YTD') {
+                $financialYearStart = $today->month >= 4 ? $today->year : $today->year - 1;
+                $fromDate = Carbon::create($financialYearStart, 4, 1)->startOfDay();
+            } else {
+                $period = 'MTD';
+                $fromDate = $today->copy()->startOfMonth()->startOfDay();
+            }
+
+            $reportingUserIds = getUsersReportingToAuth($request->user()->id);
+            $baseUsers = User::with([
+                'getbranch:id,branch_name',
+                'getdesignation:id,designation_name',
+                'reportinginfo:id,name',
+            ])
+                ->whereIn('id', $reportingUserIds)
+                ->where('active', 'Y')
+                ->orderBy('name');
+
+            $filterUsers = (clone $baseUsers)->get();
+            $userOptions = $filterUsers->map(fn ($user) => [
+                'id' => (int) $user->id,
+                'name' => $user->name,
+            ])->values();
+            $branchOptions = $filterUsers
+                ->filter(fn ($user) => !empty($user->getbranch))
+                ->map(fn ($user) => [
+                    'id' => (int) $user->getbranch->id,
+                    'name' => $user->getbranch->branch_name,
+                ])
+                ->unique('id')
+                ->values();
+            $designationOptions = $filterUsers
+                ->filter(fn ($user) => !empty($user->getdesignation))
+                ->map(fn ($user) => [
+                    'id' => (int) $user->getdesignation->id,
+                    'name' => $user->getdesignation->designation_name,
+                ])
+                ->unique('id')
+                ->values();
+
+            if ($request->filled('branch_id')) {
+                $baseUsers->where('branch_id', $request->integer('branch_id'));
+            }
+            if ($request->filled('designation_id')) {
+                $baseUsers->where('designation_id', $request->integer('designation_id'));
+            }
+            if ($request->filled('user_id')) {
+                $baseUsers->where('id', $request->integer('user_id'));
+            }
+
+            $users = $baseUsers->get();
+            $userIds = $users->pluck('id');
+            $targets = DB::table('sales_targets')
+                ->whereIn('userid', $userIds)
+                ->whereDate('startdate', '<=', $today->toDateString())
+                ->where(function ($query) use ($fromDate) {
+                    $query->whereNull('enddate')
+                        ->orWhereDate('enddate', '>=', $fromDate->toDateString());
+                })
+                ->selectRaw('userid, SUM(amount) as total')
+                ->groupBy('userid')
+                ->pluck('total', 'userid');
+            $achievements = DB::table('orders')
+                ->whereIn('created_by', $userIds)
+                ->whereBetween('order_date', [$fromDate->toDateString(), $today->toDateString()])
+                ->whereNull('deleted_at')
+                ->selectRaw('created_by, SUM(grand_total) as total')
+                ->groupBy('created_by')
+                ->pluck('total', 'created_by');
+
+            $rows = $users->map(function ($user) use ($targets, $achievements) {
+                $target = (float) ($targets[$user->id] ?? 0);
+                $achievement = (float) ($achievements[$user->id] ?? 0);
+
+                return [
+                    'id' => (int) $user->id,
+                    'name' => $user->name,
+                    'reporting_head' => optional($user->reportinginfo)->name ?? '—',
+                    'branch' => optional($user->getbranch)->branch_name ?? 'Unassigned',
+                    'designation' => optional($user->getdesignation)->designation_name ?? '—',
+                    'target' => $target,
+                    'achievement' => $achievement,
+                    'achievement_percentage' => $target > 0
+                        ? round(($achievement / $target) * 100, 2)
+                        : 0,
+                ];
+            })->values();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'period' => $period,
+                    'from_date' => $fromDate->toDateString(),
+                    'to_date' => $today->toDateString(),
+                    'month' => $today->format('M'),
+                    'year' => (int) $today->year,
+                    'rows' => $rows,
+                    'filters' => [
+                        'users' => $userOptions,
+                        'branches' => $branchOptions,
+                        'designations' => $designationOptions,
+                    ],
+                ],
+            ], $this->successStatus);
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $exception->getMessage(),
+            ], $this->internalError);
+        }
+    }
+
     public function getKyc(Request $request)
     {
 
