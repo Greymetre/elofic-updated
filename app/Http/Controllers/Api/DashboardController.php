@@ -626,6 +626,130 @@ class DashboardController extends Controller
         }
     }
 
+    public function promotionalPerformance(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'period' => 'nullable|in:TODAY,MTD,YTD,today,mtd,ytd',
+                'branch_id' => 'nullable|integer',
+                'user_id' => 'nullable|integer',
+                'type' => 'nullable|in:tent_meet,van_activity,mechanic_meet,retailer_meet',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $validator->errors(),
+                ], $this->badrequest);
+            }
+
+            $period = strtoupper($request->input('period', 'TODAY'));
+            $today = Carbon::today();
+            if ($period === 'YTD') {
+                $financialYearStart = $today->month >= 4 ? $today->year : $today->year - 1;
+                $fromDate = Carbon::create($financialYearStart, 4, 1)->startOfDay();
+            } elseif ($period === 'MTD') {
+                $fromDate = $today->copy()->startOfMonth()->startOfDay();
+            } else {
+                $period = 'TODAY';
+                $fromDate = $today->copy()->startOfDay();
+            }
+
+            $activityTypes = [
+                'tent_meet' => 'Tent Meet',
+                'van_activity' => 'Van Activity',
+                'mechanic_meet' => 'Mechanic Meet',
+                'retailer_meet' => 'Retailer Meet',
+            ];
+            $reportingUserIds = getUsersReportingToAuth($request->user()->id);
+            $baseUsers = User::with('getbranch:id,branch_name')
+                ->whereIn('id', $reportingUserIds)
+                ->where('active', 'Y')
+                ->orderBy('branch_id')
+                ->orderBy('name');
+
+            $filterUsers = (clone $baseUsers)->get();
+            $userOptions = $filterUsers->map(fn ($user) => [
+                'id' => (int) $user->id,
+                'name' => $user->name,
+            ])->values();
+            $branchOptions = $filterUsers
+                ->filter(fn ($user) => !empty($user->getbranch))
+                ->map(fn ($user) => [
+                    'id' => (int) $user->getbranch->id,
+                    'name' => $user->getbranch->branch_name,
+                ])
+                ->unique('id')
+                ->values();
+
+            if ($request->filled('branch_id')) {
+                $baseUsers->where('branch_id', $request->integer('branch_id'));
+            }
+            if ($request->filled('user_id')) {
+                $baseUsers->where('id', $request->integer('user_id'));
+            }
+
+            $users = $baseUsers->get();
+            $userIds = $users->pluck('id');
+            $activities = DB::table('promotional_activities')
+                ->whereIn('created_by', $userIds)
+                ->whereBetween('activity_date', [$fromDate->toDateString(), $today->toDateString()]);
+
+            if ($request->filled('type')) {
+                $activities->where('activity_type', $activityTypes[$request->input('type')]);
+            }
+
+            $activityCounts = $activities
+                ->selectRaw('created_by, activity_type, COUNT(*) as total')
+                ->groupBy('created_by', 'activity_type')
+                ->get()
+                ->groupBy('created_by');
+
+            $rows = $users->map(function ($user) use ($activityCounts, $activityTypes) {
+                $userCounts = $activityCounts->get($user->id, collect());
+                $counts = [];
+                foreach ($activityTypes as $key => $label) {
+                    $counts[$key] = (int) optional($userCounts->firstWhere('activity_type', $label))->total;
+                }
+
+                return [
+                    'id' => (int) $user->id,
+                    'employee' => $user->name,
+                    'branch_id' => $user->getbranch ? (int) $user->getbranch->id : null,
+                    'branch' => optional($user->getbranch)->branch_name ?? 'Unassigned',
+                    'tent_meet' => $counts['tent_meet'],
+                    'van_activity' => $counts['van_activity'],
+                    'mechanic_meet' => $counts['mechanic_meet'],
+                    'retailer_meet' => $counts['retailer_meet'],
+                    'total' => array_sum($counts),
+                ];
+            })->values();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'period' => $period,
+                    'from_date' => $fromDate->toDateString(),
+                    'to_date' => $today->toDateString(),
+                    'rows' => $rows,
+                    'filters' => [
+                        'users' => $userOptions,
+                        'branches' => $branchOptions,
+                        'types' => collect($activityTypes)->map(fn ($label, $key) => [
+                            'id' => $key,
+                            'name' => $label,
+                        ])->values(),
+                    ],
+                ],
+            ], $this->successStatus);
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $exception->getMessage(),
+            ], $this->internalError);
+        }
+    }
+
     public function getKyc(Request $request)
     {
 

@@ -195,6 +195,7 @@ Route::group(['middleware' => ['auth:users,customers']], function () {
     Route::any('dashboard', [DashboardController::class, 'dashboard']);
     Route::get('dashboard/summary', [DashboardController::class, 'dashboardSummary']);
     Route::get('dashboard/sales-performance', [DashboardController::class, 'salesPerformance']);
+    Route::get('dashboard/promotional-performance', [DashboardController::class, 'promotionalPerformance']);
     Route::any('getLeaveBalance', [DashboardController::class, 'getLeaveBalance']);
     Route::any('getUserSataus', [DashboardController::class, 'getUserSataus']);
     Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
