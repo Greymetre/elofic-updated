@@ -563,6 +563,130 @@ class AttendanceController extends Controller
         }
     }
 
+    public function overview(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'date' => 'nullable|date',
+                'user_id' => 'nullable|integer',
+                'branch_id' => 'nullable|integer',
+                'type' => 'nullable|in:market,leave,mis_punch,holiday',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $validator->errors(),
+                ], $this->badrequest);
+            }
+
+            $date = Carbon::parse($request->input('date', getcurentDate()))->toDateString();
+            $reportingUserIds = getUsersReportingToAuth($request->user()->id);
+
+            $baseUsers = User::with([
+                'getbranch:id,branch_name',
+                'reportinginfo:id,name',
+            ])
+                ->whereIn('id', $reportingUserIds)
+                ->where('active', 'Y')
+                ->orderBy('branch_id')
+                ->orderBy('name');
+
+            $filterUsers = (clone $baseUsers)->get();
+            $userOptions = $filterUsers->map(fn ($user) => [
+                'id' => (int) $user->id,
+                'name' => $user->name,
+            ])->values();
+            $branchOptions = $filterUsers
+                ->filter(fn ($user) => !empty($user->getbranch))
+                ->map(fn ($user) => [
+                    'id' => (int) $user->getbranch->id,
+                    'name' => $user->getbranch->branch_name,
+                ])
+                ->unique('id')
+                ->values();
+
+            if ($request->filled('user_id')) {
+                $baseUsers->where('id', $request->integer('user_id'));
+            }
+            if ($request->filled('branch_id')) {
+                $baseUsers->where('branch_id', $request->integer('branch_id'));
+            }
+
+            $users = $baseUsers->get();
+            $userIds = $users->pluck('id');
+            $attendances = Attendance::whereIn('user_id', $userIds)
+                ->whereDate('punchin_date', $date)
+                ->latest('id')
+                ->get()
+                ->keyBy('user_id');
+
+            $branchIds = $users->pluck('branch_id')->filter()->unique()->values();
+            $holidayBranchIds = Holiday::whereIn('branch', $branchIds)
+                ->get(['branch', 'holiday_date'])
+                ->filter(function ($holiday) use ($date) {
+                    $dates = collect(explode(',', (string) $holiday->holiday_date))
+                        ->map(fn ($holidayDate) => trim($holidayDate));
+                    return $dates->contains($date);
+                })
+                ->pluck('branch')
+                ->map(fn ($branchId) => (int) $branchId)
+                ->unique()
+                ->all();
+
+            $rows = $users->map(function ($user) use ($attendances, $holidayBranchIds) {
+                $attendance = $attendances->get($user->id);
+                $workingType = strtolower((string) optional($attendance)->working_type);
+                $isHoliday = in_array((int) $user->branch_id, $holidayBranchIds, true)
+                    || str_contains($workingType, 'holiday');
+                $isLeave = !$isHoliday && str_contains($workingType, 'leave');
+                $isMarket = !$isHoliday && !$isLeave && !empty(optional($attendance)->punchin_time);
+                $type = $isHoliday ? 'holiday' : ($isLeave ? 'leave' : ($isMarket ? 'market' : 'mis_punch'));
+
+                return [
+                    'id' => (int) $user->id,
+                    'branch_id' => $user->getbranch ? (int) $user->getbranch->id : null,
+                    'branch' => optional($user->getbranch)->branch_name ?? 'Unassigned',
+                    'employee' => $user->name,
+                    'reporting_head' => optional($user->reportinginfo)->name ?? '—',
+                    'type' => $type,
+                    'market' => $type === 'market',
+                    'leave' => $type === 'leave',
+                    'mis_punch' => $type === 'mis_punch',
+                    'holiday' => $type === 'holiday',
+                ];
+            });
+
+            if ($request->filled('type')) {
+                $rows = $rows->where('type', $request->input('type'))->values();
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'date' => $date,
+                    'rows' => $rows->values(),
+                    'totals' => [
+                        'employees' => $rows->count(),
+                        'market' => $rows->where('market', true)->count(),
+                        'leave' => $rows->where('leave', true)->count(),
+                        'mis_punch' => $rows->where('mis_punch', true)->count(),
+                        'holiday' => $rows->where('holiday', true)->count(),
+                    ],
+                    'filters' => [
+                        'users' => $userOptions,
+                        'branches' => $branchOptions,
+                    ],
+                ],
+            ], $this->successStatus);
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $exception->getMessage(),
+            ], $this->internalError);
+        }
+    }
+
     public function changeStatus(Request $request)
     {
         try {
