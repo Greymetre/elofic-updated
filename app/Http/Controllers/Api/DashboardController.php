@@ -235,6 +235,99 @@ class DashboardController extends Controller
         }
     }
 
+    public function dashboardSummary(Request $request)
+    {
+        try {
+            $period = strtoupper($request->input('filterType', 'MTD'));
+            $today = Carbon::today();
+
+            if ($period === 'YTD') {
+                $financialYearStart = $today->month >= 4 ? $today->year : $today->year - 1;
+                $fromDate = Carbon::create($financialYearStart, 4, 1)->startOfDay();
+            } else {
+                $period = 'MTD';
+                $fromDate = $today->copy()->startOfMonth()->startOfDay();
+            }
+
+            $toDate = $today->copy()->endOfDay();
+            $activeFrom = $today->copy()->subMonths(3)->startOfDay();
+            $reportingUserIds = getUsersReportingToAuth($request->user()->id);
+
+            $primaryPartners = DB::table('master_distributors')
+                ->whereBetween('created_at', [$fromDate, $toDate])
+                ->count();
+
+            $activePrimaryPartners = DB::table('primary_sales')
+                ->whereBetween('invoice_date', [$activeFrom->toDateString(), $today->toDateString()])
+                ->whereNotNull('dealer')
+                ->where('dealer', '!=', '')
+                ->distinct('dealer')
+                ->count('dealer');
+
+            $secondaryPartnersQuery = DB::table('secondary_customers')
+                ->whereBetween('created_at', [$fromDate, $toDate]);
+            if (!empty($reportingUserIds)) {
+                $secondaryPartnersQuery->whereIn('created_by', $reportingUserIds);
+            }
+            $secondaryPartners = (int) $secondaryPartnersQuery->count();
+
+            $activeSecondaryPartners = DB::table('orders')
+                ->whereBetween('order_date', [$activeFrom->toDateString(), $today->toDateString()])
+                ->whereNull('deleted_at')
+                ->when(!empty($reportingUserIds), fn ($query) => $query->whereIn('created_by', $reportingUserIds))
+                ->distinct('buyer_id')
+                ->count('buyer_id');
+
+            $complaints = DB::table('complaints')
+                ->whereBetween('created_at', [$fromDate, $toDate]);
+            $totalComplaints = (int) (clone $complaints)->count();
+            $pendingComplaints = (int) (clone $complaints)->whereIn('complaint_status', [0, 1])->count();
+            $closedComplaints = max(0, $totalComplaints - $pendingComplaints);
+
+            $expenses = DB::table('expenses')
+                ->whereBetween('date', [$fromDate->toDateString(), $today->toDateString()])
+                ->when(!empty($reportingUserIds), fn ($query) => $query->whereIn('user_id', $reportingUserIds));
+            $totalExpense = (float) (clone $expenses)->sum('claim_amount');
+            $approvedExpense = (float) (clone $expenses)
+                ->where(function ($query) {
+                    $query->where('checker_status', 1)
+                        ->orWhere('accountant_status', 1);
+                })
+                ->sum(DB::raw('COALESCE(approve_amount, claim_amount, 0)'));
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'period' => $period,
+                    'from_date' => $fromDate->toDateString(),
+                    'to_date' => $today->toDateString(),
+                    'primary_partners' => [
+                        'total' => (int) $primaryPartners,
+                        'active_last_3_months' => (int) $activePrimaryPartners,
+                    ],
+                    'secondary_partners' => [
+                        'total' => $secondaryPartners,
+                        'active_last_3_months' => (int) $activeSecondaryPartners,
+                    ],
+                    'complaints' => [
+                        'total' => $totalComplaints,
+                        'pending' => $pendingComplaints,
+                        'closed' => $closedComplaints,
+                    ],
+                    'expenses' => [
+                        'total' => $totalExpense,
+                        'approved' => $approvedExpense,
+                    ],
+                ],
+            ], $this->successStatus);
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $exception->getMessage(),
+            ], $this->internalError);
+        }
+    }
+
     public function getKyc(Request $request)
     {
 

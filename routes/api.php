@@ -193,6 +193,7 @@ Route::group(['middleware' => ['auth:customers']], function () {
 Route::group(['middleware' => ['auth:users,customers']], function () {
     // Dashboard
     Route::any('dashboard', [DashboardController::class, 'dashboard']);
+    Route::get('dashboard/summary', [DashboardController::class, 'dashboardSummary']);
     Route::any('getLeaveBalance', [DashboardController::class, 'getLeaveBalance']);
     Route::any('getUserSataus', [DashboardController::class, 'getUserSataus']);
     Route::any('pendingCounts', [DashboardController::class, 'pendingCounts']);
