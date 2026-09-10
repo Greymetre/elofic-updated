@@ -499,27 +499,86 @@ class DashboardController extends Controller
 
             $users = $baseUsers->get();
             $userIds = $users->pluck('id');
+            $monthFromDate = $today->copy()->startOfMonth()->toDateString();
+            $monthToDate = $today->copy()->endOfMonth()->toDateString();
+            $workingDaysTotal = 0;
+            for ($day = $today->copy()->startOfMonth(); $day->lte($today->copy()->endOfMonth()); $day->addDay()) {
+                if (!$day->isSunday()) {
+                    $workingDaysTotal++;
+                }
+            }
+
             $targets = DB::table('sales_targets')
                 ->whereIn('userid', $userIds)
-                ->whereDate('startdate', '<=', $today->toDateString())
-                ->where(function ($query) use ($fromDate) {
+                ->whereDate('startdate', '<=', $monthToDate)
+                ->where(function ($query) use ($monthFromDate) {
                     $query->whereNull('enddate')
-                        ->orWhereDate('enddate', '>=', $fromDate->toDateString());
+                        ->orWhereDate('enddate', '>=', $monthFromDate);
                 })
                 ->selectRaw('userid, SUM(amount) as total')
                 ->groupBy('userid')
                 ->pluck('total', 'userid');
-            $achievements = DB::table('orders')
+
+            $periodOrders = DB::table('orders')
                 ->whereIn('created_by', $userIds)
                 ->whereBetween('order_date', [$fromDate->toDateString(), $today->toDateString()])
+                ->whereNull('deleted_at');
+            $periodOrderStats = (clone $periodOrders)
+                ->selectRaw('created_by, COUNT(*) as total_orders, SUM(grand_total) as achievement')
+                ->groupBy('created_by')
+                ->get()
+                ->keyBy('created_by');
+            $mtdAchievements = DB::table('orders')
+                ->whereIn('created_by', $userIds)
+                ->whereBetween('order_date', [$monthFromDate, $today->toDateString()])
                 ->whereNull('deleted_at')
                 ->selectRaw('created_by, SUM(grand_total) as total')
                 ->groupBy('created_by')
                 ->pluck('total', 'created_by');
+            $todaySales = DB::table('orders')
+                ->whereIn('created_by', $userIds)
+                ->whereDate('order_date', $today->toDateString())
+                ->whereNull('deleted_at')
+                ->selectRaw('created_by, SUM(grand_total) as total')
+                ->groupBy('created_by')
+                ->pluck('total', 'created_by');
+            $customerCounts = DB::table('secondary_customers')
+                ->whereIn('created_by', $userIds)
+                ->selectRaw('created_by, COUNT(*) as total')
+                ->groupBy('created_by')
+                ->pluck('total', 'created_by');
+            $workingDays = DB::table('attendances')
+                ->whereIn('user_id', $userIds)
+                ->whereBetween('punchin_date', [$monthFromDate, $today->toDateString()])
+                ->whereNotNull('punchin_time')
+                ->where(function ($query) {
+                    $query->whereNull('working_type')
+                        ->orWhere(function ($workingTypeQuery) {
+                            $workingTypeQuery->where('working_type', 'not like', '%Leave%')
+                                ->where('working_type', 'not like', '%Holiday%');
+                        });
+                })
+                ->selectRaw('user_id, COUNT(DISTINCT punchin_date) as total')
+                ->groupBy('user_id')
+                ->pluck('total', 'user_id');
+            $uniqueVisitColumn = \Schema::hasColumn('check_in', 'entity_id')
+                ? 'COALESCE(entity_id, customer_id)'
+                : 'customer_id';
+            $visitStats = DB::table('check_in')
+                ->whereIn('user_id', $userIds)
+                ->whereBetween('checkin_date', [$monthFromDate, $today->toDateString()])
+                ->whereNull('deleted_at')
+                ->selectRaw("user_id, COUNT(*) as total, COUNT(DISTINCT {$uniqueVisitColumn}) as unique_total")
+                ->groupBy('user_id')
+                ->get()
+                ->keyBy('user_id');
 
-            $rows = $users->map(function ($user) use ($targets, $achievements) {
-                $target = (float) ($targets[$user->id] ?? 0);
-                $achievement = (float) ($achievements[$user->id] ?? 0);
+            $rows = $users->map(function ($user) use ($targets, $periodOrderStats, $mtdAchievements, $todaySales, $customerCounts, $workingDays, $workingDaysTotal, $visitStats) {
+                $target = (float) ($targets[$user->id] ?? 0) * 100000;
+                $periodOrder = $periodOrderStats->get($user->id);
+                $achievement = (float) optional($periodOrder)->achievement;
+                $achievementMtd = (float) ($mtdAchievements[$user->id] ?? 0);
+                $visits = $visitStats->get($user->id);
 
                 return [
                     'id' => (int) $user->id,
@@ -527,11 +586,19 @@ class DashboardController extends Controller
                     'reporting_head' => optional($user->reportinginfo)->name ?? '—',
                     'branch' => optional($user->getbranch)->branch_name ?? 'Unassigned',
                     'designation' => optional($user->getdesignation)->designation_name ?? '—',
+                    'working_days' => (int) ($workingDays[$user->id] ?? 0),
+                    'total_working_days' => $workingDaysTotal,
+                    'total_orders' => (int) optional($periodOrder)->total_orders,
+                    'total_customers' => (int) ($customerCounts[$user->id] ?? 0),
                     'target' => $target,
                     'achievement' => $achievement,
-                    'achievement_percentage' => $target > 0
-                        ? round(($achievement / $target) * 100, 2)
+                    'achievement_mtd' => $achievementMtd,
+                    'achievement_percentage_mtd' => $target > 0
+                        ? round(($achievementMtd / $target) * 100, 2)
                         : 0,
+                    'today_sales_value' => (float) ($todaySales[$user->id] ?? 0),
+                    'mtd_visits' => (int) optional($visits)->total,
+                    'mtd_unique_visits' => (int) optional($visits)->unique_total,
                 ];
             })->values();
 
