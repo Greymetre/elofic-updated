@@ -243,6 +243,10 @@ class DashboardController extends Controller
             if (!in_array($skuMetric, ['value', 'quantity'], true)) {
                 $skuMetric = 'value';
             }
+            $activityPeriod = strtolower($request->input('activityPeriod', 'today'));
+            if (!in_array($activityPeriod, ['today', 'month', 'year'], true)) {
+                $activityPeriod = 'today';
+            }
             $today = Carbon::today();
 
             if ($period === 'YTD') {
@@ -330,6 +334,30 @@ class DashboardController extends Controller
                 })
                 ->values();
 
+            if ($activityPeriod === 'year') {
+                $activityFromDate = $today->copy()->startOfYear();
+            } elseif ($activityPeriod === 'month') {
+                $activityFromDate = $today->copy()->startOfMonth();
+            } else {
+                $activityFromDate = $today->copy()->startOfDay();
+            }
+
+            $promotionalActivityCounts = DB::table('promotional_activities')
+                ->whereBetween('activity_date', [
+                    $activityFromDate->toDateString(),
+                    $today->toDateString(),
+                ])
+                ->when(!empty($reportingUserIds), fn ($query) => $query->whereIn('created_by', $reportingUserIds))
+                ->whereIn('activity_type', [
+                    'Tent Meet',
+                    'Van Activity',
+                    'Mechanic Meet',
+                    'Retailer Meet',
+                ])
+                ->selectRaw('activity_type, COUNT(*) as total')
+                ->groupBy('activity_type')
+                ->pluck('total', 'activity_type');
+
             $complaints = DB::table('complaints')
                 ->whereBetween('created_at', [$fromDate, $toDate]);
             $totalComplaints = (int) (clone $complaints)->count();
@@ -370,6 +398,17 @@ class DashboardController extends Controller
                         'value' => $secondaryOrderValue,
                     ],
                     'top_performing_skus' => $topPerformingSkus,
+                    'promotional_activities' => [
+                        'period' => $activityPeriod,
+                        'from_date' => $activityFromDate->toDateString(),
+                        'to_date' => $today->toDateString(),
+                        'counts' => [
+                            'tent_meet' => (int) ($promotionalActivityCounts['Tent Meet'] ?? 0),
+                            'van_activity' => (int) ($promotionalActivityCounts['Van Activity'] ?? 0),
+                            'mechanic_meet' => (int) ($promotionalActivityCounts['Mechanic Meet'] ?? 0),
+                            'retailer_meet' => (int) ($promotionalActivityCounts['Retailer Meet'] ?? 0),
+                        ],
+                    ],
                     'complaints' => [
                         'total' => $totalComplaints,
                         'pending' => $pendingComplaints,
