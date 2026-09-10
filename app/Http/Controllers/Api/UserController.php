@@ -77,6 +77,39 @@ class UserController extends Controller
         }        
     }
 
+    public function deleteUser(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (! $user instanceof User) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not found.',
+                ], $this->notFound);
+            }
+
+            $user->active = 'N';
+            $user->deleted_at = now();
+            $user->save();
+
+            $token = $user->token();
+            if ($token) {
+                $token->revoke();
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'User deleted successfully.',
+            ], $this->successStatus);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], $this->internalError);
+        }
+    }
+
     public function createNewTask(Request $request)
     {
         try

@@ -204,6 +204,7 @@ Route::group(['middleware' => ['auth:users,customers']], function () {
 
     Route::any('getProfile', [LoginController::class, 'getProfile']);
     Route::post('updateProfile', [LoginController::class, 'updateProfile']);
+    Route::post('delete-user', [UserController::class, 'deleteUser']);
     Route::any('logout', [LoginController::class, 'logout']);
     Route::any('getOrderDiscountLimit', [LoginController::class, 'getOrderDiscountLimit']);
 
