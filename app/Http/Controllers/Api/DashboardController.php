@@ -278,6 +278,29 @@ class DashboardController extends Controller
                 ->distinct('buyer_id')
                 ->count('buyer_id');
 
+            $secondaryAddedToday = DB::table('secondary_customers')
+                ->whereDate('created_at', $today->toDateString())
+                ->when(!empty($reportingUserIds), fn ($query) => $query->whereIn('created_by', $reportingUserIds))
+                ->count();
+
+            $periodOrders = DB::table('orders')
+                ->whereBetween('order_date', [$fromDate->toDateString(), $today->toDateString()])
+                ->whereNull('deleted_at')
+                ->when(!empty($reportingUserIds), fn ($query) => $query->whereIn('created_by', $reportingUserIds));
+            $secondaryUniqueCustomersOrdered = (int) (clone $periodOrders)
+                ->whereNotNull('buyer_id')
+                ->distinct('buyer_id')
+                ->count('buyer_id');
+            $secondaryOrderCount = (int) (clone $periodOrders)->count();
+
+            $periodOrderDetails = DB::table('order_details as od')
+                ->join('orders as o', 'o.id', '=', 'od.order_id')
+                ->whereBetween('o.order_date', [$fromDate->toDateString(), $today->toDateString()])
+                ->whereNull('o.deleted_at')
+                ->when(!empty($reportingUserIds), fn ($query) => $query->whereIn('o.created_by', $reportingUserIds));
+            $secondaryOrderQuantity = (float) (clone $periodOrderDetails)->sum('od.quantity');
+            $secondaryOrderValue = (float) (clone $periodOrderDetails)->sum('od.line_total');
+
             $complaints = DB::table('complaints')
                 ->whereBetween('created_at', [$fromDate, $toDate]);
             $totalComplaints = (int) (clone $complaints)->count();
@@ -308,6 +331,14 @@ class DashboardController extends Controller
                     'secondary_partners' => [
                         'total' => $secondaryPartners,
                         'active_last_3_months' => (int) $activeSecondaryPartners,
+                    ],
+                    'secondary_partner_details' => [
+                        'total_customers' => $secondaryPartners,
+                        'added_today' => (int) $secondaryAddedToday,
+                        'unique_customers_ordered' => $secondaryUniqueCustomersOrdered,
+                        'orders' => $secondaryOrderCount,
+                        'quantity' => $secondaryOrderQuantity,
+                        'value' => $secondaryOrderValue,
                     ],
                     'complaints' => [
                         'total' => $totalComplaints,
