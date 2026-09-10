@@ -239,6 +239,10 @@ class DashboardController extends Controller
     {
         try {
             $period = strtoupper($request->input('filterType', 'MTD'));
+            $skuMetric = strtolower($request->input('metric', 'value'));
+            if (!in_array($skuMetric, ['value', 'quantity'], true)) {
+                $skuMetric = 'value';
+            }
             $today = Carbon::today();
 
             if ($period === 'YTD') {
@@ -301,6 +305,31 @@ class DashboardController extends Controller
             $secondaryOrderQuantity = (float) (clone $periodOrderDetails)->sum('od.quantity');
             $secondaryOrderValue = (float) (clone $periodOrderDetails)->sum('od.line_total');
 
+            $topPerformingSkus = (clone $periodOrderDetails)
+                ->join('products as p', 'p.id', '=', 'od.product_id')
+                ->whereNotNull('od.product_id')
+                ->select([
+                    'p.id',
+                    'p.product_name as sku_name',
+                    DB::raw('SUM(od.quantity) as total_quantity'),
+                    DB::raw('SUM(od.line_total) as total_value'),
+                ])
+                ->groupBy('p.id', 'p.product_name')
+                ->orderByRaw($skuMetric === 'quantity'
+                    ? 'SUM(od.quantity) DESC'
+                    : 'SUM(od.line_total) DESC')
+                ->limit(5)
+                ->get()
+                ->map(function ($sku) {
+                    return [
+                        'id' => (int) $sku->id,
+                        'sku_name' => $sku->sku_name,
+                        'total_quantity' => (float) $sku->total_quantity,
+                        'total_value' => (float) $sku->total_value,
+                    ];
+                })
+                ->values();
+
             $complaints = DB::table('complaints')
                 ->whereBetween('created_at', [$fromDate, $toDate]);
             $totalComplaints = (int) (clone $complaints)->count();
@@ -340,6 +369,7 @@ class DashboardController extends Controller
                         'quantity' => $secondaryOrderQuantity,
                         'value' => $secondaryOrderValue,
                     ],
+                    'top_performing_skus' => $topPerformingSkus,
                     'complaints' => [
                         'total' => $totalComplaints,
                         'pending' => $pendingComplaints,
