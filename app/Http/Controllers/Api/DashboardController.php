@@ -279,12 +279,17 @@ class DashboardController extends Controller
             }
             $secondaryPartners = (int) $secondaryPartnersQuery->count();
 
-            $activeSecondaryPartners = DB::table('orders')
-                ->whereBetween('order_date', [$activeFrom->toDateString(), $today->toDateString()])
-                ->whereNull('deleted_at')
-                ->when(!empty($reportingUserIds), fn ($query) => $query->whereIn('created_by', $reportingUserIds))
-                ->distinct('buyer_id')
-                ->count('buyer_id');
+            // Keep the active count in the same partner cohort as the selected
+            // summary period. Previously this counted every buyer who ordered in
+            // the last three months, so MTD and YTD always showed the same value.
+            $activeSecondaryPartners = DB::table('orders as o')
+                ->join('secondary_customers as sc', 'sc.id', '=', 'o.buyer_id')
+                ->whereBetween('sc.created_at', [$fromDate, $toDate])
+                ->whereBetween('o.order_date', [$activeFrom->toDateString(), $today->toDateString()])
+                ->whereNull('o.deleted_at')
+                ->when(!empty($reportingUserIds), fn ($query) => $query->whereIn('sc.created_by', $reportingUserIds))
+                ->distinct('o.buyer_id')
+                ->count('o.buyer_id');
 
             $secondaryAddedToday = DB::table('secondary_customers')
                 ->whereDate('created_at', $today->toDateString())
