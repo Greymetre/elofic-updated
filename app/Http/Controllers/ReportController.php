@@ -79,7 +79,7 @@ class ReportController extends Controller
 
     public function userMonthlyAnalysis(Request $request, UserMonthlyAnalysisService $service)
     {
-        abort_if(Gate::denies('attendance_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('user_monthly_analysis_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $validated = $request->validate([
             'start_date' => ['nullable', 'date'],
@@ -101,7 +101,7 @@ class ReportController extends Controller
 
     public function userMonthlyAnalysisDownload(Request $request)
     {
-        abort_if(Gate::denies('attendance_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        abort_if(Gate::denies('user_monthly_analysis_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $validated = $request->validate([
             'start_date' => ['required', 'date'],

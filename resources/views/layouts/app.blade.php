@@ -2476,7 +2476,7 @@
                                         </a>
                                     </li>
                                     @endif
-                                    @if(auth()->user()->can('attendance_report'))
+                                    @if(auth()->user()->can('user_monthly_analysis_report'))
                                     <li class="nav-link-btn {{ request()->is('reports/user-monthly-analysis*') ? 'active' : '' }}">
                                         <a class="hoveradd2" href="{{ route('reports.user-monthly-analysis') }}">
                                             <i class="material-icons icon">calendar_month</i>

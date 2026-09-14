@@ -118,6 +118,7 @@ class DatabaseSeeder extends Seeder
                 ['name' => 'user_template', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
                 ['name' => 'user_location', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
                 ['name' => 'attendance_report', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
+                ['name' => 'user_monthly_analysis_report', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
                 ['name' => 'summary_report', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
                 ['name' => 'adherence_report', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
                 ['name' => 'visit_report', 'guard_name' => 'users','created_at' => date('Y-m-d H:i:s'),'updated_at' => date('Y-m-d H:i:s')],
