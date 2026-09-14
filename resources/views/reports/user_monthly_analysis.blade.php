@@ -1,8 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="content">
-    <div class="container-fluid">
+<x-app-layout>
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
@@ -85,6 +81,4 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
-@endsection
+</x-app-layout>
