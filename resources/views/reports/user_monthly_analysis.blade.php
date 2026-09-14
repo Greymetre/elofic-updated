@@ -34,45 +34,35 @@
                             </div>
                         </form>
 
-                        <p class="text-muted"><span class="text-danger font-weight-bold">L</span> = Leave, <span class="text-danger font-weight-bold">A</span> = No punch-in, M/R/D = Mechanic/Retailer/Distributor visits.</p>
-
                         <div class="table-responsive">
                             <table class="table table-bordered table-sm text-center no-wrap">
                                 <thead class="text-primary">
                                     <tr>
-                                        <th>Employee</th>
+                                        <th>Employee Code</th>
                                         <th>Employee Name</th>
                                         <th>Designation</th>
-                                        @foreach($report['dates'] as $date)
-                                            <th>{{ date('d-M', strtotime($date)) }}</th>
-                                        @endforeach
-                                        <th>Total M/R/D</th>
-                                        <th>Working Days</th>
-                                        <th>Avg. M/R/D</th>
+                                        <th>Total Mechanic MTD</th>
+                                        <th>Total Retailer MTD</th>
+                                        <th>Total Distributor MTD</th>
+                                        <th>Working Days MTD</th>
+                                        <th>Average Visits MTD</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($report['rows'] as $row)
+                                        @php($totalVisits = array_sum($row['totals']))
                                         <tr>
                                             <td>{{ $row['employee_code'] }}</td>
                                             <td class="text-left">{{ $row['name'] }}</td>
                                             <td>{{ $row['designation'] }}</td>
-                                            @foreach($report['dates'] as $date)
-                                                @php($day = $row['days'][$date])
-                                                <td>
-                                                    @if($day['status'] !== 'P')
-                                                        <span class="text-danger font-weight-bold">{{ $day['status'] }}</span>
-                                                    @else
-                                                        {{ $day['mechanic'] }}/{{ $day['retailer'] }}/{{ $day['distributor'] }}
-                                                    @endif
-                                                </td>
-                                            @endforeach
-                                            <td>{{ $row['totals']['mechanic'] }}/{{ $row['totals']['retailer'] }}/{{ $row['totals']['distributor'] }}</td>
+                                            <td>{{ $row['totals']['mechanic'] }}</td>
+                                            <td>{{ $row['totals']['retailer'] }}</td>
+                                            <td>{{ $row['totals']['distributor'] }}</td>
                                             <td>{{ $row['working_days'] }}</td>
-                                            <td>{{ $row['averages']['mechanic'] }}/{{ $row['averages']['retailer'] }}/{{ $row['averages']['distributor'] }}</td>
+                                            <td>{{ $row['working_days'] ? round($totalVisits / $row['working_days'], 2) : 0 }}</td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="{{ count($report['dates']) + 6 }}">No users found for this filter.</td></tr>
+                                        <tr><td colspan="8">No users found for this filter.</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>
