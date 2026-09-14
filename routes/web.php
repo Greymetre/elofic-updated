@@ -1003,6 +1003,8 @@ Route::post('secondary-customers/toggle-active', [SecondaryCustomerController::c
     Route::any('counterVisitReportDownload', [ReportController::class, 'counterVisitReportDownload']);
     Route::any('beatAdherenceDetailDownload', [ReportController::class, 'beatAdherenceDetailDownload']);
     Route::any('reports/attendancereport', [ReportController::class, 'attendancereport']);
+    Route::get('reports/user-monthly-analysis', [ReportController::class, 'userMonthlyAnalysis'])->name('reports.user-monthly-analysis');
+    Route::get('reports/user-monthly-analysis/download', [ReportController::class, 'userMonthlyAnalysisDownload'])->name('reports.user-monthly-analysis.download');
     Route::any('reports/reports_sale', [UsersController::class, 'reports_sale']);
     Route::any('reports/fos_rating', [UsersController::class, 'fos_rating']);
     Route::any('reports/asm_rating', [UsersController::class, 'asm_rating']);

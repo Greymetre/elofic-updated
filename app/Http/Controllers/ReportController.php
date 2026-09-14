@@ -64,6 +64,8 @@ use App\Exports\ProductAnalysisQtyExport;
 use App\Exports\ProductAnalysisValueExport;
 use App\Exports\TopDealerExport;
 use App\Exports\UserIncentiveExport;
+use App\Exports\UserMonthlyAnalysisExport;
+use App\Services\UserMonthlyAnalysisService;
 use App\Imports\CutomerOutstantingImport;
 use App\Jobs\GenerateBalanceConfirmationJob;
 use Carbon\Carbon;
@@ -74,6 +76,44 @@ use Spatie\Permission\Models\Role;
 class ReportController extends Controller
 {
     public function __construct() {}
+
+    public function userMonthlyAnalysis(Request $request, UserMonthlyAnalysisService $service)
+    {
+        abort_if(Gate::denies('attendance_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $validated = $request->validate([
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'user_id' => ['nullable', 'integer'],
+        ]);
+        $startDate = $validated['start_date'] ?? now()->startOfMonth()->format('Y-m-d');
+        $endDate = $validated['end_date'] ?? now()->endOfMonth()->format('Y-m-d');
+        $userId = isset($validated['user_id']) ? (int) $validated['user_id'] : null;
+        $report = $service->build($startDate, $endDate, $userId);
+        $users = User::query()
+            ->whereDoesntHave('roles', fn ($query) => $query->whereIn('id', config('constants.customer_roles')))
+            ->whereIn('id', getUsersReportingToAuth())
+            ->orderBy('name')
+            ->get(['id', 'name', 'employee_codes']);
+
+        return view('reports.user_monthly_analysis', compact('report', 'users', 'startDate', 'endDate', 'userId'));
+    }
+
+    public function userMonthlyAnalysisDownload(Request $request)
+    {
+        abort_if(Gate::denies('attendance_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        $validated = $request->validate([
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'user_id' => ['nullable', 'integer'],
+        ]);
+
+        return Excel::download(
+            new UserMonthlyAnalysisExport($validated['start_date'], $validated['end_date'], isset($validated['user_id']) ? (int) $validated['user_id'] : null),
+            'user_monthly_analysis_' . $validated['start_date'] . '_to_' . $validated['end_date'] . '.xlsx'
+        );
+    }
     public function beatadherence(Request $request)
     {
         $userids = getUsersReportingToAuth();

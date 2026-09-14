@@ -2446,7 +2446,7 @@
                                  @endif -->
                         @if(auth()->user()->can('reports_sale'))
                         <li
-                            class="nav-link-btn add_icon {{ request()->is('tours*') || request()->is('reports/customervisit*') || request()->is('reports/attendancereport') || request()->is('reports/attendancereportSummary') || request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') || request()->is('reports/product_analysis_qty*') || request()->is('reports/product_analysis_branch*') || request()->is('reports/product_analysis_value*') || request()->is('reports/group_wise_analysis*') || request()->is('reports/asm_rating*') || request()->is('reports/ch_rating*') ? 'active' : '' }}">
+                            class="nav-link-btn add_icon {{ request()->is('tours*') || request()->is('reports/customervisit*') || request()->is('reports/attendancereport') || request()->is('reports/attendancereportSummary') || request()->is('reports/user-monthly-analysis*') || request()->is('reports/reports_sale*') || request()->is('reports/fos_rating*') || request()->is('reports/primary_sales*') || request()->is('reports/secondary_sales*') || request()->is('reports/product_analysis_qty*') || request()->is('reports/product_analysis_branch*') || request()->is('reports/product_analysis_value*') || request()->is('reports/group_wise_analysis*') || request()->is('reports/asm_rating*') || request()->is('reports/ch_rating*') ? 'active' : '' }}">
                             <a class="hoveradd" data-toggle="collapse" href="#salesReportsMenu"
                                 aria-expanded="false">
                                 <i class="material-icons icon">point_of_sale</i>
@@ -2473,6 +2473,15 @@
                                             <i class="material-icons icon">summarize</i>
                                             <span>Attendance Summary Report</span>
                                             <div class="d-none mobile_hide">Attendance Summary Report</div>
+                                        </a>
+                                    </li>
+                                    @endif
+                                    @if(auth()->user()->can('attendance_report'))
+                                    <li class="nav-link-btn {{ request()->is('reports/user-monthly-analysis*') ? 'active' : '' }}">
+                                        <a class="hoveradd2" href="{{ route('reports.user-monthly-analysis') }}">
+                                            <i class="material-icons icon">calendar_month</i>
+                                            <span>User Monthly Analysis Report</span>
+                                            <div class="d-none mobile_hide">User Monthly Analysis Report</div>
                                         </a>
                                     </li>
                                     @endif
