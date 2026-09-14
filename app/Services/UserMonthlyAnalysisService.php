@@ -12,9 +12,13 @@ class UserMonthlyAnalysisService
 {
     public function build(string $startDate, string $endDate, ?int $userId = null): array
     {
-        $dates = collect(CarbonPeriod::create($startDate, $endDate))
-            ->map(fn ($date) => $date->format('Y-m-d'))
-            ->values();
+        $today = now()->format('Y-m-d');
+        $effectiveEndDate = min($endDate, $today);
+        $dates = $startDate <= $effectiveEndDate
+            ? collect(CarbonPeriod::create($startDate, $effectiveEndDate))
+                ->map(fn ($date) => $date->format('Y-m-d'))
+                ->values()
+            : collect();
 
         $allowedUserIds = getUsersReportingToAuth();
         $users = User::query()
@@ -29,7 +33,8 @@ class UserMonthlyAnalysisService
         $userIds = $users->pluck('id');
         $attendance = Attendance::query()
             ->whereIn('user_id', $userIds)
-            ->whereBetween('punchin_date', [$startDate, $endDate])
+            ->when($dates->isNotEmpty(), fn ($query) => $query->whereBetween('punchin_date', [$startDate, $effectiveEndDate]))
+            ->when($dates->isEmpty(), fn ($query) => $query->whereRaw('1 = 0'))
             ->get(['user_id', 'punchin_date', 'working_type'])
             ->groupBy('user_id')
             ->map(fn ($rows) => $rows->keyBy(fn ($row) => Carbon::parse($row->punchin_date)->format('Y-m-d')));
@@ -37,7 +42,8 @@ class UserMonthlyAnalysisService
         $visits = CheckIn::query()
             ->with(['customer.customertypes:id,customertype_name', 'secondaryCustomer:id,type'])
             ->whereIn('user_id', $userIds)
-            ->whereBetween('checkin_date', [$startDate, $endDate])
+            ->when($dates->isNotEmpty(), fn ($query) => $query->whereBetween('checkin_date', [$startDate, $effectiveEndDate]))
+            ->when($dates->isEmpty(), fn ($query) => $query->whereRaw('1 = 0'))
             ->whereNull('deleted_at')
             ->get(['id', 'user_id', 'customer_id', 'entity_type', 'entity_id', 'checkin_date'])
             ->groupBy(fn ($visit) => $visit->user_id . '|' . Carbon::parse($visit->checkin_date)->format('Y-m-d'));
