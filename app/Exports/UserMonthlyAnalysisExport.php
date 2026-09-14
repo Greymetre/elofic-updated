@@ -96,9 +96,12 @@ class UserMonthlyAnalysisExport implements FromArray, ShouldAutoSize, WithEvents
                         $endCell = Coordinate::stringFromColumnIndex($column + 2) . $row;
                         $sheet->getStyle("{$cell}:{$endCell}")->getFont()->setBold(true)->getColor()->setRGB('FF0000');
                         $sheet->getStyle("{$cell}:{$endCell}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    } elseif ($sheet->getCell($cell)->getValue() === 'L') {
+                    } elseif (in_array($sheet->getCell($cell)->getValue(), ['L', 'SUNDAY'], true)) {
                         $sheet->mergeCells($cell . ':' . Coordinate::stringFromColumnIndex($column + 2) . $row);
-                        $sheet->getStyle($cell)->getFont()->setBold(true)->getColor()->setRGB('FF0000');
+                        $sheet->getStyle($cell)->getFont()->setBold(true);
+                        if ($sheet->getCell($cell)->getValue() === 'L') {
+                            $sheet->getStyle($cell)->getFont()->getColor()->setRGB('FF0000');
+                        }
                         $sheet->getStyle($cell)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     }
                 }

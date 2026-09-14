@@ -25,7 +25,7 @@ class UserMonthlyAnalysisService
             ->whereDoesntHave('roles', fn ($query) => $query->whereIn('id', config('constants.customer_roles')))
             ->whereIn('id', $allowedUserIds)
             ->when($userId, fn ($query) => $query->where('id', $userId))
-            ->with('getdesignation:id,designation_name')
+            ->with(['getdesignation:id,designation_name', 'userinfo'])
             ->select('id', 'employee_codes', 'name', 'designation_id')
             ->orderBy('name')
             ->get();
@@ -64,6 +64,12 @@ class UserMonthlyAnalysisService
                 }
 
                 if (!$hasAttendance) {
+                    $joinedOnOrBeforeDate = optional($user->userinfo)->date_of_joining
+                        && Carbon::parse($user->userinfo->date_of_joining)->startOfDay()->lte(Carbon::parse($date));
+                    if (Carbon::parse($date)->isSunday() && $joinedOnOrBeforeDate) {
+                        $days[$date] = ['status' => 'SUNDAY', 'mechanic' => null, 'retailer' => null, 'distributor' => null];
+                        continue;
+                    }
                     $days[$date] = ['status' => 'A', 'mechanic' => null, 'retailer' => null, 'distributor' => null];
                     continue;
                 }
