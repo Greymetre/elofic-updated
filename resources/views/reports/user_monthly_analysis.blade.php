@@ -2,7 +2,10 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header card-header-primary">
+                    <div class="card-header card-header-icon card-header-theme">
+                        <div class="card-icon">
+                            <i class="material-icons">calendar_month</i>
+                        </div>
                         <h4 class="card-title">User Monthly Analysis Report</h4>
                     </div>
                     <div class="card-body">

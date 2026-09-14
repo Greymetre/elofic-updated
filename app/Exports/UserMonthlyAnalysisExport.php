@@ -37,9 +37,17 @@ class UserMonthlyAnalysisExport implements FromArray, ShouldAutoSize, WithEvents
             $values = [$row['employee_code'], $row['name'], $row['designation']];
             foreach ($this->report['dates'] as $date) {
                 $day = $row['days'][$date];
-                $values = array_merge($values, $day['status'] === 'P'
-                    ? [$day['mechanic'], $day['retailer'], $day['distributor']]
-                    : [$day['status'], '', '']);
+                if ($day['status'] === 'P') {
+                    $values = array_merge($values, [
+                        (string) $day['mechanic'],
+                        (string) $day['retailer'],
+                        (string) $day['distributor'],
+                    ]);
+                } elseif ($day['status'] === 'A') {
+                    $values = array_merge($values, ['A', 'A', 'A']);
+                } else {
+                    $values = array_merge($values, [$day['status'], '', '']);
+                }
             }
             $values = array_merge($values, array_values($row['totals']), [$row['working_days']], array_values($row['averages']));
             $rows[] = $values;
@@ -84,7 +92,11 @@ class UserMonthlyAnalysisExport implements FromArray, ShouldAutoSize, WithEvents
             for ($row = 3; $row <= $sheet->getHighestRow(); $row++) {
                 for ($column = 4; $column < $totalsStart; $column += 3) {
                     $cell = Coordinate::stringFromColumnIndex($column) . $row;
-                    if (in_array($sheet->getCell($cell)->getValue(), ['A', 'L'], true)) {
+                    if ($sheet->getCell($cell)->getValue() === 'A') {
+                        $endCell = Coordinate::stringFromColumnIndex($column + 2) . $row;
+                        $sheet->getStyle("{$cell}:{$endCell}")->getFont()->setBold(true)->getColor()->setRGB('FF0000');
+                        $sheet->getStyle("{$cell}:{$endCell}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    } elseif ($sheet->getCell($cell)->getValue() === 'L') {
                         $sheet->mergeCells($cell . ':' . Coordinate::stringFromColumnIndex($column + 2) . $row);
                         $sheet->getStyle($cell)->getFont()->setBold(true)->getColor()->setRGB('FF0000');
                         $sheet->getStyle($cell)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
