@@ -27,7 +27,11 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
     public function collection()
     {
-        return Attendance::with('users', 'approveReject')->where(function ($query) {
+        return Attendance::with('users', 'approveReject')
+            ->whereHas('users', function ($query) {
+                $query->where('show_attandance_report', '1');
+            })
+            ->where(function ($query) {
 
             if (!Auth::user()->hasRole('superadmin') && !Auth::user()->hasRole('Admin')) {
                 $query->whereIn('user_id', getUsersReportingToAuth());

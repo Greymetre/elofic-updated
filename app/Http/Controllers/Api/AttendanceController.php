@@ -425,6 +425,13 @@ class AttendanceController extends Controller
                 $all_reporting_user_ids = getUsersReportingToAuth($user_id);
             }
 
+            // Attendance-disabled users must not appear in counts, filters, or details.
+            $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)
+                ->where('active', 'Y')
+                ->where('show_attandance_report', '1')
+                ->pluck('id')
+                ->toArray();
+
             // Branch logic (unchanged)
             $all_user_branches = User::with('getbranch')
                 ->whereIn('id', getUsersReportingToAuth($user_id))
@@ -512,6 +519,7 @@ class AttendanceController extends Controller
         
                     $data[$key] = [
                         'attendance_id'    => $checkIn->id,
+                        'user_id'          => $userId,
                         'name'             => $attendanceUser ? $attendanceUser->name : 'N/A',
                         'date'             => date('d/m/Y', strtotime($checkIn->punchin_date)),
                         'punch_in'         => $checkIn->punchin_time ?? '',
@@ -589,6 +597,7 @@ class AttendanceController extends Controller
             ])
                 ->whereIn('id', $reportingUserIds)
                 ->where('active', 'Y')
+                ->where('show_attandance_report', '1')
                 ->orderBy('branch_id')
                 ->orderBy('name');
 

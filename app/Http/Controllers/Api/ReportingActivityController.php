@@ -47,6 +47,19 @@ class ReportingActivityController extends Controller
             ? [$search_name]
             : getUsersReportingToAuth($user_id);
         $dropdown_user_ids = getUsersReportingToAuth($user_id);
+
+        // Keep attendance totals and reporting-user fallbacks limited to users
+        // whose attendance reporting is enabled.
+        $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)
+            ->where('active', 'Y')
+            ->where('show_attandance_report', '1')
+            ->pluck('id')
+            ->toArray();
+        $dropdown_user_ids = User::whereIn('id', $dropdown_user_ids)
+            ->where('active', 'Y')
+            ->where('show_attandance_report', '1')
+            ->pluck('id')
+            ->toArray();
         // ==================== Apply Designation Filter ====================
         if ($designation) {
             $designationIds = array_filter(array_map('trim', explode(',', $designation)));

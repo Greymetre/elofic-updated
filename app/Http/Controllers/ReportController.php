@@ -678,6 +678,10 @@ class ReportController extends Controller
         abort_if(Gate::denies('attendance_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $search_branches = $request->input('search_branches');
         $all_reporting_user_ids = getUsersReportingToAuth();
+        $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)
+            ->where('show_attandance_report', '1')
+            ->pluck('id')
+            ->toArray();
         $all_user_branches = user::whereDoesntHave('roles', function ($query) {
             $query->whereIn('id', config('constants.customer_roles'));
         })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('name', 'asc')->get();
@@ -716,6 +720,9 @@ class ReportController extends Controller
         }
         if ($request->ajax()) {
             $data = Attendance::with('users:id,name,employee_codes')
+                ->whereHas('users', function ($query) {
+                    $query->where('show_attandance_report', '1');
+                })
                 ->where(function ($query) use ($request, $all_reporting_user_ids) {
                     if (!empty($request['executive_id'])) {
                         $query->where('user_id', $request['executive_id']);
@@ -890,6 +897,10 @@ class ReportController extends Controller
         abort_if(Gate::denies('attendance_summary_report'), Response::HTTP_FORBIDDEN, '403 Forbidden');
         $search_branches = $request->input('search_branches');
         $all_reporting_user_ids = getUsersReportingToAuth();
+        $all_reporting_user_ids = User::whereIn('id', $all_reporting_user_ids)
+            ->where('show_attandance_report', '1')
+            ->pluck('id')
+            ->toArray();
         $all_user_branches = user::whereDoesntHave('roles', function ($query) {
             $query->whereIn('id', config('constants.customer_roles'));
         })->with('getbranch')->whereIn('id', $all_reporting_user_ids)->orderBy('name', 'asc')->get();
@@ -949,6 +960,9 @@ class ReportController extends Controller
         }
         if ($request->ajax()) {
             $data = Attendance::with('users:id,name')
+                ->whereHas('users', function ($query) {
+                    $query->where('show_attandance_report', '1');
+                })
                 ->where(function ($query) use ($request, $all_reporting_user_ids) {
                     if (!empty($request['executive_id'])) {
                         $query->where('user_id', $request['executive_id']);
@@ -980,8 +994,6 @@ class ReportController extends Controller
                 ->select('id', 'user_id', 'punchin_date', 'punchin_time', 'punchin_longitude', 'punchin_latitude', 'punchin_address', 'punchin_image', 'punchout_date', 'punchout_time', 'punchout_latitude', 'punchout_longitude', 'punchout_address', 'punchout_image', 'worked_time', 'punchin_summary', 'punchout_summary', 'working_type', 'attendance_status', 'remark_status')
                 ->latest();
 
-                dd($data->get()->groupBy('users.name')->map->pluck('punchin_time', 'punchin_date'));
-                
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->editColumn('punchin_date', function ($data) {
