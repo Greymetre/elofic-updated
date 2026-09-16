@@ -295,6 +295,17 @@ class DashboardController extends Controller
                 ->select('type', DB::raw('COUNT(*) as total'))
                 ->groupBy('type')
                 ->pluck('total', 'type');
+            $activeSecondaryPartnerTypeCounts = DB::table('secondary_customers as sc')
+                ->join('orders as o', 'o.buyer_id', '=', 'sc.id')
+                ->whereIn('sc.created_by', $secondaryPartnerCreatorIds)
+                ->whereBetween('sc.created_at', [$fromDate, $toDate])
+                ->whereBetween('o.order_date', [$activeFrom->toDateString(), $today->toDateString()])
+                ->whereNull('o.deleted_at')
+                ->whereNotNull('sc.type')
+                ->where('sc.type', '!=', '')
+                ->select('sc.type as type', DB::raw('COUNT(DISTINCT sc.id) as total'))
+                ->groupBy('sc.type')
+                ->pluck('total', 'type');
             $secondaryPartnerTypes = DB::table('secondary_customers')
                 ->whereNotNull('type')
                 ->where('type', '!=', '')
@@ -305,9 +316,11 @@ class DashboardController extends Controller
                     'id' => strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', (string) $type)),
                     'label' => ucwords(strtolower((string) $type)),
                     'count' => (int) ($secondaryPartnerTypeCounts[$type] ?? 0),
+                    'active_count' => (int) ($activeSecondaryPartnerTypeCounts[$type] ?? 0),
                 ])
                 ->values();
             $loggedInUserSecondaryTotal = (int) $secondaryPartnerTypeCounts->sum();
+            $loggedInUserActiveSecondaryTotal = (int) $activeSecondaryPartnerTypeCounts->sum();
 
             // Keep the active count in the same partner cohort as the selected
             // summary period. Previously this counted every buyer who ordered in
@@ -459,6 +472,7 @@ class DashboardController extends Controller
                     ],
                     'secondary_partner_types' => [
                         'total' => $loggedInUserSecondaryTotal,
+                        'active' => $loggedInUserActiveSecondaryTotal,
                         'items' => $secondaryPartnerTypes,
                     ],
                     'secondary_partner_details' => [
