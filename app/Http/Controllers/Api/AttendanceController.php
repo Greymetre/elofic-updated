@@ -598,6 +598,11 @@ class AttendanceController extends Controller
                 ->whereIn('id', $reportingUserIds)
                 ->where('active', 'Y')
                 ->where('show_attandance_report', '1')
+                // Match the CRM user export: include employees that have an
+                // assigned non-customer role; role-less users are excluded.
+                ->whereHas('roles', function ($query) {
+                    $query->whereNotIn('id', config('constants.customer_roles'));
+                })
                 ->orderBy('branch_id')
                 ->orderBy('name');
 
