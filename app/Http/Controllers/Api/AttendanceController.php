@@ -662,6 +662,7 @@ class AttendanceController extends Controller
                     'branch_id' => $user->getbranch ? (int) $user->getbranch->id : null,
                     'branch' => optional($user->getbranch)->branch_name ?? 'Unassigned',
                     'employee' => $user->name,
+                    'mobile' => $user->mobile,
                     'reporting_head' => optional($user->reportinginfo)->name ?? '—',
                     'type' => $type,
                     'market' => $type === 'market',
