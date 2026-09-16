@@ -251,8 +251,8 @@ class ComplaintController extends Controller
             'batch_code' => 'nullable',
             'distributor_id' => 'required|exists:master_distributors,id',
     
-            'contact_number' => 'required',
-            'whatsapp_number' => 'nullable',
+            'contact_number' => ['required', 'regex:/^\d{10}$/'],
+            'whatsapp_number' => ['nullable', 'regex:/^\d{10}$/'],
             'full_name' => 'required',
             'email_address' => 'nullable|email',
     
@@ -275,30 +275,16 @@ class ComplaintController extends Controller
     
         try {
             
-            $exists = EndUser::where(
-                'customer_number',
-                $request->contact_number
-            )->exists();
-            
-            if ($exists) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Customer already exists with this mobile number.'
-                ], 422);
-            }
-            
-            
-            
-    
             /*
             |--------------------------------------------------------------------------
-            | Create End User
+            | Create or reuse End User
             |--------------------------------------------------------------------------
             */
-    
-            $endUser = EndUser::create([
+
+            $endUser = EndUser::updateOrCreate(
+                ['customer_number' => $request->contact_number],
+                [
                 'customer_name'      => $request->full_name,
-                'customer_number'    => $request->contact_number,
                 'whatsapp_number'    => $request->whatsapp_number,
                 'customer_email'     => $request->email_address,
                 'customer_address'   => $request->address,
@@ -307,7 +293,8 @@ class ComplaintController extends Controller
                 'district_id'        => $request->district_id,
                 'city_id'            => $request->city_id,
                 'customer_pindcode'  => $request->pincode_id,
-            ]);
+                ]
+            );
     
             /*
             |--------------------------------------------------------------------------
@@ -434,6 +421,68 @@ class ComplaintController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function customerByMobile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'mobile' => ['required', 'regex:/^\d{10}$/'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors(),
+            ], $this->badrequest);
+        }
+
+        $customer = EndUser::with([
+            'state:id,state_name',
+            'district:id,district_name,state_id',
+            'city:id,city_name,district_id',
+            'pincodeDetails:id,pincode,city_id',
+        ])->where('customer_number', $request->mobile)->latest('id')->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Customer not found',
+                'data' => null,
+            ], $this->notFound);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Existing customer found',
+            'data' => [
+                'id' => $customer->id,
+                'full_name' => $customer->customer_name,
+                'contact_number' => $customer->customer_number,
+                'whatsapp_number' => $customer->whatsapp_number,
+                'email_address' => $customer->customer_email,
+                'address' => $customer->customer_address,
+                'place' => $customer->customer_place,
+                'state' => $customer->state ? [
+                    'state_id' => $customer->state->id,
+                    'state_name' => $customer->state->state_name,
+                ] : null,
+                'district' => $customer->district ? [
+                    'district_id' => $customer->district->id,
+                    'district_name' => $customer->district->district_name,
+                    'state_id' => $customer->district->state_id,
+                ] : null,
+                'city' => $customer->city ? [
+                    'city_id' => $customer->city->id,
+                    'city_name' => $customer->city->city_name,
+                    'district_id' => $customer->city->district_id,
+                ] : null,
+                'pincode' => $customer->pincodeDetails ? [
+                    'pincode_id' => $customer->pincodeDetails->id,
+                    'pincode' => $customer->pincodeDetails->pincode,
+                    'city_id' => $customer->pincodeDetails->city_id,
+                ] : null,
+            ],
+        ], $this->successStatus);
     }
     
     public function complaintList(Request $request)

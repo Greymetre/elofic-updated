@@ -214,6 +214,7 @@ Route::group(['middleware' => ['auth:users,customers']], function () {
     //complaint start
     Route::post('complaints', [ComplaintController::class, 'createComplaint']);
     Route::get('complaintList', [ComplaintController::class, 'complaintList']);
+    Route::get('complaint/customer-by-mobile', [ComplaintController::class, 'customerByMobile']);
     Route::get('complaint/{id}', [ComplaintController::class, 'complaintDetails']);
     Route::any('getComplaintType', [ComplaintController::class, 'getComplaintType']);
 
