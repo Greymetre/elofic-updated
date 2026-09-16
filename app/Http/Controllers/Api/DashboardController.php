@@ -296,16 +296,24 @@ class DashboardController extends Controller
                 ->groupBy('type')
                 ->pluck('total', 'type');
             $activeSecondaryPartnerTypeCounts = DB::table('secondary_customers as sc')
-                ->join('orders as o', 'o.buyer_id', '=', 'sc.id')
                 ->whereIn('sc.created_by', $secondaryPartnerCreatorIds)
                 ->whereBetween('sc.created_at', [$fromDate, $toDate])
-                ->whereBetween('o.order_date', [$activeFrom->toDateString(), $today->toDateString()])
-                ->whereNull('o.deleted_at')
                 ->whereNotNull('sc.type')
                 ->where('sc.type', '!=', '')
-                ->select('sc.type as type', DB::raw('COUNT(DISTINCT sc.id) as total'))
+                ->whereExists(function ($query) use ($activeFrom, $today) {
+                    $query->select(DB::raw(1))
+                        ->from('orders as o')
+                        ->whereColumn('o.buyer_id', 'sc.id')
+                        ->whereBetween('o.order_date', [
+                            $activeFrom->toDateString(),
+                            $today->toDateString(),
+                        ])
+                        ->whereNull('o.deleted_at');
+                })
+                ->select('sc.type', DB::raw('COUNT(*) as total'))
                 ->groupBy('sc.type')
-                ->pluck('total', 'type');
+                ->get()
+                ->mapWithKeys(fn ($item) => [(string) $item->type => (int) $item->total]);
             $secondaryPartnerTypes = DB::table('secondary_customers')
                 ->whereNotNull('type')
                 ->where('type', '!=', '')
