@@ -576,8 +576,9 @@
                                         <div class="form-group has-default bmd-form-group">
                                             <input type="hidden" name="tour_plan_mandatory" value="0">
                                             <input type="checkbox" name="tour_plan_mandatory" value="1"
+                                                onchange="this.nextElementSibling.textContent = this.checked ? 'Mandatory' : 'Not Mandatory'"
                                                 {{ old('tour_plan_mandatory', $user->tour_plan_mandatory ?? 0) == 1 ? 'checked' : '' }}>
-                                            <span class="yes_no">Mandatory</span>
+                                            <span class="yes_no">{{ old('tour_plan_mandatory', $user->tour_plan_mandatory ?? 0) == 1 ? 'Mandatory' : 'Not Mandatory' }}</span>
                                             @if ($errors->has('tour_plan_mandatory'))
                                             <div class="error">
                                                 <p class="text-danger">{{ $errors->first('tour_plan_mandatory') }}</p>
