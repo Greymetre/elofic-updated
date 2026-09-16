@@ -27,10 +27,21 @@ class TourPlanController extends Controller
             ], 400);
         }
 
-        $user_id    = $request->input('user_id');
+        $user_id    = (int) $request->input('user_id');
         $start_date = $request->input('start_date');
         $end_date   = $request->input('end_date');
         $perPage    = $request->input('per_page', 30);   // ← make it paginated like global()
+
+        $requestedDate = $start_date && $end_date && $start_date === $end_date
+            ? date('Y-m-d', strtotime($start_date))
+            : null;
+
+        // Users marked "Tour Plan = No" do not need to create a plan manually.
+        // When they open punch-in for today, create their default HQ/Office Work
+        // plan once and return it through the existing tour-plan response.
+        if ($requestedDate === date('Y-m-d') && $user_id === (int) auth()->id()) {
+            $this->ensureDefaultOfficePlan($request->user(), $requestedDate);
+        }
 
         // Build query
         $query = TourProgramme::query()
@@ -101,6 +112,40 @@ class TourPlanController extends Controller
                 'total'        => $tour_plans->total(),
             ]
         ], 200);
+    }
+
+    private function ensureDefaultOfficePlan(User $user, string $date): void
+    {
+        if ((int) ($user->show_tour_plan ?? 1) !== 0) {
+            return;
+        }
+
+        $assignedCityIds = $user->cities()->pluck('city_id');
+        $baseLocation = trim((string) $user->location);
+
+        $headQuarterCity = City::query()
+            ->whereIn('id', $assignedCityIds)
+            ->when($baseLocation !== '', function ($query) use ($baseLocation) {
+                $query->orderByRaw('LOWER(city_name) = ? DESC', [mb_strtolower($baseLocation)]);
+            })
+            ->orderBy('city_name')
+            ->first();
+
+        if (!$headQuarterCity) {
+            return;
+        }
+
+        TourProgramme::firstOrCreate([
+            'date' => $date,
+            'userid' => $user->id,
+        ], [
+            'town' => $headQuarterCity->id,
+            'district' => $headQuarterCity->district_id,
+            'objectives' => 'Office Work',
+            'type' => '',
+            'status' => 1,
+            'remark' => 'Auto-created for punch-in',
+        ]);
     }
 
     public function user_list(Request $request)
