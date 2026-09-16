@@ -326,6 +326,13 @@ class DashboardController extends Controller
                     'count' => (int) ($secondaryPartnerTypeCounts[$type] ?? 0),
                     'active_count' => (int) ($activeSecondaryPartnerTypeCounts[$type] ?? 0),
                 ])
+                ->sort(function ($first, $second) {
+                    $countOrder = $second['count'] <=> $first['count'];
+
+                    return $countOrder !== 0
+                        ? $countOrder
+                        : strcmp($first['label'], $second['label']);
+                })
                 ->values();
             $loggedInUserSecondaryTotal = (int) $secondaryPartnerTypeCounts->sum();
             $loggedInUserActiveSecondaryTotal = (int) $activeSecondaryPartnerTypeCounts->sum();
