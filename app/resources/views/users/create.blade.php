@@ -571,10 +571,7 @@
                                             </div>
                                             @endif
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="input_section">
+
                                         <label class="col-form-label">Tour Plan</label>
                                         <div class="form-group has-default bmd-form-group">
                                             <input type="radio" name="show_tour_plan" value="1"
