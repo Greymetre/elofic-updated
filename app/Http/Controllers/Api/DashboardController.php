@@ -455,7 +455,7 @@ class DashboardController extends Controller
 
             $expenses = DB::table('expenses')
                 ->whereBetween('date', [$fromDate->toDateString(), $today->toDateString()])
-                ->when(!empty($reportingUserIds), fn ($query) => $query->whereIn('user_id', $reportingUserIds));
+                ->whereIn('user_id', $secondaryPartnerCreatorIds);
             $totalExpense = (float) (clone $expenses)->sum('claim_amount');
             $approvedExpense = (float) (clone $expenses)
                 ->where(function ($query) {
@@ -463,6 +463,42 @@ class DashboardController extends Controller
                         ->orWhere('accountant_status', 1);
                 })
                 ->sum(DB::raw('COALESCE(approve_amount, claim_amount, 0)'));
+            $expenseStatusLabels = [
+                0 => 'Pending',
+                1 => 'Approved',
+                2 => 'Rejected',
+                3 => 'Checked',
+                4 => 'Checked By Reporting',
+                5 => 'Processed',
+            ];
+            $expenseStatusData = (clone $expenses)
+                ->select(
+                    'checker_status',
+                    DB::raw('COUNT(*) as total_count'),
+                    DB::raw('SUM(COALESCE(claim_amount, 0)) as total_amount')
+                )
+                ->groupBy('checker_status')
+                ->get()
+                ->keyBy(fn ($item) => (string) $item->checker_status);
+            $expenseStatuses = collect([0, 1, 2, 3, 4])
+                ->merge($expenseStatusData->keys())
+                ->unique()
+                ->values();
+            $expenseBreakdown = $expenseStatuses
+                ->map(function ($rawStatus) use ($expenseStatusLabels, $expenseStatusData) {
+                    $status = is_numeric($rawStatus) ? (int) $rawStatus : (string) $rawStatus;
+                    $statusData = $expenseStatusData->get((string) $status);
+
+                    return [
+                        'id' => 'expense_status_' . $status,
+                        'status' => $status,
+                        'label' => $expenseStatusLabels[$status]
+                            ?? (is_string($status) ? ucfirst($status) : 'Status ' . $status),
+                        'count' => (int) ($statusData->total_count ?? 0),
+                        'amount' => (float) ($statusData->total_amount ?? 0),
+                    ];
+                })
+                ->values();
 
             return response()->json([
                 'status' => 'success',
@@ -511,7 +547,9 @@ class DashboardController extends Controller
                     ],
                     'expenses' => [
                         'total' => $totalExpense,
+                        'total_count' => (int) (clone $expenses)->count(),
                         'approved' => $approvedExpense,
+                        'items' => $expenseBreakdown,
                     ],
                 ],
             ], $this->successStatus);
