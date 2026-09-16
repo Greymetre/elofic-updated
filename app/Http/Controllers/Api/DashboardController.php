@@ -279,6 +279,36 @@ class DashboardController extends Controller
             }
             $secondaryPartners = (int) $secondaryPartnersQuery->count();
 
+            // Include partners created by the logged-in user and everyone in
+            // their reporting hierarchy for the selected MTD/YTD period.
+            $secondaryPartnerCreatorIds = collect($reportingUserIds)
+                ->push($request->user()->id)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+            $secondaryPartnerTypeCounts = DB::table('secondary_customers')
+                ->whereIn('created_by', $secondaryPartnerCreatorIds)
+                ->whereBetween('created_at', [$fromDate, $toDate])
+                ->whereNotNull('type')
+                ->where('type', '!=', '')
+                ->select('type', DB::raw('COUNT(*) as total'))
+                ->groupBy('type')
+                ->pluck('total', 'type');
+            $secondaryPartnerTypes = DB::table('secondary_customers')
+                ->whereNotNull('type')
+                ->where('type', '!=', '')
+                ->distinct()
+                ->orderBy('type')
+                ->pluck('type')
+                ->map(fn ($type) => [
+                    'id' => strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', (string) $type)),
+                    'label' => ucwords(strtolower((string) $type)),
+                    'count' => (int) ($secondaryPartnerTypeCounts[$type] ?? 0),
+                ])
+                ->values();
+            $loggedInUserSecondaryTotal = (int) $secondaryPartnerTypeCounts->sum();
+
             // Keep the active count in the same partner cohort as the selected
             // summary period. Previously this counted every buyer who ordered in
             // the last three months, so MTD and YTD always showed the same value.
@@ -426,6 +456,10 @@ class DashboardController extends Controller
                     'secondary_partners' => [
                         'total' => $secondaryPartners,
                         'active_last_3_months' => (int) $activeSecondaryPartners,
+                    ],
+                    'secondary_partner_types' => [
+                        'total' => $loggedInUserSecondaryTotal,
+                        'items' => $secondaryPartnerTypes,
                     ],
                     'secondary_partner_details' => [
                         'total_customers' => $secondaryPartners,
