@@ -572,7 +572,7 @@
                                             @endif
                                         </div>
 
-                                        <label class="col-form-label">Tour Plan Mandatory</label>
+                                        <label class="col-form-label">Tour Plan</label>
                                         <div class="form-group has-default bmd-form-group">
                                             <input type="hidden" name="tour_plan_mandatory" value="0">
                                             <input type="checkbox" name="tour_plan_mandatory" value="1"
