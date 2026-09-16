@@ -198,7 +198,13 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
             ->select('id', 'customer_id','entity_id',       // ✅ ADD THIS
     'entity_type', 'user_id', 'checkin_date', 'checkin_time', 'checkout_date', 'checkout_time' ,'time_interval', 'checkin_address', 'checkout_address', 'distance', 'beatscheduleid', 'created_at')
             ->orderBy('checkin_date', 'desc')
-->orderBy('checkin_time', 'desc')
+            ->orderBy(
+                User::select('name')
+                    ->whereColumn('users.id', 'check_in.user_id'),
+                'asc'
+            )
+            ->orderBy('checkin_time', 'asc')
+            ->orderBy('id', 'asc')
 ->get();
     }
 
