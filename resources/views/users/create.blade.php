@@ -571,19 +571,6 @@
                                             </div>
                                             @endif
                                         </div>
-
-                                        <label class="col-form-label">Tour Plan</label>
-                                        <div class="form-group has-default bmd-form-group">
-                                            <input type="hidden" name="tour_plan_not_mandatory" value="0">
-                                            <input type="checkbox" name="tour_plan_not_mandatory" value="1"
-                                                {{ old('tour_plan_not_mandatory', isset($user->tour_plan_mandatory) ? !$user->tour_plan_mandatory : 0) == 1 ? 'checked' : '' }}>
-                                            <span class="yes_no">Not Mandatory</span>
-                                            @if ($errors->has('tour_plan_not_mandatory'))
-                                            <div class="error">
-                                                <p class="text-danger">{{ $errors->first('tour_plan_not_mandatory') }}</p>
-                                            </div>
-                                            @endif
-                                        </div>
                                     </div>
                                 </div>
 
