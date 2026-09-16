@@ -368,6 +368,39 @@ class DashboardController extends Controller
             $totalComplaints = (int) (clone $complaints)->count();
             $pendingComplaints = (int) (clone $complaints)->whereIn('complaint_status', [0, 1])->count();
             $closedComplaints = max(0, $totalComplaints - $pendingComplaints);
+            $complaintStatusLabels = [
+                0 => 'Open',
+                1 => 'Pending',
+                2 => 'In Process',
+                3 => 'Cancelled',
+                4 => 'Closed',
+                5 => 'Rejected',
+            ];
+            $complaintStatusCounts = (clone $complaints)
+                ->select('complaint_status', DB::raw('COUNT(*) as total'))
+                ->groupBy('complaint_status')
+                ->orderBy('complaint_status')
+                ->get()
+                ->mapWithKeys(fn ($item) => [
+                    (string) $item->complaint_status => (int) $item->total,
+                ]);
+            $complaintStatuses = collect([1, 4, 5])
+                ->merge($complaintStatusCounts->keys())
+                ->unique()
+                ->values();
+            $complaintBreakdown = $complaintStatuses
+                ->map(function ($rawStatus) use ($complaintStatusLabels, $complaintStatusCounts) {
+                    $status = is_numeric($rawStatus) ? (int) $rawStatus : (string) $rawStatus;
+
+                    return [
+                        'id' => 'status_' . $status,
+                        'status' => $status,
+                        'label' => $complaintStatusLabels[$status]
+                            ?? (is_string($status) ? ucfirst($status) : 'Status ' . $status),
+                        'count' => (int) ($complaintStatusCounts->get((string) $status) ?? 0),
+                    ];
+                })
+                ->values();
 
             $expenses = DB::table('expenses')
                 ->whereBetween('date', [$fromDate->toDateString(), $today->toDateString()])
@@ -418,6 +451,7 @@ class DashboardController extends Controller
                         'total' => $totalComplaints,
                         'pending' => $pendingComplaints,
                         'closed' => $closedComplaints,
+                        'items' => $complaintBreakdown,
                     ],
                     'expenses' => [
                         'total' => $totalExpense,
