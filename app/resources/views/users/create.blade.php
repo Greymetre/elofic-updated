@@ -573,6 +573,19 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                    <div class="input_section">
+                                        <label class="col-form-label">Tour Plan</label>
+                                        <div class="form-group has-default bmd-form-group">
+                                            <input type="radio" name="show_tour_plan" value="1"
+                                                {{ old('show_tour_plan', $user->show_tour_plan ?? 1) == '1' ? 'checked' : '' }}>
+                                            <span class="yes_no">Yes</span>
+                                            <input type="radio" name="show_tour_plan" value="0"
+                                                {{ old('show_tour_plan', $user->show_tour_plan ?? 1) == '0' ? 'checked' : '' }}>
+                                            <span class="yes_no">No</span>
+                                        </div>
+                                    </div>
+                                </div>
 
 
                             </div>
