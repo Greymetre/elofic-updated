@@ -10,6 +10,14 @@ use Carbon\CarbonPeriod;
 
 class UserMonthlyAnalysisService
 {
+    public const VISIT_TYPES = [
+        'mechanic' => 'Mech.',
+        'retailer' => 'Ret.',
+        'workshop' => 'Workshop',
+        'garage' => 'Garage',
+        'distributor' => 'Dist.',
+    ];
+
     public function build(string $startDate, string $endDate, ?int $userId = null): array
     {
         $today = now()->format('Y-m-d');
@@ -49,7 +57,7 @@ class UserMonthlyAnalysisService
             ->groupBy(fn ($visit) => $visit->user_id . '|' . Carbon::parse($visit->checkin_date)->format('Y-m-d'));
 
         $rows = $users->map(function ($user) use ($dates, $attendance, $visits) {
-            $totals = ['mechanic' => 0, 'retailer' => 0, 'distributor' => 0];
+            $totals = array_fill_keys(array_keys(self::VISIT_TYPES), 0);
             $workingDays = 0;
             $days = [];
 
@@ -59,7 +67,7 @@ class UserMonthlyAnalysisService
                 $hasAttendance = (bool) $attendanceRow;
 
                 if ($onLeave) {
-                    $days[$date] = ['status' => 'L', 'mechanic' => null, 'retailer' => null, 'distributor' => null];
+                    $days[$date] = ['status' => 'L'] + array_fill_keys(array_keys(self::VISIT_TYPES), null);
                     continue;
                 }
 
@@ -67,14 +75,14 @@ class UserMonthlyAnalysisService
                     $joinedOnOrBeforeDate = optional($user->userinfo)->date_of_joining
                         && Carbon::parse($user->userinfo->date_of_joining)->startOfDay()->lte(Carbon::parse($date));
                     if (Carbon::parse($date)->isSunday() && $joinedOnOrBeforeDate) {
-                        $days[$date] = ['status' => 'SUNDAY', 'mechanic' => null, 'retailer' => null, 'distributor' => null];
+                        $days[$date] = ['status' => 'SUNDAY'] + array_fill_keys(array_keys(self::VISIT_TYPES), null);
                         continue;
                     }
-                    $days[$date] = ['status' => 'A', 'mechanic' => null, 'retailer' => null, 'distributor' => null];
+                    $days[$date] = ['status' => 'A'] + array_fill_keys(array_keys(self::VISIT_TYPES), null);
                     continue;
                 }
 
-                $counts = ['mechanic' => 0, 'retailer' => 0, 'distributor' => 0];
+                $counts = array_fill_keys(array_keys(self::VISIT_TYPES), 0);
                 foreach ($visits->get($user->id . '|' . $date, collect()) as $visit) {
                     $type = $this->visitType($visit);
                     if ($type) {
@@ -113,6 +121,12 @@ class UserMonthlyAnalysisService
 
         if (str_contains($type, 'MECHANIC')) {
             return 'mechanic';
+        }
+        if (str_contains($type, 'WORKSHOP')) {
+            return 'workshop';
+        }
+        if (str_contains($type, 'GARAGE')) {
+            return 'garage';
         }
         if (str_contains($type, 'RETAIL')) {
             return 'retailer';

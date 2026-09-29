@@ -155,6 +155,7 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
     ->pluck('name', 'id');
         return CheckIn::with(   'beatschedule',
     'customer',
+    'customer.customertypes:id,customertype_name',
     'user',
     'user.reportinginfo:id,name',
     'user:id,name,employee_codes,designation_id,division_id,branch_id,reportingid',
@@ -244,6 +245,12 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
             default              => $related?->customer_code,
         } ?: '';
 
+        $customer_type = match ($data->entity_type) {
+            'distributor'        => 'Distributor',
+            'secondary_customer' => $related?->type,
+            default              => $related?->customertypes?->customertype_name,
+        } ?: '-';
+
         $customer_registration_date = $related?->created_at
             ? Carbon::parse($related->created_at)->format('d-m-Y')
             : '-';
@@ -328,7 +335,7 @@ $this->reportingUsers = User::whereIn('id', $allReportingIds)
             isset($data['distance']) ? $data['distance'] : '-',
             $entity_id ?? '-',
             $customer_code,
-            $entity_type === 'Secondary Customer' ? 'Retailer':'Distributer',
+            $customer_type,
             $entity_name ?? '-',
          
             $mobile = trim($mobileArray[0] ?? '-'),

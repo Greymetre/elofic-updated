@@ -23,14 +23,18 @@ class UserMonthlyAnalysisExport implements FromArray, ShouldAutoSize, WithEvents
 
     public function array(): array
     {
+        $types = array_keys(UserMonthlyAnalysisService::VISIT_TYPES);
+        $labels = array_values(UserMonthlyAnalysisService::VISIT_TYPES);
+        $blank = array_fill(0, count($types) - 1, '');
+
         $header1 = ['EMPLOYEE', 'EMPLOYEE NAME', 'DESIG.'];
         $header2 = ['', '', ''];
         foreach ($this->report['dates'] as $date) {
-            $header1 = array_merge($header1, [date('d-M', strtotime($date)), '', '']);
-            $header2 = array_merge($header2, ['Mech.', 'Ret.', 'Dist.']);
+            $header1 = array_merge($header1, [date('d-M', strtotime($date))], $blank);
+            $header2 = array_merge($header2, $labels);
         }
-        $header1 = array_merge($header1, ['TOTAL', '', '', 'WORKING DAY', 'AVG.', '', '']);
-        $header2 = array_merge($header2, ['Mech.', 'Ret.', 'Dist.', '', 'Mech.', 'Ret.', 'Dist.']);
+        $header1 = array_merge($header1, ['TOTAL'], $blank, ['WORKING DAY', 'AVG.'], $blank);
+        $header2 = array_merge($header2, $labels, [''], $labels);
 
         $rows = [$header1, $header2];
         foreach ($this->report['rows'] as $row) {
@@ -38,15 +42,11 @@ class UserMonthlyAnalysisExport implements FromArray, ShouldAutoSize, WithEvents
             foreach ($this->report['dates'] as $date) {
                 $day = $row['days'][$date];
                 if ($day['status'] === 'P') {
-                    $values = array_merge($values, [
-                        (string) $day['mechanic'],
-                        (string) $day['retailer'],
-                        (string) $day['distributor'],
-                    ]);
+                    $values = array_merge($values, array_map(fn ($type) => (string) $day[$type], $types));
                 } elseif ($day['status'] === 'A') {
-                    $values = array_merge($values, ['A', 'A', 'A']);
+                    $values = array_merge($values, array_fill(0, count($types), 'A'));
                 } else {
-                    $values = array_merge($values, [$day['status'], '', '']);
+                    $values = array_merge($values, [$day['status']], $blank);
                 }
             }
             $values = array_merge($values, array_values($row['totals']), [$row['working_days']], array_values($row['averages']));
@@ -61,7 +61,8 @@ class UserMonthlyAnalysisExport implements FromArray, ShouldAutoSize, WithEvents
         return [AfterSheet::class => function (AfterSheet $event) {
             $sheet = $event->sheet->getDelegate();
             $dateCount = count($this->report['dates']);
-            $lastColumnNumber = 3 + ($dateCount * 3) + 7;
+            $span = count(UserMonthlyAnalysisService::VISIT_TYPES);
+            $lastColumnNumber = 3 + ($dateCount * $span) + ($span * 2) + 1;
             $lastColumn = Coordinate::stringFromColumnIndex($lastColumnNumber);
 
             foreach ([1, 2, 3] as $column) {
@@ -69,14 +70,14 @@ class UserMonthlyAnalysisExport implements FromArray, ShouldAutoSize, WithEvents
                 $sheet->mergeCells("{$letter}1:{$letter}2");
             }
             for ($i = 0; $i < $dateCount; $i++) {
-                $start = 4 + ($i * 3);
-                $sheet->mergeCells(Coordinate::stringFromColumnIndex($start) . '1:' . Coordinate::stringFromColumnIndex($start + 2) . '1');
+                $start = 4 + ($i * $span);
+                $sheet->mergeCells(Coordinate::stringFromColumnIndex($start) . '1:' . Coordinate::stringFromColumnIndex($start + $span - 1) . '1');
             }
-            $totalsStart = 4 + ($dateCount * 3);
-            $sheet->mergeCells(Coordinate::stringFromColumnIndex($totalsStart) . '1:' . Coordinate::stringFromColumnIndex($totalsStart + 2) . '1');
-            $workingColumn = Coordinate::stringFromColumnIndex($totalsStart + 3);
+            $totalsStart = 4 + ($dateCount * $span);
+            $sheet->mergeCells(Coordinate::stringFromColumnIndex($totalsStart) . '1:' . Coordinate::stringFromColumnIndex($totalsStart + $span - 1) . '1');
+            $workingColumn = Coordinate::stringFromColumnIndex($totalsStart + $span);
             $sheet->mergeCells("{$workingColumn}1:{$workingColumn}2");
-            $sheet->mergeCells(Coordinate::stringFromColumnIndex($totalsStart + 4) . '1:' . Coordinate::stringFromColumnIndex($totalsStart + 6) . '1');
+            $sheet->mergeCells(Coordinate::stringFromColumnIndex($totalsStart + $span + 1) . '1:' . Coordinate::stringFromColumnIndex($lastColumnNumber) . '1');
 
             $sheet->freezePane('D3');
             $sheet->setAutoFilter("A2:{$lastColumn}2");
@@ -90,14 +91,14 @@ class UserMonthlyAnalysisExport implements FromArray, ShouldAutoSize, WithEvents
                 'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
             ]);
             for ($row = 3; $row <= $sheet->getHighestRow(); $row++) {
-                for ($column = 4; $column < $totalsStart; $column += 3) {
+                for ($column = 4; $column < $totalsStart; $column += $span) {
                     $cell = Coordinate::stringFromColumnIndex($column) . $row;
                     if ($sheet->getCell($cell)->getValue() === 'A') {
-                        $endCell = Coordinate::stringFromColumnIndex($column + 2) . $row;
+                        $endCell = Coordinate::stringFromColumnIndex($column + $span - 1) . $row;
                         $sheet->getStyle("{$cell}:{$endCell}")->getFont()->setBold(true)->getColor()->setRGB('FF0000');
                         $sheet->getStyle("{$cell}:{$endCell}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     } elseif (in_array($sheet->getCell($cell)->getValue(), ['L', 'SUNDAY'], true)) {
-                        $sheet->mergeCells($cell . ':' . Coordinate::stringFromColumnIndex($column + 2) . $row);
+                        $sheet->mergeCells($cell . ':' . Coordinate::stringFromColumnIndex($column + $span - 1) . $row);
                         $sheet->getStyle($cell)->getFont()->setBold(true);
                         if ($sheet->getCell($cell)->getValue() === 'L') {
                             $sheet->getStyle($cell)->getFont()->getColor()->setRGB('FF0000');

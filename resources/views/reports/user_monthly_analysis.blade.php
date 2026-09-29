@@ -46,6 +46,8 @@
                                         <th>Designation</th>
                                         <th>Total Mechanic MTD</th>
                                         <th>Total Retailer MTD</th>
+                                        <th>Total Workshop MTD</th>
+                                        <th>Total Garage MTD</th>
                                         <th>Total Distributor MTD</th>
                                         <th>Working Days MTD</th>
                                         <th>Average Visits MTD</th>
@@ -60,12 +62,14 @@
                                             <td>{{ $row['designation'] }}</td>
                                             <td>{{ $row['totals']['mechanic'] }}</td>
                                             <td>{{ $row['totals']['retailer'] }}</td>
+                                            <td>{{ $row['totals']['workshop'] }}</td>
+                                            <td>{{ $row['totals']['garage'] }}</td>
                                             <td>{{ $row['totals']['distributor'] }}</td>
                                             <td>{{ $row['working_days'] }}</td>
                                             <td>{{ $row['working_days'] ? round($totalVisits / $row['working_days'], 2) : 0 }}</td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="8">No users found for this filter.</td></tr>
+                                        <tr><td colspan="10">No users found for this filter.</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>
