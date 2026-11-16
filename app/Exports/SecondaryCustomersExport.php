@@ -93,6 +93,7 @@ class SecondaryCustomersExport implements
         ->when(!empty($this->filters['shop_name']), fn($q) => $q->where('shop_name', 'like', '%' . $this->filters['shop_name'] . '%'))
         ->when(!empty($this->filters['mobile']), fn($q) => $q->where('mobile_number', 'like', '%' . $this->filters['mobile'] . '%'))
         ->when(!empty($this->filters['beat_id']), fn($q) => $q->where('beat_id', $this->filters['beat_id']))
+        ->when(!empty($this->filters['sales_executive_id']), fn($q) => $q->whereRaw('FIND_IN_SET(?, REPLACE(employee_id, " ", ""))', [(int) $this->filters['sales_executive_id']]))
         ->when(!empty($this->filters['state_id']), fn($q) => $q->where('state_id', $this->filters['state_id']))
         ->when(!empty($this->filters['city_id']), fn($q) => $q->where('city_id', $this->filters['city_id']))
         ->when(!empty($this->filters['opportunity_status']), fn($q) => $q->where('opportunity_status', $this->filters['opportunity_status']))

@@ -147,6 +147,11 @@ class SecondaryCustomerController extends Controller
         $query->where('beat_id', $request->beat_id);
     }
 
+    // Sales Executive filter (employee_id is a comma separated list of user ids)
+    if ($request->filled('sales_executive_id')) {
+        $query->whereRaw('FIND_IN_SET(?, REPLACE(employee_id, " ", ""))', [(int) $request->sales_executive_id]);
+    }
+
     if ($request->filled('state_id') && $request->state_id != '') {
         $query->where('state_id', $request->state_id);
     }
@@ -300,6 +305,23 @@ class SecondaryCustomerController extends Controller
     }
 
     
+    // Sales Executive dropdown: users assigned (employee_id) on visible records of this type
+    $seQuery = SecondaryCustomer::where('type', $type)->whereNotNull('employee_id')->where('employee_id', '!=', '');
+    if (auth()->user()->hasRole('Distributor')) {
+        $seQuery->where('distributor_name', auth()->user()->customerid);
+    } elseif (!auth()->user()->hasRole('superadmin') && !auth()->user()->hasRole('Admin')) {
+        $seQuery->whereIn('created_by', getUsersReportingToAuth());
+    }
+    $salesExecutiveIds = $seQuery->distinct()->pluck('employee_id')
+        ->flatMap(fn($ids) => array_map('trim', explode(',', $ids)))
+        ->filter()
+        ->unique()
+        ->values();
+    $salesExecutives = \App\Models\User::whereIn('id', $salesExecutiveIds)
+        ->orderBy('name')
+        ->pluck('name', 'id')
+        ->toArray();
+
     $folder = strtolower($type) . 's'; // MECHANIC → mechanics
     $typeTitle = $this->getTypeTitle($type);
 
@@ -318,6 +340,7 @@ class SecondaryCustomerController extends Controller
         // 'mobilesArray',
         'beatsArray',
         'states',
+        'salesExecutives',
         'downloadRoute',
         'templateRoute',
         'totalRecords'));
