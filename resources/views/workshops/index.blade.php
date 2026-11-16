@@ -64,6 +64,13 @@
                 ['class' => 'form-control select2', 'id' => 'beat_id', ]) !!}
         </div>
 
+                            <!-- Sales Executive -->
+                            <div class="col-md-3 mt-3">
+                                <label>Sales Executive</label>
+                                {!! Form::select('sales_executive_id', ['' => 'Select Sales Executive'] + ($salesExecutives ?? []), null,
+                                ['class' => 'form-control select2', 'id' => 'sales_executive_id', ]) !!}
+                            </div>
+
         <!-- State -->
         <div class="col-md-3 mt-3">
             <label>State</label>
@@ -271,6 +278,7 @@ $(document).ready(function () {
                 d.mobile     = $('#mobile').val();
                 d.status     = $('#status').val();
                 d.beat_id           = $('#beat_id').val() || '';
+                d.sales_executive_id = $('#sales_executive_id').val() || '';
                 d.state_id          = $('#state_id').val() || '';
                 d.city_id           = $('#city_id').val() || '';
                 d.opportunity_status = $('#opportunity_status').val() || '';
@@ -322,6 +330,7 @@ $(document).ready(function () {
                 shop_name: $('#shop_name').val() || '',
                 mobile: $('#mobile').val() || '',
                 beat_id: $('#beat_id').val() || '',
+                sales_executive_id: $('#sales_executive_id').val() || '',
                 state_id: $('#state_id').val() || '',
                 city_id: $('#city_id').val() || '',
                 opportunity_status: $('#opportunity_status').val() || '',
@@ -375,12 +384,12 @@ $('#start_date, #end_date').on('change', function () {
 });
 
     // Normal change events (text inputs aur normal selects)
-    $(document).on('change', '#owner_name, #shop_name, #mobile, #beat_id, #state_id, #city_id, #opportunity_status, #awareness_status', function() {
+    $(document).on('change', '#owner_name, #shop_name, #mobile, #beat_id, #sales_executive_id, #state_id, #city_id, #opportunity_status, #awareness_status', function() {
         table.draw();
     });
 
     // Select2 ke special events (jab clear ya select kare)
-    $(document).on('select2:select select2:clear', '#owner_name, #shop_name, #mobile, #beat_id, #state_id, #city_id, #opportunity_status, #awareness_status', function() {
+    $(document).on('select2:select select2:clear', '#owner_name, #shop_name, #mobile, #beat_id, #sales_executive_id, #state_id, #city_id, #opportunity_status, #awareness_status', function() {
         table.draw();
     });
 
