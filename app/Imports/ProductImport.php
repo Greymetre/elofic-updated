@@ -133,6 +133,17 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
                 'updated_at'     => now(),
             ];
 
+            // products table ke string columns NOT NULL hain (default ''), MySQL explicit
+            // null reject karta hai. Excel ka khali cell '' bana do; id/FK columns null hi rahenge.
+            $nullableKeys = ['branch_id', 'subcategory_id', 'category_id', 'brand_id', 'created_by', 'updated_at'];
+            foreach ($productData as $key => $value) {
+                if ($value === null && !in_array($key, $nullableKeys, true)) {
+                    $productData[$key] = '';
+                }
+            }
+
+            $hasName = trim((string) $productData['product_name']) !== '';
+
             // UPDATE
             if (!empty($row['product_id'])) {
 
@@ -142,11 +153,21 @@ class ProductImport implements ToCollection,WithValidation,WithHeadingRow, WithB
                     continue; // Skip invalid IDs
                 }
 
+                // Khali naam se existing product ka naam mat mitao
+                if (!$hasName) {
+                    unset($productData['product_name']);
+                }
+
                 $product->update($productData);
 
-            } 
+            }
             // CREATE
             else {
+
+                // Bina naam ka product mat banao (khali / trailing Excel rows bhi yahi skip hongi)
+                if (!$hasName) {
+                    continue;
+                }
 
                 $productData['created_at'] = now();
 
