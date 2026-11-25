@@ -1749,8 +1749,16 @@ class DashboardController extends Controller
         $zoneId = $this->eloficDashboardZoneId($request);
         $zoneName = $this->eloficDashboardZoneName($zoneId);
         $today = Carbon::today()->toDateString();
+        // Same rule as User Management: users holding a customer role (distributors created as users) are not employees
+        $customerRoleIds = (array) config('constants.customer_roles', []);
         $users = DB::table('users')
             ->where('active', 'Y')
+            ->when(!empty($customerRoleIds), fn ($query) => $query->whereNotIn('id', function ($sub) use ($customerRoleIds) {
+                $sub->select('model_id')
+                    ->from(config('permission.table_names.model_has_roles', 'model_has_roles'))
+                    ->where('model_type', (new \App\Models\User)->getMorphClass())
+                    ->whereIn('role_id', $customerRoleIds);
+            }))
             ->when($zoneId, fn ($query) => $query->where('branch_id', $zoneId))
             ->select('id', 'name', 'employee_codes')
             ->get();
