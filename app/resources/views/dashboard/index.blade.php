@@ -202,6 +202,53 @@
         .ef-lbshare { margin-left: auto; font-weight: 700; color: var(--txt2); }
         .ef-lbtrack { height: 5px; border-radius: 5px; background: var(--surface3); overflow: hidden; }
         .ef-lbfill { height: 100%; width: var(--w); border-radius: 5px; background: linear-gradient(90deg, #93c5fd, #2563eb); animation: efGrow 1s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 55ms + .3s); }
+        .ef-hero.green { background: linear-gradient(120deg, #0b3b2a 0%, #166534 45%, #22a35a 100%); }
+        .ef-hero.green p, .ef-hero.green .ef-hero-stat span { color: #bbf7d0; }
+        .ef-badge.green { color: #15803d; background: #f0fdf4; }
+        .ef-lb.green .ef-lbfill { background: linear-gradient(90deg, #86efac, #16a34a); }
+        .ef-lb.green .ef-lbval { color: #15803d; }
+        .ef-hero.purple { background: linear-gradient(120deg, #2e1065 0%, #5b21b6 45%, #8b5cf6 100%); }
+        .ef-hero.purple p, .ef-hero.purple .ef-hero-stat span { color: #ddd6fe; }
+        .ef-lb.purple .ef-lbfill { background: linear-gradient(90deg, #c4b5fd, #7c3aed); }
+        .ef-lb.purple .ef-lbval { color: #6d28d9; }
+        .ef-lb.orange .ef-lbfill { background: linear-gradient(90deg, #fed7aa, #ea580c); }
+        .ef-lb.orange .ef-lbval { color: #c2410c; }
+        .ef-lb.orange .ef-rank { background: #fff7ed; color: #c2410c; }
+        .ef-lb.scroll { max-height: 470px; overflow-y: auto; padding-right: 4px; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+        .ef-lbcode { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; color: var(--txt2); background: var(--surface3); padding: 1px 5px; border-radius: 4px; }
+        .ef-kval-text { font-size: 18px !important; line-height: 1.25 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ef-donut { position: relative; width: 190px; height: 190px; flex-shrink: 0; }
+        .ef-donut canvas { width: 190px !important; height: 190px !important; }
+        .ef-donut-c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+        .ef-donut-c b { font-size: 16px; font-weight: 700; color: var(--txt1); }
+        .ef-donut-c span { font-size: 9px; font-weight: 700; color: var(--txt3); text-transform: uppercase; letter-spacing: .08em; }
+        .ef-seglist { flex: 1; width: 100%; min-width: 0; max-height: 260px; overflow-y: auto; scrollbar-width: thin; }
+        .ef-segrow { padding: 6px 8px; border-radius: 8px; cursor: default; transition: background .2s; animation: efUp .4s both; animation-delay: calc(var(--i) * 45ms + .1s); }
+        .ef-segrow:hover, .ef-segrow.hl { background: var(--surface2); }
+        .ef-segtop { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; }
+        .ef-segname { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--txt2); font-weight: 600; }
+        .ef-segname span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ef-segval { font-weight: 700; color: var(--txt1); white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .ef-segval small { color: var(--txt3); font-weight: 600; margin-left: 4px; }
+        .ef-segbar { height: 4px; border-radius: 4px; background: var(--surface3); margin-top: 4px; overflow: hidden; }
+        .ef-segbar div { height: 100%; border-radius: 4px; animation: efGrow .9s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 45ms + .25s); }
+        .ef-legend-click .ef-legitem { cursor: pointer; padding: 2px 7px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); transition: opacity .2s, background .2s; user-select: none; }
+        .ef-legend-click .ef-legitem:hover { background: var(--surface2); }
+        .ef-legend-click .ef-legitem.off { opacity: .4; text-decoration: line-through; }
+        .ef-kcard.red-t { --tone: #dc2626; --tone-bg: #fef2f2; }
+        .ef-mini { height: 6px; border-radius: 6px; background: var(--surface3); overflow: hidden; margin-top: 10px; }
+        .ef-mini > div { height: 100%; width: 0; border-radius: 6px; background: linear-gradient(90deg, color-mix(in srgb, var(--tone) 45%, #fff), var(--tone)); transition: width 1.1s cubic-bezier(.2,.7,.2,1); }
+        .ef-sortbar { display: inline-flex; gap: 4px; background: var(--surface3); padding: 3px; border-radius: 8px; }
+        .ef-chip { border: 0; background: transparent; font-size: 10px; font-weight: 600; color: var(--txt2); padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: background .2s, color .2s; }
+        .ef-chip:hover { color: var(--txt1); }
+        .ef-chip.active { background: var(--surface); color: var(--brand); box-shadow: 0 1px 3px rgba(15,30,53,.12); }
+        .ef-pct { font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 20px; }
+        .ef-lbsub { font-size: 10px; color: var(--txt3); font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .ef-attn { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: #fef2f2; border: 1px solid #fecaca; font-size: 11px; color: #991b1b; font-weight: 500; display: none; }
+        .ef-attn b { font-weight: 700; }
+        .ef-attn .names { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+        .ef-attn .names span { background: #fff; border: 1px solid #fecaca; border-radius: 20px; padding: 1px 8px; font-size: 10px; font-weight: 600; }
+        .ef-emp-summary .ef-kcard .ef-kval { font-size: 24px; }
         .ef-stchips { display: flex; gap: 6px; flex-wrap: wrap; margin: -4px 0 10px; }
         .ef-stchips .ef-st { padding: 3px 9px 3px 7px; }
         .ef-stchips .ef-st b { font-weight: 700; margin-left: 2px; }
@@ -352,97 +399,272 @@
                 </div>
             </div>
 
-            <div id="ef-primary" class="ef-panel">
+            <div id="ef-primary" class="ef-panel ef-tone-green">
+                <div class="ef-hero green ef-reveal">
+                    <div style="position:relative;z-index:1;">
+                        <h2>Primary Sales Overview</h2>
+                        <p>Dealer invoicing &amp; branch performance for <span data-badge>-</span></p>
+                    </div>
+                    <div class="ef-hero-stat">
+                        <div><b data-pr-hero="sales">-</b><span>Net Sales</span></div>
+                        <div><b data-pr-hero="invoices">-</b><span>Invoices</span></div>
+                        <div><b data-pr-hero="states">-</b><span>States (Top 10)</span></div>
+                    </div>
+                </div>
+
+                <div class="ef-slabel">Key Metrics</div>
+                <div class="ef-kgrid">
+                    <div class="ef-card ef-kcard green ef-reveal" style="--d:.05s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-coin-rupee"></i></span><span class="ef-klabel">Primary Sales</span></div>
+                        <div class="ef-target-row">
+                            <div class="ef-target-box">
+                                <div class="ef-target-lbl">Achievement</div>
+                                <div class="ef-target-val" data-pr-kpi="achievement">-</div>
+                            </div>
+                            <div class="ef-target-box">
+                                <div class="ef-target-lbl">Target</div>
+                                <div class="ef-target-val" data-pr-kpi="target">-</div>
+                            </div>
+                        </div>
+                        <div data-pr-kpi="targetGap"></div>
+                    </div>
+                    <div class="ef-card ef-kcard ef-reveal" style="--d:.12s" data-pr-kpi="achCard">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-target-arrow"></i></span><span class="ef-klabel">Overall Achievement</span></div>
+                        <div class="ef-ach">
+                            <div>
+                                <div class="ef-kval" data-pr-kpi="percent">-</div>
+                                <div class="ef-ksub" data-pr-kpi="targetSub">vs target</div>
+                            </div>
+                            <div class="ef-ring">
+                                <svg width="74" height="74" viewBox="0 0 74 74"><circle class="bg" cx="37" cy="37" r="31"/><circle class="fg" data-pr-kpi="ring" cx="37" cy="37" r="31" stroke-dasharray="194.8" stroke-dashoffset="194.8"/></svg>
+                                <i class="ti ti-trophy"></i>
+                            </div>
+                        </div>
+                        <div class="ef-trend"><i class="ti ti-refresh"></i>Target recalculates by period</div>
+                    </div>
+                    <div class="ef-card ef-kcard amber ef-reveal" style="--d:.19s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-file-invoice"></i></span><span class="ef-klabel">Total Invoices</span></div>
+                        <div class="ef-kval" data-pr-kpi="invoices">-</div>
+                        <div class="ef-ksub">Unique invoice numbers in period</div>
+                        <div class="ef-trend"><i class="ti ti-receipt"></i><span data-pr-kpi="avgInvoice">Avg invoice value</span></div>
+                    </div>
+                    <div class="ef-card ef-kcard purple ef-reveal" style="--d:.26s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-packages"></i></span><span class="ef-klabel">Total Quantity</span></div>
+                        <div class="ef-kval" data-pr-kpi="qty">-</div>
+                        <div class="ef-ksub">Units invoiced (Nos)</div>
+                        <div class="ef-trend"><i class="ti ti-box"></i><span data-pr-kpi="avgQty">Per invoice</span></div>
+                    </div>
+                </div>
+
                 <div class="ef-slabel">Performance Charts</div>
                 <div class="ef-g2">
-                    <div class="ef-card ef-chart">
-                        <div class="ef-chtitle">Total sales trend<span class="ef-badge" data-badge></span></div>
-                        <div class="ef-empty" data-empty="prTrend">No primary sales trend found for this period</div>
-                        <div class="ef-canvas" style="height:185px;"><canvas id="prTrend"></canvas></div>
+                    <div class="ef-card ef-chart ef-reveal" style="--d:.05s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#fef3c7;color:#d97706;"><i class="ti ti-crown"></i></span><span>Top 10 dealers<small>Ranked by net invoice value, with state</small></span></span><span class="ef-badge green" data-badge></span></div>
+                        <div class="ef-stchips" id="prTopStates"></div>
+                        <div class="ef-empty" data-empty="prTop">No dealer sales found for this period</div>
+                        <div class="ef-lb green" id="prTop"></div>
                     </div>
-                    <div class="ef-card ef-chart">
-                        <div class="ef-chtitle">Sales vs target<span class="ef-badge" data-badge></span></div>
-                        <div class="ef-legend"><span class="ef-legitem"><span class="ef-legsq" style="background:#16a34a;"></span>Achievement</span><span class="ef-legitem"><span class="ef-legsq" style="background:#e2e8f0;border:1px solid #cbd5e1;"></span>Target</span></div>
-                        <div class="ef-empty" data-empty="prTarget">No primary sales or target found for this period</div>
-                        <div class="ef-canvas" style="height:155px;"><canvas id="prTarget"></canvas></div>
+                    <div class="ef-stack">
+                        <div class="ef-card ef-chart ef-reveal" style="--d:.12s">
+                            <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#f0fdf4;color:#16a34a;"><i class="ti ti-target"></i></span><span>Sales vs target<small>Month-wise achievement against target</small></span></span><span class="ef-badge green" data-badge></span></div>
+                            <div class="ef-legend"><span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(#4ade80,#15803d);"></span>Achievement</span><span class="ef-legitem"><span class="ef-legsq" style="background:#e2e8f0;border:1px solid #cbd5e1;"></span>Target</span></div>
+                            <div class="ef-empty" data-empty="prTarget">No primary sales or target found for this period</div>
+                            <div class="ef-canvas"><canvas id="prTarget"></canvas></div>
+                        </div>
+                        <div class="ef-card ef-chart ef-reveal" style="--d:.19s">
+                            <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#ecfdf5;color:#059669;"><i class="ti ti-chart-line"></i></span><span>Total sales trend<small>Primary net value over the period</small></span></span><span class="ef-badge green" data-badge></span></div>
+                            <div class="ef-empty" data-empty="prTrend">No primary sales trend found for this period</div>
+                            <div class="ef-canvas"><canvas id="prTrend"></canvas></div>
+                        </div>
                     </div>
                 </div>
                 <div class="ef-g2">
-                    <div class="ef-card ef-chart">
-                        <div class="ef-chtitle">Year-on-year growth<span class="ef-badge">FY comparison</span></div>
-                        <div class="ef-legend"><span class="ef-legitem"><span class="ef-legsq" style="background:#bbf7d0;"></span>FY24</span><span class="ef-legitem"><span class="ef-legsq" style="background:#16a34a;"></span>FY25</span><span class="ef-legitem"><span class="ef-legsq" style="background:#14532d;"></span>FY26</span></div>
+                    <div class="ef-card ef-chart ef-reveal" style="--d:.05s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#f5f3ff;color:#7c3aed;"><i class="ti ti-calendar-stats"></i></span><span>Year-on-year growth<small>Monthly sales across financial years</small></span></span><span class="ef-badge purple">FY comparison</span></div>
+                        <div class="ef-legend" id="prYoyLegend"></div>
                         <div class="ef-empty" data-empty="prYoy">No primary year-on-year sales found</div>
-                        <div class="ef-canvas" style="height:160px;"><canvas id="prYoy"></canvas></div>
+                        <div class="ef-canvas tall"><canvas id="prYoy"></canvas></div>
                     </div>
-                    <div class="ef-card ef-chart">
-                        <div class="ef-chtitle">Zone-wise sales<span class="ef-badge" data-badge></span></div>
-                        <div class="ef-legend"><span class="ef-legitem"><span class="ef-legsq" style="background:#16a34a;"></span>Achievement</span><span class="ef-legitem"><span class="ef-legsq" style="background:#e2e8f0;border:1px solid #cbd5e1;"></span>Target</span></div>
+                    <div class="ef-card ef-chart ef-reveal" style="--d:.12s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon"><i class="ti ti-map-2"></i></span><span>Zone-wise sales<small>Sorted by achievement, % of target shown</small></span></span><span class="ef-badge" data-badge></span></div>
+                        <div class="ef-legend"><span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(90deg,#93c5fd,#2563eb);"></span>Achievement</span><span class="ef-legitem"><span class="ef-legsq" style="background:#e2e8f0;border:1px solid #cbd5e1;"></span>Target</span></div>
                         <div class="ef-empty" data-empty="prRegion">No primary zone-wise sales found for this period</div>
-                        <div class="ef-canvas" style="height:155px;"><canvas id="prRegion"></canvas></div>
+                        <div class="ef-canvas tall"><canvas id="prRegion"></canvas></div>
                     </div>
                 </div>
             </div>
 
             <div id="ef-product" class="ef-panel">
-                <div class="ef-slabel">Product Analytics</div>
-                <div class="ef-g2">
-                    <div class="ef-card ef-chart">
-                        <div class="ef-chtitle">Top 23 products - by sales value<span class="ef-badge purple" data-badge></span></div>
-                        <div class="ef-empty" data-empty="pTop">No product sales found for this period</div>
-                        <div class="ef-canvas tall"><canvas id="pTop"></canvas></div>
+                <div class="ef-hero purple ef-reveal">
+                    <div style="position:relative;z-index:1;">
+                        <h2>Product Analytics</h2>
+                        <p>SKU, segment &amp; movement insights from secondary orders for <span data-badge>-</span></p>
                     </div>
-                    <div class="ef-card ef-chart">
-                        <div class="ef-chtitle">Slow moving products - by sales value<span class="ef-badge orange" data-badge></span></div>
+                    <div class="ef-hero-stat">
+                        <div><b data-pd-hero="sales">-</b><span>Product Sales</span></div>
+                        <div><b data-pd-hero="qty">-</b><span>Units Sold</span></div>
+                        <div><b data-pd-hero="sold">-</b><span>SKUs Sold</span></div>
+                    </div>
+                </div>
+
+                <div class="ef-slabel">Key Metrics</div>
+                <div class="ef-kgrid">
+                    <div class="ef-card ef-kcard purple ef-reveal" style="--d:.05s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-coin-rupee"></i></span><span class="ef-klabel">Product Sales</span></div>
+                        <div class="ef-kval" data-pd-kpi="sales">-</div>
+                        <div class="ef-ksub">Order value across all SKUs</div>
+                        <div class="ef-trend"><i class="ti ti-receipt"></i><span data-pd-kpi="avgPrice">Avg value per unit</span></div>
+                    </div>
+                    <div class="ef-card ef-kcard ef-reveal" style="--d:.12s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-packages"></i></span><span class="ef-klabel">Units Sold</span></div>
+                        <div class="ef-kval" data-pd-kpi="qty">-</div>
+                        <div class="ef-ksub">Total ordered quantity (Nos)</div>
+                        <div class="ef-trend"><i class="ti ti-box"></i><span data-pd-kpi="avgQty">Per SKU</span></div>
+                    </div>
+                    <div class="ef-card ef-kcard green ef-reveal" style="--d:.19s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-barcode"></i></span><span class="ef-klabel">SKU Coverage</span></div>
+                        <div class="ef-ach">
+                            <div>
+                                <div class="ef-kval" data-pd-kpi="sold">-</div>
+                                <div class="ef-ksub" data-pd-kpi="catalogSub">of active catalogue</div>
+                            </div>
+                            <div class="ef-ring">
+                                <svg width="74" height="74" viewBox="0 0 74 74"><circle class="bg" cx="37" cy="37" r="31"/><circle class="fg" data-pd-kpi="ring" cx="37" cy="37" r="31" stroke-dasharray="194.8" stroke-dashoffset="194.8"/></svg>
+                                <i class="ti ti-barcode"></i>
+                            </div>
+                        </div>
+                        <div class="ef-trend"><i class="ti ti-chart-pie"></i><span data-pd-kpi="coverage">Catalogue moving</span></div>
+                    </div>
+                    <div class="ef-card ef-kcard amber ef-reveal" style="--d:.26s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-category"></i></span><span class="ef-klabel">Top Segment</span></div>
+                        <div class="ef-kval ef-kval-text" data-pd-kpi="topSegment">-</div>
+                        <div class="ef-ksub" data-pd-kpi="topSegmentSub">Share of product sales</div>
+                        <div class="ef-trend"><i class="ti ti-layers-subtract"></i><span data-pd-kpi="segments">Segments</span></div>
+                    </div>
+                </div>
+
+                <div class="ef-slabel">Product Performance</div>
+                <div class="ef-g2">
+                    <div class="ef-card ef-chart ef-reveal" style="--d:.05s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#f5f3ff;color:#7c3aed;"><i class="ti ti-rocket"></i></span><span>Top products<small>Best sellers by order value, with segment &amp; units</small></span></span><span class="ef-badge purple" data-badge></span></div>
+                        <div class="ef-empty" data-empty="pTop">No product sales found for this period</div>
+                        <div class="ef-lb purple scroll" id="pTop"></div>
+                    </div>
+                    <div class="ef-card ef-chart ef-reveal" style="--d:.12s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#fff7ed;color:#ea580c;"><i class="ti ti-hourglass-low"></i></span><span>Slow moving products<small>Lowest order value among SKUs that sold</small></span></span><span class="ef-badge orange" data-badge></span></div>
                         <div class="ef-empty" data-empty="pSlow">No slow moving product data found</div>
-                        <div class="ef-canvas tall"><canvas id="pSlow"></canvas></div>
+                        <div class="ef-lb orange scroll" id="pSlow"></div>
                     </div>
                 </div>
                 <div class="ef-g2">
-                    <div class="ef-card ef-chart">
-                        <div class="ef-chtitle">Segment-wise sales - by sales value<span class="ef-badge purple" data-badge></span></div>
+                    <div class="ef-card ef-chart ef-reveal" style="--d:.05s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#ecfeff;color:#0891b2;"><i class="ti ti-chart-donut-3"></i></span><span>Segment-wise sales<small>Category share of order value</small></span></span><span class="ef-badge purple" data-badge></span></div>
                         <div class="ef-empty" data-empty="pSegment">No segment sales found</div>
-                        <div class="ef-cat-wrap">
-                            <div class="ef-cat-canvas"><canvas id="pSegment"></canvas></div>
-                            <div style="flex:1;width:100%;" id="pSegmentLegend"></div>
+                        <div class="ef-cat-wrap" id="pSegmentWrap">
+                            <div class="ef-donut"><canvas id="pSegment"></canvas><div class="ef-donut-c"><b data-pd-kpi="segTotal">-</b><span>Total</span></div></div>
+                            <div class="ef-seglist" id="pSegmentLegend"></div>
                         </div>
                     </div>
-                    <div class="ef-card ef-chart">
-                        <div class="ef-chtitle">Top 10 SKU trend - by sales value<span class="ef-badge purple" data-badge></span></div>
-                        <div id="pSkuLegend" class="ef-legend"></div>
+                    <div class="ef-card ef-chart ef-reveal" style="--d:.12s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#fdf2f8;color:#db2777;"><i class="ti ti-chart-line"></i></span><span>Top 10 SKU trend<small>Click a legend item to show / hide a SKU</small></span></span><span class="ef-badge purple" data-badge></span></div>
+                        <div id="pSkuLegend" class="ef-legend ef-legend-click"></div>
                         <div class="ef-empty" data-empty="pSku">No SKU trend found</div>
-                        <div class="ef-canvas"><canvas id="pSku"></canvas></div>
+                        <div class="ef-canvas tall"><canvas id="pSku"></canvas></div>
                     </div>
                 </div>
             </div>
 
             <div id="ef-employees" class="ef-panel">
+                <div class="ef-hero ef-reveal">
+                    <div style="position:relative;z-index:1;">
+                        <h2>Team Performance</h2>
+                        <p>Field attendance today &amp; employee target achievement for <span data-badge>-</span></p>
+                    </div>
+                    <div class="ef-hero-stat">
+                        <div><b data-emp-hero="market">-</b><span>On Market Today</span></div>
+                        <div><b data-emp-hero="value">-</b><span>Team Order Value</span></div>
+                        <div><b data-emp-hero="onTarget">-</b><span>On Target (90%+)</span></div>
+                    </div>
+                </div>
+
                 <div class="ef-slabel">Today's Snapshot</div>
-                <div class="ef-ekgrid">
-                    <div class="ef-ekcard"><div class="ef-ekiconwrap" style="background:#eff6ff;color:#2563eb;"><i class="ti ti-users"></i></div><div class="ef-ekval" style="color:#1e3a5f;" data-emp-kpi="totalEmployees">-</div><div class="ef-eklbl">Total Employees</div><div class="ef-eksub" style="color:var(--txt3);"><i class="ti ti-building" style="font-size:11px;"></i> All active roles</div></div>
-                    <div class="ef-ekcard"><div class="ef-ekiconwrap" style="background:#f0fdf4;color:#16a34a;"><i class="ti ti-map-pin"></i></div><div class="ef-ekval" style="color:#14532d;" data-emp-kpi="todayOnMarket">-</div><div class="ef-eklbl">Today on Market</div><div class="ef-eksub" style="color:#16a34a;"><i class="ti ti-circle-check" style="font-size:11px;"></i> Field presence</div></div>
-                    <div class="ef-ekcard"><div class="ef-ekiconwrap" style="background:#fffbeb;color:#d97706;"><i class="ti ti-calendar-off"></i></div><div class="ef-ekval" style="color:#78350f;" data-emp-kpi="todayOnLeave">-</div><div class="ef-eklbl">Today on Leave</div><div class="ef-eksub" style="color:#d97706;"><i class="ti ti-alert-circle" style="font-size:11px;"></i> Of active strength</div></div>
-                    <div class="ef-ekcard"><div class="ef-ekiconwrap" style="background:#fef2f2;color:#dc2626;"><i class="ti ti-clock-exclamation"></i></div><div class="ef-ekval" style="color:#7f1d1d;" data-emp-kpi="misPunch">-</div><div class="ef-eklbl">MIS Punch</div><div class="ef-eksub" style="color:#dc2626;"><i class="ti ti-alert-triangle" style="font-size:11px;"></i> Attendance mismatch</div></div>
+                <div class="ef-kgrid">
+                    <div class="ef-card ef-kcard ef-reveal" style="--d:.05s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-users"></i></span><span class="ef-klabel">Total Employees</span></div>
+                        <div class="ef-kval" data-emp-kpi="totalEmployees">-</div>
+                        <div class="ef-ksub">All active users in selected zone</div>
+                        <div class="ef-trend"><i class="ti ti-building"></i>Active strength</div>
+                    </div>
+                    <div class="ef-card ef-kcard green ef-reveal" style="--d:.12s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-map-pin"></i></span><span class="ef-klabel">Today on Market</span></div>
+                        <div class="ef-ach">
+                            <div>
+                                <div class="ef-kval" data-emp-kpi="todayOnMarket">-</div>
+                                <div class="ef-ksub" data-emp-kpi="marketSub">of active strength</div>
+                            </div>
+                            <div class="ef-ring">
+                                <svg width="74" height="74" viewBox="0 0 74 74"><circle class="bg" cx="37" cy="37" r="31"/><circle class="fg" data-emp-kpi="ring" cx="37" cy="37" r="31" stroke-dasharray="194.8" stroke-dashoffset="194.8"/></svg>
+                                <i class="ti ti-walk"></i>
+                            </div>
+                        </div>
+                        <div class="ef-trend"><i class="ti ti-circle-check"></i>Punched in, field presence</div>
+                    </div>
+                    <div class="ef-card ef-kcard amber ef-reveal" style="--d:.19s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-calendar-off"></i></span><span class="ef-klabel">Today on Leave</span></div>
+                        <div class="ef-kval" data-emp-kpi="todayOnLeave">-</div>
+                        <div class="ef-ksub" data-emp-kpi="leaveSub">of active strength</div>
+                        <div class="ef-mini"><div data-emp-kpi="leaveBar"></div></div>
+                    </div>
+                    <div class="ef-card ef-kcard red-t ef-reveal" style="--d:.26s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-clock-exclamation"></i></span><span class="ef-klabel">MIS Punch</span></div>
+                        <div class="ef-kval" data-emp-kpi="misPunch">-</div>
+                        <div class="ef-ksub" data-emp-kpi="misSub">Not punched in today</div>
+                        <div class="ef-mini"><div data-emp-kpi="misBar"></div></div>
+                    </div>
                 </div>
 
                 <div class="ef-slabel">Team Order Summary</div>
                 <div class="ef-emp-summary">
-                    <div class="ef-escard">
-                        <div class="ef-esicon" style="background:#eff6ff;color:#2563eb;"><i class="ti ti-shopping-cart"></i></div>
-                        <div><div class="ef-esval" data-emp-summary="totalOrderQty">-</div><div class="ef-eslbl">Total Order Qty (Nos)</div></div>
+                    <div class="ef-card ef-kcard ef-reveal" style="--d:.05s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-shopping-cart"></i></span><span class="ef-klabel">Total Order Qty (Nos)</span></div>
+                        <div class="ef-kval" data-emp-summary="totalOrderQty">-</div>
+                        <div class="ef-ksub">Secondary units booked by team</div>
                     </div>
-                    <div class="ef-escard">
-                        <div class="ef-esicon" style="background:#f0fdf4;color:#16a34a;"><i class="ti ti-coin"></i></div>
-                        <div><div class="ef-esval" data-emp-summary="totalOrderValue">-</div><div class="ef-eslbl">Total Order Value</div></div>
+                    <div class="ef-card ef-kcard green ef-reveal" style="--d:.12s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-coin-rupee"></i></span><span class="ef-klabel">Total Order Value</span></div>
+                        <div class="ef-kval" data-emp-summary="totalOrderValue">-</div>
+                        <div class="ef-ksub">Secondary + primary value</div>
                     </div>
-                    <div class="ef-escard">
-                        <div class="ef-esicon" style="background:#faf5ff;color:#7c3aed;"><i class="ti ti-user-check"></i></div>
-                        <div><div class="ef-esval" data-emp-summary="uniqueActiveCustomers">-</div><div class="ef-eslbl">Unique Active Customers</div></div>
+                    <div class="ef-card ef-kcard purple ef-reveal" style="--d:.19s">
+                        <div class="ef-khead"><span class="ef-kicon"><i class="ti ti-user-check"></i></span><span class="ef-klabel">Unique Active Customers</span></div>
+                        <div class="ef-kval" data-emp-summary="uniqueActiveCustomers">-</div>
+                        <div class="ef-ksub">Customers who ordered via team</div>
                     </div>
                 </div>
 
-                <div class="ef-slabel">Target vs Achievement - all employees (scroll)</div>
-                <div class="ef-card ef-chart" style="padding:15px 15px 10px;">
-                    <div class="ef-chtitle" style="margin-bottom:8px;">Employee target vs achievement<span class="ef-badge" data-badge></span></div>
+                <div class="ef-slabel">Performance</div>
+                <div class="ef-g2">
+                    <div class="ef-card ef-chart ef-reveal" style="--d:.05s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#fef3c7;color:#d97706;"><i class="ti ti-award"></i></span><span>Top 10 performers<small>Ranked by achievement % of target</small></span></span><span class="ef-badge" data-badge></span></div>
+                        <div class="ef-empty" data-empty="empTop">No employee achievement found for this period</div>
+                        <div class="ef-lb" id="empTop"></div>
+                    </div>
+                    <div class="ef-card ef-chart ef-reveal" style="--d:.12s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#ecfeff;color:#0891b2;"><i class="ti ti-chart-donut-3"></i></span><span>Achievement distribution<small>Employees grouped by % of target achieved</small></span></span><span class="ef-badge" data-badge></span></div>
+                        <div class="ef-empty" data-empty="empDist">No employee targets found for this period</div>
+                        <div class="ef-cat-wrap" id="empDistWrap">
+                            <div class="ef-donut"><canvas id="empDist"></canvas><div class="ef-donut-c"><b data-emp-kpi="distTotal">-</b><span>Employees</span></div></div>
+                            <div class="ef-seglist" id="empDistLegend"></div>
+                        </div>
+                        <div class="ef-attn" id="empAttn"></div>
+                    </div>
+                </div>
+
+                <div class="ef-slabel">Target vs Achievement - all employees</div>
+                <div class="ef-card ef-chart ef-reveal" style="--d:.05s">
+                    <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon"><i class="ti ti-chart-bar"></i></span><span>Employee target vs achievement<small>Scroll sideways to see everyone &middot; bar colour = achievement band</small></span></span>
+                        <span class="ef-sortbar"><button type="button" class="ef-chip active" data-emp-sort="pct">Achievement %</button><button type="button" class="ef-chip" data-emp-sort="value">Value</button><button type="button" class="ef-chip" data-emp-sort="name">A - Z</button></span>
+                    </div>
                     <div class="ef-legend"><span class="ef-legitem"><span class="ef-legsq" style="background:#16a34a;"></span>90%+</span><span class="ef-legitem"><span class="ef-legsq" style="background:#3b82f6;"></span>75-89%</span><span class="ef-legitem"><span class="ef-legsq" style="background:#d97706;"></span>60-74%</span><span class="ef-legitem"><span class="ef-legsq" style="background:#dc2626;"></span>&lt;60%</span><span class="ef-legitem"><span class="ef-legsq" style="background:#e2e8f0;border:1px solid #cbd5e1;"></span>Target</span></div>
                     <div class="ef-empty" data-empty="empTarget">No employee achievement or target found for this period</div>
                     <div class="ef-emp-chart-wrap"><div class="ef-emp-chart-inner"><canvas id="empTarget"></canvas></div></div>
@@ -670,12 +892,20 @@
                 }
                 charts[id] = new Chart(document.getElementById(id), { type: 'line', data: { labels, datasets }, options });
             };
-            const doughnut = (id, rows) => {
+            const doughnut = (id, rows, onHover, palette = colors) => {
                 destroy(id);
                 charts[id] = new Chart(document.getElementById(id), {
                     type: 'doughnut',
-                    data: { labels: rows.map(r => r.label), datasets: [{ data: rows.map(r => r.value), backgroundColor: colors, borderWidth: 0 }] },
-                    options: { responsive: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.label}: ${money(ctx.parsed)}` } } } }
+                    data: { labels: rows.map(r => r.label), datasets: [{ data: rows.map(r => Number(r.value || 0)), backgroundColor: rows.map((r, i) => palette[i % palette.length]), borderWidth: 2, borderColor: '#fff', hoverOffset: 10, borderRadius: 4, spacing: 1 }] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '70%', layout: { padding: 8 },
+                        animation: reduceMotion ? false : { animateRotate: true, animateScale: true, duration: 1100, easing: 'easeOutQuart' },
+                        onHover: (evt, els) => onHover && onHover(els.length ? els[0].index : -1),
+                        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            return ` ${ctx.label}: ${money(ctx.parsed)} (${total ? (ctx.parsed / total * 100).toFixed(1) : 0}%)`;
+                        } } } }
+                    }
                 });
             };
             const updateBadges = (label) => {
@@ -704,11 +934,11 @@
                 }).join('');
                 wrap.querySelectorAll('[data-count]').forEach(el => countUp(el, el.dataset.count, compact));
             };
-            const renderTopCustomers = (top) => {
-                const list = document.getElementById('sTop');
-                const chips = document.getElementById('sTopStates');
+            const renderTopCustomers = (top, id = 'sTop') => {
+                const list = document.getElementById(id);
+                const chips = document.getElementById(id + 'States');
                 const show = hasValues(top);
-                setVisible(document.querySelector('[data-empty="sTop"]'), !show);
+                setVisible(document.querySelector(`[data-empty="${id}"]`), !show);
                 list.style.display = show ? 'flex' : 'none';
                 chips.style.display = show ? 'flex' : 'none';
                 if (!show) { list.innerHTML = ''; chips.innerHTML = ''; return { orders: 0, states: 0 }; }
@@ -753,6 +983,23 @@
                 }).join('');
                 return { orders: top.reduce((s, r) => s + Number(r.orders || 0), 0), states: stateOrder.filter(s => s !== 'Unknown').length };
             };
+            // Target gap pill + animated achievement ring (shared by Secondary & Primary)
+            const renderAchievement = (attr, ach, target, pct) => {
+                const q = key => document.querySelector(`[${attr}="${key}"]`);
+                q('targetGap').innerHTML = !target
+                    ? `<span class="ef-pill warn"><i class="ti ti-alert-circle"></i>No target set for this period</span>`
+                    : (ach >= target
+                        ? `<span class="ef-pill ok"><i class="ti ti-circle-check"></i>Target exceeded by ${esc(money(ach - target))}</span>`
+                        : `<span class="ef-pill warn"><i class="ti ti-trending-down"></i>${esc(money(target - ach))} short &middot; ${(100 - pct).toFixed(1)}% gap</span>`);
+                const card = q('achCard');
+                const tone = pct >= 100 ? 'green' : pct >= 75 ? '' : pct >= 50 ? 'amber' : 'purple';
+                card.classList.remove('green', 'amber', 'purple');
+                if (tone) card.classList.add(tone);
+                const ring = q('ring');
+                const circ = 2 * Math.PI * 31;
+                ring.style.strokeDashoffset = circ;
+                requestAnimationFrame(() => requestAnimationFrame(() => { ring.style.strokeDashoffset = circ * (1 - Math.min(pct, 100) / 100); }));
+            };
             const renderSecondary = (data) => {
                 updateBadges(data.periodLabel);
                 const k = data.kpis;
@@ -769,21 +1016,7 @@
 
                 const target = Number(k.secondarySalesTarget || 0);
                 const ach = Number(k.secondarySalesAchievement || 0);
-                document.querySelector('[data-kpi="targetGap"]').innerHTML = !target
-                    ? `<span class="ef-pill warn"><i class="ti ti-alert-circle"></i>No target set for this period</span>`
-                    : (ach >= target
-                        ? `<span class="ef-pill ok"><i class="ti ti-circle-check"></i>Target exceeded by ${esc(money(ach - target))}</span>`
-                        : `<span class="ef-pill warn"><i class="ti ti-trending-down"></i>${esc(money(target - ach))} short &middot; ${(100 - pct).toFixed(1)}% gap</span>`);
-
-                // Achievement ring
-                const card = document.querySelector('[data-kpi="achCard"]');
-                const tone = pct >= 100 ? 'green' : pct >= 75 ? '' : pct >= 50 ? 'amber' : 'purple';
-                card.classList.remove('green', 'amber', 'purple');
-                if (tone) card.classList.add(tone);
-                const ring = document.querySelector('[data-kpi="ring"]');
-                const circ = 2 * Math.PI * 31;
-                ring.style.strokeDashoffset = circ;
-                requestAnimationFrame(() => requestAnimationFrame(() => { ring.style.strokeDashoffset = circ * (1 - Math.min(pct, 100) / 100); }));
+                renderAchievement('data-kpi', ach, target, pct);
 
                 renderBreakdown(data.customerBreakdown || []);
 
@@ -846,95 +1079,368 @@
                     })]
                 }));
             };
+            const setRing = (el, pct) => {
+                if (!el) return;
+                const circ = 2 * Math.PI * 31;
+                el.style.strokeDashoffset = circ;
+                requestAnimationFrame(() => requestAnimationFrame(() => { el.style.strokeDashoffset = circ * (1 - Math.min(Math.max(pct, 0), 100) / 100); }));
+            };
+            // Ranked product list (top sellers / slow movers)
+            const renderProductList = (rows, id, segColor, slow = false) => {
+                const list = document.getElementById(id);
+                const show = hasValues(rows);
+                setVisible(document.querySelector(`[data-empty="${id}"]`), !show);
+                list.style.display = show ? 'flex' : 'none';
+                if (!show) { list.innerHTML = ''; return; }
+                const max = Math.max(...rows.map(r => Number(r.value || 0)), 1);
+                const total = rows.reduce((s, r) => s + Number(r.value || 0), 0);
+                list.innerHTML = rows.map((r, i) => {
+                    const value = Number(r.value || 0);
+                    const qty = Number(r.qty || 0);
+                    const t = r.segment ? segColor(r.segment) : null;
+                    const rank = slow ? `<span class="ef-rank"><i class="ti ti-arrow-down-right" style="font-size:13px;"></i></span>` : `<span class="ef-rank ${i < 3 ? 'r' + (i + 1) : ''}">${i + 1}</span>`;
+                    return `<div class="ef-lbrow" style="--i:${Math.min(i, 14)};" title="${esc(r.label)}${r.code ? ' (' + esc(r.code) + ')' : ''}">
+                        ${rank}
+                        <div class="ef-lbmain">
+                            <div class="ef-lbhead"><span class="ef-lbname">${esc(r.label)}</span><span class="ef-lbval">${esc(money(value).replace('Rs. ', '₹'))}</span></div>
+                            <div class="ef-lbmeta">
+                                ${r.code ? `<span class="ef-lbcode">${esc(r.code)}</span>` : ''}
+                                ${t ? `<span class="ef-st" style="--st-bg:${t}1a;--st-fg:${t};"><i class="ti ti-category"></i>${esc(r.segment)}</span>` : ''}
+                                ${qty ? `<span>${compact(qty)} units</span>` : ''}
+                                <span class="ef-lbshare">${total ? (value / total * 100).toFixed(1) : '0.0'}%</span>
+                            </div>
+                            <div class="ef-lbtrack"><div class="ef-lbfill" style="--w:${Math.max(value / max * 100, 2).toFixed(1)}%;"></div></div>
+                        </div>
+                    </div>`;
+                }).join('');
+            };
             const renderProduct = (data) => {
                 updateBadges(data.periodLabel);
-                const top = data.charts.topProducts || [];
-                if (!empty('pTop', top)) bar('pTop', top.map(r => r.label), [{ data: top.map(r => lakh(r.value)), backgroundColor: '#7c3aed', borderRadius: 3, barThickness: 8 }], scaledChartOptions('L', 'y', { font: { size: 8, family: 'Inter' }, autoSkip: false }));
-                const slow = data.charts.slowMovingProducts || [];
-                if (!empty('pSlow', slow)) bar('pSlow', slow.map(r => r.label), [{ data: slow.map(r => lakh(r.value)), backgroundColor: '#ea580c', borderRadius: 3, barThickness: 13 }], scaledChartOptions('L', 'y', { font: { size: 8, family: 'Inter' }, autoSkip: false }));
+                const k = data.kpis || {};
+                const q = key => document.querySelector(`[data-pd-kpi="${key}"]`);
+                const sales = Number(k.productSales || 0);
+                const qty = Number(k.totalQuantity || 0);
+                const sold = Number(k.productsSold || 0);
+                const catalog = Number(k.catalogProducts || 0);
+                const coverage = catalog ? sold / catalog * 100 : 0;
                 const seg = data.charts.segmentWiseSales || [];
-                if (!empty('pSegment', seg)) {
-                    doughnut('pSegment', seg);
-                    const total = seg.reduce((sum, row) => sum + Number(row.value || 0), 0);
-                    document.getElementById('pSegmentLegend').innerHTML = seg.map((row, i) => `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;"><span style="display:flex;align-items:center;gap:5px;min-width:0;"><span style="width:8px;height:8px;border-radius:2px;background:${colors[i % colors.length]};display:inline-block;flex-shrink:0;"></span><span style="font-size:11px;color:#475569;font-weight:500;overflow:hidden;text-overflow:ellipsis;">${row.label}</span></span><span style="font-size:12px;font-weight:700;color:#0f172a;">${total ? Math.round((row.value / total) * 100) : 0}%</span></div>`).join('');
+                const segTotal = seg.reduce((sum, row) => sum + Number(row.value || 0), 0);
+
+                countUp(q('sales'), sales, money);
+                countUp(q('qty'), qty, compact);
+                countUp(q('sold'), sold, compact);
+                countUp(document.querySelector('[data-pd-hero="sales"]'), sales, money);
+                countUp(document.querySelector('[data-pd-hero="qty"]'), qty, compact);
+                countUp(document.querySelector('[data-pd-hero="sold"]'), sold, compact);
+                q('avgPrice').textContent = qty ? 'Avg ' + money(sales / qty) + ' per unit' : 'No units in period';
+                q('avgQty').textContent = sold ? compact(qty / sold) + ' units per SKU' : 'No SKUs in period';
+                q('catalogSub').textContent = 'of ' + compact(catalog) + ' active SKUs';
+                q('coverage').textContent = coverage.toFixed(1) + '% of catalogue moving';
+                setRing(q('ring'), coverage);
+                q('topSegment').textContent = k.topSegment || '-';
+                q('topSegment').title = k.topSegment || '';
+                q('topSegmentSub').textContent = seg.length && segTotal ? (Number(seg[0].value) / segTotal * 100).toFixed(1) + '% share · ' + money(seg[0].value) : 'No segment sales';
+                q('segments').textContent = compact(k.segments ?? seg.length) + ' segments with sales';
+
+                const segIndex = {};
+                seg.forEach((r, i) => { segIndex[r.label] = i; });
+                const segColor = (name) => segIndex[name] !== undefined ? colors[segIndex[name] % colors.length] : '#64748b';
+                renderProductList(data.charts.topProducts || [], 'pTop', segColor);
+                renderProductList(data.charts.slowMovingProducts || [], 'pSlow', segColor, true);
+
+                const legend = document.getElementById('pSegmentLegend');
+                const wrap = document.getElementById('pSegmentWrap');
+                if (!hasValues(seg)) {
+                    setVisible(document.querySelector('[data-empty="pSegment"]'), true);
+                    wrap.style.display = 'none';
+                    destroy('pSegment');
+                    legend.innerHTML = '';
                 } else {
-                    document.getElementById('pSegmentLegend').innerHTML = '';
+                    setVisible(document.querySelector('[data-empty="pSegment"]'), false);
+                    wrap.style.display = 'flex';
+                    q('segTotal').textContent = money(segTotal).replace('Rs. ', '₹');
+                    const segMax = Math.max(...seg.map(r => Number(r.value || 0)), 1);
+                    legend.innerHTML = seg.map((row, i) => {
+                        const c = colors[i % colors.length];
+                        const v = Number(row.value || 0);
+                        return `<div class="ef-segrow" data-seg="${i}" style="--i:${Math.min(i, 12)};">
+                            <div class="ef-segtop"><span class="ef-segname"><span class="ef-legsq" style="background:${c};"></span><span>${esc(row.label)}</span></span><span class="ef-segval">${segTotal ? (v / segTotal * 100).toFixed(1) : 0}%<small>${esc(money(v).replace('Rs. ', '₹'))}</small></span></div>
+                            <div class="ef-segbar"><div style="width:${Math.max(v / segMax * 100, 1).toFixed(1)}%;background:${c};"></div></div>
+                        </div>`;
+                    }).join('');
+                    const highlight = (idx) => legend.querySelectorAll('.ef-segrow').forEach(el => el.classList.toggle('hl', Number(el.dataset.seg) === idx));
+                    doughnut('pSegment', seg, highlight);
+                    legend.querySelectorAll('.ef-segrow').forEach(el => {
+                        el.addEventListener('mouseenter', () => {
+                            const chart = charts.pSegment; if (!chart) return;
+                            const idx = Number(el.dataset.seg);
+                            chart.setActiveElements([{ datasetIndex: 0, index: idx }]);
+                            chart.tooltip.setActiveElements([{ datasetIndex: 0, index: idx }], { x: chart.width / 2, y: chart.height / 2 });
+                            chart.update();
+                        });
+                        el.addEventListener('mouseleave', () => {
+                            const chart = charts.pSegment; if (!chart) return;
+                            chart.setActiveElements([]); chart.tooltip.setActiveElements([], { x: 0, y: 0 }); chart.update();
+                        });
+                    });
                 }
+
                 const sku = data.charts.topSkuTrend || [];
                 const skuRows = sku.flatMap(s => s.data || []);
+                const skuLegend = document.getElementById('pSkuLegend');
                 if (!empty('pSku', skuRows)) {
-                    document.getElementById('pSkuLegend').innerHTML = sku.map((s, i) => `<span class="ef-legitem"><span class="ef-legsq" style="background:${colors[i % colors.length]};"></span><span style="font-size:9px;">${s.label}</span></span>`).join('');
-                    line('pSku', (sku[0]?.data || []).map(r => r.label), sku.map((series, i) => ({ label: series.label, data: (series.data || []).map(r => lakh(r.value)), borderColor: colors[i % colors.length], backgroundColor: 'transparent', tension: .4, pointRadius: 2, borderWidth: 1.8 })), scaledChartOptions('L', 'x', { font: { size: 9, family: 'Inter' } }));
+                    const labels = (sku[0]?.data || []).map(r => r.label);
+                    skuLegend.innerHTML = sku.map((s, i) => `<span class="ef-legitem" data-sku="${i}" title="${esc(s.label)}"><span class="ef-legsq" style="background:${colors[i % colors.length]};"></span><span style="font-size:9.5px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(s.label)}</span></span>`).join('');
+                    if (labels.length < 3) {
+                        // Single / two-month period: compare SKUs side by side as bars
+                        const totals = sku.map(s => (s.data || []).reduce((a, r) => a + Number(r.value || 0), 0));
+                        bar('pSku', sku.map(s => s.label.length > 18 ? s.label.slice(0, 17) + '…' : s.label), [{
+                            label: labels.join(' - ') || 'Sales', data: totals.map(lakh),
+                            backgroundColor: sku.map((s, i) => colors[i % colors.length]), borderRadius: 6, borderSkipped: false, maxBarThickness: 16
+                        }], withPad(scaledChartOptions('L', 'y', { font: { size: 9.5, weight: '600', family: 'Inter' }, color: '#475569' }), { right: 8 }));
+                    } else {
+                        line('pSku', labels, sku.map((series, i) => ({
+                            label: series.label, data: (series.data || []).map(r => lakh(r.value)), borderColor: colors[i % colors.length],
+                            backgroundColor: colors[i % colors.length], tension: .4, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', borderWidth: 2
+                        })), scaledChartOptions('L', 'x'));
+                    }
+                    skuLegend.querySelectorAll('[data-sku]').forEach(el => el.addEventListener('click', () => {
+                        const chart = charts.pSku; if (!chart) return;
+                        const idx = Number(el.dataset.sku);
+                        if (chart.config.type === 'line') {
+                            const visible = chart.isDatasetVisible(idx);
+                            chart.setDatasetVisibility(idx, !visible);
+                            el.classList.toggle('off', visible);
+                        } else {
+                            const ds = chart.data.datasets[0];
+                            ds._orig = ds._orig || ds.data.slice();
+                            const hidden = ds.data[idx] === null;
+                            ds.data[idx] = hidden ? ds._orig[idx] : null;
+                            el.classList.toggle('off', !hidden);
+                        }
+                        chart.update();
+                    }));
                 } else {
-                    document.getElementById('pSkuLegend').innerHTML = '';
+                    skuLegend.innerHTML = '';
                 }
             };
             const renderPrimary = (data) => {
                 updateBadges(data.periodLabel);
-                const target = data.charts.salesVsTarget || [];
-                if (!empty('prTarget', target, ['achievement', 'target'])) bar('prTarget', target.map(r => r.label), [
-                    { data: target.map(r => r.achievement), backgroundColor: '#16a34a', borderRadius: 4, barThickness: 14 },
-                    { data: target.map(r => r.target), backgroundColor: '#e2e8f0', borderRadius: 4, barThickness: 14 }
-                ]);
+                const k = data.kpis || {};
+                const ach = Number(k.primarySalesAchievement || 0);
+                const target = Number(k.primarySalesTarget || 0);
+                const pct = Number(k.overallAchievementPercent || 0);
+                const invoices = Number(k.totalInvoices || 0);
+                const qty = Number(k.totalQuantity || 0);
+                const q = key => document.querySelector(`[data-pr-kpi="${key}"]`);
+                countUp(q('achievement'), ach, money);
+                countUp(q('target'), target, money);
+                countUp(q('percent'), pct, v => Number(v).toFixed(1).replace(/\.0$/, '') + '%', 1200);
+                countUp(q('invoices'), invoices, compact);
+                countUp(q('qty'), qty, compact);
+                q('targetSub').textContent = 'vs ' + money(target) + ' target';
+                q('avgInvoice').textContent = invoices ? 'Avg ' + money(ach / invoices) + ' per invoice' : 'No invoices in period';
+                q('avgQty').textContent = invoices ? compact(qty / invoices) + ' units per invoice' : 'No invoices in period';
+                renderAchievement('data-pr-kpi', ach, target, pct);
+
+                const topInfo = renderTopCustomers(data.charts.topDealers || [], 'prTop');
+                countUp(document.querySelector('[data-pr-hero="sales"]'), ach, money);
+                countUp(document.querySelector('[data-pr-hero="invoices"]'), invoices, compact);
+                countUp(document.querySelector('[data-pr-hero="states"]'), topInfo.states, compact);
+
+                const targetRows = data.charts.salesVsTarget || [];
+                if (!empty('prTarget', targetRows, ['achievement', 'target'])) bar('prTarget', targetRows.map(r => r.label), [
+                    { label: 'Achievement', data: targetRows.map(r => lakh(r.achievement)), backgroundColor: grad('#4ade80', '#15803d'), borderRadius: 6, borderSkipped: false, maxBarThickness: 26, categoryPercentage: .6, barPercentage: .85 },
+                    { label: 'Target', data: targetRows.map(r => lakh(r.target)), backgroundColor: '#e2e8f0', hoverBackgroundColor: '#cbd5e1', borderRadius: 6, borderSkipped: false, maxBarThickness: 26, categoryPercentage: .6, barPercentage: .85 }
+                ], Object.assign(withPad(scaledChartOptions('L', 'x'), { top: 16 }), {
+                    plugins: [endLabels(i => {
+                        const r = targetRows[i];
+                        return r && Number(r.target) > 0 ? Math.round(r.achievement / r.target * 100) + '%' : '';
+                    })]
+                }));
+
                 const trend = data.charts.salesTrend || [];
-                if (!empty('prTrend', trend)) line('prTrend', trend.map(r => r.label), [{ data: trend.map(r => r.value), borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,.09)', fill: true, tension: .4, pointRadius: 3, borderWidth: 2 }]);
+                if (!empty('prTrend', trend)) {
+                    if (trend.length < 3) {
+                        bar('prTrend', trend.map(r => r.label), [{ label: 'Sales', data: trend.map(r => crore(r.value)), backgroundColor: grad('#6ee7b7', '#059669'), borderRadius: 8, borderSkipped: false, maxBarThickness: 46 }], scaledChartOptions('Cr', 'x'));
+                    } else {
+                        line('prTrend', trend.map(r => r.label), [{
+                            label: 'Sales', data: trend.map(r => crore(r.value)), borderColor: '#059669',
+                            backgroundColor: (ctx) => {
+                                const a = ctx.chart.chartArea; if (!a) return 'rgba(5,150,105,.1)';
+                                const g = ctx.chart.ctx.createLinearGradient(0, a.top, 0, a.bottom);
+                                g.addColorStop(0, 'rgba(5,150,105,.28)'); g.addColorStop(1, 'rgba(5,150,105,0)'); return g;
+                            },
+                            fill: true, tension: .4, pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: '#fff', pointBorderColor: '#059669', pointBorderWidth: 2, borderWidth: 2.5
+                        }], scaledChartOptions('Cr', 'x'));
+                    }
+                }
+
                 const yoy = data.charts.yoyGrowth || [];
                 const yoyRows = yoy.flatMap(y => y.data || []);
-                if (!empty('prYoy', yoyRows)) bar('prYoy', (yoy[0]?.data || []).map(r => r.label), yoy.map((series, i) => ({ data: (series.data || []).map(r => r.value), backgroundColor: ['#bbf7d0','#16a34a','#14532d'][i] || colors[i], borderRadius: 3, barThickness: 8 })));
-                const region = data.charts.regionWiseSales || [];
+                const yoyColors = [['#dcfce7', '#bbf7d0'], ['#4ade80', '#16a34a'], ['#15803d', '#14532d']];
+                document.getElementById('prYoyLegend').innerHTML = yoy.map((s, i) => {
+                    const c = yoyColors[i] || [colors[i], colors[i]];
+                    return `<span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(${c[0]},${c[1]});"></span>${esc(s.label)}</span>`;
+                }).join('');
+                if (!empty('prYoy', yoyRows)) bar('prYoy', (yoy[0]?.data || []).map(r => r.label), yoy.map((series, i) => {
+                    const c = yoyColors[i] || [colors[i], colors[i]];
+                    return { label: series.label, data: (series.data || []).map(r => crore(r.value)), backgroundColor: grad(c[0], c[1]), borderRadius: 4, borderSkipped: false, maxBarThickness: 12, categoryPercentage: .75, barPercentage: .9 };
+                }), scaledChartOptions('Cr', 'x'));
+
+                const region = (data.charts.regionWiseSales || []).slice().sort((a, b) => Number(b.achievement || 0) - Number(a.achievement || 0));
                 if (!empty('prRegion', region, ['achievement', 'target'])) bar('prRegion', region.map(r => r.label), [
-                    { data: region.map(r => r.achievement), backgroundColor: '#16a34a', borderRadius: 4, barThickness: 16 },
-                    { data: region.map(r => r.target), backgroundColor: '#e2e8f0', borderRadius: 4, barThickness: 16 }
-                ]);
+                    { label: 'Achievement', data: region.map(r => lakh(r.achievement)), backgroundColor: grad('#93c5fd', '#2563eb', true), borderRadius: 6, borderSkipped: false, maxBarThickness: 14, categoryPercentage: .75, barPercentage: .9 },
+                    { label: 'Target', data: region.map(r => lakh(r.target)), backgroundColor: '#e2e8f0', hoverBackgroundColor: '#cbd5e1', borderRadius: 6, borderSkipped: false, maxBarThickness: 14, categoryPercentage: .75, barPercentage: .9 }
+                ], Object.assign(withPad(scaledChartOptions('L', 'y', { font: { size: 10, weight: '600', family: 'Inter' }, color: '#475569' }), { right: 44 }), {
+                    plugins: [endLabels(i => {
+                        const r = region[i];
+                        if (!r) return '';
+                        return Number(r.target) > 0 ? Math.round(r.achievement / r.target * 100) + '%' : (Number(r.achievement) > 0 ? scaledMoney(lakh(r.achievement), 'L') : '');
+                    })]
+                }));
+            };
+            // Achievement bands used across the Employees tab
+            const empBands = [
+                { key: 'g', label: '90%+ (on target)', min: 90, color: '#16a34a', light: '#86efac' },
+                { key: 'b', label: '75 - 89%', min: 75, color: '#3b82f6', light: '#93c5fd' },
+                { key: 'a', label: '60 - 74%', min: 60, color: '#d97706', light: '#fcd34d' },
+                { key: 'r', label: 'Below 60%', min: -Infinity, color: '#dc2626', light: '#fca5a5' }
+            ];
+            const empBand = (row) => empBands.find(b => Number(row.achievementPercent || 0) >= b.min);
+            const pctLabel = v => Number(v || 0).toFixed(1).replace(/\.0$/, '') + '%';
+            let empRows = [];
+            let empSort = 'pct';
+            const renderEmpChart = () => {
+                const rows = empRows.slice();
+                if (empSort === 'pct') rows.sort((a, b) => Number(b.achievementPercent || 0) - Number(a.achievementPercent || 0) || Number(b.achievement || 0) - Number(a.achievement || 0));
+                else if (empSort === 'value') rows.sort((a, b) => Number(b.achievement || 0) - Number(a.achievement || 0));
+                else rows.sort((a, b) => String(a.label).localeCompare(String(b.label), undefined, { numeric: true, sensitivity: 'base' }));
+                if (empty('empTarget', rows, ['achievement', 'target'])) return;
+                const inner = document.querySelector('.ef-emp-chart-inner');
+                if (inner) inner.style.minWidth = Math.max(900, rows.length * 46 + 120) + 'px';
+                const bandOf = rows.map(empBand);
+                bar('empTarget', rows.map(r => String(r.label).length > 16 ? String(r.label).slice(0, 15) + '…' : r.label), [
+                    { label: 'Achievement', data: rows.map(r => lakh(r.achievement)), backgroundColor: ctx => grad(bandOf[ctx.dataIndex]?.light || '#93c5fd', bandOf[ctx.dataIndex]?.color || '#3b82f6')(ctx), borderRadius: 5, borderSkipped: false, maxBarThickness: 16, categoryPercentage: .7, barPercentage: .9 },
+                    { label: 'Target', data: rows.map(r => lakh(r.target)), backgroundColor: '#e2e8f0', hoverBackgroundColor: '#cbd5e1', borderRadius: 5, borderSkipped: false, maxBarThickness: 16, categoryPercentage: .7, barPercentage: .9 }
+                ], {
+                    plugins: [endLabels(i => Number(rows[i]?.target) > 0 ? Math.round(rows[i].achievementPercent) + '%' : '')],
+                    options: {
+                        layout: { padding: { top: 16 } },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    title: items => {
+                                        const row = rows[items[0]?.dataIndex] || {};
+                                        return row.name + (row.code ? ` (${row.code})` : '');
+                                    },
+                                    label: ctx => ` ${ctx.dataset.label}: ${scaledMoney(ctx.parsed.y, 'L')}`,
+                                    afterBody: items => {
+                                        const row = rows[items[0]?.dataIndex] || {};
+                                        return Number(row.target) > 0 ? `Achieved: ${pctLabel(row.achievementPercent)}` : 'No target set';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { ticks: { font: { size: 9, family: 'Inter', weight: '600' }, color: '#64748b', autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false }, border: { display: false } },
+                            y: { ticks: { font: { size: 9, family: 'Inter' }, color: '#94a3b8', callback: value => scaledMoney(value, 'L') }, grid: { color: 'rgba(0,0,0,.04)' }, border: { display: false } }
+                        }
+                    }
+                });
             };
             const renderEmployees = (data) => {
                 updateBadges(data.periodLabel);
                 const k = data.kpis || {};
                 const s = data.summary || {};
-                document.querySelector('[data-emp-kpi="totalEmployees"]').textContent = compact(k.totalEmployees);
-                document.querySelector('[data-emp-kpi="todayOnMarket"]').textContent = compact(k.todayOnMarket);
-                document.querySelector('[data-emp-kpi="todayOnLeave"]').textContent = compact(k.todayOnLeave);
-                document.querySelector('[data-emp-kpi="misPunch"]').textContent = compact(k.misPunch);
-                document.querySelector('[data-emp-summary="totalOrderQty"]').textContent = compact(s.totalOrderQty);
-                document.querySelector('[data-emp-summary="totalOrderValue"]').textContent = money(s.totalOrderValue);
-                document.querySelector('[data-emp-summary="uniqueActiveCustomers"]').textContent = compact(s.uniqueActiveCustomers);
+                const q = key => document.querySelector(`[data-emp-kpi="${key}"]`);
+                const total = Number(k.totalEmployees || 0);
+                const market = Number(k.todayOnMarket || 0);
+                const leave = Number(k.todayOnLeave || 0);
+                const mis = Number(k.misPunch || 0);
+                const share = v => total ? v / total * 100 : 0;
 
-                const rows = data.charts.employeeTargetVsAchievement || [];
-                if (!empty('empTarget', rows, ['achievement', 'target'])) {
-                    const inner = document.querySelector('.ef-emp-chart-inner');
-                    if (inner) inner.style.minWidth = Math.max(1400, rows.length * 42 + 180) + 'px';
-                    const bg = rows.map(row => {
-                        const pct = Number(row.achievementPercent || 0);
-                        if (pct >= 90) return '#16a34a';
-                        if (pct >= 75) return '#3b82f6';
-                        if (pct >= 60) return '#d97706';
-                        return '#dc2626';
-                    });
-                    bar('empTarget', rows.map(r => r.label), [
-                        { label: 'Achievement', data: rows.map(r => lakh(r.achievement)), backgroundColor: bg, borderRadius: 4, barThickness: 16 },
-                        { label: 'Target', data: rows.map(r => lakh(r.target)), backgroundColor: '#e2e8f0', borderColor: '#cbd5e1', borderWidth: 1, borderRadius: 4, barThickness: 16 }
-                    ], {
-                        options: {
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        title: items => {
-                                            const row = rows[items[0]?.dataIndex] || {};
-                                            return row.name ? `${row.name} - ${row.label}` : row.label;
-                                        },
-                                        label: ctx => `${ctx.dataset.label}: ${scaledMoney(ctx.parsed.y, 'L')}`
-                                    }
-                                }
-                            },
-                            scales: {
-                                x: { ticks: { font: { size: 9, family: 'Inter' }, color: '#94a3b8', autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false }, border: { display: false } },
-                                y: { ticks: { font: { size: 9, family: 'Inter' }, color: '#94a3b8', callback: value => scaledMoney(value, 'L') }, grid: { color: 'rgba(0,0,0,.04)' }, border: { display: false } }
-                            }
-                        }
-                    });
+                countUp(q('totalEmployees'), total, compact);
+                countUp(q('todayOnMarket'), market, compact);
+                countUp(q('todayOnLeave'), leave, compact);
+                countUp(q('misPunch'), mis, compact);
+                q('marketSub').textContent = share(market).toFixed(1) + '% of ' + compact(total) + ' active';
+                q('leaveSub').textContent = share(leave).toFixed(1) + '% of active strength';
+                q('misSub').textContent = share(mis).toFixed(1) + '% not punched in today';
+                setRing(q('ring'), share(market));
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    q('leaveBar').style.width = Math.min(share(leave), 100) + '%';
+                    q('misBar').style.width = Math.min(share(mis), 100) + '%';
+                }));
+                countUp(document.querySelector('[data-emp-summary="totalOrderQty"]'), s.totalOrderQty, compact);
+                countUp(document.querySelector('[data-emp-summary="totalOrderValue"]'), s.totalOrderValue, money);
+                countUp(document.querySelector('[data-emp-summary="uniqueActiveCustomers"]'), s.uniqueActiveCustomers, compact);
+
+                empRows = data.charts.employeeTargetVsAchievement || [];
+                const withTarget = empRows.filter(r => Number(r.target || 0) > 0);
+                const onTarget = withTarget.filter(r => Number(r.achievementPercent || 0) >= 90).length;
+                countUp(document.querySelector('[data-emp-hero="market"]'), market, compact);
+                countUp(document.querySelector('[data-emp-hero="value"]'), s.totalOrderValue, money);
+                document.querySelector('[data-emp-hero="onTarget"]').textContent = withTarget.length ? `${onTarget} / ${withTarget.length}` : '-';
+
+                // Top 10 performers: by % where targets exist, otherwise by achievement value
+                const list = document.getElementById('empTop');
+                const ranked = (withTarget.length ? withTarget.slice().sort((a, b) => b.achievementPercent - a.achievementPercent) : empRows.slice().sort((a, b) => b.achievement - a.achievement)).filter(r => Number(r.achievement || 0) > 0).slice(0, 10);
+                setVisible(document.querySelector('[data-empty="empTop"]'), !ranked.length);
+                list.style.display = ranked.length ? 'flex' : 'none';
+                const maxAch = Math.max(...ranked.map(r => Number(r.achievement || 0)), 1);
+                list.innerHTML = ranked.map((r, i) => {
+                    const band = empBand(r);
+                    const hasT = Number(r.target || 0) > 0;
+                    const w = hasT ? Math.min(Number(r.achievementPercent || 0), 100) : Number(r.achievement || 0) / maxAch * 100;
+                    return `<div class="ef-lbrow" style="--i:${i};" title="${esc(r.name)}${r.code ? ' (' + esc(r.code) + ')' : ''}">
+                        <span class="ef-rank ${i < 3 ? 'r' + (i + 1) : ''}">${i + 1}</span>
+                        <div class="ef-lbmain">
+                            <div class="ef-lbhead"><span class="ef-lbname">${esc(r.name)}</span>${hasT ? `<span class="ef-pct" style="background:${band.color}1a;color:${band.color};">${pctLabel(r.achievementPercent)}</span>` : `<span class="ef-lbval">${esc(scaledMoney(lakh(r.achievement), 'L'))}</span>`}</div>
+                            <div class="ef-lbmeta">
+                                ${r.code ? `<span class="ef-lbcode">${esc(r.code)}</span>` : ''}
+                                <span class="ef-lbsub">${esc(scaledMoney(lakh(r.achievement), 'L'))}${hasT ? ' of ' + esc(scaledMoney(lakh(r.target), 'L')) : ''}</span>
+                            </div>
+                            <div class="ef-lbtrack"><div class="ef-lbfill" style="--w:${Math.max(w, 2).toFixed(1)}%;background:linear-gradient(90deg,${band.light},${band.color});"></div></div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                // Distribution donut
+                const wrap = document.getElementById('empDistWrap');
+                const legend = document.getElementById('empDistLegend');
+                const attn = document.getElementById('empAttn');
+                const dist = empBands.map(b => ({ label: b.label, value: withTarget.filter(r => empBand(r) === b).length }));
+                if (!withTarget.length) {
+                    setVisible(document.querySelector('[data-empty="empDist"]'), true);
+                    wrap.style.display = 'none'; attn.style.display = 'none';
+                    destroy('empDist'); legend.innerHTML = '';
+                } else {
+                    setVisible(document.querySelector('[data-empty="empDist"]'), false);
+                    wrap.style.display = 'flex';
+                    q('distTotal').textContent = compact(withTarget.length);
+                    const maxD = Math.max(...dist.map(d => d.value), 1);
+                    legend.innerHTML = dist.map((d, i) => `<div class="ef-segrow" data-seg="${i}" style="--i:${i};">
+                        <div class="ef-segtop"><span class="ef-segname"><span class="ef-legsq" style="background:${empBands[i].color};"></span><span>${esc(d.label)}</span></span><span class="ef-segval">${d.value}<small>${(d.value / withTarget.length * 100).toFixed(0)}%</small></span></div>
+                        <div class="ef-segbar"><div style="width:${Math.max(d.value / maxD * 100, 1).toFixed(1)}%;background:${empBands[i].color};"></div></div>
+                    </div>`).join('');
+                    const highlight = idx => legend.querySelectorAll('.ef-segrow').forEach(el => el.classList.toggle('hl', Number(el.dataset.seg) === idx));
+                    doughnut('empDist', dist, highlight, empBands.map(b => b.color));
+                    charts.empDist.options.plugins.tooltip.callbacks.label = ctx => ` ${ctx.label}: ${ctx.parsed} employee${ctx.parsed === 1 ? '' : 's'}`;
+                    charts.empDist.update('none');
+                    const low = withTarget.filter(r => Number(r.achievementPercent || 0) < 60).sort((a, b) => a.achievementPercent - b.achievementPercent);
+                    attn.style.display = low.length ? 'block' : 'none';
+                    attn.innerHTML = low.length ? `<i class="ti ti-alert-triangle"></i> <b>${low.length}</b> employee${low.length > 1 ? 's are' : ' is'} below 60% of target<div class="names">${low.slice(0, 8).map(r => `<span title="${esc(pctLabel(r.achievementPercent))}">${esc(r.name)} &middot; ${esc(pctLabel(r.achievementPercent))}</span>`).join('')}${low.length > 8 ? `<span>+${low.length - 8} more</span>` : ''}</div>` : '';
                 }
+
+                renderEmpChart();
             };
+            document.querySelectorAll('[data-emp-sort]').forEach(btn => btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-emp-sort]').forEach(b => b.classList.toggle('active', b === btn));
+                empSort = btn.dataset.empSort;
+                if (empRows.length) renderEmpChart();
+            }));
             const load = async (force = false) => {
                 setStatus('Loading dashboard data...');
                 try {

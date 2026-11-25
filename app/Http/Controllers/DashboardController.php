@@ -1540,15 +1540,17 @@ class DashboardController extends Controller
             ->join('products as p', 'p.id', '=', 'od.product_id');
 
         $topProducts = (clone $base)
-            ->selectRaw("COALESCE(NULLIF(p.product_name, ''), CONCAT('Product #', od.product_id)) as label, SUM(od.line_total) as value")
-            ->groupBy('od.product_id', 'p.product_name')
+            ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
+            ->selectRaw("COALESCE(NULLIF(p.product_name, ''), CONCAT('Product #', od.product_id)) as label, COALESCE(NULLIF(p.product_code, ''), '') as code, COALESCE(NULLIF(c.category_name, ''), NULLIF(p.new_group, ''), '') as segment, SUM(od.line_total) as value, SUM(od.quantity) as qty")
+            ->groupBy('od.product_id', 'p.product_name', 'p.product_code', 'c.category_name', 'p.new_group')
             ->orderByDesc('value')
             ->limit(23)
             ->get();
 
         $slowMoving = (clone $base)
-            ->selectRaw("COALESCE(NULLIF(p.product_name, ''), CONCAT('Product #', od.product_id)) as label, SUM(od.line_total) as value")
-            ->groupBy('od.product_id', 'p.product_name')
+            ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
+            ->selectRaw("COALESCE(NULLIF(p.product_name, ''), CONCAT('Product #', od.product_id)) as label, COALESCE(NULLIF(p.product_code, ''), '') as code, COALESCE(NULLIF(c.category_name, ''), NULLIF(p.new_group, ''), '') as segment, SUM(od.line_total) as value, SUM(od.quantity) as qty")
+            ->groupBy('od.product_id', 'p.product_name', 'p.product_code', 'c.category_name', 'p.new_group')
             ->havingRaw('SUM(od.line_total) > 0')
             ->orderBy('value')
             ->limit(10)
@@ -1562,6 +1564,18 @@ class DashboardController extends Controller
             ->get();
 
         $topSkuIds = $topProducts->take(10)->pluck('label')->values();
+
+        $productSales = (float) (clone $base)->sum('od.line_total');
+        $productQty = (float) (clone $base)->sum('od.quantity');
+        $productsSold = (int) (clone $base)->distinct('od.product_id')->count('od.product_id');
+        $catalogQuery = DB::table('products')->whereNull('deleted_at');
+        if (\Schema::hasColumn('products', 'active')) {
+            $catalogQuery->where('active', 'Y');
+        }
+        $catalogProducts = (int) $catalogQuery->count();
+        if ($catalogProducts === 0) {
+            $catalogProducts = (int) DB::table('products')->whereNull('deleted_at')->count();
+        }
         $topSkuProducts = (clone $base)
             ->selectRaw('od.product_id, p.product_name')
             ->groupBy('od.product_id', 'p.product_name')
@@ -1585,6 +1599,14 @@ class DashboardController extends Controller
             'periodLabel' => $periodLabel,
             'source' => 'orders + order_details.line_total + products',
             'filter' => compact('fromdate', 'todate', 'zoneId'),
+            'kpis' => [
+                'productSales' => $productSales,
+                'totalQuantity' => $productQty,
+                'productsSold' => $productsSold,
+                'catalogProducts' => $catalogProducts,
+                'segments' => $segmentWise->count(),
+                'topSegment' => optional($segmentWise->first())->label,
+            ],
             'charts' => [
                 'topProducts' => $topProducts,
                 'slowMovingProducts' => $slowMoving,
@@ -1647,7 +1669,7 @@ class DashboardController extends Controller
             });
 
         $topDealers = $this->eloficPrimarySalesBase($fromdate, $todate, $zoneName)
-            ->selectRaw("COALESCE(NULLIF(dealer, ''), 'Unassigned') as label, SUM(net_amount) as value")
+            ->selectRaw("COALESCE(NULLIF(dealer, ''), 'Unassigned') as label, COALESCE(MAX(NULLIF(state, '')), '-') as state, COALESCE(MAX(NULLIF(city, '')), '') as city, SUM(net_amount) as value, COUNT(DISTINCT invoiceno) as orders")
             ->groupBy('label')
             ->orderByDesc('value')
             ->limit(10)
@@ -1735,6 +1757,7 @@ class DashboardController extends Controller
             return [
                 'label' => $employeeCode !== '' ? $employeeCode : ('User #' . $user->id),
                 'name' => $user->name ?: ('User #' . $user->id),
+                'code' => trim((string) ($user->employee_codes ?? '')),
                 'achievement' => $achievement,
                 'target' => $target,
                 'achievementPercent' => $target > 0 ? round(($achievement / $target) * 100, 2) : 0,
