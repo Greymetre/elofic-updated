@@ -1555,10 +1555,15 @@ class DashboardController extends Controller
         $npdSummary = ['sales' => 0, 'qty' => 0, 'skusSold' => 0, 'catalog' => 0];
         $topNpdByValue = collect();
         $topNpdByQty = collect();
+        $bottomNpdByValue = collect();
+        $bottomNpdByQty = collect();
         if ($hasNpd) {
             $npdRanking = (clone $productRanking)->whereRaw($npdCondition, [$npdCutoff]);
             $topNpdByValue = (clone $npdRanking)->orderByDesc('value')->limit(10)->get();
             $topNpdByQty = (clone $npdRanking)->orderByDesc('qty')->orderByDesc('value')->limit(10)->get();
+            // Bottom 10 = NPD products that sold something in the period, lowest first
+            $bottomNpdByValue = (clone $npdRanking)->havingRaw('SUM(od.line_total) > 0')->orderBy('value')->orderBy('qty')->limit(10)->get();
+            $bottomNpdByQty = (clone $npdRanking)->havingRaw('SUM(od.quantity) > 0')->orderBy('qty')->orderBy('value')->limit(10)->get();
 
             $npdBase = (clone $base)->whereRaw($npdCondition, [$npdCutoff]);
             $npdSummary = [
@@ -1649,6 +1654,8 @@ class DashboardController extends Controller
                 'topProductsByQty' => $topProductsByQty,
                 'topNpdByValue' => $topNpdByValue,
                 'topNpdByQty' => $topNpdByQty,
+                'bottomNpdByValue' => $bottomNpdByValue,
+                'bottomNpdByQty' => $bottomNpdByQty,
                 'slowMovingProducts' => $slowMoving,
                 'segmentWiseSales' => $segmentWise,
                 'topSkuTrend' => $topSkuTrend,

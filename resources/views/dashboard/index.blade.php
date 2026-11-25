@@ -579,14 +579,14 @@
                 </div>
                 <div class="ef-g2">
                     <div class="ef-card ef-chart ef-reveal" style="--d:.05s">
-                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#fdf2f8;color:#db2777;"><i class="ti ti-currency-rupee"></i></span><span>Top 10 NPD Sale &ndash; Value wise<small>New products ranked by order value</small></span></span><span class="ef-badge" style="background:#fdf2f8;color:#be185d;" data-badge></span></div>
-                        <div class="ef-empty" data-empty="pNpdValue">No NPD sales found for this period</div>
-                        <div class="ef-canvas tall"><canvas id="pNpdValue"></canvas></div>
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#fdf2f8;color:#db2777;"><i class="ti ti-trending-up"></i></span><span><span data-npd-title="top">Top 10 NPD Sale &ndash; Value wise</span><small data-npd-sub="top">Best selling new products for selected period &amp; zone</small></span></span><span class="ef-sortbar"><button type="button" class="ef-chip active" data-npd-chart="top" data-metric="value"><i class="ti ti-currency-rupee"></i> Value</button><button type="button" class="ef-chip" data-npd-chart="top" data-metric="qty"><i class="ti ti-packages"></i> Quantity</button></span></div>
+                        <div class="ef-empty" data-empty="pNpd_top">No NPD sales found for this period</div>
+                        <div class="ef-canvas tall"><canvas id="pNpd_top"></canvas></div>
                     </div>
                     <div class="ef-card ef-chart ef-reveal" style="--d:.12s">
-                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#ecfeff;color:#0891b2;"><i class="ti ti-packages"></i></span><span>Top 10 NPD Sale &ndash; Quantity wise<small>New products ranked by units sold</small></span></span><span class="ef-badge" style="background:#ecfeff;color:#0e7490;" data-badge></span></div>
-                        <div class="ef-empty" data-empty="pNpdQty">No NPD sales found for this period</div>
-                        <div class="ef-canvas tall"><canvas id="pNpdQty"></canvas></div>
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#fff7ed;color:#ea580c;"><i class="ti ti-trending-down"></i></span><span><span data-npd-title="bottom">Bottom 10 NPD Sale &ndash; Value wise</span><small data-npd-sub="bottom">Weakest selling new products (with at least one sale)</small></span></span><span class="ef-sortbar"><button type="button" class="ef-chip active" data-npd-chart="bottom" data-metric="value"><i class="ti ti-currency-rupee"></i> Value</button><button type="button" class="ef-chip" data-npd-chart="bottom" data-metric="qty"><i class="ti ti-packages"></i> Quantity</button></span></div>
+                        <div class="ef-empty" data-empty="pNpd_bottom">No NPD sales found for this period</div>
+                        <div class="ef-canvas tall"><canvas id="pNpd_bottom"></canvas></div>
                     </div>
                 </div>
 
@@ -1166,6 +1166,54 @@
                 }).join('');
             };
             const shortLabel = (txt, n = 24) => { txt = String(txt ?? ''); return txt.length > n ? txt.slice(0, n - 1) + '…' : txt; };
+            // Top / Bottom 10 NPD charts, each with its own Value / Quantity toggle
+            let npdData = {};
+            const npdMetric = { top: 'value', bottom: 'value' };
+            const npdMeta = {
+                top: { title: 'Top 10 NPD Sale', value: ['topNpdByValue', '#f9a8d4', '#be185d'], qty: ['topNpdByQty', '#67e8f9', '#0e7490'] },
+                bottom: { title: 'Bottom 10 NPD Sale', value: ['bottomNpdByValue', '#fdba74', '#c2410c'], qty: ['bottomNpdByQty', '#a5b4fc', '#4338ca'] }
+            };
+            const moneyScale = (max) => max >= 10000000 ? { div: 10000000, unit: 'Cr' } : max >= 100000 ? { div: 100000, unit: 'L' } : max >= 1000 ? { div: 1000, unit: 'K' } : { div: 1, unit: '' };
+            const renderNpdChart = (kind) => {
+                const metric = npdMetric[kind];
+                const byQty = metric === 'qty';
+                const [key, from, to] = npdMeta[kind][metric];
+                const rows = npdData[key] || [];
+                const id = 'pNpd_' + kind;
+                document.querySelector(`[data-npd-title="${kind}"]`).textContent = `${npdMeta[kind].title} – ${byQty ? 'Quantity' : 'Value'} wise`;
+                if (empty(id, rows, [metric])) return;
+                const sc = moneyScale(Math.max(...rows.map(r => Number(r.value || 0)), 0));
+                const scaled = v => Number((Number(v || 0) / sc.div).toFixed(2));
+                const fmt = r => byQty ? compact(r.qty) + ' units' : scaledMoney(scaled(r.value), sc.unit);
+                const cfg = withPad(scaledChartOptions(sc.unit, 'y', { font: { size: 10, weight: '600', family: 'Inter' }, color: '#475569' }), { right: 70 });
+                if (byQty) cfg.options.scales.x.ticks.callback = v => compact(v);
+                cfg.options.plugins.tooltip.callbacks = {
+                    title: items => rows[items[0]?.dataIndex]?.label || '',
+                    label: ctx => {
+                        const r = rows[ctx.dataIndex] || {};
+                        return [` Value: ${money(r.value)}`, ` Quantity: ${compact(r.qty)} units`];
+                    },
+                    afterBody: items => {
+                        const r = rows[items[0]?.dataIndex] || {};
+                        const out = [];
+                        if (r.code) out.push('Code: ' + r.code);
+                        if (r.segment) out.push('Segment: ' + r.segment);
+                        if (r.launch_date) out.push('Launched: ' + new Date(String(r.launch_date).replace(' ', 'T')).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }));
+                        return out;
+                    }
+                };
+                bar(id, rows.map(r => shortLabel(r.label)), [{
+                    label: byQty ? 'Quantity' : 'Value',
+                    data: rows.map(r => byQty ? Number(r.qty || 0) : scaled(r.value)),
+                    backgroundColor: grad(from, to, true), borderRadius: 6, borderSkipped: false, maxBarThickness: 18, categoryPercentage: .8, barPercentage: .9
+                }], Object.assign(cfg, { plugins: [endLabels(i => rows[i] ? fmt(rows[i]) : '')] }));
+            };
+            document.querySelectorAll('[data-npd-chart]').forEach(btn => btn.addEventListener('click', () => {
+                const kind = btn.dataset.npdChart;
+                document.querySelectorAll(`[data-npd-chart="${kind}"]`).forEach(b => b.classList.toggle('active', b === btn));
+                npdMetric[kind] = btn.dataset.metric;
+                renderNpdChart(kind);
+            }));
             const renderNpd = (data, totalSales, totalQty) => {
                 const k = data.kpis || {};
                 const c = data.charts || {};
@@ -1188,35 +1236,9 @@
                     q('skuBar').style.width = Math.min(pct(skus, catalog), 100) + '%';
                 }));
 
-                const npdChart = (id, rows, metric, from, to) => {
-                    if (empty(id, rows, [metric])) return;
-                    const byQty = metric === 'qty';
-                    const fmt = v => byQty ? compact(v) + ' units' : scaledMoney(lakh(v), 'L');
-                    const cfg = withPad(scaledChartOptions(byQty ? '' : 'L', 'y', { font: { size: 10, weight: '600', family: 'Inter' }, color: '#475569' }), { right: 64 });
-                    if (byQty) cfg.options.scales.x.ticks.callback = v => compact(v);
-                    cfg.options.plugins.tooltip.callbacks = {
-                        title: items => rows[items[0]?.dataIndex]?.label || '',
-                        label: ctx => {
-                            const r = rows[ctx.dataIndex] || {};
-                            return [` Value: ${money(r.value)}`, ` Quantity: ${compact(r.qty)} units`];
-                        },
-                        afterBody: items => {
-                            const r = rows[items[0]?.dataIndex] || {};
-                            const out = [];
-                            if (r.code) out.push('Code: ' + r.code);
-                            if (r.segment) out.push('Segment: ' + r.segment);
-                            if (r.launch_date) out.push('Launched: ' + new Date(String(r.launch_date).replace(' ', 'T')).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }));
-                            return out;
-                        }
-                    };
-                    bar(id, rows.map(r => shortLabel(r.label)), [{
-                        label: byQty ? 'Quantity' : 'Value',
-                        data: rows.map(r => byQty ? Number(r.qty || 0) : lakh(r.value)),
-                        backgroundColor: grad(from, to, true), borderRadius: 6, borderSkipped: false, maxBarThickness: 18, categoryPercentage: .8, barPercentage: .9
-                    }], Object.assign(cfg, { plugins: [endLabels(i => rows[i] ? fmt(byQty ? rows[i].qty : rows[i].value) : '')] }));
-                };
-                npdChart('pNpdValue', c.topNpdByValue || [], 'value', '#f9a8d4', '#be185d');
-                npdChart('pNpdQty', c.topNpdByQty || [], 'qty', '#67e8f9', '#0e7490');
+                npdData = c;
+                renderNpdChart('top');
+                renderNpdChart('bottom');
             };
             let pdTop = null;
             let pdMetric = 'value';
