@@ -1749,19 +1749,7 @@ class DashboardController extends Controller
         $zoneId = $this->eloficDashboardZoneId($request);
         $zoneName = $this->eloficDashboardZoneName($zoneId);
         $today = Carbon::today()->toDateString();
-        // Same rule as User Management: users holding a customer role (distributors created as users) are not employees
-        $customerRoleIds = (array) config('constants.customer_roles', []);
-        $users = DB::table('users')
-            ->where('active', 'Y')
-            ->when(!empty($customerRoleIds), fn ($query) => $query->whereNotIn('id', function ($sub) use ($customerRoleIds) {
-                $sub->select('model_id')
-                    ->from(config('permission.table_names.model_has_roles', 'model_has_roles'))
-                    ->where('model_type', (new \App\Models\User)->getMorphClass())
-                    ->whereIn('role_id', $customerRoleIds);
-            }))
-            ->when($zoneId, fn ($query) => $query->where('branch_id', $zoneId))
-            ->select('id', 'name', 'employee_codes')
-            ->get();
+        $users = $this->eloficEmployeeUsers($zoneId);
         $userIds = $users->pluck('id');
 
         $todayAttendance = DB::table('attendances')
@@ -1844,6 +1832,100 @@ class DashboardController extends Controller
                 'employeeTargetVsAchievement' => $employeeTargets,
                 'visits' => $visits,
             ],
+        ]);
+    }
+
+    /**
+     * Active employee users. Same rule as User Management: users holding a customer role
+     * (distributors created as users) are not employees.
+     */
+    private function eloficEmployeeUsers(?int $zoneId)
+    {
+        $customerRoleIds = (array) config('constants.customer_roles', []);
+        return DB::table('users')
+            ->where('active', 'Y')
+            ->when(!empty($customerRoleIds), fn ($query) => $query->whereNotIn('id', function ($sub) use ($customerRoleIds) {
+                $sub->select('model_id')
+                    ->from(config('permission.table_names.model_has_roles', 'model_has_roles'))
+                    ->where('model_type', (new \App\Models\User)->getMorphClass())
+                    ->whereIn('role_id', $customerRoleIds);
+            }))
+            ->when($zoneId, fn ($query) => $query->where('branch_id', $zoneId))
+            ->select('id', 'name', 'employee_codes')
+            ->get();
+    }
+
+    /**
+     * Employee-wise visits for its own date range (a single day works too).
+     * Params: fromDate, toDate (Y-m-d, default today), zoneId.
+     * Per employee and customer type: visits, unique customers, new customers (created in range by that employee).
+     */
+    public function eloficEmployeeVisits(Request $request)
+    {
+        $today = Carbon::today()->toDateString();
+        try {
+            $from = Carbon::parse($request->input('fromDate') ?: $today);
+            $to = Carbon::parse($request->input('toDate') ?: $from->toDateString());
+        } catch (\Throwable $e) {
+            $from = $to = Carbon::today();
+        }
+        if ($from->gt($to)) {
+            [$from, $to] = [$to, $from];
+        }
+        $fromdate = $from->toDateString();
+        $todate = $to->toDateString();
+        $types = ['RETAILER', 'MECHANIC', 'GARAGE', 'WORKSHOP'];
+        $label = $fromdate === $todate ? $from->format('d M Y') : $from->format('d M Y') . ' - ' . $to->format('d M Y');
+
+        $users = $this->eloficEmployeeUsers($this->eloficDashboardZoneId($request));
+        $zero = fn () => ['visits' => 0, 'unique' => 0, 'new' => 0];
+        $rows = [];
+        foreach ($users as $user) {
+            $rows[$user->id] = [
+                'id' => $user->id,
+                'name' => trim((string) $user->name) !== '' ? $user->name : ('User #' . $user->id),
+                'code' => trim((string) ($user->employee_codes ?? '')),
+                'ALL' => $zero(),
+            ];
+            foreach (array_merge($types, ['OTHER']) as $t) {
+                $rows[$user->id][$t] = $zero();
+            }
+        }
+
+        if (\Schema::hasTable('check_in') && !empty($rows)) {
+            $newCondition = 'sc.created_at BETWEEN ? AND ?';
+            if (\Schema::hasColumn('secondary_customers', 'created_by')) {
+                $newCondition .= ' AND sc.created_by = ci.user_id';
+            }
+            $typeExpr = "CASE WHEN UPPER(sc.type) IN ('" . implode("','", $types) . "') THEN UPPER(sc.type) ELSE 'OTHER' END";
+            $stats = DB::table('check_in as ci')
+                ->join('secondary_customers as sc', 'sc.id', '=', 'ci.entity_id')
+                ->where('ci.entity_type', 'secondary_customer')
+                ->whereBetween('ci.checkin_date', [$fromdate, $todate])
+                ->whereIn('ci.user_id', array_keys($rows))
+                ->selectRaw("ci.user_id, {$typeExpr} as ctype, COUNT(*) as visits, COUNT(DISTINCT ci.entity_id) as uniq, COUNT(DISTINCT CASE WHEN {$newCondition} THEN ci.entity_id END) as new_cust", [$fromdate . ' 00:00:00', $todate . ' 23:59:59'])
+                ->groupBy('ci.user_id', 'ctype')
+                ->get();
+            foreach ($stats as $r) {
+                if (!isset($rows[$r->user_id])) {
+                    continue;
+                }
+                $vals = ['visits' => (int) $r->visits, 'unique' => (int) $r->uniq, 'new' => (int) $r->new_cust];
+                $rows[$r->user_id][$r->ctype] = $vals;
+                // customer types are disjoint, so distinct counts can be summed for ALL
+                foreach ($vals as $k => $v) {
+                    $rows[$r->user_id]['ALL'][$k] += $v;
+                }
+            }
+        }
+
+        $rows = collect($rows)->sortByDesc(fn ($r) => $r['ALL']['visits'])->values();
+
+        return response()->json([
+            'periodLabel' => $label,
+            'filter' => compact('fromdate', 'todate'),
+            'types' => $types,
+            'employees' => $rows,
         ]);
     }
 

@@ -272,6 +272,17 @@
         .ef-vstat em { margin-left: auto; font-style: normal; font-size: 10px; font-weight: 700; color: var(--tone); background: var(--tone-bg); padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
         .ef-vstat em:empty { display: none; }
         @media (max-width: 900px) { .ef-visit-stats { grid-template-columns: 1fr; } }
+        .ef-evctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; padding: 8px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; }
+        .ef-evctl .lbl { font-size: 10px; font-weight: 700; color: var(--txt3); text-transform: uppercase; letter-spacing: .04em; }
+        .ef-evctl .grow { flex: 1; }
+        .ef-evctl .ef-date.on { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(79,70,229,.12); }
+        .ef-evscroll { max-height: 560px; overflow-y: auto; padding-right: 4px; }
+        .ef-evinner { position: relative; height: 240px; }
+        #evCard { position: relative; }
+        #evCard.ev-busy .ef-evscroll { opacity: .45; transition: opacity .2s; }
+        .ef-evidle { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: #fffbeb; border: 1px solid #fde68a; font-size: 11px; color: #92400e; font-weight: 500; display: none; }
+        .ef-evidle .names { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+        .ef-evidle .names span { background: #fff; border: 1px solid #fde68a; border-radius: 20px; padding: 1px 8px; font-size: 10px; font-weight: 600; }
         .ef-stchips { display: flex; gap: 6px; flex-wrap: wrap; margin: -4px 0 10px; }
         .ef-stchips .ef-st { padding: 3px 9px 3px 7px; }
         .ef-stchips .ef-st b { font-weight: 700; margin-left: 2px; }
@@ -285,7 +296,7 @@
         @media (prefers-reduced-motion: reduce) { .ef-dashboard *, .ef-dashboard *::before, .ef-dashboard *::after { animation: none !important; transition: none !important; } }
     </style>
 
-    <div class="ef-dashboard" data-secondary-url="{{ route('dashboard.secondary-sales') }}" data-product-url="{{ route('dashboard.products') }}" data-primary-url="{{ route('dashboard.primary-sales') }}" data-employees-url="{{ route('dashboard.employees') }}">
+    <div class="ef-dashboard" data-secondary-url="{{ route('dashboard.secondary-sales') }}" data-product-url="{{ route('dashboard.products') }}" data-primary-url="{{ route('dashboard.primary-sales') }}" data-employees-url="{{ route('dashboard.employees') }}" data-emp-visits-url="{{ route('dashboard.employee-visits') }}">
         <div class="ef-loadbar"></div>
         <div class="ef-fbar">
             <span class="ef-label">Period</span>
@@ -718,6 +729,45 @@
                     <div class="ef-note" style="margin-top:8px;"><i class="ti ti-info-circle"></i> New customer = customer created in the selected period by the same employee who visited.</div>
                 </div>
 
+                <div class="ef-card ef-chart ef-reveal" id="evCard" style="--d:.08s;margin-bottom:12px;">
+                    <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#ecfeff;color:#0891b2;"><i class="ti ti-users-group"></i></span><span>Employee-wise Visits<small data-ev-sub>Visits by each employee</small></span></span>
+                        <span class="ef-sortbar" style="flex-wrap:wrap;">
+                            <button type="button" class="ef-chip active" data-ev-type="ALL">All</button>
+                            <button type="button" class="ef-chip" data-ev-type="RETAILER">Retailer</button>
+                            <button type="button" class="ef-chip" data-ev-type="MECHANIC">Mechanic</button>
+                            <button type="button" class="ef-chip" data-ev-type="GARAGE">Garage</button>
+                            <button type="button" class="ef-chip" data-ev-type="WORKSHOP">Workshop</button>
+                        </span>
+                    </div>
+                    <div class="ef-evctl">
+                        <span class="lbl"><i class="ti ti-calendar"></i> Date</span>
+                        <span class="ef-sortbar">
+                            <button type="button" class="ef-chip active" data-ev-range="today">Today</button>
+                            <button type="button" class="ef-chip" data-ev-range="yesterday">Yesterday</button>
+                            <button type="button" class="ef-chip" data-ev-range="period">Selected period</button>
+                        </span>
+                        <input type="date" id="evFrom" class="ef-date" title="From date" max="{{ now()->format('Y-m-d') }}" value="{{ now()->format('Y-m-d') }}">
+                        <span style="font-size:11px;color:var(--txt3);">to</span>
+                        <input type="date" id="evTo" class="ef-date" title="To date (keep same as From for a single day)" max="{{ now()->format('Y-m-d') }}" value="{{ now()->format('Y-m-d') }}">
+                        <span class="grow"></span>
+                        <span class="lbl">Sort</span>
+                        <span class="ef-sortbar">
+                            <button type="button" class="ef-chip active" data-ev-sort="visits">Visits</button>
+                            <button type="button" class="ef-chip" data-ev-sort="new">New customers</button>
+                            <button type="button" class="ef-chip" data-ev-sort="name">A - Z</button>
+                        </span>
+                    </div>
+                    <div class="ef-visit-stats">
+                        <div class="ef-vstat" style="--tone:#0891b2;--tone-bg:#ecfeff;"><span class="ef-kicon"><i class="ti ti-user-check"></i></span><div><b data-ev="active">-</b><span>Employees on visits</span></div><em data-ev="activeShare"></em></div>
+                        <div class="ef-vstat" style="--tone:#4f46e5;--tone-bg:#eef2ff;"><span class="ef-kicon"><i class="ti ti-map-pin-check"></i></span><div><b data-ev="visits">-</b><span>Total Visits</span></div><em data-ev="avg"></em></div>
+                        <div class="ef-vstat" style="--tone:#db2777;--tone-bg:#fdf2f8;"><span class="ef-kicon"><i class="ti ti-user-plus"></i></span><div><b data-ev="new">-</b><span>New Customers Visited</span></div><em data-ev="newShare"></em></div>
+                    </div>
+                    <div class="ef-legend"><span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(90deg,#c7d2fe,#4f46e5);"></span>Total visits</span><span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(90deg,#a5f3fc,#0891b2);"></span>Unique customers visited</span><span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(90deg,#fbcfe8,#db2777);"></span>Unique visits (new customers)</span></div>
+                    <div class="ef-empty" data-empty="empVisitsEmp">No visits found for this date</div>
+                    <div class="ef-evscroll"><div class="ef-evinner"><canvas id="empVisitsEmp"></canvas></div></div>
+                    <div class="ef-evidle" id="evIdle"></div>
+                </div>
+
                 <div class="ef-slabel">Performance</div>
                 <div class="ef-g2">
                     <div class="ef-card ef-chart ef-reveal" style="--d:.05s">
@@ -758,7 +808,7 @@
     <script>
         (() => {
             const root = document.querySelector('.ef-dashboard');
-            const urls = { secondary: root.dataset.secondaryUrl, product: root.dataset.productUrl, primary: root.dataset.primaryUrl, employees: root.dataset.employeesUrl };
+            const urls = { secondary: root.dataset.secondaryUrl, product: root.dataset.productUrl, primary: root.dataset.primaryUrl, employees: root.dataset.employeesUrl, empVisits: root.dataset.empVisitsUrl };
             const charts = {};
             const colors = ['#3b82f6','#7c3aed','#16a34a','#ea580c','#d97706','#f43f5e','#06b6d4','#84cc16','#a855f7','#64748b'];
             const state = { filterType: 'MTD', fromDate: document.getElementById('efFrom').value, toDate: document.getElementById('efTo').value, zoneId: document.getElementById('efZone').value, activeTab: 'secondary', loaded: { secondary: false, product: false, primary: false, employees: false } };
@@ -1568,6 +1618,119 @@
                 visitType = btn.dataset.visitType;
                 if (visitData) renderVisits();
             }));
+            // ---- Employee-wise visits (own date filter, single day allowed) ----
+            const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const evFrom = document.getElementById('evFrom');
+            const evTo = document.getElementById('evTo');
+            const ev = { mode: 'today', from: ymd(new Date()), to: ymd(new Date()), type: 'ALL', sort: 'visits', data: null, period: null, seq: 0 };
+            const setEvRange = (mode) => {
+                const d = new Date();
+                if (mode === 'today') { ev.from = ev.to = ymd(d); }
+                else if (mode === 'yesterday') { d.setDate(d.getDate() - 1); ev.from = ev.to = ymd(d); }
+                else if (mode === 'period' && ev.period) { ev.from = ev.period.from; ev.to = ev.period.to; }
+                ev.mode = mode;
+                evFrom.value = ev.from;
+                evTo.value = ev.to;
+                document.querySelectorAll('[data-ev-range]').forEach(b => b.classList.toggle('active', b.dataset.evRange === mode));
+                [evFrom, evTo].forEach(el => el.classList.toggle('on', mode === 'custom'));
+            };
+            const renderEmpVisits = () => {
+                const d = ev.data || {};
+                const zero = { visits: 0, unique: 0, new: 0 };
+                const all = (d.employees || []).map(e => Object.assign({ name: e.name, code: e.code }, e[ev.type] || zero));
+                const byName = (a, b) => String(a.name).localeCompare(String(b.name), undefined, { sensitivity: 'base', numeric: true });
+                const sorters = {
+                    visits: (a, b) => b.visits - a.visits || b.unique - a.unique || byName(a, b),
+                    new: (a, b) => b.new - a.new || b.visits - a.visits || byName(a, b),
+                    name: byName
+                };
+                const active = all.filter(r => r.visits > 0).sort(sorters[ev.sort]);
+                const idle = all.filter(r => r.visits === 0).sort(byName);
+                const sum = key => active.reduce((t, r) => t + Number(r[key] || 0), 0);
+                const visits = sum('visits'), uniq = sum('unique'), fresh = sum('new');
+                const q = key => document.querySelector(`[data-ev="${key}"]`);
+
+                document.querySelector('[data-ev-sub]').textContent = `${visitTypeLabel[ev.type]} · ${d.periodLabel || '-'}`;
+                q('active').textContent = all.length ? `${active.length} / ${all.length}` : '-';
+                q('activeShare').textContent = all.length ? (active.length / all.length * 100).toFixed(0) + '% of team' : '';
+                countUp(q('visits'), visits, compact);
+                q('avg').textContent = active.length ? (visits / active.length).toFixed(1) + ' per employee' : '';
+                countUp(q('new'), fresh, compact);
+                q('newShare').textContent = uniq ? (fresh / uniq * 100).toFixed(1) + '% of visited' : '';
+
+                const idleBox = document.getElementById('evIdle');
+                idleBox.style.display = idle.length && all.length ? 'block' : 'none';
+                idleBox.innerHTML = idle.length ? `<i class="ti ti-alert-triangle"></i> <b>${idle.length}</b> employee${idle.length > 1 ? 's have' : ' has'} no ${ev.type === 'ALL' ? '' : esc(visitTypeLabel[ev.type].toLowerCase()) + ' '}visits on ${esc(d.periodLabel || 'this date')}<div class="names">${idle.slice(0, 20).map(r => `<span title="${esc(r.code)}">${esc(r.name)}</span>`).join('')}${idle.length > 20 ? `<span>+${idle.length - 20} more</span>` : ''}</div>` : '';
+
+                const emptyEl = document.querySelector('[data-empty="empVisitsEmp"]');
+                emptyEl.textContent = d.error ? 'Could not load visits (' + d.error + ')' : `No visits found for ${d.periodLabel || 'this date'}`;
+                if (empty('empVisitsEmp', active, ['visits'])) return;
+                document.querySelector('.ef-evinner').style.height = Math.max(200, active.length * 34 + 48) + 'px';
+                const thin = { borderRadius: 4, borderSkipped: false, barPercentage: .92, categoryPercentage: .78, maxBarThickness: 12 };
+                bar('empVisitsEmp', active.map(r => shortLabel(r.name, 22)), [
+                    Object.assign({ label: 'Total visits', data: active.map(r => r.visits), backgroundColor: grad('#c7d2fe', '#4f46e5', true) }, thin),
+                    Object.assign({ label: 'Unique customers visited', data: active.map(r => r.unique), backgroundColor: grad('#a5f3fc', '#0891b2', true) }, thin),
+                    Object.assign({ label: 'Unique visits (new customers)', data: active.map(r => r.new), backgroundColor: grad('#fbcfe8', '#db2777', true) }, thin)
+                ], {
+                    indexAxis: 'y',
+                    options: {
+                        animation: reduceMotion ? false : { duration: 700, easing: 'easeOutQuart', delay: c => (c.type === 'data' && c.mode === 'default') ? Math.min(c.dataIndex * 30, 600) + c.datasetIndex * 90 : 0 },
+                        interaction: { mode: 'index', intersect: false, axis: 'y' },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: {
+                                title: items => { const r = active[items[0]?.dataIndex]; return r ? r.name + (r.code ? ' (' + r.code + ')' : '') : ''; },
+                                label: c => ` ${c.dataset.label}: ${compact(c.parsed.x)}`,
+                                afterBody: items => { const r = active[items[0]?.dataIndex]; return r && r.unique ? `${(r.visits / r.unique).toFixed(1)} visits / customer` : ''; }
+                            } }
+                        },
+                        scales: {
+                            x: { beginAtZero: true, position: 'top', ticks: { font: { size: 9, family: 'Inter' }, color: '#94a3b8', precision: 0, callback: v => compact(v) }, grid: { color: 'rgba(0,0,0,.04)' }, border: { display: false } },
+                            y: { ticks: { font: { size: 10, family: 'Inter', weight: '600' }, color: '#475569', autoSkip: false }, grid: { display: false }, border: { display: false } }
+                        }
+                    }
+                });
+            };
+            const loadEmpVisits = async () => {
+                const seq = ++ev.seq;
+                const query = new URLSearchParams({ fromDate: ev.from, toDate: ev.to });
+                if (state.zoneId) query.set('zoneId', state.zoneId);
+                const card = document.getElementById('evCard');
+                card.classList.add('ev-busy');
+                try {
+                    const res = await fetch(urls.empVisits + '?' + query.toString(), { headers: { 'Accept': 'application/json' } });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const data = await res.json();
+                    if (seq !== ev.seq) return;
+                    ev.data = data;
+                } catch (e) {
+                    if (seq !== ev.seq) return;
+                    ev.data = { employees: [], error: e.message || 'request failed' };
+                } finally {
+                    if (seq === ev.seq) card.classList.remove('ev-busy');
+                }
+                renderEmpVisits();
+            };
+            document.querySelectorAll('[data-ev-range]').forEach(btn => btn.addEventListener('click', () => { setEvRange(btn.dataset.evRange); loadEmpVisits(); }));
+            [evFrom, evTo].forEach(el => el.addEventListener('change', () => {
+                if (!evFrom.value || !evTo.value) return;
+                if (el === evFrom && evFrom.value > evTo.value) evTo.value = evFrom.value; // picking one day = from & to same
+                if (el === evTo && evTo.value < evFrom.value) evFrom.value = evTo.value;
+                ev.from = evFrom.value;
+                ev.to = evTo.value;
+                setEvRange('custom');
+                loadEmpVisits();
+            }));
+            document.querySelectorAll('[data-ev-type]').forEach(btn => btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-ev-type]').forEach(b => b.classList.toggle('active', b === btn));
+                ev.type = btn.dataset.evType;
+                if (ev.data) renderEmpVisits();
+            }));
+            document.querySelectorAll('[data-ev-sort]').forEach(btn => btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-ev-sort]').forEach(b => b.classList.toggle('active', b === btn));
+                ev.sort = btn.dataset.evSort;
+                if (ev.data) renderEmpVisits();
+            }));
             const renderEmployees = (data) => {
                 updateBadges(data.periodLabel);
                 const k = data.kpis || {};
@@ -1655,6 +1818,11 @@
                 renderEmpChart();
                 visitData = (data.charts || {}).visits || null;
                 renderVisits();
+                // Employee-wise visits: keeps its own date, follows zone; "Selected period" tracks the top filter
+                const f = data.filter || {};
+                if (f.fromdate && f.todate) ev.period = { from: f.fromdate, to: f.todate };
+                if (ev.mode === 'period') setEvRange('period');
+                loadEmpVisits();
             };
             document.querySelectorAll('[data-emp-sort]').forEach(btn => btn.addEventListener('click', () => {
                 document.querySelectorAll('[data-emp-sort]').forEach(b => b.classList.toggle('active', b === btn));
