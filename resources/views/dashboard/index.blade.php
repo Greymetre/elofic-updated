@@ -276,8 +276,10 @@
         .ef-evctl .lbl { font-size: 10px; font-weight: 700; color: var(--txt3); text-transform: uppercase; letter-spacing: .04em; }
         .ef-evctl .grow { flex: 1; }
         .ef-evctl .ef-date.on { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(79,70,229,.12); }
-        .ef-evscroll { max-height: 560px; overflow-y: auto; padding-right: 4px; }
-        .ef-evinner { position: relative; height: 240px; }
+        .ef-evscroll { overflow-x: auto; overflow-y: hidden; padding-bottom: 6px; scrollbar-width: thin; }
+        .ef-evscroll::-webkit-scrollbar { height: 8px; }
+        .ef-evscroll::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 8px; }
+        .ef-evinner { position: relative; height: 340px; min-width: 100%; }
         #evCard { position: relative; }
         #evCard.ev-busy .ef-evscroll { opacity: .45; transition: opacity .2s; }
         .ef-evidle { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: #fffbeb; border: 1px solid #fde68a; font-size: 11px; color: #92400e; font-weight: 500; display: none; }
@@ -762,7 +764,7 @@
                         <div class="ef-vstat" style="--tone:#4f46e5;--tone-bg:#eef2ff;"><span class="ef-kicon"><i class="ti ti-map-pin-check"></i></span><div><b data-ev="visits">-</b><span>Total Visits</span></div><em data-ev="avg"></em></div>
                         <div class="ef-vstat" style="--tone:#db2777;--tone-bg:#fdf2f8;"><span class="ef-kicon"><i class="ti ti-user-plus"></i></span><div><b data-ev="new">-</b><span>New Customers Visited</span></div><em data-ev="newShare"></em></div>
                     </div>
-                    <div class="ef-legend"><span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(90deg,#c7d2fe,#4f46e5);"></span>Total visits</span><span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(90deg,#a5f3fc,#0891b2);"></span>Unique customers visited</span><span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(90deg,#fbcfe8,#db2777);"></span>Unique visits (new customers)</span></div>
+                    <div class="ef-legend"><span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(#a5b4fc,#4f46e5);"></span>Total visits</span><span class="ef-legitem"><span class="ef-legsq" style="background:#0891b2;border-radius:50%;"></span>Unique customers visited</span><span class="ef-legitem"><span class="ef-legsq" style="background:#db2777;border-radius:50%;"></span>Unique visits (new customers added)</span><span class="ef-legitem" data-ev-scrollhint style="margin-left:auto;color:var(--txt3);"><i class="ti ti-arrows-horizontal"></i> Scroll sideways to see everyone</span></div>
                     <div class="ef-empty" data-empty="empVisitsEmp">No visits found for this date</div>
                     <div class="ef-evscroll"><div class="ef-evinner"><canvas id="empVisitsEmp"></canvas></div></div>
                     <div class="ef-evidle" id="evIdle"></div>
@@ -1665,28 +1667,40 @@
                 const emptyEl = document.querySelector('[data-empty="empVisitsEmp"]');
                 emptyEl.textContent = d.error ? 'Could not load visits (' + d.error + ')' : `No visits found for ${d.periodLabel || 'this date'}`;
                 if (empty('empVisitsEmp', active, ['visits'])) return;
-                document.querySelector('.ef-evinner').style.height = Math.max(200, active.length * 34 + 48) + 'px';
-                const thin = { borderRadius: 4, borderSkipped: false, barPercentage: .92, categoryPercentage: .78, maxBarThickness: 12 };
-                bar('empVisitsEmp', active.map(r => shortLabel(r.name, 22)), [
-                    Object.assign({ label: 'Total visits', data: active.map(r => r.visits), backgroundColor: grad('#c7d2fe', '#4f46e5', true) }, thin),
-                    Object.assign({ label: 'Unique customers visited', data: active.map(r => r.unique), backgroundColor: grad('#a5f3fc', '#0891b2', true) }, thin),
-                    Object.assign({ label: 'Unique visits (new customers)', data: active.map(r => r.new), backgroundColor: grad('#fbcfe8', '#db2777', true) }, thin)
+                // Vertical mixed chart (same look as Total Visits Done), one slot per employee, scrolls sideways
+                const slot = 72;
+                const scroller = document.querySelector('.ef-evscroll');
+                const inner = document.querySelector('.ef-evinner');
+                inner.style.height = '340px';
+                inner.style.width = Math.max(scroller.clientWidth || 0, active.length * slot + 60) + 'px';
+                scroller.scrollLeft = 0;
+                const hint = document.querySelector('[data-ev-scrollhint]');
+                if (hint) hint.style.display = active.length * slot + 60 > (scroller.clientWidth || 0) ? '' : 'none';
+                const nameLines = n => { const w = String(n || '').trim().split(/\s+/); return w.length > 1 ? [shortLabel(w[0], 12), shortLabel(w.slice(1).join(' '), 12)] : [shortLabel(w[0], 12)]; };
+                const many = active.length > 25;
+                bar('empVisitsEmp', active.map(r => nameLines(r.name)), [
+                    { type: 'line', label: 'Unique visits (new customers)', data: active.map(r => r.new), borderColor: '#db2777', backgroundColor: '#db2777', borderWidth: 2.5, tension: .35, pointRadius: 4, pointHoverRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 2, order: 0 },
+                    { type: 'line', label: 'Unique customers visited', data: active.map(r => r.unique), borderColor: '#0891b2', backgroundColor: '#0891b2', borderWidth: 2, borderDash: [5, 4], tension: .35, pointRadius: many ? 2 : 3, pointHoverRadius: 5, pointBackgroundColor: '#fff', pointBorderWidth: 2, order: 1 },
+                    { label: 'Total visits', data: active.map(r => r.visits), backgroundColor: grad('#c7d2fe', '#4f46e5'), borderRadius: 5, borderSkipped: false, maxBarThickness: 34, order: 2 }
                 ], {
-                    indexAxis: 'y',
                     options: {
-                        animation: reduceMotion ? false : { duration: 700, easing: 'easeOutQuart', delay: c => (c.type === 'data' && c.mode === 'default') ? Math.min(c.dataIndex * 30, 600) + c.datasetIndex * 90 : 0 },
-                        interaction: { mode: 'index', intersect: false, axis: 'y' },
+                        layout: { padding: { top: 8 } },
+                        animation: reduceMotion ? false : { duration: 800, easing: 'easeOutQuart', delay: c => (c.type === 'data' && c.mode === 'default') ? Math.min(c.dataIndex * 30, 700) + c.datasetIndex * 120 : 0 },
                         plugins: {
                             legend: { display: false },
                             tooltip: { callbacks: {
                                 title: items => { const r = active[items[0]?.dataIndex]; return r ? r.name + (r.code ? ' (' + r.code + ')' : '') : ''; },
-                                label: c => ` ${c.dataset.label}: ${compact(c.parsed.x)}`,
-                                afterBody: items => { const r = active[items[0]?.dataIndex]; return r && r.unique ? `${(r.visits / r.unique).toFixed(1)} visits / customer` : ''; }
+                                label: c => ` ${c.dataset.label}: ${compact(c.parsed.y)}`,
+                                afterBody: items => {
+                                    const r = active[items[0]?.dataIndex];
+                                    if (!r || !r.unique) return '';
+                                    return [`New customers: ${(r.new / r.unique * 100).toFixed(0)}% of visited`, `${(r.visits / r.unique).toFixed(1)} visits / customer`];
+                                }
                             } }
                         },
                         scales: {
-                            x: { beginAtZero: true, position: 'top', ticks: { font: { size: 9, family: 'Inter' }, color: '#94a3b8', precision: 0, callback: v => compact(v) }, grid: { color: 'rgba(0,0,0,.04)' }, border: { display: false } },
-                            y: { ticks: { font: { size: 10, family: 'Inter', weight: '600' }, color: '#475569', autoSkip: false }, grid: { display: false }, border: { display: false } }
+                            x: { ticks: { font: { size: 9, family: 'Inter', weight: '600' }, color: '#64748b', autoSkip: false, maxRotation: 0 }, grid: { display: false }, border: { display: false } },
+                            y: { beginAtZero: true, ticks: { font: { size: 9, family: 'Inter' }, color: '#94a3b8', precision: 0, callback: val => compact(val) }, grid: { color: 'rgba(0,0,0,.04)' }, border: { display: false } }
                         }
                     }
                 });
