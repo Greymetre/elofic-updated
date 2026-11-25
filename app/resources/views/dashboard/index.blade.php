@@ -546,7 +546,7 @@
                 <div class="ef-slabel">Product Performance</div>
                 <div class="ef-g2">
                     <div class="ef-card ef-chart ef-reveal" style="--d:.05s">
-                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#f5f3ff;color:#7c3aed;"><i class="ti ti-rocket"></i></span><span>Top products<small>Best sellers by order value, with segment &amp; units</small></span></span><span class="ef-badge purple" data-badge></span></div>
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#f5f3ff;color:#7c3aed;"><i class="ti ti-rocket"></i></span><span>Top products<small data-pd-topsub>Top 23 by order value, with segment &amp; units</small></span></span><span class="ef-sortbar"><button type="button" class="ef-chip active" data-pd-metric="value"><i class="ti ti-currency-rupee"></i> Value</button><button type="button" class="ef-chip" data-pd-metric="qty"><i class="ti ti-packages"></i> Quantity</button></span></div>
                         <div class="ef-empty" data-empty="pTop">No product sales found for this period</div>
                         <div class="ef-lb purple scroll" id="pTop"></div>
                     </div>
@@ -1086,34 +1086,52 @@
                 requestAnimationFrame(() => requestAnimationFrame(() => { el.style.strokeDashoffset = circ * (1 - Math.min(Math.max(pct, 0), 100) / 100); }));
             };
             // Ranked product list (top sellers / slow movers)
-            const renderProductList = (rows, id, segColor, slow = false) => {
+            const renderProductList = (rows, id, segColor, slow = false, metric = 'value') => {
                 const list = document.getElementById(id);
                 const show = hasValues(rows);
                 setVisible(document.querySelector(`[data-empty="${id}"]`), !show);
                 list.style.display = show ? 'flex' : 'none';
                 if (!show) { list.innerHTML = ''; return; }
-                const max = Math.max(...rows.map(r => Number(r.value || 0)), 1);
-                const total = rows.reduce((s, r) => s + Number(r.value || 0), 0);
+                const byQty = metric === 'qty';
+                const m = r => Number((byQty ? r.qty : r.value) || 0);
+                const max = Math.max(...rows.map(m), 1);
+                const total = rows.reduce((s, r) => s + m(r), 0);
                 list.innerHTML = rows.map((r, i) => {
                     const value = Number(r.value || 0);
                     const qty = Number(r.qty || 0);
+                    const mv = m(r);
                     const t = r.segment ? segColor(r.segment) : null;
                     const rank = slow ? `<span class="ef-rank"><i class="ti ti-arrow-down-right" style="font-size:13px;"></i></span>` : `<span class="ef-rank ${i < 3 ? 'r' + (i + 1) : ''}">${i + 1}</span>`;
                     return `<div class="ef-lbrow" style="--i:${Math.min(i, 14)};" title="${esc(r.label)}${r.code ? ' (' + esc(r.code) + ')' : ''}">
                         ${rank}
                         <div class="ef-lbmain">
-                            <div class="ef-lbhead"><span class="ef-lbname">${esc(r.label)}</span><span class="ef-lbval">${esc(money(value).replace('Rs. ', '₹'))}</span></div>
+                            <div class="ef-lbhead"><span class="ef-lbname">${esc(r.label)}</span><span class="ef-lbval">${byQty ? compact(qty) + ' units' : esc(money(value).replace('Rs. ', '₹'))}</span></div>
                             <div class="ef-lbmeta">
                                 ${r.code ? `<span class="ef-lbcode">${esc(r.code)}</span>` : ''}
                                 ${t ? `<span class="ef-st" style="--st-bg:${t}1a;--st-fg:${t};"><i class="ti ti-category"></i>${esc(r.segment)}</span>` : ''}
-                                ${qty ? `<span>${compact(qty)} units</span>` : ''}
-                                <span class="ef-lbshare">${total ? (value / total * 100).toFixed(1) : '0.0'}%</span>
+                                ${byQty ? `<span>${esc(money(value).replace('Rs. ', '₹'))}</span>` : (qty ? `<span>${compact(qty)} units</span>` : '')}
+                                <span class="ef-lbshare" title="Share of ${byQty ? 'units' : 'value'} in this list">${total ? (mv / total * 100).toFixed(1) : '0.0'}%</span>
                             </div>
-                            <div class="ef-lbtrack"><div class="ef-lbfill" style="--w:${Math.max(value / max * 100, 2).toFixed(1)}%;"></div></div>
+                            <div class="ef-lbtrack"><div class="ef-lbfill" style="--w:${Math.max(mv / max * 100, 2).toFixed(1)}%;"></div></div>
                         </div>
                     </div>`;
                 }).join('');
             };
+            let pdTop = null;
+            let pdMetric = 'value';
+            const renderTopProducts = () => {
+                if (!pdTop) return;
+                const c = pdTop.data.charts;
+                const rows = pdMetric === 'qty' ? (c.topProductsByQty || (c.topProducts || []).slice().sort((a, b) => Number(b.qty || 0) - Number(a.qty || 0))) : (c.topProducts || []);
+                document.querySelector('[data-pd-topsub]').textContent = pdMetric === 'qty' ? 'Top 23 by units sold, with segment & value' : 'Top 23 by order value, with segment & units';
+                renderProductList(rows, 'pTop', pdTop.segColor, false, pdMetric);
+                document.getElementById('pTop').scrollTop = 0;
+            };
+            document.querySelectorAll('[data-pd-metric]').forEach(btn => btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-pd-metric]').forEach(b => b.classList.toggle('active', b === btn));
+                pdMetric = btn.dataset.pdMetric;
+                renderTopProducts();
+            }));
             const renderProduct = (data) => {
                 updateBadges(data.periodLabel);
                 const k = data.kpis || {};
@@ -1145,7 +1163,8 @@
                 const segIndex = {};
                 seg.forEach((r, i) => { segIndex[r.label] = i; });
                 const segColor = (name) => segIndex[name] !== undefined ? colors[segIndex[name] % colors.length] : '#64748b';
-                renderProductList(data.charts.topProducts || [], 'pTop', segColor);
+                pdTop = { data, segColor };
+                renderTopProducts();
                 renderProductList(data.charts.slowMovingProducts || [], 'pSlow', segColor, true);
 
                 const legend = document.getElementById('pSegmentLegend');

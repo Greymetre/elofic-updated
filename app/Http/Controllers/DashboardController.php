@@ -1539,10 +1539,18 @@ class DashboardController extends Controller
         $base = $this->eloficOrderDetailsBase($fromdate, $todate, $zoneId)
             ->join('products as p', 'p.id', '=', 'od.product_id');
 
-        $topProducts = (clone $base)
+        $productRanking = (clone $base)
             ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
             ->selectRaw("COALESCE(NULLIF(p.product_name, ''), CONCAT('Product #', od.product_id)) as label, COALESCE(NULLIF(p.product_code, ''), '') as code, COALESCE(NULLIF(c.category_name, ''), NULLIF(p.new_group, ''), '') as segment, SUM(od.line_total) as value, SUM(od.quantity) as qty")
-            ->groupBy('od.product_id', 'p.product_name', 'p.product_code', 'c.category_name', 'p.new_group')
+            ->groupBy('od.product_id', 'p.product_name', 'p.product_code', 'c.category_name', 'p.new_group');
+
+        $topProducts = (clone $productRanking)
+            ->orderByDesc('value')
+            ->limit(23)
+            ->get();
+
+        $topProductsByQty = (clone $productRanking)
+            ->orderByDesc('qty')
             ->orderByDesc('value')
             ->limit(23)
             ->get();
@@ -1609,6 +1617,7 @@ class DashboardController extends Controller
             ],
             'charts' => [
                 'topProducts' => $topProducts,
+                'topProductsByQty' => $topProductsByQty,
                 'slowMovingProducts' => $slowMoving,
                 'segmentWiseSales' => $segmentWise,
                 'topSkuTrend' => $topSkuTrend,
