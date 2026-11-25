@@ -1823,9 +1823,11 @@ class DashboardController extends Controller
             ->values()
             ->take(60);
 
+        $visits = $this->eloficVisitStats($fromdate, $todate, $userIds);
+
         return response()->json([
             'periodLabel' => $periodLabel,
-            'source' => 'users + attendances + orders/order_details + primary_sales',
+            'source' => 'users + attendances + orders/order_details + primary_sales + check_in',
             'filter' => compact('fromdate', 'todate', 'zoneId'),
             'kpis' => [
                 'totalEmployees' => $users->count(),
@@ -1840,8 +1842,100 @@ class DashboardController extends Controller
             ],
             'charts' => [
                 'employeeTargetVsAchievement' => $employeeTargets,
+                'visits' => $visits,
             ],
         ]);
+    }
+
+    /**
+     * Secondary-customer visits (check_in) by employees, split by customer type.
+     * - visits:    every check-in
+     * - unique:    distinct customers visited
+     * - new:       distinct customers visited that were added in this period by the same employee
+     * Daily buckets for periods up to 62 days, monthly beyond that.
+     */
+    private function eloficVisitStats(string $fromdate, string $todate, $userIds): array
+    {
+        $types = ['RETAILER', 'MECHANIC', 'GARAGE', 'WORKSHOP'];
+        $daily = Carbon::parse($fromdate)->diffInDays(Carbon::parse($todate)) <= 62;
+
+        $buckets = [];
+        if ($daily) {
+            for ($d = Carbon::parse($fromdate); $d->lte(Carbon::parse($todate)); $d->addDay()) {
+                $buckets[$d->format('Y-m-d')] = $d->format('d M');
+            }
+        } else {
+            for ($d = Carbon::parse($fromdate)->startOfMonth(); $d->lte(Carbon::parse($todate)); $d->addMonth()) {
+                $buckets[$d->format('Y-m')] = $d->format('M y');
+            }
+        }
+
+        $empty = ['granularity' => $daily ? 'day' : 'month', 'types' => $types, 'buckets' => [], 'totals' => []];
+        if (!\Schema::hasTable('check_in') || collect($userIds)->isEmpty()) {
+            return $empty;
+        }
+
+        $newCondition = 'sc.created_at BETWEEN ? AND ?';
+        $newBindings = [$fromdate . ' 00:00:00', $todate . ' 23:59:59'];
+        if (\Schema::hasColumn('secondary_customers', 'created_by')) {
+            $newCondition .= ' AND sc.created_by = ci.user_id';
+        }
+
+        $base = DB::table('check_in as ci')
+            ->join('secondary_customers as sc', 'sc.id', '=', 'ci.entity_id')
+            ->where('ci.entity_type', 'secondary_customer')
+            ->whereBetween('ci.checkin_date', [$fromdate, $todate])
+            ->whereIn('ci.user_id', collect($userIds)->all());
+
+        $typeExpr = "CASE WHEN UPPER(sc.type) IN ('" . implode("','", $types) . "') THEN UPPER(sc.type) ELSE 'OTHER' END";
+        $metrics = "COUNT(*) as visits, COUNT(DISTINCT ci.entity_id) as uniq, COUNT(DISTINCT CASE WHEN {$newCondition} THEN ci.entity_id END) as new_cust";
+        $bucketExpr = $daily ? "DATE_FORMAT(ci.checkin_date, '%Y-%m-%d')" : "DATE_FORMAT(ci.checkin_date, '%Y-%m')";
+
+        $byBucket = (clone $base)
+            ->selectRaw("{$bucketExpr} as bucket, {$typeExpr} as ctype, {$metrics}", $newBindings)
+            ->groupBy('bucket', 'ctype')
+            ->get();
+        $byType = (clone $base)
+            ->selectRaw("{$typeExpr} as ctype, {$metrics}", $newBindings)
+            ->groupBy('ctype')
+            ->get()
+            ->keyBy('ctype');
+
+        $zero = fn () => ['visits' => 0, 'unique' => 0, 'new' => 0];
+        $rows = [];
+        foreach ($buckets as $key => $label) {
+            $rows[$key] = ['label' => $label, 'ALL' => $zero()];
+            foreach (array_merge($types, ['OTHER']) as $t) {
+                $rows[$key][$t] = $zero();
+            }
+        }
+        foreach ($byBucket as $r) {
+            if (!isset($rows[$r->bucket])) {
+                continue;
+            }
+            $vals = ['visits' => (int) $r->visits, 'unique' => (int) $r->uniq, 'new' => (int) $r->new_cust];
+            $rows[$r->bucket][$r->ctype] = $vals;
+            // customer types are disjoint, so distinct counts can be summed for ALL
+            foreach ($vals as $k => $v) {
+                $rows[$r->bucket]['ALL'][$k] += $v;
+            }
+        }
+
+        $totals = ['ALL' => $zero()];
+        foreach (array_merge($types, ['OTHER']) as $t) {
+            $row = $byType->get($t);
+            $totals[$t] = $row ? ['visits' => (int) $row->visits, 'unique' => (int) $row->uniq, 'new' => (int) $row->new_cust] : $zero();
+            foreach ($totals[$t] as $k => $v) {
+                $totals['ALL'][$k] += $v;
+            }
+        }
+
+        return [
+            'granularity' => $daily ? 'day' : 'month',
+            'types' => $types,
+            'buckets' => array_values($rows),
+            'totals' => $totals,
+        ];
     }
 
     private function eloficDashboardPeriod(Request $request): array

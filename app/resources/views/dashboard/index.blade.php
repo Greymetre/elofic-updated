@@ -265,6 +265,13 @@
         .ef-npdshare span { font-size: 9.5px; color: var(--txt3); font-weight: 600; }
         .ef-npdshare .ef-mini { margin-top: 5px; }
         @media (max-width: 1000px) { .ef-npdgrid { grid-template-columns: 1fr; } }
+        .ef-visit-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+        .ef-vstat { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border); position: relative; }
+        .ef-vstat b { display: block; font-size: 20px; font-weight: 700; color: var(--txt1); line-height: 1.1; font-variant-numeric: tabular-nums; }
+        .ef-vstat span:not(.ef-kicon) { font-size: 10px; font-weight: 700; color: var(--txt3); text-transform: uppercase; }
+        .ef-vstat em { margin-left: auto; font-style: normal; font-size: 10px; font-weight: 700; color: var(--tone); background: var(--tone-bg); padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+        .ef-vstat em:empty { display: none; }
+        @media (max-width: 900px) { .ef-visit-stats { grid-template-columns: 1fr; } }
         .ef-stchips { display: flex; gap: 6px; flex-wrap: wrap; margin: -4px 0 10px; }
         .ef-stchips .ef-st { padding: 3px 9px 3px 7px; }
         .ef-stchips .ef-st b { font-weight: 700; margin-left: 2px; }
@@ -687,6 +694,28 @@
                         <div class="ef-kval" data-emp-summary="uniqueActiveCustomers">-</div>
                         <div class="ef-ksub">Customers who ordered via team</div>
                     </div>
+                </div>
+
+                <div class="ef-slabel">Field Visits</div>
+                <div class="ef-card ef-chart ef-reveal" style="--d:.05s;margin-bottom:12px;">
+                    <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#eef2ff;color:#4f46e5;"><i class="ti ti-route"></i></span><span>Total Visits Done<small data-visit-sub>Check-ins at retailers, mechanics, garages &amp; workshops</small></span></span>
+                        <span class="ef-sortbar" style="flex-wrap:wrap;">
+                            <button type="button" class="ef-chip active" data-visit-type="ALL">All</button>
+                            <button type="button" class="ef-chip" data-visit-type="RETAILER">Retailer</button>
+                            <button type="button" class="ef-chip" data-visit-type="MECHANIC">Mechanic</button>
+                            <button type="button" class="ef-chip" data-visit-type="GARAGE">Garage</button>
+                            <button type="button" class="ef-chip" data-visit-type="WORKSHOP">Workshop</button>
+                        </span>
+                    </div>
+                    <div class="ef-visit-stats">
+                        <div class="ef-vstat" style="--tone:#4f46e5;--tone-bg:#eef2ff;"><span class="ef-kicon"><i class="ti ti-map-pin-check"></i></span><div><b data-visit="visits">-</b><span>Total Visits</span></div></div>
+                        <div class="ef-vstat" style="--tone:#0891b2;--tone-bg:#ecfeff;"><span class="ef-kicon"><i class="ti ti-users"></i></span><div><b data-visit="unique">-</b><span>Unique Customers Visited</span></div><em data-visit="repeat"></em></div>
+                        <div class="ef-vstat" style="--tone:#db2777;--tone-bg:#fdf2f8;"><span class="ef-kicon"><i class="ti ti-user-plus"></i></span><div><b data-visit="new">-</b><span>Unique Visits &middot; New Customers</span></div><em data-visit="newShare"></em></div>
+                    </div>
+                    <div class="ef-legend"><span class="ef-legitem"><span class="ef-legsq" style="background:linear-gradient(#a5b4fc,#4f46e5);"></span>Total visits</span><span class="ef-legitem"><span class="ef-legsq" style="background:#0891b2;border-radius:50%;"></span>Unique customers visited</span><span class="ef-legitem"><span class="ef-legsq" style="background:#db2777;border-radius:50%;"></span>Unique visits (new customers added)</span></div>
+                    <div class="ef-empty" data-empty="empVisits">No visits found for this period</div>
+                    <div class="ef-canvas tall"><canvas id="empVisits"></canvas></div>
+                    <div class="ef-note" style="margin-top:8px;"><i class="ti ti-info-circle"></i> New customer = customer created in the selected period by the same employee who visited.</div>
                 </div>
 
                 <div class="ef-slabel">Performance</div>
@@ -1493,6 +1522,52 @@
                     }
                 });
             };
+            let visitData = null;
+            let visitType = 'ALL';
+            const visitTypeLabel = { ALL: 'All customers', RETAILER: 'Retailers', MECHANIC: 'Mechanics', GARAGE: 'Garages', WORKSHOP: 'Workshops' };
+            const renderVisits = () => {
+                const v = visitData || {};
+                const t = (v.totals || {})[visitType] || { visits: 0, unique: 0, new: 0 };
+                const q = key => document.querySelector(`[data-visit="${key}"]`);
+                countUp(q('visits'), t.visits, compact);
+                countUp(q('unique'), t.unique, compact);
+                countUp(q('new'), t.new, compact);
+                q('repeat').textContent = t.unique ? (t.visits / t.unique).toFixed(1) + ' visits / customer' : '';
+                q('newShare').textContent = t.unique ? (t.new / t.unique * 100).toFixed(1) + '% of visited' : '';
+                document.querySelector('[data-visit-sub]').textContent = `${visitTypeLabel[visitType]} · ${v.granularity === 'month' ? 'month-wise' : 'day-wise'} check-ins by the team`;
+
+                const rows = (v.buckets || []).map(b => Object.assign({ label: b.label }, b[visitType] || { visits: 0, unique: 0, new: 0 }));
+                if (empty('empVisits', rows, ['visits'])) return;
+                const many = rows.length > 16;
+                bar('empVisits', rows.map(r => r.label), [
+                    { type: 'line', label: 'Unique visits (new customers)', data: rows.map(r => r.new), borderColor: '#db2777', backgroundColor: '#db2777', borderWidth: 2.5, tension: .35, pointRadius: many ? 2 : 4, pointHoverRadius: 6, pointBackgroundColor: '#fff', pointBorderWidth: 2, order: 0 },
+                    { type: 'line', label: 'Unique customers visited', data: rows.map(r => r.unique), borderColor: '#0891b2', backgroundColor: '#0891b2', borderWidth: 2, borderDash: [5, 4], tension: .35, pointRadius: many ? 0 : 3, pointHoverRadius: 5, pointBackgroundColor: '#fff', pointBorderWidth: 2, order: 1 },
+                    { label: 'Total visits', data: rows.map(r => r.visits), backgroundColor: grad('#c7d2fe', '#4f46e5'), borderRadius: 5, borderSkipped: false, maxBarThickness: 28, order: 2 }
+                ], {
+                    options: {
+                        layout: { padding: { top: 8 } },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: {
+                                label: ctx => ` ${ctx.dataset.label}: ${compact(ctx.parsed.y)}`,
+                                afterBody: items => {
+                                    const r = rows[items[0]?.dataIndex];
+                                    return r && r.unique ? `New customers: ${(r.new / r.unique * 100).toFixed(0)}% of visited` : '';
+                                }
+                            } }
+                        },
+                        scales: {
+                            x: { ticks: { font: { size: 9, family: 'Inter' }, color: '#94a3b8', autoSkip: true, maxTicksLimit: many ? 16 : 31, maxRotation: 0 }, grid: { display: false }, border: { display: false } },
+                            y: { beginAtZero: true, ticks: { font: { size: 9, family: 'Inter' }, color: '#94a3b8', precision: 0, callback: val => compact(val) }, grid: { color: 'rgba(0,0,0,.04)' }, border: { display: false } }
+                        }
+                    }
+                });
+            };
+            document.querySelectorAll('[data-visit-type]').forEach(btn => btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-visit-type]').forEach(b => b.classList.toggle('active', b === btn));
+                visitType = btn.dataset.visitType;
+                if (visitData) renderVisits();
+            }));
             const renderEmployees = (data) => {
                 updateBadges(data.periodLabel);
                 const k = data.kpis || {};
@@ -1578,6 +1653,8 @@
                 }
 
                 renderEmpChart();
+                visitData = (data.charts || {}).visits || null;
+                renderVisits();
             };
             document.querySelectorAll('[data-emp-sort]').forEach(btn => btn.addEventListener('click', () => {
                 document.querySelectorAll('[data-emp-sort]').forEach(b => b.classList.toggle('active', b === btn));
