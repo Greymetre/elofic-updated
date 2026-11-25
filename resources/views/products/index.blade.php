@@ -22,6 +22,14 @@
                     </div>
 
                     <div class="p-2" style="width:200px;">
+                      <select class="selectpicker" name="npd" id="npd" data-style="select-with-transition" title="Product Type">
+                        <option value="">All Products</option>
+                        <option value="NPD">NPD (launched in last 1 year)</option>
+                        <option value="EXISTING">Existing</option>
+                      </select>
+                    </div>
+
+                    <div class="p-2" style="width:200px;">
                       <select class="selectpicker" name="category_id" id="category_id" data-style="select-with-transition" title="Select Division">
                         <option value="">Select Division</option>
                         @if(@isset($categories ))
@@ -107,6 +115,7 @@
                 <th>{!! trans('panel.global.no') !!}</th>
                 <th>{!! trans('panel.global.action') !!}</th>
                 <th>{!! trans('panel.product.fields.product_image') !!}</th>
+                <th>NPD</th>
                 <!-- <th>{!! trans('panel.product.fields.category_name') !!}</th> -->
                   <th>Segment</th>
                 <!-- <th>{!! trans('panel.product.fields.subcategory_name') !!}</th> -->
@@ -159,6 +168,7 @@
                 d._token = token,
                 d.category_id = $('#category_id').val()
                 d.active = $('#active').val()
+                d.npd = $('#npd').val()
             }
         },
         columns: [{
@@ -178,6 +188,13 @@
           {
             data: 'image',
             name: 'image',
+            "defaultContent": '',
+            orderable: false,
+            searchable: false
+          },
+          {
+            data: 'npd',
+            name: 'npd',
             "defaultContent": '',
             orderable: false,
             searchable: false
@@ -288,6 +305,35 @@
       $('#active').change(function() {
         console.log($('#active').val());
         table.draw();
+      });
+
+      $('#npd').change(function() {
+        table.draw();
+      });
+
+      $('body').on('change', '.npdToggle', function() {
+        var $cb = $(this);
+        var makeNpd = $cb.is(':checked');
+        if (!confirm(makeNpd ? 'Tag this product as NPD?' : 'Remove NPD tag? The product will show as Existing.')) {
+          $cb.prop('checked', !makeNpd);
+          return false;
+        }
+        $.ajax({
+          url: "{{ route('products.npd') }}",
+          type: 'POST',
+          data: { _token: token, id: $cb.data('id'), npd: makeNpd ? 1 : 0 },
+          success: function(data) {
+            $('.message').empty().append(data.message);
+            $('.alert').removeClass('alert-success alert-danger').addClass(data.status == 'success' ? 'alert-success' : 'alert-danger').show();
+            table.draw(false);
+          },
+          error: function(xhr) {
+            $cb.prop('checked', !makeNpd);
+            var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Unable to update NPD tag';
+            $('.message').empty().append(msg);
+            $('.alert').removeClass('alert-success').addClass('alert-danger').show();
+          }
+        });
       });
 
       $('body').on('click', '.activeRecord', function() {

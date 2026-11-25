@@ -53,6 +53,8 @@ class SyncProducts extends Command
                 'suc_del' => $item['zcvalue'] ?? null,
                 'budget_for_month' => $item['znpoint'] ?? null,
                 'product_no' => $item['prodid'] ?? '',
+                // API creation date -> drives automatic NPD tag (npd_excluded is never touched by sync)
+                'launch_date' => !empty($item['entry_date']) ? \Carbon\Carbon::parse($item['entry_date']) : $product->launch_date,
                 
                 // 'hsn_sac' => $item['hsn_sac'] ?? null,
                 // 'product_image' => $item['image'] ?? null,

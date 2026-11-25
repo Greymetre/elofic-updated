@@ -554,6 +554,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::any('products-template', [ProductController::class, 'template'])->name('products.template');
     Route::post('products-upload', [ProductController::class, 'upload'])->name('products.upload');
     Route::post('products-active', [ProductController::class, 'active'])->name('products.active');
+    Route::post('products-npd', [ProductController::class, 'npd'])->name('products.npd');
     // Route::any('stockinfo', [ProductController::class, 'stockInfo'])->name('products.stockinfo');
     // Route::any('stockupdate', [ProductController::class, 'stockUpdate'])->name('products.stockupdate');
     Route::any('production', [ProductController::class, 'production'])->name('products.production');

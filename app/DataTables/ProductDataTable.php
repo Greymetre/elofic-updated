@@ -65,11 +65,32 @@ class ProductDataTable extends DataTable
                                 '.$btn.'
                             </div>'.$activebtn;
             })
+            ->addColumn('npd', function ($row) {
+                $launch = $row->effective_launch_date;
+                $eligible = $launch && $launch->gte(Product::npdCutoff());
+                $launchText = $launch ? $launch->format('d M Y') : '-';
+                if ($row->is_npd) {
+                    $badge = '<span class="badge" style="background:#7c3aed;color:#fff;padding:5px 9px;border-radius:12px;font-weight:600;">NPD</span>';
+                } elseif ($eligible) {
+                    $badge = '<span class="badge" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;padding:4px 9px;border-radius:12px;font-weight:600;" title="Launched within 1 year, but removed from NPD manually">Existing (manual)</span>';
+                } else {
+                    $badge = '<span class="badge" style="background:#f1f5f9;color:#475569;padding:5px 9px;border-radius:12px;font-weight:600;">Existing</span>';
+                }
+                $html = '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">' . $badge
+                    . '<small style="color:#94a3b8;">Launch: ' . e($launchText) . '</small>';
+                if ($eligible && auth()->user()->can(['product_edit'])) {
+                    $checked = $row->is_npd ? 'checked' : '';
+                    $html .= '<div class="togglebutton" title="Tag / untag as NPD"><label style="margin:0;">'
+                        . '<input type="checkbox" class="npdToggle" data-id="' . $row->id . '" ' . $checked . '>'
+                        . '<span class="toggle"></span><small>NPD</small></label></div>';
+                }
+                return $html . '</div>';
+            })
             ->addColumn('image', function ($query) {
                 $product_image = !empty($query->product_image) ? $query->product_image : asset('assets/img/placeholder.jpg') ;
                 return '<img src="'.$product_image.'" border="0" width="70" class="img-rounded imageDisplayModel" align="center" />';
             })
-            ->rawColumns(['action','image', 'expiry_info']);
+            ->rawColumns(['action','image', 'expiry_info', 'npd']);
     }
 
     /**
@@ -86,6 +107,11 @@ class ProductDataTable extends DataTable
         }
         if($request->active && !empty($request->active)){
             $data->where('active', $request->active);
+        }
+        if ($request->npd === 'NPD') {
+            $data->npd();
+        } elseif ($request->npd === 'EXISTING') {
+            $data->existing();
         }
         $data = $data->latest()->newQuery();
 

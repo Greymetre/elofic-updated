@@ -17,16 +17,22 @@ class ProductExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
     {
         $this->category_id = $request->input('category_id');
         $this->active = $request->input('active');
+        $this->npd = $request->input('npd');
     }
 
     public function collection()
     {
-        $data = Product::with('productpriceinfo')->select('id','active','product_name','product_code','new_group','sub_group','expiry_interval','expiry_interval_preiod', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no','suc_del', 'product_no', 'model_no','phase','sap_code' , 'branch_id', 'hsn_sac', 'hsn_sac_no');
+        $data = Product::with('productpriceinfo')->select('id','active','product_name','product_code','new_group','sub_group','expiry_interval','expiry_interval_preiod', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'specification', 'part_no','suc_del', 'product_no', 'model_no','phase','sap_code' , 'branch_id', 'hsn_sac', 'hsn_sac_no', 'launch_date', 'npd_excluded', 'created_at');
         if($this->category_id && !empty($this->category_id)){
             $data->where('category_id', $this->category_id);
         }
         if($this->active && !empty($this->active)){
             $data->where('active', $this->active);
+        }
+        if ($this->npd === 'NPD') {
+            $data->npd();
+        } elseif ($this->npd === 'EXISTING') {
+            $data->existing();
         }
         $data = $data->latest()->get();
 
@@ -35,7 +41,7 @@ class ProductExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
 
     public function headings(): array
     {
-            return ['Product id','Plant No','Material No','Part No','Material Group','Application','Material description','WM packing standad','Old Material','Material Type','Segment','Material Grp','Makers','Type','Model','Nishtha','Saathi','Pack Size','MRP','price','Remarks','Subcategory id','Category id','Category','Brand id','Product Image','status'];
+            return ['Product id','Plant No','Material No','Part No','Material Group','Application','Material description','WM packing standad','Old Material','Material Type','Segment','Material Grp','Makers','Type','Model','Nishtha','Saathi','Pack Size','MRP','price','Remarks','Subcategory id','Category id','Category','Brand id','Product Image','status','Product Type','Launch Date'];
    
     // return ['product_id','product_name','product_code','new_group','sub_group','expiry_interval','expiry_interval_preiod','display_name', 'description', 'subcategory_id','subcategory','category_id','category','brand_id','brand','product_image','unit_id','unit_name','mrp','price','selling_price','gst','discount','max_discount', 'hp', 'kw', 'product_stage', 'model_no','suc_del','Phase','status','Sap Code' , 'budget_for_month' , 'top_sku' , 'branch_id', 'rmc', 'hsn_sac', 'hsn_sac_no'];
     }
@@ -75,6 +81,8 @@ class ProductExport implements FromCollection,WithHeadings,ShouldAutoSize,WithMa
         $data['brand_id'] ?? '-',
         $data['product_image'] ?? '-',
         $data['active'] ?? '-',
+        $data->is_npd ? 'NPD' : 'Existing',
+        optional($data->effective_launch_date)->format('d-m-Y') ?? '-',
 
         // $data['new_group'] ?? '',
         

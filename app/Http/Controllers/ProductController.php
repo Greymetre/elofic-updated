@@ -429,6 +429,33 @@ public function create()
         }
         return response()->json(['status' => 'error','message' => 'Error in Status Update']);
     }
+    /** Remove a product from NPD (or put it back to the automatic NPD rule). */
+    public function npd(Request $request)
+    {
+        abort_if(Gate::denies('product_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+        $request->validate(['id' => 'required|integer', 'npd' => 'required|in:0,1']);
+        $product = Product::findOrFail($request->id);
+
+        $wantNpd = (int) $request->npd === 1;
+        if ($wantNpd) {
+            $launch = $product->effective_launch_date;
+            if (!$launch || $launch->lt(Product::npdCutoff())) {
+                return response()->json(['status' => 'error', 'message' => 'Only products launched in the last ' . Product::NPD_MONTHS . ' months can be tagged NPD.'], 422);
+            }
+        }
+
+        $product->forceFill([
+            'npd_excluded' => !$wantNpd,
+            'npd_updated_by' => auth()->id(),
+            'npd_updated_at' => now(),
+        ])->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $wantNpd ? 'Product tagged as NPD' : 'Product removed from NPD (now Existing)',
+        ]);
+    }
+
     public function upload(Request $request) 
     {
         abort_if(Gate::denies('product_upload'), Response::HTTP_FORBIDDEN, '403 Forbidden');

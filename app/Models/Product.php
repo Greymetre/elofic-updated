@@ -11,7 +11,49 @@ class Product extends Model
 
     protected $table = 'products';
 
-    protected $fillable = ['active', 'ranking' ,'product_name','product_code','new_group','sub_group','expiry_interval','expiry_interval_preiod', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'hsn_sac', 'hsn_sac_no', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at', 'specification', 'part_no', 'product_no', 'model_no','phase','suc_del','sap_code' , 'branch_id'];
+    protected $fillable = ['active', 'ranking' ,'product_name','product_code','new_group','sub_group','expiry_interval','expiry_interval_preiod', 'display_name', 'description', 'subcategory_id', 'category_id', 'brand_id', 'product_image', 'unit_id', 'hsn_sac', 'hsn_sac_no', 'created_by', 'updated_by', 'deleted_at', 'created_at', 'updated_at', 'specification', 'part_no', 'product_no', 'model_no','phase','suc_del','sap_code' , 'branch_id', 'launch_date', 'npd_excluded', 'npd_updated_by', 'npd_updated_at'];
+
+    protected $casts = [
+        'launch_date' => 'datetime',
+        'npd_excluded' => 'boolean',
+    ];
+
+    protected $appends = ['is_npd'];
+
+    /** Products launched within this many months are tagged NPD automatically. */
+    public const NPD_MONTHS = 12;
+
+    public static function npdCutoff()
+    {
+        return now()->subMonths(self::NPD_MONTHS)->startOfDay();
+    }
+
+    /** Launch date from the catalogue API; falls back to created_at for products added in the CRM. */
+    public function getEffectiveLaunchDateAttribute()
+    {
+        return $this->launch_date ?? $this->created_at;
+    }
+
+    public function getIsNpdAttribute(): bool
+    {
+        $launch = $this->effective_launch_date;
+        return !$this->npd_excluded && $launch && $launch->gte(self::npdCutoff());
+    }
+
+    public function scopeNpd($query)
+    {
+        return $query->where('npd_excluded', false)
+            ->whereRaw('COALESCE(products.launch_date, products.created_at) >= ?', [self::npdCutoff()]);
+    }
+
+    public function scopeExisting($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('npd_excluded', true)
+                ->orWhereRaw('COALESCE(products.launch_date, products.created_at) < ?', [self::npdCutoff()])
+                ->orWhereRaw('COALESCE(products.launch_date, products.created_at) IS NULL');
+        });
+    }
     public function categories()
     {
         return $this->belongsTo('App\Models\Category', 'category_id', 'id')->select('id','category_name','category_image');
