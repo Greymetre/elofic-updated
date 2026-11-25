@@ -1449,8 +1449,10 @@ class DashboardController extends Controller
 
         $topCustomers = $this->eloficOrderDetailsBase($fromdate, $todate, $zoneId)
             ->leftJoin('secondary_customers as sc', 'sc.id', '=', 'o.buyer_id')
-            ->selectRaw("COALESCE(NULLIF(sc.shop_name, ''), NULLIF(sc.owner_name, ''), CONCAT('Customer #', o.buyer_id)) as label, SUM(od.line_total) as value")
-            ->groupBy('o.buyer_id', 'sc.shop_name', 'sc.owner_name')
+            ->leftJoin('states as st', 'st.id', '=', 'sc.state_id')
+            ->leftJoin('cities as ct', 'ct.id', '=', 'sc.city_id')
+            ->selectRaw("COALESCE(NULLIF(sc.shop_name, ''), NULLIF(sc.owner_name, ''), CONCAT('Customer #', o.buyer_id)) as label, COALESCE(NULLIF(st.state_name, ''), '-') as state, COALESCE(ct.city_name, '') as city, SUM(od.line_total) as value, COUNT(DISTINCT o.id) as orders")
+            ->groupBy('o.buyer_id', 'sc.shop_name', 'sc.owner_name', 'st.state_name', 'ct.city_name')
             ->orderByDesc('value')
             ->limit(10)
             ->get();
