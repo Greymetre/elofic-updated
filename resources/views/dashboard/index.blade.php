@@ -232,6 +232,33 @@
         .ef-segval small { color: var(--txt3); font-weight: 600; margin-left: 4px; }
         .ef-segbar { height: 4px; border-radius: 4px; background: var(--surface3); margin-top: 4px; overflow: hidden; }
         .ef-segbar div { height: 100%; border-radius: 4px; animation: efGrow .9s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i) * 45ms + .25s); }
+        /* Segment-wise sales card */
+        .ef-seg-card { display: flex; flex-direction: column; }
+        .ef-seg-card .ef-cat-wrap { flex: 1; gap: 22px; padding: 4px 4px 0; }
+        .ef-seg-card .ef-donut, .ef-seg-card .ef-donut canvas { width: 200px !important; height: 200px !important; }
+        .ef-seg-card .ef-donut-c b { font-size: 18px; }
+        .ef-seg-card .ef-seglist { max-height: 300px; }
+        .ef-seg-card .ef-segrow { padding: 9px 10px; }
+        .ef-seg-card .ef-segtop { font-size: 12px; }
+        .ef-seg-card .ef-segbar { height: 6px; margin-top: 7px; }
+        .ef-segmeta { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; font-size: 10px; color: var(--txt3); font-weight: 600; }
+        .ef-segmeta b { color: var(--txt2); font-weight: 700; }
+        .ef-segmeta .warn { color: #b45309; }
+        .ef-seginsights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+        .ef-seginsight { padding: 10px 12px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border); min-width: 0; }
+        .ef-seginsight span { display: block; font-size: 9.5px; font-weight: 700; color: var(--txt3); text-transform: uppercase; letter-spacing: .05em; }
+        .ef-seginsight b { display: block; margin-top: 4px; font-size: 14px; font-weight: 700; color: var(--txt1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+        .ef-seginsight small { display: block; margin-top: 2px; font-size: 10px; color: var(--txt3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ef-seginsight.warn { background: #fffbeb; border-color: #fde68a; }
+        .ef-seginsight.warn b { color: #b45309; }
+        @media (max-width: 600px) { .ef-seginsights { grid-template-columns: 1fr; } }
+        /* Top 10 SKU card */
+        .ef-sku-card { display: flex; flex-direction: column; }
+        .ef-sku-card .ef-canvas { flex: 1; min-height: 340px; }
+        .ef-sku-card .ef-legend { gap: 6px; margin-bottom: 10px; }
+        .ef-sku-card .ef-legitem { font-size: 10px; padding: 3px 9px; }
+        .ef-skufoot { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); font-size: 10.5px; color: var(--txt3); font-weight: 600; }
+        .ef-skufoot b { color: var(--txt1); }
         .ef-legend-click .ef-legitem { cursor: pointer; padding: 2px 7px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); transition: opacity .2s, background .2s; user-select: none; }
         .ef-legend-click .ef-legitem:hover { background: var(--surface2); }
         .ef-legend-click .ef-legitem.off { opacity: .4; text-decoration: line-through; }
@@ -624,19 +651,21 @@
                     </div>
                 </div>
                 <div class="ef-g2">
-                    <div class="ef-card ef-chart ef-reveal" style="--d:.05s">
-                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#ecfeff;color:#0891b2;"><i class="ti ti-chart-donut-3"></i></span><span>Segment-wise sales<small>Category share of order value</small></span></span><span class="ef-badge purple" data-badge></span></div>
+                    <div class="ef-card ef-chart ef-seg-card ef-reveal" style="--d:.05s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#ecfeff;color:#0891b2;"><i class="ti ti-chart-donut-3"></i></span><span>Segment-wise sales<small>Category share of order value, units &amp; SKUs</small></span></span><span class="ef-badge purple" data-badge></span></div>
                         <div class="ef-empty" data-empty="pSegment">No segment sales found</div>
                         <div class="ef-cat-wrap" id="pSegmentWrap">
                             <div class="ef-donut"><canvas id="pSegment"></canvas><div class="ef-donut-c"><b data-pd-kpi="segTotal">-</b><span>Total</span></div></div>
                             <div class="ef-seglist" id="pSegmentLegend"></div>
                         </div>
+                        <div class="ef-seginsights" id="pSegInsights"></div>
                     </div>
-                    <div class="ef-card ef-chart ef-reveal" style="--d:.12s">
-                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#fdf2f8;color:#db2777;"><i class="ti ti-chart-line"></i></span><span>Top 10 SKU trend<small>Click a legend item to show / hide a SKU</small></span></span><span class="ef-badge purple" data-badge></span></div>
+                    <div class="ef-card ef-chart ef-sku-card ef-reveal" style="--d:.12s">
+                        <div class="ef-chtitle"><span class="ef-tleft"><span class="ef-chicon" style="background:#eef2ff;color:#4f46e5;"><i class="ti ti-chart-bar" id="pSkuIcon"></i></span><span><span id="pSkuTitle">Top 10 SKUs</span><small id="pSkuSub">Best selling SKUs by order value</small></span></span><span class="ef-badge purple" data-badge></span></div>
                         <div id="pSkuLegend" class="ef-legend ef-legend-click"></div>
-                        <div class="ef-empty" data-empty="pSku">No SKU trend found</div>
+                        <div class="ef-empty" data-empty="pSku">No SKU sales found</div>
                         <div class="ef-canvas tall"><canvas id="pSku"></canvas></div>
+                        <div class="ef-skufoot" id="pSkuFoot"></div>
                     </div>
                 </div>
             </div>
@@ -1379,19 +1408,38 @@
                     wrap.style.display = 'none';
                     destroy('pSegment');
                     legend.innerHTML = '';
+                    document.getElementById('pSegInsights').innerHTML = '';
                 } else {
                     setVisible(document.querySelector('[data-empty="pSegment"]'), false);
                     wrap.style.display = 'flex';
                     q('segTotal').textContent = money(segTotal).replace('Rs. ', '₹');
                     const segMax = Math.max(...seg.map(r => Number(r.value || 0)), 1);
+                    const rupee = v => money(v).replace('Rs. ', '₹');
                     legend.innerHTML = seg.map((row, i) => {
                         const c = colors[i % colors.length];
                         const v = Number(row.value || 0);
+                        const share = segTotal ? (v / segTotal * 100).toFixed(1) : '0';
+                        const unassigned = row.label === 'Unassigned';
+                        const meta = [`<span><b>${share}%</b> share</span>`];
+                        if (row.qty !== undefined) meta.push(`<span><b>${compact(row.qty)}</b> units</span>`);
+                        if (row.skus !== undefined) meta.push(`<span><b>${compact(row.skus)}</b> SKU${Number(row.skus) === 1 ? '' : 's'}</span>`);
+                        if (unassigned) meta.push(`<span class="warn" title="Products sold without a category / group mapped"><i class="ti ti-alert-triangle"></i> no category mapped</span>`);
                         return `<div class="ef-segrow" data-seg="${i}" style="--i:${Math.min(i, 12)};">
-                            <div class="ef-segtop"><span class="ef-segname"><span class="ef-legsq" style="background:${c};"></span><span>${esc(row.label)}</span></span><span class="ef-segval">${segTotal ? (v / segTotal * 100).toFixed(1) : 0}%<small>${esc(money(v).replace('Rs. ', '₹'))}</small></span></div>
+                            <div class="ef-segtop"><span class="ef-segname"><span class="ef-legsq" style="background:${c};"></span><span title="${esc(row.label)}">${esc(row.label)}</span></span><span class="ef-segval">${esc(rupee(v))}</span></div>
                             <div class="ef-segbar"><div style="width:${Math.max(v / segMax * 100, 1).toFixed(1)}%;background:${c};"></div></div>
+                            <div class="ef-segmeta">${meta.join('')}</div>
                         </div>`;
                     }).join('');
+                    const top = seg[0];
+                    const unassignedRow = seg.find(r => r.label === 'Unassigned');
+                    const tiles = [
+                        `<div class="ef-seginsight"><span>Top segment</span><b title="${esc(top.label)}">${esc(top.label)}</b><small>${segTotal ? (Number(top.value) / segTotal * 100).toFixed(1) : 0}% of sales</small></div>`,
+                        `<div class="ef-seginsight"><span>Avg per unit</span><b>${qty ? esc(rupee(sales / qty)) : '-'}</b><small>${compact(qty)} units sold</small></div>`,
+                        unassignedRow
+                            ? `<div class="ef-seginsight warn" title="Map a category / group to these products to see their real segment"><span>Unassigned</span><b>${esc(rupee(unassignedRow.value))}</b><small>${unassignedRow.skus !== undefined ? compact(unassignedRow.skus) + ' SKUs without category' : 'without category'}</small></div>`
+                            : `<div class="ef-seginsight"><span>Segments</span><b>${compact(seg.length)}</b><small>with sales this period</small></div>`
+                    ];
+                    document.getElementById('pSegInsights').innerHTML = tiles.join('');
                     const highlight = (idx) => legend.querySelectorAll('.ef-segrow').forEach(el => el.classList.toggle('hl', Number(el.dataset.seg) === idx));
                     doughnut('pSegment', seg, highlight);
                     legend.querySelectorAll('.ef-segrow').forEach(el => {
@@ -1409,44 +1457,90 @@
                     });
                 }
 
-                const sku = data.charts.topSkuTrend || [];
-                const skuRows = sku.flatMap(s => s.data || []);
+                renderSkuChart(data.charts.topSkuTrend || [], sales);
+            };
+            // Top 10 SKUs: ranked bars for a 1-2 month period, monthly trend lines for longer periods
+            const renderSkuChart = (sku, totalSales) => {
                 const skuLegend = document.getElementById('pSkuLegend');
-                if (!empty('pSku', skuRows)) {
-                    const labels = (sku[0]?.data || []).map(r => r.label);
-                    skuLegend.innerHTML = sku.map((s, i) => `<span class="ef-legitem" data-sku="${i}" title="${esc(s.label)}"><span class="ef-legsq" style="background:${colors[i % colors.length]};"></span><span style="font-size:9.5px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(s.label)}</span></span>`).join('');
-                    if (labels.length < 3) {
-                        // Single / two-month period: compare SKUs side by side as bars
-                        const totals = sku.map(s => (s.data || []).reduce((a, r) => a + Number(r.value || 0), 0));
-                        bar('pSku', sku.map(s => s.label.length > 18 ? s.label.slice(0, 17) + '…' : s.label), [{
-                            label: labels.join(' - ') || 'Sales', data: totals.map(lakh),
-                            backgroundColor: sku.map((s, i) => colors[i % colors.length]), borderRadius: 6, borderSkipped: false, maxBarThickness: 16
-                        }], withPad(scaledChartOptions('L', 'y', { font: { size: 9.5, weight: '600', family: 'Inter' }, color: '#475569' }), { right: 8 }));
-                    } else {
-                        line('pSku', labels, sku.map((series, i) => ({
-                            label: series.label, data: (series.data || []).map(r => lakh(r.value)), borderColor: colors[i % colors.length],
-                            backgroundColor: colors[i % colors.length], tension: .4, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', borderWidth: 2
-                        })), scaledChartOptions('L', 'x'));
-                    }
-                    skuLegend.querySelectorAll('[data-sku]').forEach(el => el.addEventListener('click', () => {
-                        const chart = charts.pSku; if (!chart) return;
-                        const idx = Number(el.dataset.sku);
-                        if (chart.config.type === 'line') {
-                            const visible = chart.isDatasetVisible(idx);
-                            chart.setDatasetVisibility(idx, !visible);
-                            el.classList.toggle('off', visible);
-                        } else {
-                            const ds = chart.data.datasets[0];
-                            ds._orig = ds._orig || ds.data.slice();
-                            const hidden = ds.data[idx] === null;
-                            ds.data[idx] = hidden ? ds._orig[idx] : null;
-                            el.classList.toggle('off', !hidden);
-                        }
-                        chart.update();
-                    }));
-                } else {
-                    skuLegend.innerHTML = '';
+                const foot = document.getElementById('pSkuFoot');
+                const title = document.getElementById('pSkuTitle');
+                const sub = document.getElementById('pSkuSub');
+                const icon = document.getElementById('pSkuIcon');
+                const totalOf = s => s.value !== undefined ? Number(s.value || 0) : (s.data || []).reduce((a, r) => a + Number(r.value || 0), 0);
+                const rows = sku.map(s => ({ label: s.label, code: s.code || '', qty: s.qty, value: totalOf(s), data: s.data || [] }));
+                const months = (sku[0]?.data || []).map(r => r.label);
+                const trendMode = months.length >= 3;
+                skuLegend.innerHTML = '';
+                foot.innerHTML = '';
+                title.textContent = trendMode ? 'Top 10 SKU trend' : 'Top 10 SKUs';
+                sub.textContent = trendMode ? 'Monthly order value · click a SKU to show / hide' : 'Best selling SKUs by order value';
+                icon.className = 'ti ' + (trendMode ? 'ti-chart-line' : 'ti-chart-bar');
+                if (empty('pSku', rows)) { foot.style.display = 'none'; return; }
+                foot.style.display = 'flex';
+
+                const sc = moneyScale(Math.max(...rows.map(r => r.value), 0));
+                const scaled = v => Number((Number(v || 0) / sc.div).toFixed(2));
+                const top10 = rows.reduce((a, r) => a + r.value, 0);
+                const shareOf = v => totalSales ? (v / totalSales * 100) : 0;
+                foot.innerHTML = `<span>Top 10 = <b>${esc(scaledMoney(scaled(top10), sc.unit))}</b></span><span><b>${shareOf(top10).toFixed(1)}%</b> of product sales</span>`;
+                const details = r => {
+                    const out = [];
+                    if (r.code) out.push('Code: ' + r.code);
+                    if (r.qty !== undefined) out.push('Quantity: ' + compact(r.qty) + ' units');
+                    out.push('Share of product sales: ' + shareOf(r.value).toFixed(1) + '%');
+                    return out;
+                };
+
+                if (!trendMode) {
+                    const cfg = withPad(scaledChartOptions(sc.unit, 'y', { font: { size: 10, weight: '600', family: 'Inter' }, color: '#475569' }), { right: 92 });
+                    cfg.options.plugins.tooltip.callbacks = {
+                        title: items => rows[items[0]?.dataIndex]?.label || '',
+                        label: ctx => ` Value: ${money(rows[ctx.dataIndex]?.value)}`,
+                        afterBody: items => details(rows[items[0]?.dataIndex] || {})
+                    };
+                    bar('pSku', rows.map((r, i) => (i + 1) + '. ' + shortLabel(r.label, 22)), [{
+                        label: months.join(' - ') || 'Sales',
+                        data: rows.map(r => scaled(r.value)),
+                        backgroundColor: grad('#a5b4fc', '#4338ca', true), hoverBackgroundColor: '#4338ca',
+                        borderRadius: 6, borderSkipped: false, maxBarThickness: 18, categoryPercentage: .8, barPercentage: .9
+                    }], Object.assign(cfg, { plugins: [endLabels(i => rows[i] ? scaledMoney(scaled(rows[i].value), sc.unit) + ' · ' + shareOf(rows[i].value).toFixed(1) + '%' : '')] }));
+                    return;
                 }
+
+                skuLegend.innerHTML = rows.map((r, i) => `<span class="ef-legitem" data-sku="${i}" title="${esc(r.label)} · ${esc(scaledMoney(scaled(r.value), sc.unit))}"><span class="ef-legsq" style="background:${colors[i % colors.length]};"></span><span style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${esc(r.label)}</span></span>`).join('');
+                const cfg = scaledChartOptions(sc.unit, 'x');
+                cfg.options.interaction = { mode: 'nearest', axis: 'x', intersect: false };
+                cfg.options.plugins.tooltip.callbacks = {
+                    title: items => items[0]?.label || '',
+                    label: ctx => ` ${shortLabel(ctx.dataset.label, 30)}: ${scaledMoney(ctx.parsed.y, sc.unit)}`
+                };
+                cfg.options.plugins.tooltip.itemSort = (a, b) => b.parsed.y - a.parsed.y;
+                line('pSku', months, rows.map((r, i) => ({
+                    label: r.label, data: r.data.map(m => scaled(m.value)), borderColor: colors[i % colors.length],
+                    backgroundColor: colors[i % colors.length], tension: .35, borderWidth: 2,
+                    pointRadius: 2.5, pointHoverRadius: 6, pointBorderWidth: 0, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff'
+                })), cfg);
+                skuLegend.querySelectorAll('[data-sku]').forEach(el => {
+                    const idx = Number(el.dataset.sku);
+                    el.addEventListener('click', () => {
+                        const chart = charts.pSku; if (!chart) return;
+                        const visible = chart.isDatasetVisible(idx);
+                        chart.setDatasetVisibility(idx, !visible);
+                        el.classList.toggle('off', visible);
+                        chart.update();
+                    });
+                    // hovering a SKU chip fades the other lines
+                    el.addEventListener('mouseenter', () => {
+                        const chart = charts.pSku; if (!chart) return;
+                        chart.data.datasets.forEach((ds, k) => { ds.borderColor = k === idx ? colors[k % colors.length] : colors[k % colors.length] + '33'; ds.borderWidth = k === idx ? 3 : 1.5; });
+                        chart.update('none');
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        const chart = charts.pSku; if (!chart) return;
+                        chart.data.datasets.forEach((ds, k) => { ds.borderColor = colors[k % colors.length]; ds.borderWidth = 2; });
+                        chart.update('none');
+                    });
+                });
             };
             const renderPrimary = (data) => {
                 updateBadges(data.periodLabel);

@@ -1600,7 +1600,7 @@ class DashboardController extends Controller
 
         $segmentWise = (clone $base)
             ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
-            ->selectRaw("COALESCE(NULLIF(c.category_name, ''), NULLIF(p.new_group, ''), 'Unassigned') as label, SUM(od.line_total) as value")
+            ->selectRaw("COALESCE(NULLIF(c.category_name, ''), NULLIF(p.new_group, ''), 'Unassigned') as label, SUM(od.line_total) as value, SUM(od.quantity) as qty, COUNT(DISTINCT od.product_id) as skus")
             ->groupBy('label')
             ->orderByDesc('value')
             ->get();
@@ -1622,8 +1622,8 @@ class DashboardController extends Controller
             $catalogProducts = (int) DB::table('products')->whereNull('deleted_at')->count();
         }
         $topSkuProducts = (clone $base)
-            ->selectRaw('od.product_id, p.product_name')
-            ->groupBy('od.product_id', 'p.product_name')
+            ->selectRaw('od.product_id, p.product_name, p.product_code, SUM(od.line_total) as value, SUM(od.quantity) as qty')
+            ->groupBy('od.product_id', 'p.product_name', 'p.product_code')
             ->orderByRaw('SUM(od.line_total) DESC')
             ->limit(10)
             ->get();
@@ -1643,6 +1643,9 @@ class DashboardController extends Controller
         $topSkuTrend = $topSkuProducts->map(function ($product) use ($buckets, $skuMonthly) {
             return [
                 'label' => $product->product_name ?: ('Product #' . $product->product_id),
+                'code' => (string) ($product->product_code ?? ''),
+                'value' => (float) $product->value,
+                'qty' => (float) $product->qty,
                 'data' => $buckets->map(fn ($bucket) => [
                     'label' => $bucket['label'],
                     'value' => $skuMonthly[$product->product_id][substr($bucket['from'], 0, 7)] ?? 0.0,
@@ -2299,7 +2302,7 @@ class DashboardController extends Controller
             'toDate' => (string) $request->input('toDate', ''),
             'zoneId' => (string) $request->input('zoneId', ''),
         ];
-        $key = 'elofic_dash:v1:' . $name . ':' . Carbon::today()->toDateString() . ':' . md5(json_encode($params));
+        $key = 'elofic_dash:v2:' . $name . ':' . Carbon::today()->toDateString() . ':' . md5(json_encode($params));
         if ($request->boolean('refresh')) {
             Cache::forget($key);
         }
