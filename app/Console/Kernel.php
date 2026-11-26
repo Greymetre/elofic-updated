@@ -41,6 +41,17 @@ class Kernel extends ConsoleKernel
             ->timezone('Asia/Kolkata')
             ->twiceDaily(0, 12)
             ->withoutOverlapping();
+        // attendance push alerts: not punched in by 09:30, not punched out by 20:30
+        $schedule->command('attendance:reminders punchin')
+            ->timezone('Asia/Kolkata')
+            ->dailyAt('09:30')
+            ->withoutOverlapping()
+            ->runInBackground();
+        $schedule->command('attendance:reminders punchout')
+            ->timezone('Asia/Kolkata')
+            ->dailyAt('20:30')
+            ->withoutOverlapping()
+            ->runInBackground();
         // safety net for live locations stored without an address (geocode failed or per request cap hit)
         $schedule->command('locations:update-address')
             ->timezone('Asia/Kolkata')
