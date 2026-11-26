@@ -28,10 +28,13 @@ class Product extends Model
         return now()->subMonths(self::NPD_MONTHS)->startOfDay();
     }
 
-    /** Launch date from the catalogue API; falls back to created_at for products added in the CRM. */
+    /**
+     * Launch date = entry_date from the catalogue API (stored in launch_date by sync:products).
+     * No fallback to created_at: synced products get created_at = sync time, which would wrongly tag everything as NPD.
+     */
     public function getEffectiveLaunchDateAttribute()
     {
-        return $this->launch_date ?? $this->created_at;
+        return $this->launch_date;
     }
 
     public function getIsNpdAttribute(): bool
@@ -43,15 +46,16 @@ class Product extends Model
     public function scopeNpd($query)
     {
         return $query->where('npd_excluded', false)
-            ->whereRaw('COALESCE(products.launch_date, products.created_at) >= ?', [self::npdCutoff()]);
+            ->whereNotNull('products.launch_date')
+            ->where('products.launch_date', '>=', self::npdCutoff());
     }
 
     public function scopeExisting($query)
     {
         return $query->where(function ($q) {
             $q->where('npd_excluded', true)
-                ->orWhereRaw('COALESCE(products.launch_date, products.created_at) < ?', [self::npdCutoff()])
-                ->orWhereRaw('COALESCE(products.launch_date, products.created_at) IS NULL');
+                ->orWhere('products.launch_date', '<', self::npdCutoff())
+                ->orWhereNull('products.launch_date');
         });
     }
     public function categories()

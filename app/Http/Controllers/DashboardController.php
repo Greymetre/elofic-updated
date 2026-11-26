@@ -1539,17 +1539,17 @@ class DashboardController extends Controller
         $base = $this->eloficOrderDetailsBase($fromdate, $todate, $zoneId)
             ->join('products as p', 'p.id', '=', 'od.product_id');
 
-        // NPD = launched (API entry_date, else created_at) within the last 12 months and not manually excluded
+        // NPD = API entry_date (products.launch_date) within the last 12 months and not manually excluded
         $hasNpd = \Schema::hasColumn('products', 'npd_excluded') && \Schema::hasColumn('products', 'launch_date');
         $npdCutoff = \App\Models\Product::npdCutoff()->toDateTimeString();
-        $npdCondition = 'p.npd_excluded = 0 AND COALESCE(p.launch_date, p.created_at) >= ?';
+        $npdCondition = 'p.npd_excluded = 0 AND p.launch_date IS NOT NULL AND p.launch_date >= ?';
 
         $productRanking = (clone $base)
             ->leftJoin('categories as c', 'c.id', '=', 'p.category_id')
             ->selectRaw("COALESCE(NULLIF(p.product_name, ''), CONCAT('Product #', od.product_id)) as label, COALESCE(NULLIF(p.product_code, ''), '') as code, COALESCE(NULLIF(c.category_name, ''), NULLIF(p.new_group, ''), '') as segment, SUM(od.line_total) as value, SUM(od.quantity) as qty")
             ->groupBy('od.product_id', 'p.product_name', 'p.product_code', 'c.category_name', 'p.new_group');
         if ($hasNpd) {
-            $productRanking->selectRaw("MAX(CASE WHEN {$npdCondition} THEN 1 ELSE 0 END) as is_npd, MAX(COALESCE(p.launch_date, p.created_at)) as launch_date", [$npdCutoff]);
+            $productRanking->selectRaw("MAX(CASE WHEN {$npdCondition} THEN 1 ELSE 0 END) as is_npd, MAX(p.launch_date) as launch_date", [$npdCutoff]);
         }
 
         $npdSummary = ['sales' => 0, 'qty' => 0, 'skusSold' => 0, 'catalog' => 0];
