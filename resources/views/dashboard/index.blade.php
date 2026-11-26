@@ -1843,28 +1843,54 @@
                 empSort = btn.dataset.empSort;
                 if (empRows.length) renderEmpChart();
             }));
+            // ---- Data loading: per tab+filter client cache, stale-response guard, background prefetch ----
+            const renderers = { secondary: renderSecondary, product: renderProduct, primary: renderPrimary, employees: renderEmployees };
+            const CLIENT_TTL = 2 * 60 * 1000;
+            const dataCache = new Map(); // "tab|params" -> { at, promise }
+            const renderedKey = {};      // tab -> "tab|params" currently drawn
+            let loadSeq = 0;
+            const cacheKey = (tab) => tab + '|' + params();
+            const getData = (tab) => {
+                const key = cacheKey(tab);
+                const hit = dataCache.get(key);
+                if (hit && Date.now() - hit.at < CLIENT_TTL) return hit.promise;
+                const promise = fetchJson(urls[tab]).catch(e => { dataCache.delete(key); throw e; });
+                dataCache.set(key, { at: Date.now(), promise });
+                return promise;
+            };
+            // Warm the other tabs one by one so switching tabs is instant (data only; charts draw when the tab opens)
+            const prefetchOthers = () => {
+                const snapshot = params();
+                const run = async () => {
+                    for (const tab of Object.keys(renderers)) {
+                        if (tab === state.activeTab || params() !== snapshot) continue;
+                        try { await getData(tab); } catch (e) { /* shown when the tab is opened */ }
+                    }
+                };
+                (window.requestIdleCallback || ((cb) => setTimeout(cb, 300)))(run);
+            };
             const load = async (force = false) => {
+                const tab = state.activeTab;
+                if (!renderers[tab]) return;
+                const key = cacheKey(tab);
+                if (force) dataCache.delete(key);
+                const seq = ++loadSeq; // invalidates any older in-flight load
+                if (!force && state.loaded[tab] && renderedKey[tab] === key) {
+                    setStatus('');
+                    return;
+                }
                 setStatus('Loading dashboard data...');
                 try {
-                    if ((state.activeTab === 'secondary' || force) && (!state.loaded.secondary || force)) {
-                        renderSecondary(await fetchJson(urls.secondary));
-                        state.loaded.secondary = true;
-                    }
-                    if ((state.activeTab === 'product' || force) && (!state.loaded.product || force)) {
-                        renderProduct(await fetchJson(urls.product));
-                        state.loaded.product = true;
-                    }
-                    if ((state.activeTab === 'primary' || force) && (!state.loaded.primary || force)) {
-                        renderPrimary(await fetchJson(urls.primary));
-                        state.loaded.primary = true;
-                    }
-                    if ((state.activeTab === 'employees' || force) && (!state.loaded.employees || force)) {
-                        renderEmployees(await fetchJson(urls.employees));
-                        state.loaded.employees = true;
-                    }
+                    const data = await getData(tab);
+                    // user switched tab / filter while this was in flight: a newer load owns the screen
+                    if (seq !== loadSeq || tab !== state.activeTab) return;
+                    renderers[tab](data);
+                    state.loaded[tab] = true;
+                    renderedKey[tab] = key;
                     setStatus('');
+                    prefetchOthers();
                 } catch (e) {
-                    setStatus(e.message || 'Unable to load dashboard data.', true);
+                    if (seq === loadSeq) setStatus(e.message || 'Unable to load dashboard data.', true);
                 }
             };
 
