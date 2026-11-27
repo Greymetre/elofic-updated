@@ -36,7 +36,7 @@ class MobileAppLoginUsersFieldKonnectExport implements FromCollection, WithHeadi
     {
         $f_year_array = explode('-', $this->financial_year);
 
-        $data = MobileUserLoginDetails::with(['user'])->where('app', '2');
+        $data = MobileUserLoginDetails::with(['user.getbranch'])->where('app', '2');
 
         if ($this->start_date && !empty($this->start_date) && $this->end_date && !empty($this->end_date)) {
             $startDate = date('Y-m-d', strtotime($this->start_date));
@@ -64,16 +64,17 @@ class MobileAppLoginUsersFieldKonnectExport implements FromCollection, WithHeadi
     public function map($data): array
     {
         
+        $user = $data->user;
         return [
             $data['id'],
-            $data['user']['id'],
-            isset($data['user']['name']) ? $data['user']['name'] : '',
-            isset($data['user']['mobile']) ? $data['user']['mobile'] : '',
-            isset($data['user']['getbranch']['branch_name']) ? $data['user']['getbranch']['branch_name'] : '',
-            isset($data['app_version']) ? $data['app_version'] : '',
-            isset($data['device_name']) ? $data['device_name'] : '',
-            isset($data['first_login_date']) ? date('Y-m-d', strtotime($data['first_login_date'])) : '',
-            isset($data['last_login_date']) ? date('Y-m-d', strtotime($data['last_login_date'])) : '',
+            $user->id ?? ($data['user_id'] ?? ''),
+            $user->name ?? '',
+            $user->mobile ?? '',
+            $user->getbranch->branch_name ?? '',
+            $data['app_version'] ?? '',
+            $data['device_name'] ?? '',
+            !empty($data['first_login_date']) ? date('Y-m-d', strtotime($data['first_login_date'])) : '',
+            !empty($data['last_login_date']) ? date('Y-m-d', strtotime($data['last_login_date'])) : '',
             isset($data['login_status']) ? ($data['login_status'] == '0' ? 'Logout' : 'Login') : '',
         ];
     }
