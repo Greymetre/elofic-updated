@@ -30,6 +30,7 @@ class DashboardController extends Controller
     {
         abort_if(Gate::denies('dashboard_access'), Response::HTTP_FORBIDDEN, 'Forbidden,' . PHP_EOL . 'You don\'t have the right permissions. Please contact to the admin.');
         $dashboardZones = Branch::where('active', 'Y')
+            ->when($this->eloficScopeBranchIds() !== null, fn ($query) => $query->whereIn('id', $this->eloficScopeBranchIds()))
             ->orderBy('branch_name')
             ->get(['id', 'branch_name']);
 
@@ -1414,6 +1415,14 @@ class DashboardController extends Controller
             $registrations->join('users as scu', 'scu.id', '=', 'sc.created_by')
                 ->where('scu.branch_id', $zoneId);
         }
+        $scopeIds = $this->eloficScopeUserIds();
+        if ($scopeIds !== null) {
+            if ($this->efHasColumn('secondary_customers', 'created_by')) {
+                $registrations->whereIn('sc.created_by', $scopeIds);
+            } else {
+                $registrations->whereRaw('1 = 0');
+            }
+        }
         $totalRegistrations = (int) (clone $registrations)->count();
         $breakdown = (clone $registrations)
             ->selectRaw("UPPER(sc.type) as type, COUNT(*) as total")
@@ -1429,6 +1438,9 @@ class DashboardController extends Controller
         if ($zoneId) {
             $activeBreakdown->join('users as zu', 'zu.id', '=', 'o.created_by')
                 ->where('zu.branch_id', $zoneId);
+        }
+        if ($scopeIds !== null) {
+            $activeBreakdown->whereIn('o.created_by', $scopeIds);
         }
 
         $activeBreakdown = $activeBreakdown
@@ -1492,6 +1504,7 @@ class DashboardController extends Controller
         $zoneBranches = DB::table('branches')
             ->where('active', 'Y')
             ->when($zoneId, fn ($query) => $query->where('id', $zoneId))
+            ->when($scopeIds !== null, fn ($query) => $query->whereIn('id', $this->eloficScopeBranchIds()))
             ->orderBy('branch_name')
             ->get(['id', 'branch_name']);
 
@@ -1880,6 +1893,7 @@ class DashboardController extends Controller
                     ->whereIn('role_id', $customerRoleIds);
             }))
             ->when($zoneId, fn ($query) => $query->where('branch_id', $zoneId))
+            ->when($this->eloficScopeUserIds() !== null, fn ($query) => $query->whereIn('id', $this->eloficScopeUserIds()))
             ->select('id', 'name', 'employee_codes')
             ->get();
     }
@@ -2084,6 +2098,94 @@ class DashboardController extends Controller
         return is_numeric($zoneId) && (int) $zoneId > 0 ? (int) $zoneId : null;
     }
 
+    /**
+     * Roles that see the whole company on the dashboard. Everyone else (BM, ZM, ASM, ...)
+     * only sees the employees reporting to them (getUsersReportingToAuth). Same list as
+     * getUsersReportingToAuth's "all users" branch, minus the branch-based roles.
+     */
+    private const EF_FULL_ACCESS_ROLES = [
+        'superadmin', 'Admin', 'subAdmin', 'CRM', 'HR_Admin', 'HO_Account', 'Sub_Support',
+        'Service Admin', 'All Customers', 'Sub billing', 'Sales Admin', 'Marketing_Admin',
+        'MIS_ADMIN', 'Data_Crm',
+    ];
+
+    private bool $efScopeResolved = false;
+    private ?array $efScopeIds = null;
+    private ?array $efScopeUsers = null;
+
+    /** null = no restriction; otherwise the user ids (self + reporting hierarchy) the viewer may see. */
+    private function eloficScopeUserIds(): ?array
+    {
+        if (!$this->efScopeResolved) {
+            $this->efScopeResolved = true;
+            $user = Auth::user();
+            if ($user && ((int) $user->id === 41012 || !$user->hasAnyRole(self::EF_FULL_ACCESS_ROLES))) {
+                $this->efScopeIds = array_values(array_unique(array_map('intval', getUsersReportingToAuth($user->id))));
+                if (empty($this->efScopeIds)) {
+                    $this->efScopeIds = [(int) $user->id];
+                }
+            }
+        }
+
+        return $this->efScopeIds;
+    }
+
+    /** id, name, employee_codes, branch_id of the scoped users (only when scoped). */
+    private function eloficScopeUsers()
+    {
+        $ids = $this->eloficScopeUserIds();
+        if ($ids === null) {
+            return null;
+        }
+        if ($this->efScopeUsers === null) {
+            $this->efScopeUsers = DB::table('users')->whereIn('id', $ids)
+                ->get(['id', 'name', 'employee_codes', 'branch_id'])->all();
+        }
+
+        return collect($this->efScopeUsers);
+    }
+
+    /** Branches the scoped users belong to (branch_id may be a comma list). */
+    private function eloficScopeBranchIds(): ?array
+    {
+        $users = $this->eloficScopeUsers();
+        if ($users === null) {
+            return null;
+        }
+
+        return $users->flatMap(fn ($user) => explode(',', (string) $user->branch_id))
+            ->map(fn ($id) => (int) trim($id))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /** Restricts a primary_sales query to rows of the scoped users (emp_code, else sales_person name). */
+    private function eloficApplyPrimaryScope($query, string $prefix = '')
+    {
+        $users = $this->eloficScopeUsers();
+        if ($users === null) {
+            return $query;
+        }
+        $codes = $users->pluck('employee_codes')->map(fn ($v) => trim((string) $v))->filter()->unique()->values()->all();
+        $names = $users->pluck('name')->map(fn ($v) => trim((string) $v))->filter()->unique()->values()->all();
+        $hasCode = $this->efHasColumn('primary_sales', 'emp_code');
+        $hasPerson = $this->efHasColumn('primary_sales', 'sales_person');
+
+        $query->where(function ($sub) use ($codes, $names, $hasCode, $hasPerson, $prefix) {
+            $sub->whereRaw('1 = 0');
+            if ($hasCode && !empty($codes)) {
+                $sub->orWhereIn($prefix . 'emp_code', $codes);
+            }
+            if ($hasPerson && !empty($names)) {
+                $sub->orWhereIn($prefix . 'sales_person', $names);
+            }
+        });
+
+        return $query;
+    }
+
     private function eloficDashboardZoneName(?int $zoneId): ?string
     {
         if (!$zoneId) {
@@ -2106,6 +2208,9 @@ class DashboardController extends Controller
             $query->join('users as zu', 'zu.id', '=', 'o.created_by')
                 ->where('zu.branch_id', $zoneId);
         }
+        if (($scopeIds = $this->eloficScopeUserIds()) !== null) {
+            $query->whereIn('o.created_by', $scopeIds);
+        }
 
         return $query;
     }
@@ -2122,7 +2227,7 @@ class DashboardController extends Controller
             });
         }
 
-        return $query;
+        return $this->eloficApplyPrimaryScope($query);
     }
 
     private function eloficTargetLakhToRupees(float $target): float
@@ -2142,6 +2247,9 @@ class DashboardController extends Controller
         if ($zoneId) {
             $query->join('users as tu', 'tu.id', '=', 'sales_targets.userid')
                 ->where('tu.branch_id', $zoneId);
+        }
+        if (($scopeIds = $this->eloficScopeUserIds()) !== null) {
+            $query->whereIn('sales_targets.userid', $scopeIds);
         }
 
         return $query;
@@ -2186,6 +2294,9 @@ class DashboardController extends Controller
         if ($this->efHasColumn('salestargetusers', 'year')) {
             $query->whereIn(DB::raw('YEAR(year)'), $this->eloficTargetYears($fromdate, $todate));
         }
+        if (!$this->eloficApplyTargetUserScope($query, 'salestargetusers')) {
+            return 0.0;
+        }
         return $this->eloficTargetLakhToRupees((float) $query->sum('target'));
     }
 
@@ -2201,6 +2312,9 @@ class DashboardController extends Controller
         }
         if ($zoneId && $this->efHasColumn('branchwise_targets', 'branch_id')) {
             $query->where('branch_id', $zoneId);
+        }
+        if (!$this->eloficApplyTargetUserScope($query, 'branchwise_targets')) {
+            return 0.0;
         }
         if ($this->efHasColumn('branchwise_targets', 'month')) {
             $query->whereIn('month', $this->eloficTargetMonthValues($fromdate, $todate));
@@ -2241,7 +2355,9 @@ class DashboardController extends Controller
                     $query->whereIn('branch_id', $branchIds);
                 }
             }
-            $target += $this->eloficTargetLakhToRupees((float) $query->sum('target'));
+            if ($this->eloficApplyTargetUserScope($query, 'salestargetusers')) {
+                $target += $this->eloficTargetLakhToRupees((float) $query->sum('target'));
+            }
         }
 
         if ($target <= 0 && $this->efHasTable('branchwise_targets')) {
@@ -2258,10 +2374,31 @@ class DashboardController extends Controller
             if ($branchName) {
                 $query->where('branch_name', $branchName);
             }
-            $target += $this->eloficTargetLakhToRupees((float) $query->sum('target'));
+            if ($this->eloficApplyTargetUserScope($query, 'branchwise_targets')) {
+                $target += $this->eloficTargetLakhToRupees((float) $query->sum('target'));
+            }
         }
 
         return $target;
+    }
+
+    /**
+     * Limits a target table to the scoped users. Returns false when the viewer is scoped but the
+     * table has no user column (a branch-level target cannot be split per team, so it is skipped).
+     */
+    private function eloficApplyTargetUserScope($query, string $table): bool
+    {
+        $scopeIds = $this->eloficScopeUserIds();
+        if ($scopeIds === null) {
+            return true;
+        }
+        $column = $this->efHasColumn($table, 'user_id') ? 'user_id' : ($this->efHasColumn($table, 'userid') ? 'userid' : null);
+        if (!$column) {
+            return false;
+        }
+        $query->whereIn($table . '.' . $column, $scopeIds);
+
+        return true;
     }
 
     private function eloficTargetYears(string $fromdate, string $todate): array
@@ -2291,7 +2428,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Dashboard responses are not user-specific, so they are cached per endpoint + filter for a few minutes.
+     * Dashboard responses are cached per endpoint + filter (+ viewer, for team-scoped roles) for a few minutes.
      * The key includes today's date so MTD / YTD roll over at midnight. Pass ?refresh=1 to rebuild.
      */
     private function eloficCachedJson(Request $request, string $name, int $ttlSeconds, \Closure $build)
@@ -2302,7 +2439,10 @@ class DashboardController extends Controller
             'toDate' => (string) $request->input('toDate', ''),
             'zoneId' => (string) $request->input('zoneId', ''),
         ];
-        $key = 'elofic_dash:v2:' . $name . ':' . Carbon::today()->toDateString() . ':' . md5(json_encode($params));
+        // Scoped viewers (BM etc.) get their own cache entry; full-access roles share one.
+        $scopeIds = $this->eloficScopeUserIds();
+        $params['scope'] = $scopeIds === null ? 'all' : 'u' . Auth::id();
+        $key = 'elofic_dash:v3:' . $name . ':' . Carbon::today()->toDateString() . ':' . md5(json_encode($params));
         if ($request->boolean('refresh')) {
             Cache::forget($key);
         }
