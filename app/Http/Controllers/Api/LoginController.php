@@ -312,6 +312,8 @@ class LoginController extends Controller
                 'login_status'    => '1',
                 'app'             => '2', // field app
             ]
+            + ((!$checkLastLogin || empty($checkLastLogin->first_login_date) || str_starts_with((string) $checkLastLogin->first_login_date, '0000'))
+                ? ['first_login_date' => now()] : [])
         );
 
         // Revoke old tokens (your logic)

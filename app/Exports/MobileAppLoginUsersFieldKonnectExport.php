@@ -73,10 +73,15 @@ class MobileAppLoginUsersFieldKonnectExport implements FromCollection, WithHeadi
             $user->getbranch->branch_name ?? '',
             $data['app_version'] ?? '',
             $data['device_name'] ?? '',
-            !empty($data['first_login_date']) ? date('Y-m-d', strtotime($data['first_login_date'])) : '',
-            !empty($data['last_login_date']) ? date('Y-m-d', strtotime($data['last_login_date'])) : '',
+            $this->validDate($data['first_login_date'] ?? null) ? date('Y-m-d', strtotime($data['first_login_date'])) : '',
+            $this->validDate($data['last_login_date'] ?? null) ? date('Y-m-d', strtotime($data['last_login_date'])) : '',
             isset($data['login_status']) ? ($data['login_status'] == '0' ? 'Logout' : 'Login') : '',
         ];
+    }
+
+    private function validDate($value): bool
+    {
+        return !empty($value) && !str_starts_with((string) $value, '0000') && strtotime((string) $value) > 0;
     }
 
     public function registerEvents(): array
