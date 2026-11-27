@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\Product;
 use App\Models\ProductDetails;
+use App\Models\Subcategory;
 
 class SyncProducts extends Command
 {
@@ -18,6 +19,9 @@ class SyncProducts extends Command
         $created = 0;
         $updated = 0;
         $unchanged = 0;
+
+        // Products without a segment are mapped to the "All" segment so the app can show/filter them.
+        $defaultSubcategoryId = Subcategory::where('subcategory_name', 'All')->where('active', 'Y')->value('id');
 
         $response = Http::get('http://103.25.175.214:9297/api/catelogdata');
 
@@ -60,6 +64,10 @@ class SyncProducts extends Command
                 // 'product_image' => $item['image'] ?? null,
                 'active' => "Y"
             ]);
+
+            if (empty($product->subcategory_id) && $defaultSubcategoryId) {
+                $product->subcategory_id = $defaultSubcategoryId;
+            }
 
             $productChanges = array_keys($product->getDirty());
             if (!empty($productChanges)) {

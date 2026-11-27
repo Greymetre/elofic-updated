@@ -120,6 +120,7 @@ class ProductController extends Controller
                             ->Orwhere('specification', 'LIKE', "%{$search}%")
                             ->Orwhere('part_no', 'LIKE', "%{$search}%")
                             ->Orwhere('product_no', 'LIKE', "%{$search}%")
+                            ->Orwhere('model_no', 'LIKE', "%{$search}%")
                             ->orWhereHas('categories', function ($query) use ($search) {
                                 $query->where('category_name', 'LIKE', "%{$search}%");
                             })
@@ -231,6 +232,8 @@ class ProductController extends Controller
                     $data->push([
                         'id' => isset($value['id']) ? $value['id'] : 0,
                         'product_name' => isset($value['product_name']) ? $value['product_name'].'('.$value['product_code'].')' : '',
+                        'product_code' => $value['product_code'] ?? '',
+                        'material_no' => $value['product_code'] ?? '',
                         'display_name' => isset($value['display_name']) ? $value['display_name'] : '',
                         'description' => isset($value['description']) ? $value['description'] : '',
                         'product_image' => isset($value['product_image']) ? $value['product_image'] : '',
@@ -668,6 +671,8 @@ class ProductController extends Controller
                 $data = collect([
                     'id' => isset($query['id']) ? $query['id'] : 0,
                     'product_name' => isset($query['product_name']) ? $query['product_name'] : '',
+                    'product_code' => $query['product_code'] ?? '',
+                    'material_no' => $query['product_code'] ?? '',
                     'display_name' => isset($query['display_name']) ? $query['display_name'] : '',
                     'description' => isset($query['description']) ? $query['description'] : '',
                     'product_image' => (isset($query['product_image']) && !empty($query['product_image'])) ? url('/public/uploads').'/'.$query['product_image'] : url('/public/assets/img/placeholder.jpg'),
